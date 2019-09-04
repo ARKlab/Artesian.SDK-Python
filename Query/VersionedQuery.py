@@ -46,25 +46,25 @@ class _VersionedQuery(_Query):
         self._queryParameters.versionSelectionType = VersionSelectionType.LAST_OF_DAYS      
         if(start.startswith("P")):
             if(end is None):
-                self._queryParameters.versionSelectionConfig.lastOf.period = start
+                self._queryParameters.versionSelectionConfig.versionsRange.period = start
             else:
-                self._queryParameters.versionSelectionConfig.lastOf.periodFrom = start
-                self._queryParameters.versionSelectionConfig.lastOf.periodTo = end
+                self._queryParameters.versionSelectionConfig.versionsRange.periodFrom = start
+                self._queryParameters.versionSelectionConfig.versionsRange.periodTo = end
         else:
-            self._queryParameters.versionSelectionConfig.lastOf.dateStart = start
-            self._queryParameters.versionSelectionConfig.lastOf.dateEnd = end
+            self._queryParameters.versionSelectionConfig.versionsRange.dateStart = start
+            self._queryParameters.versionSelectionConfig.versionsRange.dateEnd = end
         return self
     def forLastOfMonths(self, start, end=None):
         self._queryParameters.versionSelectionType = VersionSelectionType.LAST_OF_MONTHS
         if(start.startswith("P")):
             if(end is None):
-                self._queryParameters.versionSelectionConfig.lastOf.period = start
+                self._queryParameters.versionSelectionConfig.versionsRange.period = start
             else:
-                self._queryParameters.versionSelectionConfig.lastOf.periodFrom = start
-                self._queryParameters.versionSelectionConfig.lastOf.periodTo = end
+                self._queryParameters.versionSelectionConfig.versionsRange.periodFrom = start
+                self._queryParameters.versionSelectionConfig.versionsRange.periodTo = end
         else:
-            self._queryParameters.versionSelectionConfig.lastOf.dateStart = start
-            self._queryParameters.versionSelectionConfig.lastOf.dateEnd = end
+            self._queryParameters.versionSelectionConfig.versionsRange.dateStart = start
+            self._queryParameters.versionSelectionConfig.versionsRange.dateEnd = end
         return self
     def forLastNVersions(self, lastN):
         self._queryParameters.versionSelectionType = VersionSelectionType.LASTN
@@ -73,6 +73,18 @@ class _VersionedQuery(_Query):
     def forVersion(self, version):
         self._queryParameters.versionSelectionType = VersionSelectionType.VERSION
         self._queryParameters.versionSelectionConfig.version = version
+        return self
+    def forMostRecent(self, start, end=None):
+        self._queryParameters.versionSelectionType = VersionSelectionType.MOST_RECENT
+        if(start.startswith("P")):
+            if(end is None):
+                self._queryParameters.versionSelectionConfig.versionsRange.period = start
+            else:
+                self._queryParameters.versionSelectionConfig.versionsRange.periodFrom = start
+                self._queryParameters.versionSelectionConfig.versionsRange.periodTo = end
+        else:
+            self._queryParameters.versionSelectionConfig.versionsRange.dateStart = start
+            self._queryParameters.versionSelectionConfig.versionsRange.dateEnd = end
         return self
     def execute(self):
         urls = self.__buildRequest()
@@ -111,6 +123,7 @@ class _VersionedQuery(_Query):
             VersionSelectionType.MUV: f"MUV",
             VersionSelectionType.LAST_OF_DAYS: f"LastOfDays/" + self.__buildVersionRange(),
             VersionSelectionType.LAST_OF_MONTHS: f"LastOfMonths/" + self.__buildVersionRange(),
+            VersionSelectionType.MOST_RECENT: f"MostRecent/" + self.__buildVersionRange(),
             VersionSelectionType.VERSION: f"Version/{self._queryParameters.versionSelectionConfig.version}"
         }
         vr = switcher.get(self._queryParameters.versionSelectionType, "VType")
@@ -119,12 +132,12 @@ class _VersionedQuery(_Query):
         return vr
     def __buildVersionRange(self):
         vr=""
-        if  (self._queryParameters.versionSelectionConfig.lastOf.dateStart is not None) and (self._queryParameters.versionSelectionConfig.lastOf.dateEnd is not None):
-            vr = f"{self._queryParameters.versionSelectionConfig.lastOf.dateStart}/{self._queryParameters.versionSelectionConfig.lastOf.dateEnd}"
-        elif (self._queryParameters.versionSelectionConfig.lastOf.period is not None):
-            vr = f"{self._queryParameters.versionSelectionConfig.lastOf.period}"
-        elif (self._queryParameters.versionSelectionConfig.lastOf.periodFrom is not None) and  (self._queryParameters.versionSelectionConfig.lastOf.periodTo is not None):
-            vr = f"{self._queryParameters.versionSelectionConfig.lastOf.dateStart}/{self._queryParameters.versionSelectionConfig.lastOf.dateEnd}"
+        if  (self._queryParameters.versionSelectionConfig.versionsRange.dateStart is not None) and (self._queryParameters.versionSelectionConfig.versionsRange.dateEnd is not None):
+            vr = f"{self._queryParameters.versionSelectionConfig.versionsRange.dateStart}/{self._queryParameters.versionSelectionConfig.versionsRange.dateEnd}"
+        elif (self._queryParameters.versionSelectionConfig.versionsRange.period is not None):
+            vr = f"{self._queryParameters.versionSelectionConfig.versionsRange.period}"
+        elif (self._queryParameters.versionSelectionConfig.versionsRange.periodFrom is not None) and  (self._queryParameters.versionSelectionConfig.versionsRange.periodTo is not None):
+            vr = f"{self._queryParameters.versionSelectionConfig.versionsRange.dateStart}/{self._queryParameters.versionSelectionConfig.versionsRange.dateEnd}"
         return vr
     def __getGranularityPath(self,granularity):
         switcher = {

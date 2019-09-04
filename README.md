@@ -66,6 +66,12 @@ q.forLastOfMonths("2019-03-12","2019-03-16").execute()
 q.forLastOfMonths("P0Y-1M0D","P0Y1M0D").execute()
 q.forLastOfMonths("P0Y-1M0D").execute()
 q.forVersion("2019-03-12T14:30:00").execute()
+q.test1.forMostRecent("2019-03-12","2019-03-16").execute()
+q.test1.forMostRecent("P0Y0M-2D","P0Y0M2D").execute()
+q.test1.forMostRecent("P0Y0M-2D").execute()
+q.test1.forMostRecent("2019-03-12","2019-03-16").execute()
+q.test1.forMostRecent("P0Y-1M0D","P0Y1M0D").execute()
+q.test1.forMostRecent("P0Y-1M0D").execute() 
 ```
 To construct a Versioned Time Series the following must be provided.
 <table>

@@ -18,7 +18,7 @@ class MarketDataService:
             url = url + "&versionFrom=" + versionFrom + "&versionTo=" + versionTo 
         with self.__client as c:
             res = await asyncio.gather(*[self.__executor.exec(c.exec, 'GET', url, None)])
-            return list(itertools.chain(*map(lambda r: r.json(),res)))
+            return res[0].json()
     def readCurveRange(self, id, page, pageSize, product=None, versionFrom=None, versionTo=None):
         url = str(id) + "/curves?page=" + str(page) + "&pagesize=" + str(pageSize) 
         if(versionFrom is not None and versionTo is not None):

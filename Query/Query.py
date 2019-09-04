@@ -53,7 +53,6 @@ class _Query:
             raise Exception("Not supported RangeType")
         return subPath
     def _exec(self, urls):
-        res = []
         loop = asyncio.get_event_loop()
         rr = loop.run_until_complete(self._execAsync(urls))
         return rr

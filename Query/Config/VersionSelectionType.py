@@ -5,3 +5,4 @@ class VersionSelectionType(Enum):
     LAST_OF_DAYS = 3
     LAST_OF_MONTHS = 4
     VERSION = 5
+    MOST_RECENT = 6
