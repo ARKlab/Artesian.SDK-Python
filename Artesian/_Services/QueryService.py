@@ -1,10 +1,10 @@
-from Query.DefaultPartitionStrategy import DefaultPartitionStrategy
-from Query.ActualQuery import _ActualQuery
-from Query.VersionedQuery import _VersionedQuery
-from Query.MasQuery import _MasQuery
-from ClientsExecutor.RequestExecutor import _RequestExecutor
-from ClientsExecutor.Client import _Client
-from Configuration.ArtesianPolicyConfig import ArtesianPolicyConfig
+from Artesian._Configuration.DefaultPartitionStrategy import DefaultPartitionStrategy
+from Artesian._Query.ActualQuery import _ActualQuery
+from Artesian._Query.VersionedQuery import _VersionedQuery
+from Artesian._Query.MasQuery import _MasQuery
+from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
+from Artesian._ClientsExecutor.Client import _Client
+from Artesian._Configuration.ArtesianPolicyConfig import ArtesianPolicyConfig
 class QueryService:
     __queryRoute = "query" 
     __queryVersion = "v1.0"

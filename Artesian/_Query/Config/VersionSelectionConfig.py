@@ -1,4 +1,4 @@
-from Query.Config.VersionsRangeSelectionConfig import VersionsRangeSelectionConfig
+from Artesian._Query.Config.VersionsRangeSelectionConfig import VersionsRangeSelectionConfig
 class VersionSelectionConfig:
     def __init__(self):
         self.lastN = None

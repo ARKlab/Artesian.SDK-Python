@@ -1,6 +1,6 @@
-from ClientsExecutor.RequestExecutor import _RequestExecutor
-from ClientsExecutor.Client import _Client
-from Configuration.ArtesianPolicyConfig import ArtesianPolicyConfig
+from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
+from Artesian._ClientsExecutor.Client import _Client
+from Artesian._Configuration.ArtesianPolicyConfig import ArtesianPolicyConfig
 import asyncio
 import itertools
 class MarketDataService:

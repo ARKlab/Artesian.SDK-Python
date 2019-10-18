@@ -1,6 +1,6 @@
-from Services.MarketDataService import MarketDataService
-from Query.Config.RelativeInterval import RelativeInterval
-from Configuration.ArtesianConfig import ArtesianConfig
+from Artesian import MarketDataService
+from Artesian import RelativeInterval
+from Artesian import ArtesianConfig
 cfg = ArtesianConfig("baseaddr","apikey")
 
 qs = MarketDataService(cfg)

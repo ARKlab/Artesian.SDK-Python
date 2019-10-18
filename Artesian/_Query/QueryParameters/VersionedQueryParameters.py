@@ -1,5 +1,5 @@
-from Query.QueryParameters.QueryParameters import _QueryParameters
-from Query.Config.VersionSelectionConfig import VersionSelectionConfig
+from Artesian._Query.QueryParameters.QueryParameters import _QueryParameters
+from Artesian._Query.Config.VersionSelectionConfig import VersionSelectionConfig
 class VersionedQueryParameters(_QueryParameters): 
     def __init__(self, ids, extractionRangeSelectionConfig, extractionRangeType, timezone, filterId, granularity, transformId, versionSelectionConfig, versionSelectionType):
         _QueryParameters.__init__(self, ids, extractionRangeSelectionConfig, extractionRangeType, timezone, filterId)

@@ -1,6 +1,6 @@
-from Query.Config.ExtractionRangeType import ExtractionRangeType
-from Query.QueryParameters.QueryParameters import _QueryParameters
-from Query.Config.RelativeInterval import RelativeInterval
+from Artesian._Query.Config.ExtractionRangeType import ExtractionRangeType
+from Artesian._Query.QueryParameters.QueryParameters import _QueryParameters
+from Artesian._Query.Config.RelativeInterval import RelativeInterval
 import asyncio
 import itertools
 class _Query:
