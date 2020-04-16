@@ -1,19 +1,21 @@
 from Artesian import GMEPublicOfferService
 from Artesian import ArtesianConfig
 
-cfg = ArtesianConfig("baseaddr","apikey")
+cfg = ArtesianConfig("https://test-arkive-proxy-abijnkebhgdtw.azurewebsites.net/ArkTest","NP16E00ikgbfCATUgTxWoE4-3BA2xO8PmQmfMuUqCPuk10PPllxeo9TIX3DCz-xVjM4xazIy-GUYWTICxwQLdenp9dHVqS2DeYBp8e1yd-fhp6yDuAQDul3ElP08ryHs")
 
 qs = GMEPublicOfferService(cfg)
 
-#AbsoluteRange - TimeZone - MultiIds - MUV
+
 test1 = qs.createQuery() \
-    .inAbsoluteDateRange("2018-01-01","2018-01-02") \
+    .forDate("2020-04-01") \
     .forMarket(["MGP"]) \
-    .isGroupedBy(["Purpose","Market","FuelType","Unit","Operator"]) \
-    .forStatus(["ACC"]) \
-    .forUnitType(["UP","UC","UPV","UCV"]) \
+    .forStatus("ACC") \
+    .forPurpose("BID") \
     .forZone(["NORD"]) \
+    .withPagination(1,10) \
     .execute()
 
 
 res = test1
+
+suca = ""

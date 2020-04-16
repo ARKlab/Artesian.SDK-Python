@@ -1,8 +1,7 @@
 from Artesian._GMEPublicOffers.QueryParameters.GMEPOfferQueryParameters import GMEPOfferQueryParameters
 from Artesian._GMEPublicOffers.Config.ExtractionRangeConfig import ExtractionRangeConfig
 from Artesian._Configuration.DefaultPartitionStrategy import DefaultPartitionStrategy
-from Artesian._GMEPublicOffers.Config.ExtractionRangeType import ExtractionRangeType
-from Artesian._GMEPublicOffers.Config.GroupedBy import GroupedBy
+from Artesian._GMEPublicOffers.Config.GenerationType import GenerationType
 from Artesian._GMEPublicOffers.Config.Market import Market
 from Artesian._GMEPublicOffers.Config.Purpose import Purpose
 from Artesian._GMEPublicOffers.Config.Scope import Scope
@@ -15,11 +14,12 @@ import itertools
 import urllib
 
 class _GMEPOfferQuery:
+    __routePrefix = "extract"
     def __init__(self, client, requestExecutor, partitionStrategy):
-        queryParameters = GMEPOfferQueryParameters(None,ExtractionRangeConfig(), None, None, None, None, None, None, None, None, None) 
+        queryParameters = GMEPOfferQueryParameters(None,ExtractionRangeConfig(), None, None, None, None, None, None, None, None, None, None, None )
         self._queryParameters = queryParameters
-        self._client = client
-        self._requestExecutor = requestExecutor
+        self.__client = client
+        self.__executor = requestExecutor
         self.__partition= partitionStrategy
 
     def forScope(self, scope):
@@ -31,19 +31,11 @@ class _GMEPOfferQuery:
     def forUnitType(self, unitType):
         self._queryParameters.unitType = unitType
         return self
-    def inAbsoluteDateRange(self, start, end):
-        self._queryParameters.extractionRangeType = ExtractionRangeType.DATE_RANGE
-        self._queryParameters.extractionRangeSelectionConfig.dateStart = start
-        self._queryParameters.extractionRangeSelectionConfig.dateEnd = end
-        return self
-    def isPivoted(self, pivot):
-        self._queryParameters.pivot = pivot
+    def forDate(self, date):
+        self._queryParameters.extractionRangeSelectionConfig.date = date
         return self
     def forUnit(self, unit):
         self._queryParameters.unit = unit
-        return self
-    def isGroupedBy(self, groupby):
-        self._queryParameters.groupby = groupby
         return self
     def forOperator(self, operator):
         self._queryParameters.operator = operator
@@ -57,50 +49,51 @@ class _GMEPOfferQuery:
     def forPurpose(self, purpose):
         self._queryParameters.purpose = purpose
         return self
+    def forBAType(self, baType):
+        self._queryParameters.baType = baType
+        return self
+    def forGenerationType(self, generationType):
+        self._queryParameters.baType = generationType
+        return self
+    def withPagination(self, pagenumber,pagesize):
+        self._queryParameters.page = pagenumber
+        self._queryParameters.pageSize = pagesize
+        return self
     def execute(self):
-        urls = self.__buildRequest()
-        return self._exec(urls)
+        url = self.__buildRequest()
+        return self._exec(url)
     async def executeAsync(self):
-        urls = self.__buildRequest()
-        return self._execAsync(urls)
+        url = self.__buildRequest()
+        return self._execAsync(url)
     def __buildRequest(self):
         self._validateQuery()
         qps = self.__partition.PartitionGMEPOffer([self._queryParameters])
-        urls = []
         for qp in qps:
-            url = f"?{self._buildExtractionRangeRoute(qp)}"
+            url = f"/{self.__routePrefix}/{self._buildExtractionRangeRoute(qp)}/{qp.purpose}/{qp.status}?"
+            if not (qp.page is None):
+                url = url + "page=" + str(qp.page)
+            if not (qp.pageSize is None):
+                url = url + "&pageSize=" + str(qp.pageSize)        
             if not (qp.scope is None):
                 sep = ","
                 scope= sep.join(map(str,qp.scope))
                 enc = urllib.parse.quote_plus(scope)
                 url = url + "&scope=" + enc
-            if not (qp.status is None):
-                sep = ","
-                status= sep.join(map(str,qp.status))
-                enc = urllib.parse.quote_plus(status)
-                url = url + "&status=" + enc
             if not (qp.unitType is None):
                 sep = ","
                 unitType= sep.join(map(str,qp.unitType))
                 enc = urllib.parse.quote_plus(unitType)
                 url = url + "&unitType=" + enc
-            if not (qp.status is None):
-                sep = ","
-                status= sep.join(map(str,qp.status))
-                enc = urllib.parse.quote_plus(status)
-                url = url + "&status=" + enc
-            if not (qp.pivot is None):
-                url = url + "&pivot=" + str(qp.pivot)
             if not (qp.unit is None):
                 sep = ","
                 unit= sep.join(map(str,qp.unit))
                 enc = urllib.parse.quote_plus(unit)
                 url = url + "&unit=" + enc
-            if not (qp.groupby is None):
+            if not (qp.generationType is None):
                 sep = ","
-                groupby= sep.join(map(str,qp.groupby))
-                enc = urllib.parse.quote_plus(groupby)
-                url = url + "&groupby=" + enc
+                generationType = sep.join(map(str,qp.generationType))
+                enc = urllib.parse.quote_plus(generationType)
+                url = url + "&generationType=" + enc
             if not (qp.operator is None):
                 sep = ","
                 operator= sep.join(map(str,qp.operator))
@@ -115,60 +108,44 @@ class _GMEPOfferQuery:
                 sep = ","
                 market= sep.join(map(str,qp.market))
                 enc = urllib.parse.quote_plus(market)
-                url = url + "&market=" + enc
-            if not (qp.purpose is None):
+                url = url + "&market=" + enc    
+            if not (qp.baType is None):
                 sep = ","
-                purpose= sep.join(map(str,qp.purpose))
-                enc = urllib.parse.quote_plus(purpose)
-                url = url + "&purpose=" + enc
-            
-            urls.append(url)
-        return urls
+                baType= sep.join(map(str,qp.baType))
+                enc = urllib.parse.quote_plus(baType)
+                url = url + "&baType=" + enc         
+        return url
 
     def _buildExtractionRangeRoute(self, queryParamaters):
-        subPath = f"{self.__toUrlParam(queryParamaters.extractionRangeSelectionConfig.dateStart, queryParamaters.extractionRangeSelectionConfig.dateEnd)}"
+        subPath = f"{self.__toUrlParam(queryParamaters.extractionRangeSelectionConfig.date)}"
         return subPath
-    def _exec(self, urls):
+    def _buildExtractionStatus(self, status):
+        subPath = f"{urllib.parse.quote_plus(status)}"
+        return subPath
+    def _buildExtractionPurpose(self, purpose):
+        subPath = f"{urllib.parse.quote_plus(purpose)}"
+        return subPath
+    def _exec(self, url):
         loop = asyncio.get_event_loop()
-        rr = loop.run_until_complete(self._execAsync(urls))
+        rr = loop.run_until_complete(self._execAsync(url))
         return rr
-    async def _execAsync(self, urls):
-            with self._client as c:
-                res = await asyncio.gather(*[self._requestExecutor.exec(c.exec, 'GET', i, None) for i in urls])
-                return list(itertools.chain(*map(lambda r: r.json(),res)))
-    def __toUrlParam(self, start, end):
-        return f"Start={start}&End={end}"
+    async def _execAsync(self, url):
+        with self.__client as c:
+            res = await asyncio.gather(*[self.__executor.exec(c.exec, 'GET', url, None)])
+            return res[0].json()
+    def __toUrlParam(self, date):
+        return f"{date}"   
     def _validateQuery(self):
-        if(self._queryParameters.extractionRangeType is None):
-            raise Exception("Data extraction range must be provided. Provide a date range , period or period range or an interval eg .InAbsoluteDateRange()")
         if(self._queryParameters.scope is not None):
             for x in self._queryParameters.scope:
                 res=getattr(Scope, x, None)
                 if (res is None):
                     self._raiseError("scope",x)
-        if(self._queryParameters.groupby is not None):
-            for x in self._queryParameters.groupby:
-                res=getattr(GroupedBy, x, None)
-                if (res is None):
-                    self._raiseError("groupby", x)
         if(self._queryParameters.market is not None):
             for x in self._queryParameters.market:
                 res=getattr(Market, x, None)
                 if (res is None):
                     self._raiseError("Market", x)
-        if(self._queryParameters.pivot is not None):
-            if(str(self._queryParameters.pivot) != "True" and str(self._queryParameters.pivot) != "False"):
-                self._raiseError("Pivot", str(self._queryParameters.pivot))
-        if(self._queryParameters.purpose is not None):
-            for x in self._queryParameters.purpose:
-                res=getattr(Purpose, x, None)
-                if (res is None):
-                    self._raiseError("Purpose", x)
-        if(self._queryParameters.status is not None):
-            for x in self._queryParameters.status:
-                res=getattr(Status, x, None)
-                if (res is None):
-                    self._raiseError("Status", x)
         if(self._queryParameters.unitType is not None):
             for x in self._queryParameters.unitType:
                 res=getattr(UnitType, x, None)

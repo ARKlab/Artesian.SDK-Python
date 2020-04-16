@@ -1,5 +1,6 @@
 from Artesian._Configuration.DefaultPartitionStrategy import DefaultPartitionStrategy
 from Artesian._Query.ActualQuery import _ActualQuery
+from Artesian._Query.AuctionQuery import _AuctionQuery
 from Artesian._Query.VersionedQuery import _VersionedQuery
 from Artesian._Query.MasQuery import _MasQuery
 from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
@@ -21,3 +22,5 @@ class QueryService:
         return _VersionedQuery(self.__client, self.__executor, self.__partitionStrategy)
     def createMarketAssessment(self):
         return _MasQuery(self.__client, self.__executor, self.__partitionStrategy)
+    def createAuction(self):
+        return _AuctionQuery(self.__client, self.__executor, self.__partitionStrategy)
