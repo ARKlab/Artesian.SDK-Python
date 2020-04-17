@@ -18,6 +18,8 @@ class QueryService:
         self.__client = _Client(self.__queryBaseurl ,self.__config.apiKey)
     def createActual(self):
         return _ActualQuery(self.__client, self.__executor, self.__partitionStrategy)
+    def createAuction(self):
+        return _AuctionQuery(self.__client, self.__executor, self.__partitionStrategy)
     def createVersioned(self):
         return _VersionedQuery(self.__client, self.__executor, self.__partitionStrategy)
     def createMarketAssessment(self):

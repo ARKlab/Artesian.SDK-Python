@@ -5,6 +5,8 @@ class DefaultPartitionStrategy:
     
     def PartitionActual(self, actualQueryParameters):
         return self._tsPartitionStrategy(actualQueryParameters)
+    def PartitionAuction(self, auctionQueryParameters):
+        return self._tsPartitionStrategy(auctionQueryParameters)
     def Partitionversioned(self, versionedQueryParameters):
        return self._tsPartitionStrategy(versionedQueryParameters)
     def PartitionMas(self, masQueryParameters):

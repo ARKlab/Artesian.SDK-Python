@@ -36,7 +36,7 @@ class _AuctionQuery(_Query):
         return super()._execAsync(urls)
     def __buildRequest(self):
         self.__validateQuery()
-        qps = self.__partition.PartitionActual([self._queryParameters])
+        qps = self.__partition.PartitionAuction([self._queryParameters])
         urls = []
         for qp in qps:
             url = f"/{self.__routePrefix}/{super()._buildExtractionRangeRoute(qp)}?_=1"
