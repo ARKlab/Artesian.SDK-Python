@@ -24,5 +24,3 @@ class QueryService:
         return _VersionedQuery(self.__client, self.__executor, self.__partitionStrategy)
     def createMarketAssessment(self):
         return _MasQuery(self.__client, self.__executor, self.__partitionStrategy)
-    def createAuction(self):
-        return _AuctionQuery(self.__client, self.__executor, self.__partitionStrategy)
