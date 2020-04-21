@@ -1,7 +1,4 @@
-from Artesian import QueryService
-from Artesian import Granularity
-from Artesian import RelativeInterval
-from Artesian import ArtesianConfig
+from Artesian import *
 
 cfg = ArtesianConfig("baseaddr","apikey")
 

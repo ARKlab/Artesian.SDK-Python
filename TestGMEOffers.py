@@ -1,10 +1,4 @@
-from Artesian import GMEPublicOfferService
-from Artesian import ArtesianConfig
-from Artesian import Market
-from Artesian import Status
-from Artesian import Scope
-from Artesian import Zone
-from Artesian import Purpose
+from Artesian import *
 
 cfg = ArtesianConfig("baseaddr","apikey")
 
