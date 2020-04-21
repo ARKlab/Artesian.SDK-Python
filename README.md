@@ -14,7 +14,7 @@ Alternatively, to install this package go to the [release page](https://github.c
 ## How to use
 The Artesian.SDK instance can be configured using API-Key authentication
 ```Python
-from artesian import ArtesianConfig
+from Artesian import *
 
 cfg = ArtesianServiceConfig("https://fake-artesian-env/", "{api-key}")
 ```
@@ -24,7 +24,7 @@ Using the ArtesianServiceConfig `cfg` we create an instance of the QueryService 
 
 ### Actual Time Series
 ```Python
-from artesian import QueryService,Granularity
+from Artesian import *
 
 qs = QueryService(cfg);
 data = qs.createActual() \
@@ -47,7 +47,7 @@ To construct an Actual Time Series the following must be provided.
 
 ### Versioned Time Series
 ```Python
-from artesian import QueryService,Granularity
+from Artesian import *
 
 qs = QueryService(cfg);
 q = qs.createVersioned() \
@@ -86,7 +86,7 @@ To construct a Versioned Time Series the following must be provided.
 
 ### Market Assessment Time Series
 ```Python
-from artesian import QueryService
+from Artesian import *
 
 qs = QueryService(cfg);
 data = qs.createMarketAssessment() \
@@ -101,6 +101,27 @@ To construct a Market Assessment Time Series the following must be provided.
   <tr><td>Market Data ID</td><td>Provide a market data id or set of market data id's to query</td></tr>
   <tr><td>Product</td><td>Provide a product or set of products</td></tr>
   <tr><td>Time Extraction Window</td><td>An extraction time window for data to be queried </td></tr>
+</table>
+
+[Go to Time Extraction window section](#artesian-sdk-extraction-windows)
+
+### Auction Time Series
+```Python
+from Artesian import *
+
+qs = QueryService(cfg);
+data = qs.createAuction() \
+    .forMarketData([100011484,100011472,100011477,100011490,100011468,100011462,100011453]) \
+    .inAbsoluteDateRange("2018-01-01","2018-01-02") \
+    .inTimeZone("UTC") \
+    .execute()
+
+```
+To construct an Auction Time Series the following must be provided.
+<table>
+  <tr><th>Auction Query</th><th>Description</th></tr>
+  <tr><td>Market Data ID</td><td>Provide a market data id or set of market data id's to query</td></tr>
+  <tr><td>Time Extraction Window</td><td>An extraction time window for data to be queried</td></tr>
 </table>
 
 [Go to Time Extraction window section](#artesian-sdk-extraction-windows)
@@ -130,7 +151,7 @@ Period Range
 Using the ArtesianServiceConfig `cfg` we create an instance of the MarketDataService which is used to retrieve MarketData infos.
 
 ```Python
-from artesian import MarketDataService
+from Artesian import *
 
 mds = MarketDataService(cfg);
 

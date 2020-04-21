@@ -1,13 +1,12 @@
-from Query.Query import _Query
-from Query.QueryParameters.MasQueryParameters import MasQueryParameters
-from Query.Config.ExtractionRangeConfig import ExtractionRangeConfig
-from Query.Config.Granularity import Granularity
-from Query.DefaultPartitionStrategy import DefaultPartitionStrategy
+from Artesian._Query.Query import _Query
+from Artesian._Query.QueryParameters.AuctionQueryParameters import AuctionQueryParameters
+from Artesian._Query.Config.ExtractionRangeConfig import ExtractionRangeConfig
+from Artesian._Configuration.DefaultPartitionStrategy import DefaultPartitionStrategy
 import urllib
-class _MasQuery(_Query):
-    __routePrefix = "mas"
+class _AuctionQuery(_Query):
+    __routePrefix = "auction"
     def __init__(self, client, requestExecutor, partitionStrategy):
-        queryParameters = MasQueryParameters(None,ExtractionRangeConfig(), None, None, None, None) 
+        queryParameters = AuctionQueryParameters(None,ExtractionRangeConfig(), None, None, None) 
         _Query.__init__(self, client, requestExecutor, queryParameters)
         self.__partition= partitionStrategy
 
@@ -29,12 +28,6 @@ class _MasQuery(_Query):
     def inRelativePeriod(self, extractionPeriod):
         super()._inRelativePeriod(extractionPeriod)
         return self
-    def inRelativeInterval(self, relativeInterval):
-        super()._inRelativeInterval(relativeInterval)
-        return self
-    def forProducts(self, products):
-        self._queryParameters.products = products
-        return self
     def execute(self):
         urls = self.__buildRequest()
         return super()._exec(urls)
@@ -43,7 +36,7 @@ class _MasQuery(_Query):
         return super()._execAsync(urls)
     def __buildRequest(self):
         self.__validateQuery()
-        qps = self.__partition.PartitionMas([self._queryParameters])
+        qps = self.__partition.PartitionAuction([self._queryParameters])
         urls = []
         for qp in qps:
             url = f"/{self.__routePrefix}/{super()._buildExtractionRangeRoute(qp)}?_=1"
@@ -54,13 +47,11 @@ class _MasQuery(_Query):
                 url = url + "&id=" + enc
             if not (qp.filterId is None):
                 url = url + "&filterId=" + str(qp.filterId)
-            if not (qp.products is None):
-                sep = ","
-                prod= enc = urllib.parse.quote_plus(sep.join(qp.products))
-                url = url + "&p=" + prod
+            if not (qp.timezone is None):
+                url = url + "&tz=" + qp.timezone
             urls.append(url)
         return urls
     def __validateQuery(self):
         super()._validateQuery()
-        if (self._queryParameters.products is None):
-                raise Exception("Products must be provided for extraction. Use .ForProducts() argument takes a string or string array of products")
+        if (self._queryParameters.ids is None and self._queryParameters.filterId is None):
+                raise Exception("Extraction ids or filterid must be provided. Use .forMarketData() or .forFilterId()")

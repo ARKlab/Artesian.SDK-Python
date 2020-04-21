@@ -1,6 +1,5 @@
-from Services.QueryService import QueryService
-from Query.Config.RelativeInterval import RelativeInterval
-from Configuration.ArtesianConfig import ArtesianConfig
+from Artesian import *
+
 cfg = ArtesianConfig("baseaddr","apikey")
 
 qs = QueryService(cfg)
