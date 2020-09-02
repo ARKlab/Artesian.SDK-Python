@@ -5,7 +5,7 @@ This Library provides read access to the Artesian API
 
 ## Getting Started
 ### Installation
-You can install the package directly from pip [pip](https://pypi.org/project/pip/).
+You can install the package directly from [pip](https://pypi.org/project/artesian-sdk/).
 ```Python
 pip install artesian-sdk
 ```
