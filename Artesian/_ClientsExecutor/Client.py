@@ -1,9 +1,14 @@
 import requests
+import pkg_resources  # part of setuptools
+import platform
+
 class _Client:
     def __init__(self, baseUrl, apiKey):
+        sdkVersion = pkg_resources.require("artesian-sdk")[0].version
+        artesianAgentString = "artesian-sdk:" + sdkVersion + "," + platform.system() + " " + platform.release() + ":"  + platform.version() + ",Python:" + platform.python_version()
         self.__baseUrl = baseUrl
         self.__session = requests.Session()
-        self.__session.headers.update({'x-api-key':apiKey, 'Accept':'application/json', 'Accept-Encoding':'gzip', 'User-Agent':'Artesian.SDK-Python/1.0'})
+        self.__session.headers.update({'x-api-key':apiKey, 'Accept':'application/json', 'Accept-Encoding':'gzip', 'User-Agent':'Artesian.SDK-Python/1.0', 'X-Artesian-Agent': artesianAgentString})
     def __enter__(self):
         self.__session.__enter__()
         return self

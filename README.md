@@ -105,6 +105,27 @@ To construct a Market Assessment Time Series the following must be provided.
 
 [Go to Time Extraction window section](#artesian-sdk-extraction-windows)
 
+### Bid Ask Time Series
+```Python
+from Artesian import *
+
+qs = QueryService(cfg);
+data = qs.createBidAsk() \
+    .forMarketData([100000032,100000043]) \
+    .forProducts(["D+1","Feb-18"]) \
+    .inAbsoluteDateRange("2018-01-01","2018-01-02") \
+    .execute()
+```
+To construct a Bid Ask Time Series the following must be provided.
+<table>
+  <tr><th>Mas Query</th><th>Description</th></tr>
+  <tr><td>Market Data ID</td><td>Provide a market data id or set of market data id's to query</td></tr>
+  <tr><td>Product</td><td>Provide a product or set of products</td></tr>
+  <tr><td>Time Extraction Window</td><td>An extraction time window for data to be queried </td></tr>
+</table>
+
+[Go to Time Extraction window section](#artesian-sdk-extraction-windows)
+
 ### Auction Time Series
 ```Python
 from Artesian import *

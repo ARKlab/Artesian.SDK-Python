@@ -3,6 +3,7 @@ from Artesian._Query.ActualQuery import _ActualQuery
 from Artesian._Query.AuctionQuery import _AuctionQuery
 from Artesian._Query.VersionedQuery import _VersionedQuery
 from Artesian._Query.MasQuery import _MasQuery
+from Artesian._Query.BidAskQuery import _BidAskQuery
 from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
 from Artesian._ClientsExecutor.Client import _Client
 from Artesian._Configuration.ArtesianPolicyConfig import ArtesianPolicyConfig
@@ -24,3 +25,5 @@ class QueryService:
         return _VersionedQuery(self.__client, self.__executor, self.__partitionStrategy)
     def createMarketAssessment(self):
         return _MasQuery(self.__client, self.__executor, self.__partitionStrategy)
+    def createBidAsk(self):
+        return _BidAskQuery(self.__client, self.__executor, self.__partitionStrategy)
