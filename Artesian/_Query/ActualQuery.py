@@ -38,6 +38,18 @@ class _ActualQuery(_Query):
     def inGranularity(self, granularity):
         self._queryParameters.granularity = granularity
         return self
+    def withFillNull(self):
+        self._queryParameters.fill = NullFillStategy()
+        return self
+    def withFillNone(self):
+        self._queryParameters.fill = NoFillStategy()
+        return self
+    def withFillLatestValue(self, period):
+        self._queryParameters.fill = FillLatestStategy(period)
+        return self
+    def withFillCustomValue(self, val):
+        self._queryParameters.fill = FillCustomStategy(val)
+        return self
     def execute(self):
         urls = self.__buildRequest()
         return super()._exec(urls)
@@ -61,6 +73,8 @@ class _ActualQuery(_Query):
                 url = url + "&tz=" + qp.timezone
             if not (qp.transformId is None):
                 url = url + "&tr=" + str(qp.transformId)
+            if not (qp.fill is None):
+                url = url + "&" + qp.fill.getUrlParams()
             urls.append(url)
         return urls
     def __validateQuery(self):
@@ -84,3 +98,24 @@ class _ActualQuery(_Query):
         if vr == "VGran" :
             raise Exception("Not supported Granularity")
         return vr
+
+
+class NullFillStategy:
+    def getUrlParams(self):
+        return "fillerK=Null"
+
+class NoFillStategy:
+    def getUrlParams(self):
+        return "fillerK=NoFill"
+
+class FillLatestStategy:
+    def __init__(self, period):
+        self.period = period
+    def getUrlParams(self):
+        return f"fillerK=LatestValidValue&fillerP={self.period}"
+
+class FillCustomStategy:
+    def __init__(self, val):
+        self.val = val
+    def getUrlParams(self):
+        return f"fillerK=CustomValue&fillerP={self.val}"        
