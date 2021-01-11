@@ -18,3 +18,4 @@ class Zone(Enum):
     SLOV = 16
     SUD = 17
     SVIZ = 18
+    CALA = 19
