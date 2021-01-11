@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="artesian-sdk",
-    version="2.1.0",
+    version="2.2.0",
     author="Ark-Lab",
     long_description = long_description,
     long_description_content_type='text/markdown',
