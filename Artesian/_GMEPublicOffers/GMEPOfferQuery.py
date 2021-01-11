@@ -236,7 +236,8 @@ class _GMEPOfferQuery:
             Zone.SICI: "SICI",
             Zone.SLOV: "SLOV",
             Zone.SUD: "SUD",
-            Zone.SVIZ: "SVIZ"
+            Zone.SVIZ: "SVIZ",
+            Zone.CALA: "CALA"
         }
         vr = switcher.get(zone, "DefZone")
         if vr == "DefZone" :
