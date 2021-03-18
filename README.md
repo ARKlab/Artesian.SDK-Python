@@ -167,6 +167,58 @@ Period Range
  .inRelativePeriodRange("P-3D", "P10D")
 ```
 
+### Filler Strategy
+
+All extraction types (Actual,Versioned, Market Assessment and BidAsk) have an optional filler strategy.
+
+```python
+var versionedSeries = qs        
+  .createVersioned() \
+  .forMarketData([100000001]) \
+  .forLastNVersions(1) \
+  .inGranularity(Granularity.Day) \
+  .inAbsoluteDateRange(new Date("2018-1-1"), new Date("2018-1-10")) \
+  .withFillLatestValue("P5D") \
+  .execute()
+```
+
+Null
+
+```python
+ .withFillNull()
+```
+
+None
+
+```python
+ .withFillNone()
+```
+
+Custom Value
+
+```python
+ //Timeseries
+ .withFillCustomValue(123)
+ // Market Assessment
+ .withFillCustomValue(
+    settlement = 123,
+    open = 456,
+    close = 789,
+    high = 321,
+    low = 654,
+    volumePaid = 987,
+    volueGiven = 213,
+    volume = 435,
+  )
+```
+
+Latest Value
+
+```python
+ .withFillLatestValue("P5D")
+```
+
+
 ## MarketData Service
 
 Using the ArtesianServiceConfig `cfg` we create an instance of the MarketDataService which is used to retrieve MarketData infos.

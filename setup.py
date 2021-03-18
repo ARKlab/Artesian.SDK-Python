@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="artesian-sdk",
-    version="2.0.1",
+    version="2.2.2",
     author="Ark-Lab",
     long_description = long_description,
     long_description_content_type='text/markdown',
@@ -14,9 +14,13 @@ setuptools.setup(
     url="https://github.com/ARKlab/Artesian.SDK-Python",
     packages=setuptools.find_packages(),
     py_modules = ['artesian'], 
+    install_requires=[
+        'requests',
+        'six'
+    ],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
-    ],	
+    ]
 	)

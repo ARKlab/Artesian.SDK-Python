@@ -36,6 +36,18 @@ class _BidAskQuery(_Query):
     def forProducts(self, products):
         self._queryParameters.products = products
         return self
+    def withFillNull(self):
+        self._queryParameters.fill = NullFillStategy()
+        return self
+    def withFillNone(self):
+        self._queryParameters.fill = NoFillStategy()
+        return self
+    def withFillLatestValue(self, period):
+        self._queryParameters.fill = FillLatestStategy(period)
+        return self
+    def withFillCustomValue(self, **val):
+        self._queryParameters.fill = FillCustomStategy(val)
+        return self
     def execute(self):
         urls = self.__buildRequest()
         return super()._exec(urls)
@@ -59,9 +71,45 @@ class _BidAskQuery(_Query):
                 sep = ","
                 prod= enc = urllib.parse.quote_plus(sep.join(qp.products))
                 url = url + "&p=" + prod
+            if not (qp.fill is None):
+                url = url + "&" + qp.fill.getUrlParams()
             urls.append(url)
         return urls
     def __validateQuery(self):
         super()._validateQuery()
         if (self._queryParameters.products is None):
                 raise Exception("Products must be provided for extraction. Use .ForProducts() argument takes a string or string array of products")
+
+
+class NullFillStategy:
+    def getUrlParams(self):
+        return "fillerK=Null"
+
+class NoFillStategy:
+    def getUrlParams(self):
+        return "fillerK=NoFill"
+
+class FillLatestStategy:
+    def __init__(self, period):
+        self.period = period
+    def getUrlParams(self):
+        return f"fillerK=LatestValidValue&fillerP={self.period}"
+
+class FillCustomStategy:
+    def __init__(self, val):
+        self.val = val
+    def getUrlParams(self):
+        def toQueryParams(vals):
+            filtered = filter(lambda x:x[1], vals)
+            stringVals = map(lambda x:[x[0], str(x[1])], filtered)
+            joinedEqual = map(lambda x:"=".join(x), stringVals)
+            return "&".join(joinedEqual)
+        return toQueryParams([
+            ["fillerK", "CustomValue"],
+            ["fillerDVbbp", self.val.get("bestBidPrice")],
+            ["fillerDVbap", self.val.get("bestAskPrice")],
+            ["fillerDVbbq", self.val.get("bestBidQuantity")],
+            ["fillerDVbaq", self.val.get("bestAskQuantity")],
+            ["fillerDVlp", self.val.get("lastPrice")],
+            ["fillerDVlq", self.val.get("lastQuantity")],
+        ])

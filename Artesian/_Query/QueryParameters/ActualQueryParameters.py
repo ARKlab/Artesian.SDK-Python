@@ -4,3 +4,4 @@ class ActualQueryParameters(_QueryParameters):
         _QueryParameters.__init__(self, ids, extractionRangeSelectionConfig, extractionRangeType, timezone, filterId)
         self.granularity = granularity
         self.transformId = transformId
+        self.fill = None

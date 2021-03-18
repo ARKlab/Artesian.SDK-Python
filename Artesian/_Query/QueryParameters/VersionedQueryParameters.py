@@ -5,6 +5,7 @@ class VersionedQueryParameters(_QueryParameters):
         _QueryParameters.__init__(self, ids, extractionRangeSelectionConfig, extractionRangeType, timezone, filterId)
         self.granularity = granularity
         self.transformId = transformId
+        self.fill = None
         if(versionSelectionConfig is None):
             self.versionSelectionConfig = VersionSelectionConfig()
         else:
