@@ -15,3 +15,4 @@ class Market(Enum):
     MI6 = 13
     MI7 = 14
     MSD = 15
+    MRR = 16
