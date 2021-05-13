@@ -237,6 +237,19 @@ pageSize = 100
 res = mds.readCurveRange(100042422, page, pageSize, versionFrom="2016-12-20" , versionTo="2019-03-12")
 ```
 
+## Jupyter
+
+Artesian SDK uses asyncio internally, this causes a conflict with Jupyter. You can work around this issue by add the following at the beginning of the notebook.
+
+```python
+
+!pip install nest_asyncio
+
+import nest_asyncio
+nest_asyncio.apply()
+
+```
+[Issue #3397 with workaround](https://github.com/jupyter/notebook/issues/3397#issuecomment-419386811)
 
 ## Links
 * [Github](https://github.com/ARKlab/Artesian.SDK-Python)
