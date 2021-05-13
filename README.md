@@ -16,11 +16,11 @@ The Artesian.SDK instance can be configured using API-Key authentication
 ```Python
 from Artesian import *
 
-cfg = ArtesianServiceConfig("https://fake-artesian-env/", "{api-key}")
+cfg = ArtesianConfig("https://fake-artesian-env/", "{api-key}")
 ```
 
 ## QueryService
-Using the ArtesianServiceConfig `cfg` we create an instance of the QueryService which is used to create Actual, Versioned and Market Assessment time series queries
+Using the ArtesianConfig `cfg` we create an instance of the QueryService which is used to create Actual, Versioned and Market Assessment time series queries
 
 ### Actual Time Series
 ```Python
