@@ -14,10 +14,17 @@ MAX_WAIT = 1073741823
 class _RequestExecutor:
     def __init__(self,policy):
         self.__policy = policy
-        self.__sem = asyncio.Semaphore(self.__policy.maxParallelism)
+        self.__sem = None
+
+    def getSemaphore(self):
+        if self.__sem == None:
+            self.__sem = asyncio.Semaphore(self.__policy.maxParallelism)
+        return self.__sem
+
     async def __do(self, callback, *args, **kwargs):
-        async with self.__sem as s:
+        async with self.getSemaphore() as s:
             return await callback(*args, **kwargs)
+
     async def exec(self, callback, *args, **kwargs):
         r = Retrying(wait_fixed = self.__policy.retryWaitTime, stop_max_attempt_number= self.__policy.maxRetry, retry_on_exception= lambda e : not (isinstance(e, requests.HTTPError) and e.response.status_code >= 400 and e.response.status_code < 500))
         return await r.call(self.__do, callback, *args, **kwargs)
@@ -252,3 +259,4 @@ class RetryError(Exception):
 
     def __str__(self):
         return "RetryError[{0}]".format(self.last_attempt)    
+

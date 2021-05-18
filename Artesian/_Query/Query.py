@@ -53,7 +53,7 @@ class _Query:
             raise Exception("Not supported RangeType")
         return subPath
     def _exec(self, urls):
-        loop = asyncio.get_event_loop()
+        loop = get_event_loop()
         rr = loop.run_until_complete(self._execAsync(urls))
         return rr
     async def _execAsync(self, urls):
@@ -83,3 +83,19 @@ class _Query:
         if subPath == "RelativeInterval" :
             raise Exception("Not supported RelativeInterval")
         return subPath
+
+
+def get_event_loop():
+    """
+    Wrapper around asyncio get_event_loop.
+    Ensures that there is an event loop available.
+    An event loop may not be available if the sdk is not run in the main event loop
+    """
+    try:
+        asyncio.get_event_loop()
+    except RuntimeError as ex:
+        if "There is no current event loop in thread" in str(ex):
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+    
+    return asyncio.get_event_loop()

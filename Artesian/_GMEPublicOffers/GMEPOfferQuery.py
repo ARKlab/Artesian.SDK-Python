@@ -63,7 +63,7 @@ class _GMEPOfferQuery:
     def execute(self):
         url = self.__buildRequest()
         return self._exec(url)
-    async def executeAsync(self):
+    def executeAsync(self):
         url = self.__buildRequest()
         return self._execAsync(url)
     def __buildRequest(self):
@@ -253,7 +253,7 @@ class _GMEPOfferQuery:
         subPath = f"{urllib.parse.quote_plus(purpose)}"
         return subPath
     def _exec(self, url):
-        loop = asyncio.get_event_loop()
+        loop = get_event_loop()
         rr = loop.run_until_complete(self._execAsync(url))
         return rr
     async def _execAsync(self, url):
@@ -269,3 +269,19 @@ class _GMEPOfferQuery:
             raise Exception("Extraction Date must be provided. Use .forDate() argument takes a string formatted as YYYY-MM-DD")
         if(self._queryParameters.status is None):
             raise Exception("Extraction Status must be provided. Use .forStatus() argument takes a status type")
+
+
+def get_event_loop():
+    """
+    Wrapper around asyncio get_event_loop.
+    Ensures that there is an event loop available.
+    An event loop may not be available if the sdk is not run in the main event loop
+    """
+    try:
+        asyncio.get_event_loop()
+    except RuntimeError as ex:
+        if "There is no current event loop in thread" in str(ex):
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+    
+    return asyncio.get_event_loop()

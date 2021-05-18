@@ -53,7 +53,7 @@ class _ActualQuery(_Query):
     def execute(self):
         urls = self.__buildRequest()
         return super()._exec(urls)
-    async def executeAsync(self):
+    def executeAsync(self):
         urls = self.__buildRequest()
         return super()._execAsync(urls)
     def __buildRequest(self):

@@ -23,6 +23,22 @@ class MarketDataService:
         url = str(id) + "/curves?page=" + str(page) + "&pagesize=" + str(pageSize) 
         if(versionFrom is not None and versionTo is not None):
             url = url + "&versionFrom=" + versionFrom + "&versionTo=" + versionTo 
-        loop = asyncio.get_event_loop()
+        loop = get_event_loop()
         rr = loop.run_until_complete(self.readCurveRangeAsync(id, page, pageSize, product, versionFrom, versionTo))
         return rr
+
+
+def get_event_loop():
+    """
+    Wrapper around asyncio get_event_loop.
+    Ensures that there is an event loop available.
+    An event loop may not be available if the sdk is not run in the main event loop
+    """
+    try:
+        asyncio.get_event_loop()
+    except RuntimeError as ex:
+        if "There is no current event loop in thread" in str(ex):
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+    
+    return asyncio.get_event_loop()
