@@ -62,3 +62,31 @@ class TestVersioned(unittest.TestCase):
         query = requests.getQs()
         self.assertEqual(query["fillerK"],"CustomValue")
         self.assertEqual(query["fillerDV"],"10")
+
+    @helpers.TrackRequests
+    def test_ForMostRecent(self, requests):
+        url = qs.createVersioned() \
+            .forMarketData([100000001]) \
+            .inAbsoluteDateRange("2018-01-01","2018-01-02") \
+            .inTimeZone("UTC") \
+            .inGranularity(Granularity.HOUR) \
+            .forMostRecent("2018-01-01","2018-01-02") \
+            .withFillCustomValue(10) \
+            .execute()
+
+        query = requests.getQs()
+        self.assertEqual(query["fillerDV"],"10")
+
+    @helpers.TrackRequests
+    def test_ForMostRecentDateTime(self, requests):
+        url = qs.createVersioned() \
+            .forMarketData([100000001]) \
+            .inAbsoluteDateRange("2018-01-01 12:30:30","2018-01-02 19:15:00") \
+            .inTimeZone("UTC") \
+            .inGranularity(Granularity.HOUR) \
+            .forMostRecent("2018-01-01 12:30:30","2018-01-02 19:15:00") \
+            .withFillCustomValue(10) \
+            .execute()
+
+        query = requests.getQs()
+        self.assertEqual(query["fillerDV"],"10")
