@@ -80,7 +80,7 @@ class TestVersioned(unittest.TestCase):
     @helpers.TrackRequests
     def test_ForMostRecentDateTime(self, requests):
         url = qs.createVersioned() \
-            .forMarketData([100002068]) \
+            .forMarketData([100000001]) \
             .inAbsoluteDateRange("2021-09-22","2021-09-23") \
             .inTimeZone("CET") \
             .inGranularity(Granularity.DAY) \
@@ -94,7 +94,7 @@ class TestVersioned(unittest.TestCase):
     @helpers.TrackRequests
     def test_ForMostRecentDateTimeFillNull(self, requests):
         url = qs.createVersioned() \
-            .forMarketData([100002068]) \
+            .forMarketData([100000001]) \
             .inAbsoluteDateRange("2021-09-22","2021-09-23") \
             .inTimeZone("CET") \
             .inGranularity(Granularity.DAY) \
