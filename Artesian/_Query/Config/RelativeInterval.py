@@ -1,5 +1,7 @@
 from enum import Enum
 class RelativeInterval(Enum):
+    """ Class that sets the Relative Interval to be queried. """
+    
     ROLLING_WEEK =  1
     ROLLING_MONTH = 2
     ROLLING_QUARTER = 3

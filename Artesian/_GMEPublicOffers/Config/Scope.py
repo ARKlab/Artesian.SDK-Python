@@ -1,5 +1,7 @@
 from enum import Enum
 class Scope(Enum):
+    """ This class sets the Scope"""
+
     ACC = 1
     AS = 2
     CA = 3

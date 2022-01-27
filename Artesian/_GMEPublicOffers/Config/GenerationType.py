@@ -1,5 +1,8 @@
 from enum import Enum
 class GenerationType(Enum):
+    """ 
+        This class sets the Generation Type.
+    """
     UNKNOWN = 1
     OTHER = 2
     AUTOGENERATION = 3

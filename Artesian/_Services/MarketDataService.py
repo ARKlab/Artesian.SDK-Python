@@ -1,12 +1,25 @@
 from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
 from Artesian._ClientsExecutor.Client import _Client
+from Artesian._Configuration.ArtesianConfig import ArtesianConfig
 from Artesian._Configuration.ArtesianPolicyConfig import ArtesianPolicyConfig
 import asyncio
 import itertools
+
 class MarketDataService:
+    """ A MarketData Entity represents a data curve enriched by its metadata.
+    each entity is composed of some fundamental parameters:
+    """
+
     __queryRoute = "marketdata/entity" 
     __version = "v2.1"
-    def __init__(self, artesianConfig):
+    def __init__(self, artesianConfig: ArtesianConfig):
+        """ Inits the MarketData Service 
+        
+        Using the ArtesianServiceConfig, is possible to create an istance of the MarketDataService which is used to retrieve and edit MarketData references.
+
+            Args:
+                Artesian Config.
+        """
         self.__config = artesianConfig
         self.__policy = ArtesianPolicyConfig(None, None, None)
         self.__queryBaseurl = self.__config.baseUrl + "/" + self.__version + "/" + self.__queryRoute 

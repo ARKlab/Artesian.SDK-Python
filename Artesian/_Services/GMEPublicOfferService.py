@@ -1,3 +1,4 @@
+from Artesian._Configuration.ArtesianConfig import ArtesianConfig
 from Artesian._Configuration.DefaultPartitionStrategy import DefaultPartitionStrategy
 from Artesian._GMEPublicOffers.GMEPOfferQuery import _GMEPOfferQuery
 from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
@@ -6,7 +7,11 @@ from Artesian._Configuration.ArtesianPolicyConfig import ArtesianPolicyConfig
 class GMEPublicOfferService:
     __offerstype = "gmepublicoffer"
     __version = "v1.0"
-    def __init__(self, artesianConfig):
+    def __init__(self, artesianConfig: ArtesianConfig):
+        """ Inits for GME Public Offer Service
+
+            Args:
+                Artesian Configuration."""
         self.__config = artesianConfig
         self.__policy = ArtesianPolicyConfig(None, None, None)
         self.__queryBaseurl = self.__config.baseUrl + "/" + self.__offerstype + "/" + self.__version 

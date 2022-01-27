@@ -5,10 +5,22 @@ import asyncio
 import itertools
 class _Query:
     def __init__(self, client, requestExecutor, queryParameters):
+        """ Inits _Query 
+        
+        Args:
+            client credential
+
+            requestExecutor
+
+            partitionStrategy. """
+            
         self._queryParameters = queryParameters
         self._client = client
         self._requestExecutor = requestExecutor
     def _forMarketData(self, ids):
+        """ Select the CURVE ID of interest.
+
+            E.g.: 100000xxx"""
         self._queryParameters.ids = ids
         self._queryParameters.filterId = None
         return self
@@ -17,23 +29,42 @@ class _Query:
         self._queryParameters.ids = None
         return self
     def _inTimezone(self, tz):
+        """ Gets the Query in a specific TimeZone.
+
+            E.g.: (UTC") / ("CET") / ("EET") / ("WET") / ("Europe/Istanbul") / ("Europe/Moscow")"""
         self._queryParameters.timezone = tz
         return self
     def _inAbsoluteDateRange(self, start, end):
+        """ Gets the Query in an absolute date range window. 
+            The Absolute Date Range is in ISO8601 format.
+        
+            E.g.: ("2021-12-01", "2021-12-31")
+        """
         self._queryParameters.extractionRangeType = ExtractionRangeType.DATE_RANGE
         self._queryParameters.extractionRangeSelectionConfig.dateStart = start
         self._queryParameters.extractionRangeSelectionConfig.dateEnd = end
         return self
     def _inRelativePeriodRange(self, pstart, pend):
+        """ Gets the Query in a relative period range time window.
+        
+        E.g.: ("P-3D", "P10D") -> from 3 days prior, to be considered until 10 days after."""
+
+
         self._queryParameters.extractionRangeType = ExtractionRangeType.PERIOD_RANGE
         self._queryParameters.extractionRangeSelectionConfig.periodFrom = pstart
         self._queryParameters.extractionRangeSelectionConfig.periodTo = pend
         return self
     def _inRelativePeriod(self, period):
+        """ Gets the Query in a relative period of a time window.
+        
+            E.g.: ("P5D")"""
         self._queryParameters.extractionRangeType = ExtractionRangeType.PERIOD
         self._queryParameters.extractionRangeSelectionConfig.period = period
         return self
     def _inRelativeInterval(self, relativeInterval):
+        """ The Relative Interval considers a specific interval of time.
+        
+        E.g.: (RelativeInterval.ROLLING_WEEK) or (RelativeInterval.ROLLING_MONTH)"""
         self._queryParameters.extractionRangeType = ExtractionRangeType.RELATIVE_INTERVAL
         self._queryParameters.extractionRangeSelectionConfig.relativeInterval = relativeInterval
         return self

@@ -1,5 +1,6 @@
 from enum import Enum
 class Zone(Enum):
+    """This class sets the Zone."""
     AUST = 1
     BRNN = 2
     CNOR = 3

@@ -1,5 +1,6 @@
 from enum import Enum
 class Market(Enum):
+    """ This class sets the Market. """
     MB = 1
     MB2 = 2
     MB3 = 3

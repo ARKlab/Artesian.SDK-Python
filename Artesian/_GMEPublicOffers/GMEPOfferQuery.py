@@ -17,6 +17,14 @@ import urllib
 class _GMEPOfferQuery:
     __routePrefix = "extract"
     def __init__(self, client, requestExecutor, partitionStrategy):
+        """ Inits _GMEPOfferQuery
+        
+        Args:
+                client credential
+                
+                requestExecutor
+                
+                 partitionStrategy. """
         queryParameters = GMEPOfferQueryParameters(None,ExtractionRangeConfig(), None, None, None, None, None, None, None, None, None, None, None )
         self._queryParameters = queryParameters
         self.__client = client
@@ -24,43 +32,56 @@ class _GMEPOfferQuery:
         self.__partition= partitionStrategy
 
     def forScope(self, scope):
-        self._queryParameters.scope = scope
+        """ Set the scopes to be queried."""
+        self._queryParameters.scope = scope 
         return self
     def forStatus(self, status):
+        """ Set the status to be queried."""
         self._queryParameters.status = status
         return self
     def forUnitType(self, unitType):
+        """ Set the unit types to be queried."""
         self._queryParameters.unitType = unitType
         return self
     def forDate(self, date):
+        """ Set the date to be queried."""
         self._queryParameters.extractionRangeSelectionConfig.date = date
         return self
     def forUnit(self, unit):
+        """ Set the units to be queried."""
         self._queryParameters.unit = unit
         return self
     def forOperator(self, operator):
+        """ Set the operators to be queried."""
         self._queryParameters.operator = operator
         return self
     def forZone(self, zone):
+        """ Set the zones to be queried."""
         self._queryParameters.zone = zone
         return self
     def forMarket(self, market):
+        """ Set the markets to be queried."""
         self._queryParameters.market = market
         return self
     def forPurpose(self, purpose):
+        """ Set the Purpose to be queried."""
         self._queryParameters.purpose = purpose
         return self
     def forBAType(self, baType):
+        """ Set the BATypes to be queried."""
         self._queryParameters.baType = baType
         return self
     def forGenerationType(self, generationType):
+        """ Set the generation types to be queried."""
         self._queryParameters.baType = generationType
         return self
     def withPagination(self, pagenumber,pagesize):
+        """ Set the request pagination."""
         self._queryParameters.page = pagenumber
         self._queryParameters.pageSize = pagesize
         return self
     def execute(self):
+        """ Execute GME Public Offer Query."""
         url = self.__buildRequest()
         return self._exec(url)
     def executeAsync(self):
