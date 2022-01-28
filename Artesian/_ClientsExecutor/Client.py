@@ -1,7 +1,7 @@
 import requests
 import pkg_resources  # part of setuptools
 import platform
-from ArtesianJsonSerializer import artesianJsonSerialize, artesianJsonDeserialize
+from Artesian._ClientsExecutor.ArtesianJsonSerializer import artesianJsonSerialize, artesianJsonDeserialize
 
 class _Client:
     def __init__(self, baseUrl, apiKey):

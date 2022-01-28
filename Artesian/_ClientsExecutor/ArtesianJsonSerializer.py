@@ -1,5 +1,5 @@
 import jsons
-from ArtesianTags import ArtesianTags
+from Artesian._Services.Dto import ArtesianTags
 from typing import List
 from typish import instance_of
 
