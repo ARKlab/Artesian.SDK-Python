@@ -15,7 +15,7 @@ class _Client:
         return self
     def __exit__(self, *args):
         self.__session.__exit__(args)
-    def exec(self, method: str, url: str, obj: object = None, retcls: type = None):
+    async def exec(self, method: str, url: str, obj: object = None, retcls: type = None):
         json = artesianJsonSerialize(obj)
         r = requests.Request(method, self.__baseUrl + url, json=json)
         prep = self.__session.prepare_request(r)
