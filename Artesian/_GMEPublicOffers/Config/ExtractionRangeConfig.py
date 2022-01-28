@@ -1,10 +1,10 @@
 from pandas import date_range
 
-
 class ExtractionRangeConfig:
-    """
-    Extraction Range Configuration.
-    """
+    """ This class sets the Extraction Range Configuration. """
 
-    def __init__(self):
+    def __init__(self): 
+        """ 
+        Inits the Extraction Range Configuration. 
+        """
         self.date = None

@@ -1,17 +1,20 @@
+from Artesian import _ClientsExecutor
+from Artesian._ClientsExecutor import RequestExecutor
 from Artesian._Query.Query import _Query
 from Artesian._Query.QueryParameters.MasQueryParameters import MasQueryParameters
 from Artesian._Query.Config.ExtractionRangeConfig import ExtractionRangeConfig
 from Artesian._Query.Config.Granularity import Granularity
 from Artesian._Configuration.DefaultPartitionStrategy import DefaultPartitionStrategy
 import urllib
+from typing import List
 class _MasQuery(_Query):
     __routePrefix = "mas"
-    def __init__(self, client, requestExecutor, partitionStrategy):
+    def __init__(self, client: _ClientsExecutor, requestExecutor: RequestExecutor, partitionStrategy: DefaultPartitionStrategy):
         """ Inits _MasQuery 
         
         Args:
         
-            client credential
+            client 
 
             requestExecutor 
         
@@ -20,76 +23,94 @@ class _MasQuery(_Query):
         _Query.__init__(self, client, requestExecutor, queryParameters)
         self.__partition= partitionStrategy
 
-    def forMarketData(self, ids):
-        """ Select the CURVE ID of interest.
+    def forMarketData(self, ids: List[int]):
+        """ Set the list of marketdata to be queried.
 
-            E.g.: 100000xxx"""
+            Args:
+                ids: list of marketdata id's to be queried. E.g.: 100000xxx
+        """
         super()._forMarketData(ids)
         return self
-    def forFilterId(self, filterId):
+    def forFilterId(self, filterId: List[int]):
+        """ Sets the list of filtered marketdata id to be queried
+            
+            Args:
+                filterId: list of marketdata filtered by id"""
         super()._forFilterId(filterId)
         return self
-    def inTimeZone(self, tz):
-        """ Gets the Market Assessment Query in a specific TimeZone.
+    def inTimeZone(self, tz: str):
+        """ Gets the Mas Query in a specific TimeZone in IANA format.
 
-            E.g.: (UTC") / ("CET") / ("EET") / ("WET") / ("Europe/Istanbul") / ("Europe/Moscow")"""
+            Args:
+                timezone: "UTC","CET","Europe/Istanbul"
+        """
         super()._inTimezone(tz)
         return self
     def inAbsoluteDateRange(self, start, end):
-        """ Gets the Market Assessment Query in an absolute date range window. 
+        """ Gets the Mas Query in an absolute date range window. 
             The Absolute Date Range is in ISO8601 format.
         
-            E.g.: ("2021-12-01", "2021-12-31")
+            Args:
+                start, end: ("2021-12-01", "2021-12-31")
         """
         super()._inAbsoluteDateRange(start, end)
         return self
     def inRelativePeriodRange(self, pStart, pEnd):
-        """ Gets the Market Assessment Query in a relative period range time window.
+        """ Gets the Mas Query in a relative period range time window.
         
-        E.g.: ("P-3D", "P10D") -> from 3 days prior, to be considered until 10 days after."""
+            Args:
+                pStart, pEnd: ("P-3D", "P10D")"""
 
         super()._inRelativePeriodRange(pStart, pEnd)
         return self
-    def inRelativePeriod(self, extractionPeriod):
-        """ Gets the Market Assessment Query in a relative period of a time window.
+    def inRelativePeriod(self, extractionPeriod: str):
+        """ Gets the Mas Query in a relative period of a time window.
         
-        E.g.: ("P5D")"""
+            Args:
+                extractionPeriod: ("P5D")"""
         super()._inRelativePeriod(extractionPeriod)
         return self
-    def inRelativeInterval(self, relativeInterval):
-        """ The Relative Interval considers a specific interval of time.
+    def inRelativeInterval(self, relativeInterval: str):
+        """ Gets the Relative Interval considers a specific interval of time window.
         
-          E.g.: (RelativeInterval.ROLLING_WEEK) or (RelativeInterval.ROLLING_MONTH)"""
+            Args:
+                relativeInterval: ""RelativeInterval.ROLLING_WEEK"" or "RelativeInterval.ROLLING_MONTH"."""
         super()._inRelativeInterval(relativeInterval)
         return self
-    def forProducts(self, products):
-        """ Gets the Products tor the Market Assessment Query in a time window.
+    def forProducts(self, products: str):
+        """ Gets the Products tor the BidAsk Query in a time window.
         
-         E.g.: forProducts(["D+1","Feb-18"])"""
+            Args:
+                forProducts: ["D+1","Feb-18"]"""
         self._queryParameters.products = products
         return self
     def withFillNull(self):
-        """ This is an optional filler strategy for the extraction.
+        """ Optional filler strategy for the extraction.
         
-        Ex:    withFillNull() """
+            Args: 
+                e.g.: withFillNull() """
         self._queryParameters.fill = NullFillStategy()
         return self
     def withFillNone(self):
-        """ This is an optional filler strategy for the extraction.
+        """ Optional filler strategy for the extraction.
         
-        Ex:    withFillNone() """
+            Args:
+                e.g.: withFillNone() """
         self._queryParameters.fill = NoFillStategy()
         return self
     def withFillLatestValue(self, period):
-        """ This is an optional filler strategy for the extraction.
+        """ Optional filler strategy for the extraction.
         
-        Ex:    withFillLatestValue("P5D") """
+            Args:
+               e.g.:   withFillLatestValue("P5D") """
         self._queryParameters.fill = FillLatestStategy(period)
         return self
     def withFillCustomValue(self, **val):
-        """ This is an optional filler strategy for the extraction.
+        """ Optional filler strategy for the extraction.
         
-        Ex:    //Timeseries
+            Args:
+                e.g.:
+                //Timeseries
                 .withFillCustomValue(123)
                // Market Assessment
                 .withFillCustomValue(
@@ -140,20 +161,27 @@ class _MasQuery(_Query):
 
 
 class NullFillStategy:
+     """ Class that sets the Null Filling Strategy."""
     def getUrlParams(self):
         return "fillerK=Null"
 
 class NoFillStategy:
+    
+    """ Class that sets the No Filling Strategy."""
+    
     def getUrlParams(self):
         return "fillerK=NoFill"
 
 class FillLatestStategy:
+    """ Class that sets the Last Filling Strategy."""
+    
     def __init__(self, period):
         self.period = period
     def getUrlParams(self):
         return f"fillerK=LatestValidValue&fillerP={self.period}"
 
 class FillCustomStategy:
+    """Class that sets the Custom Filling Strategy."""
     def __init__(self, val):
         self.val = val
     def getUrlParams(self):

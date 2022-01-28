@@ -1,3 +1,6 @@
+
+from Artesian import _ClientsExecutor
+from Artesian._ClientsExecutor import RequestExecutor
 from Artesian._GMEPublicOffers.QueryParameters.GMEPOfferQueryParameters import GMEPOfferQueryParameters
 from Artesian._GMEPublicOffers.Config.ExtractionRangeConfig import ExtractionRangeConfig
 from Artesian._Configuration.DefaultPartitionStrategy import DefaultPartitionStrategy
@@ -13,78 +16,125 @@ from Artesian._GMEPublicOffers.Config.BaType import BaType
 import asyncio
 import itertools
 import urllib
+from __future__ import annotations
 
 class _GMEPOfferQuery:
     __routePrefix = "extract"
-    def __init__(self, client, requestExecutor, partitionStrategy):
-        """ Inits _GMEPOfferQuery
+    def __init__(self, client: _ClientsExecutor , requestExecutor: RequestExecutor, partitionStrategy: DefaultPartitionStrategy): 
+        """ Inits _GME Public Offer Query
         
         Args:
-                client credential
+                client
                 
                 requestExecutor
                 
-                 partitionStrategy. """
+                partitionStrategy. 
+
+        """
+
         queryParameters = GMEPOfferQueryParameters(None,ExtractionRangeConfig(), None, None, None, None, None, None, None, None, None, None, None )
         self._queryParameters = queryParameters
         self.__client = client
         self.__executor = requestExecutor
         self.__partition= partitionStrategy
 
-    def forScope(self, scope):
-        """ Set the scopes to be queried."""
+    def forScope(self, scope: Scope) -> _GMEPOfferQuery:
+        """ Set the scopes to be queried.
+        
+            Returns:
+                GMEPublicOfferQuery."""
         self._queryParameters.scope = scope 
         return self
     def forStatus(self, status):
-        """ Set the status to be queried."""
+        """ Set the status to be queried.
+        
+            Returns:
+                GMEPublicOfferQuery."""
         self._queryParameters.status = status
         return self
     def forUnitType(self, unitType):
-        """ Set the unit types to be queried."""
+        """ Set the unit types to be queried.
+        
+            Returns:
+                GMEPublicOfferQuery."""
         self._queryParameters.unitType = unitType
         return self
     def forDate(self, date):
-        """ Set the date to be queried."""
+        """ Set the date to be queried.
+        
+            Returns:
+                GMEPublicOfferQuery."""
         self._queryParameters.extractionRangeSelectionConfig.date = date
         return self
     def forUnit(self, unit):
-        """ Set the units to be queried."""
+        """ Set the units to be queried.
+            
+            Returns:
+                GMEPublicOfferQuery."""
         self._queryParameters.unit = unit
         return self
     def forOperator(self, operator):
-        """ Set the operators to be queried."""
+        """ Set the operators to be queried.
+            
+            Returns:
+                GMEPublicOfferQuery."""
         self._queryParameters.operator = operator
         return self
     def forZone(self, zone):
-        """ Set the zones to be queried."""
+        """ Set the zones to be queried.
+        
+            Returns:
+                GMEPublicOfferQuery."""
         self._queryParameters.zone = zone
         return self
     def forMarket(self, market):
-        """ Set the markets to be queried."""
+        """ Set the markets to be queried.
+        
+            Returns:
+                GMEPublicOfferQuery."""
         self._queryParameters.market = market
         return self
     def forPurpose(self, purpose):
-        """ Set the Purpose to be queried."""
+        """ Set the Purpose to be queried.
+        
+            Returns:
+                GMEPublicOfferQuery."""
         self._queryParameters.purpose = purpose
         return self
     def forBAType(self, baType):
-        """ Set the BATypes to be queried."""
+        """ Set the BATypes to be queried.
+        
+            Returns:
+                GMEPublicOfferQuery."""
         self._queryParameters.baType = baType
         return self
     def forGenerationType(self, generationType):
-        """ Set the generation types to be queried."""
+        """ Set the generation types to be queried.
+        
+            Returns:
+                GMEPublicOfferQuery."""
         self._queryParameters.baType = generationType
         return self
     def withPagination(self, pagenumber,pagesize):
-        """ Set the request pagination."""
+        """ Set the request pagination.
+        
+            Returns:
+                GMEPublicOfferQuery."""
         self._queryParameters.page = pagenumber
         self._queryParameters.pageSize = pagesize
         return self
     def execute(self):
-        """ Execute GME Public Offer Query."""
+        """ Execute GME Public Offer Query.
+        
+            Returns:
+                GMEPublicOfferQuery."""
         url = self.__buildRequest()
         return self._exec(url)
     def executeAsync(self):
+        """ Execute GME Public Offer Query.
+        
+            Returns:
+                Enumerable of TimeSerieRow Actual."""
         url = self.__buildRequest()
         return self._execAsync(url)
     def __buildRequest(self):

@@ -1,3 +1,5 @@
+from Artesian import _ClientsExecutor
+from Artesian._ClientsExecutor import RequestExecutor
 from Artesian._Query.Query import _Query
 from Artesian._Query.QueryParameters.VersionedQueryParameters import VersionedQueryParameters
 from Artesian._Query.Config.ExtractionRangeConfig import ExtractionRangeConfig
@@ -7,12 +9,12 @@ from Artesian._Query.Config.Granularity import Granularity
 import urllib
 class _VersionedQuery(_Query):
     __routePrefix = "vts"
-    def __init__(self, client, requestExecutor, partitionStrategy):
+    def __init__(self, client: _ClientsExecutor, requestExecutor: RequestExecutor, partitionStrategy: DefaultPartitionStrategy):
         """ Inits _VersionedQuery 
 
             Args:
             
-                client credential
+                client 
 
                 requestExecutor
 
@@ -22,33 +24,43 @@ class _VersionedQuery(_Query):
         _Query.__init__(self, client, requestExecutor, queryParameters)
         self.__partition= partitionStrategy
 
-    def forMarketData(self, ids):
-        """ Select the CURVE ID of interest.
+    def forMarketData(self, ids: int):
+        """ Set the list of marketdata to be queried.
 
-            E.g.: 100000xxx"""
+            Args:
+                ids: list of marketdata id's to be queried. E.g.: 100000xxx
+        """
         super()._forMarketData(ids)
         return self
     def forFilterId(self, filterId):
+        """ Sets the list of filtered marketdata id to be queried
+            
+            Args:
+                filterId: list of marketdata filtered by id"""
         super()._forFilterId(filterId)
         return self
     def inTimeZone(self, tz):
-        """ Gets the Versioned Query in a specific TimeZone.
+        """ Gets the Versioned Query in a specific TimeZone in IANA format.
 
-            E.g.: (UTC") / ("CET") / ("EET") / ("WET") / ("Europe/Istanbul") / ("Europe/Moscow")"""
+            Args:
+                timezone: "UTC","CET","Europe/Istanbul"
+        """
         super()._inTimezone(tz)
         return self
     def inAbsoluteDateRange(self, start, end):
         """ Gets the Versioned Query in an absolute date range window. 
             The Absolute Date Range is in ISO8601 format.
         
-            E.g.: ("2021-12-01", "2021-12-31")
+            Args:
+                start, end: ("2021-12-01", "2021-12-31")
         """
         super()._inAbsoluteDateRange(start, end)
         return self
     def inRelativePeriodRange(self, pStart, pEnd=None):
         """ Gets the Versioned Query in a relative period range time window.
         
-        E.g.: ("P-3D", "P10D") -> from 3 days prior, to be considered until 10 days after."""
+            Args:
+                pStart, pEnd: ("P-3D", "P10D")"""
 
 
         super()._inRelativePeriodRange(pStart, pEnd)
@@ -56,36 +68,41 @@ class _VersionedQuery(_Query):
     def inRelativePeriod(self, extractionPeriod):
         """ Gets the Versioned Query in a relative period of a time window.
         
-        E.g.: ("P5D")"""
+            Args:
+                extractionPeriod: ("P5D")"""
         super()._inRelativePeriod(extractionPeriod)
         return self
     def inRelativeInterval(self, relativeInterval):
-        """ The Relative Interval considers a specific interval of time.
+        """ Gets the Relative Interval considers a specific interval of time window.
         
-        E.g.: (RelativeInterval.ROLLING_WEEK) or (RelativeInterval.ROLLING_MONTH)"""
+            Args:
+                relativeInterval: ""RelativeInterval.ROLLING_WEEK"" or "RelativeInterval.ROLLING_MONTH"."""
         super()._inRelativeInterval(relativeInterval)
         return self
     def withTimeTransform(self, tr):
-        """ With Time Transform:
+        """ Gets the Versioned query in a specific Time Transform.
         
-        E.g.: ("Custom") / ("GASDAY66") / ("THERMALYEAR") ."""
+            Args:
+                e.g.: "Custom","GASDAY66","THERMALYEAR"."""
         self._queryParameters.transformId = tr
         return self
-    def inGranularity(self, granularity):
-        """ The Granularity needs to be specified:
+    def inGranularity(self, granularity: Granularity):
+        """ Gets the Versioned Query in a specific Granularity.
         
-        E.g.: ("TenMinute") / ("FifteenMinute") / ("Hour") / ("Day") / ("Week") / ("Month") / ("Season") / ("Year") """
+            Args:
+                granularity:  e.g.: "TenMinute", "FifteenMinute", "Hour", "Year""""
         self._queryParameters.granularity = granularity
         return self
     def forMUV(self):
         """ Gets the timeseries of the most updated version of each timepoint of a versioned timeseries.
-        """
+            """
         self._queryParameters.versionSelectionType = VersionSelectionType.MUV
         return self
     def forLastOfDays(self, start, end=None):
         """ Gets the lastest version of a versioned timeseries of each day in a time window..
-
-        E.g.: forLastOfDays("2021-03-12","2021-03-16") / forLastOfDays("P0Y0M-2D","P0Y0M2D") / forLastOfDays("P0Y0M-2D")"""
+            
+            Args:
+                start, end:  forLastOfDays("2021-03-12","2021-03-16"), forLastOfDays("P0Y0M-2D","P0Y0M2D"), forLastOfDays("P0Y0M-2D")"""
 
         self._queryParameters.versionSelectionType = VersionSelectionType.LAST_OF_DAYS      
         if(start.startswith("P")):
@@ -100,8 +117,9 @@ class _VersionedQuery(_Query):
         return self
     def forLastOfMonths(self, start, end=None):
         """ Gets the lastest version of a versioned timeseries of each month in a time window.
-
-        E.g.: forLastOfMonths("2021-03-12","2021-03-16") / forLastOfMonths("P0Y-1M0D","P0Y1M0D") / forLastOfMonths("P0Y-1M0D") """
+            
+            Args:
+                start, end:  forLastOfMonths("2021-03-12","2021-03-16"), forLastOfMonths("P0Y-1M0D","P0Y1M0D"), forLastOfMonths("P0Y-1M0D") """
         self._queryParameters.versionSelectionType = VersionSelectionType.LAST_OF_MONTHS
         if(start.startswith("P")):
             if(end is None):
@@ -115,22 +133,25 @@ class _VersionedQuery(_Query):
         return self
     def forLastNVersions(self, lastN):
         """ Gets the lastest N timeseries versions that have at least a not-null value .
-        
-        E.g.: forLastNVersions(2)"""
+            
+            Args:
+                lastN:   e.g.: forLastNVersions(2)"""
         self._queryParameters.versionSelectionType = VersionSelectionType.LASTN
         self._queryParameters.versionSelectionConfig.lastN = lastN
         return self
     def forVersion(self, version):
         """ Gets the specified version of a versioned timeseries.
         
-        E.g.: forVersion("2021-03-12T14:30:00")"""
+            Args:
+                verion: forVersion("2021-03-12T14:30:00")"""
         self._queryParameters.versionSelectionType = VersionSelectionType.VERSION
         self._queryParameters.versionSelectionConfig.version = version
         return self
     def forMostRecent(self, start, end=None):
         """ Gets the most recent version of a versioned timeseries in a time window.
         
-        E.g.: .forMostRecent("2021-03-12","2021-03-16") / forMostRecent("2021-03-12T12:30:05","2021-03-16T18:42:30") / forMostRecent("P0Y0M-2D","P0Y0M2D") / forMostRecent("P0Y0M-2D") / forMostRecent("2021-03-12","2021-03-16") / forMostRecent("P0Y-1M0D","P0Y1M0D") / forMostRecent("P0Y-1M0D") """
+            Args:
+                start, end: forMostRecent("2021-03-12","2021-03-16"), forMostRecent("2021-03-12T12:30:05","2021-03-16T18:42:30"), forMostRecent("P0Y0M-2D","P0Y0M2D"), forMostRecent("P0Y0M-2D") / forMostRecent("2021-03-12","2021-03-16") / forMostRecent("P0Y-1M0D","P0Y1M0D") / forMostRecent("P0Y-1M0D") """
         self._queryParameters.versionSelectionType = VersionSelectionType.MOST_RECENT
         if(start.startswith("P")):
             if(end is None):
@@ -143,27 +164,32 @@ class _VersionedQuery(_Query):
             self._queryParameters.versionSelectionConfig.versionsRange.dateEnd = end
         return self
     def withFillNull(self):
-        """ This is an optional filler strategy for the extraction.
+        """ Optional filler strategy for the extraction.
         
-        Ex:    withFillNull() """
+            Args: 
+                e.g.: withFillNull() """
         self._queryParameters.fill = NullFillStategy()
         return self
     def withFillNone(self):
-        """ This is an optional filler strategy for the extraction.
+        """ Optional filler strategy for the extraction.
         
-        Ex:    withFillNone() """
+            Args:
+                e.g.: withFillNone() """
         self._queryParameters.fill = NoFillStategy()
         return self
     def withFillLatestValue(self, period):
-        """ This is an optional filler strategy for the extraction.
+        """ Optional filler strategy for the extraction.
         
-        Ex:    withFillLatestValue("P5D") """
+            Args:
+               e.g.:   withFillLatestValue("P5D") """
         self._queryParameters.fill = FillLatestStategy(period)
         return self
     def withFillCustomValue(self, val):
-        """ This is an optional filler strategy for the extraction.
+        """ Optional filler strategy for the extraction.
         
-        Ex:    //Timeseries
+            Args:
+                e.g.:
+                //Timeseries
                 .withFillCustomValue(123)
                // Market Assessment
                 .withFillCustomValue(
@@ -255,20 +281,25 @@ class _VersionedQuery(_Query):
 
 
 class NullFillStategy:
+    """ Class that sets the Null Filling Strategy."""
+    
     def getUrlParams(self):
         return "fillerK=Null"
 
 class NoFillStategy:
+    """ Class that sets the No Filling Strategy."""
     def getUrlParams(self):
         return "fillerK=NoFill"
 
 class FillLatestStategy:
+    """ Class that sets the Last Filling Strategy."""
     def __init__(self, period):
         self.period = period
     def getUrlParams(self):
         return f"fillerK=LatestValidValue&fillerP={self.period}"
 
 class FillCustomStategy:
+    """Class that sets the Custom Filling Strategy."""
     def __init__(self, val):
         self.val = val
     def getUrlParams(self):

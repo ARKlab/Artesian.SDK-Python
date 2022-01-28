@@ -1,16 +1,19 @@
+from Artesian import _ClientsExecutor
+from Artesian._ClientsExecutor import RequestExecutor
 from Artesian._Query.Query import _Query
 from Artesian._Query.QueryParameters.AuctionQueryParameters import AuctionQueryParameters
 from Artesian._Query.Config.ExtractionRangeConfig import ExtractionRangeConfig
 from Artesian._Configuration.DefaultPartitionStrategy import DefaultPartitionStrategy
 import urllib
+from typing import List
 class _AuctionQuery(_Query):
     __routePrefix = "auction"
-    def __init__(self, client, requestExecutor, partitionStrategy):
+    def __init__(self, client: _ClientsExecutor, requestExecutor: RequestExecutor, partitionStrategy: DefaultPartitionStrategy):
         """ Inits _AuctionQuery 
          
             Args:
             
-                client credential
+                client 
 
                 requestExecutor
                 
@@ -19,40 +22,51 @@ class _AuctionQuery(_Query):
         _Query.__init__(self, client, requestExecutor, queryParameters)
         self.__partition= partitionStrategy
 
-    def forMarketData(self, ids):
-        """ Select the CURVE ID of interest.
+    def forMarketData(self, ids: List[int]):
+        """ Set the list of marketdata to be queried.
 
-            E.g.: 100000xxx"""
+            Args:
+                ids: list of marketdata id's to be queried. E.g.: 100000xxx
+        """
         super()._forMarketData(ids)
         return self
-    def forFilterId(self, filterId):
+    def forFilterId(self, filterId: List[int]):
+        """ Sets the list of filtered marketdata id to be queried
+            
+            Args:
+                filterId: list of marketdata filtered by id"""
         super()._forFilterId(filterId)
         return self
-    def inTimeZone(self, tz):
-        """ Gets the Auction Query in a specific TimeZone.
+    def inTimeZone(self, tz: str):
+        """ Gets the Auction Query in a specific TimeZone in IANA format.
 
-            E.g.: (UTC") / ("CET") / ("EET") / ("WET") / ("Europe/Istanbul") / ("Europe/Moscow")"""
+            Args:
+                timezone: "UTC","CET","Europe/Istanbul"
+        """
         super()._inTimezone(tz)
         return self
     def inAbsoluteDateRange(self, start, end):
-        """ Gets the AuctionQuery version in an absolute date range window. 
+        """ Gets the Auction Query in an absolute date range window. 
             The Absolute Date Range is in ISO8601 format.
         
-            E.g.: ("2021-12-01", "2021-12-31")
+            Args:
+                start, end: ("2021-12-01", "2021-12-31")
         """
         super()._inAbsoluteDateRange(start, end)
         return self
     def inRelativePeriodRange(self, pStart, pEnd):
-        """ Gets the AuctionQuery in a relative period range time window.
+        """ Gets the Auction Query in a relative period range time window.
         
-        E.g.: ("P-3D", "P10D") -> from 3 days prior, to be considered until 10 days after."""
+            Args:
+                pStart, pEnd: ("P-3D", "P10D")"""
 
         super()._inRelativePeriodRange(pStart, pEnd)
         return self
-    def inRelativePeriod(self, extractionPeriod):
-        """ Gets the AuctionQuery in a relative period of a time window.
+    def inRelativePeriod(self, extractionPeriod: str):
+        """ Gets the Auction Query in a relative period of a time window.
         
-        E.g.: ("P5D")"""
+            Args:
+                extractionPeriod: ("P5D")"""
         super()._inRelativePeriod(extractionPeriod)
         return self
     def execute(self):

@@ -1,4 +1,5 @@
 class VersionsRangeSelectionConfig:
+    """ The class Configures the Version Range Selection."""
     def __init__(self):
         """ Inits for the Versions Range Selection Configuration. """
         

@@ -1,44 +1,59 @@
+from Artesian import _ClientsExecutor
+from Artesian._ClientsExecutor import RequestExecutor
+from Artesian._GMEPublicOffers import QueryParameters
 from Artesian._Query.Config.ExtractionRangeType import ExtractionRangeType
 from Artesian._Query.QueryParameters.QueryParameters import _QueryParameters
 from Artesian._Query.Config.RelativeInterval import RelativeInterval
 import asyncio
 import itertools
+from typing import List
 class _Query:
-    def __init__(self, client, requestExecutor, queryParameters):
+    def __init__(self, client: _ClientsExecutor, requestExecutor: RequestExecutor, queryParameters:QueryParameters):
         """ Inits _Query 
         
         Args:
-            client credential
+            client 
 
             requestExecutor
 
-            partitionStrategy. """
+            queryParameters. """
             
         self._queryParameters = queryParameters
         self._client = client
         self._requestExecutor = requestExecutor
-    def _forMarketData(self, ids):
-        """ Select the CURVE ID of interest.
+    def _forMarketData(self, ids: List[int]):
+        """ Set the list of marketdata to be queried.
 
-            E.g.: 100000xxx"""
+            Args:
+                ids: list of marketdata id's to be queried. E.g.: 100000xxx
+        """
         self._queryParameters.ids = ids
         self._queryParameters.filterId = None
         return self
-    def _forFilterId(self, filterId):
+    def _forFilterId(self, filterId: int):
+        """ Sets the list of filtered marketdata id to be queried
+            
+            Args:
+                filterId: list of marketdata filtered by id"""
         self._queryParameters.filterId = filterId
         self._queryParameters.ids = None
         return self
-    def _inTimezone(self, tz):
-        """ Gets the Query in a specific TimeZone.
+    def _inTimezone(self, tz: str):
+        """ Gets the Query in a specific TimeZone in IANA format.
 
-            E.g.: (UTC") / ("CET") / ("EET") / ("WET") / ("Europe/Istanbul") / ("Europe/Moscow")"""
+            Args:
+                timezone: "UTC","CET","Europe/Istanbul"
+        """
         self._queryParameters.timezone = tz
         return self
-    def _inAbsoluteDateRange(self, start, end):
+    def _inAbsoluteDateRange(self, start:str, end:str):
         """ Gets the Query in an absolute date range window. 
             The Absolute Date Range is in ISO8601 format.
+            The Range is end exclusive (ex. "2022-01-01"->"2022-01-02" extracts a single day)
         
-            E.g.: ("2021-12-01", "2021-12-31")
+            Args:
+                start: the date start of the range of extracted timeserie, in ISO format. (ex. "2022-01-01")
+                end:  the EXCLUSIVE date end of the range of extracted timeserie, in ISO format. (ex. "2022-01-01")
         """
         self._queryParameters.extractionRangeType = ExtractionRangeType.DATE_RANGE
         self._queryParameters.extractionRangeSelectionConfig.dateStart = start
@@ -47,7 +62,8 @@ class _Query:
     def _inRelativePeriodRange(self, pstart, pend):
         """ Gets the Query in a relative period range time window.
         
-        E.g.: ("P-3D", "P10D") -> from 3 days prior, to be considered until 10 days after."""
+            Args:
+                pStart, pEnd: ("P-3D", "P10D")"""
 
 
         self._queryParameters.extractionRangeType = ExtractionRangeType.PERIOD_RANGE
@@ -57,14 +73,16 @@ class _Query:
     def _inRelativePeriod(self, period):
         """ Gets the Query in a relative period of a time window.
         
-            E.g.: ("P5D")"""
+            Args:
+                extractionPeriod: ("P5D")"""
         self._queryParameters.extractionRangeType = ExtractionRangeType.PERIOD
         self._queryParameters.extractionRangeSelectionConfig.period = period
         return self
     def _inRelativeInterval(self, relativeInterval):
-        """ The Relative Interval considers a specific interval of time.
+        """ Gets the Relative Interval considers a specific interval of time window.
         
-        E.g.: (RelativeInterval.ROLLING_WEEK) or (RelativeInterval.ROLLING_MONTH)"""
+            Args:
+                relativeInterval: ""RelativeInterval.ROLLING_WEEK"" or "RelativeInterval.ROLLING_MONTH"."""
         self._queryParameters.extractionRangeType = ExtractionRangeType.RELATIVE_INTERVAL
         self._queryParameters.extractionRangeSelectionConfig.relativeInterval = relativeInterval
         return self
@@ -87,7 +105,7 @@ class _Query:
         loop = get_event_loop()
         rr = loop.run_until_complete(self._execAsync(urls))
         return rr
-    async def _execAsync(self, urls):
+    async def _execAsync(self, urls) -> list:
             with self._client as c:
                 res = await asyncio.gather(*[self._requestExecutor.exec(c.exec, 'GET', i, None) for i in urls])
                 return list(itertools.chain(*map(lambda r: r.json(),res)))

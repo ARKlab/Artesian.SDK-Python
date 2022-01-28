@@ -1,8 +1,9 @@
-class ExtractionRangeConfig:
-      """ This class sets up the Extraction Range Configuration.
+from Artesian._GMEPublicOffers import QueryParameters
 
-   """
-    def __init__(self):
+
+class ExtractionRangeConfig:
+     """ This class sets up the Extraction Range Configuration. """
+     def __init__(self):
         """ Init for the Extraction Range Configuration. 
 
         The DateTime is set in ISO8601 format

@@ -1,115 +1,125 @@
+from Artesian import _ClientsExecutor
+from Artesian._ClientsExecutor import RequestExecutor
 from Artesian._Query.Query import _Query
 from Artesian._Query.QueryParameters.ActualQueryParameters import ActualQueryParameters
 from Artesian._Query.Config.ExtractionRangeConfig import ExtractionRangeConfig
 from Artesian._Query.Config.Granularity import Granularity
 from Artesian._Configuration.DefaultPartitionStrategy import DefaultPartitionStrategy
 import urllib
+from typing import List
+from __future__ import annotations
+
 class _ActualQuery(_Query):
     __routePrefix = "ts"
-    def __init__(self, client, requestExecutor, partitionStrategy):
+    def __init__(self, client: _ClientsExecutor, requestExecutor: RequestExecutor, partitionStrategy: DefaultPartitionStrategy):
         """ Inits _ActualQuery
          
-            Args:
-            
-                client credential
+            Args:          
+                client 
 
-                requestExecutor
-                
+                requestExecutor    
+
                 partitionStrategy. """
         queryParameters = ActualQueryParameters(None,ExtractionRangeConfig(), None, None, None, None, None) 
         _Query.__init__(self, client, requestExecutor, queryParameters)
         self.__partition= partitionStrategy
 
-    def forMarketData(self, ids):
-        """ Select the CURVE ID of interest.
+    def forMarketData(self, ids: List[int]) -> _ActualQuery:
+        """ Set the list of marketdata to be queried.
 
-            E.g.: 100000xxx"""
+            Args:
+                ids: list of marketdata id's to be queried. E.g.: 100000xxx
+        """
         super()._forMarketData(ids)
         return self
-    def forFilterId(self, filterId):
+    def forFilterId(self, filterId: int):
+        """ Sets the list of filtered marketdata id to be queried
+            
+            Args:
+                filterId: list of marketdata filtered by id"""
         super()._forFilterId(filterId)
         return self
     def inTimeZone(self, tz):
-        """ Gets the Actual Query in a specific TimeZone.
+        """ Gets the Actual Query in a specific TimeZone in IANA format.
 
-            E.g.: (UTC") / ("CET") / ("EET") / ("WET") / ("Europe/Istanbul") / ("Europe/Moscow")"""
+            Args:
+                timezone: "UTC","CET","Europe/Istanbul"
+        """
         super()._inTimezone(tz)
         return self
     def inAbsoluteDateRange(self, start, end):
-        """ Gets the Actual query in an absolute date range window. 
+        """ Gets the Actual Query in an absolute date range window. 
             The Absolute Date Range is in ISO8601 format.
         
-            E.g.: ("2021-12-01", "2021-12-31")
+            Args:
+                start, end: ("2021-12-01", "2021-12-31")
         """
         super()._inAbsoluteDateRange(start, end)
         return self
     def inRelativePeriodRange(self, pStart, pEnd):
         """ Gets the Actual Query in a relative period range time window.
         
-        E.g.: ("P-3D", "P10D") -> from 3 days prior, to be considered until 10 days after."""
-        # ASK if ok!!
+            Args:
+                pStart, pEnd: ("P-3D", "P10D")"""
 
         super()._inRelativePeriodRange(pStart, pEnd)
         return self
-    def inRelativePeriod(self, extractionPeriod):
+    def inRelativePeriod(self, extractionPeriod: str):
         """ Gets the Actual Query in a relative period of a time window.
         
-        E.g.: ("P5D")"""
+            Args:
+                extractionPeriod: ("P5D")"""
         super()._inRelativePeriod(extractionPeriod)
         return self
-    def inRelativeInterval(self, relativeInterval):
-        """ Gets the Actual Query in a relative interval of a time window.
+    def inRelativeInterval(self, relativeInterval: str):
+        """ Gets the Relative Interval considers a specific interval of time window.
         
-        E.g.: (RelativeInterval.ROLLING_WEEK) or (RelativeInterval.ROLLING_MONTH)"""
+            Args:
+                relativeInterval: ""RelativeInterval.ROLLING_WEEK"" or "RelativeInterval.ROLLING_MONTH"."""
         super()._inRelativeInterval(relativeInterval)
         return self
-    def withTimeTransform(self, tr):
-        """ With Time Transform:
-        
-        E.g.: ("Custom") / ("GASDAY66") / ("THERMALYEAR") ."""
+    def withTimeTransform(self, tr: str):
+        """Gets the Actual Query in a specific time transform to be queried.
+
+            Args:
+                timetransform:  "Custom", "GASDAY66", "THERMALYEAR" ."""
         self._queryParameters.transformId = tr
         return self
-    def inGranularity(self, granularity):
-        """ The Granularity needs to be specified:
+    def inGranularity(self, granularity: Granularity):
+        """ Gets the Actual Query in a specific granularity to be queried.
         
-        E.g.: ("TenMinute") / ("FifteenMinute") / ("Hour") / ("Day") / ("Week") / ("Month") / ("Season") / ("Year") """
+            Args:
+                granularity: e.g.: "TenMinute", "FifteenMinute", "Hour", "Year" """
         self._queryParameters.granularity = granularity
         return self
     def withFillNull(self):
-        """ This is an optional filler strategy for the extraction.
+        """ Optional filler strategy for the extraction.
         
-        Ex:    withFillNull() """
+            Args: 
+                e.g.: withFillNull() """
         self._queryParameters.fill = NullFillStategy()
         return self
     def withFillNone(self):
-        """ This is an optional filler strategy for the extraction.
+        """ Optional filler strategy for the extraction.
         
-        Ex:    withFillNone() """
+            Args:
+                e.g.: withFillNone() """
         self._queryParameters.fill = NoFillStategy()
         return self
     def withFillLatestValue(self, period):
-        """ This is an optional filler strategy for the extraction.
+        """ Optional filler strategy for the extraction.
         
-        Ex:    withFillLatestValue("P5D") """
+            Args:
+               e.g.:   withFillLatestValue("P5D") """
         self._queryParameters.fill = FillLatestStategy(period)
         return self
-    def withFillCustomValue(self, val):
-        """ This is an optional filler strategy for the extraction.
+    def withFillCustomValue(self, value:float) -> _ActualQuery:
+        """ Optional filler strategy for the extraction.
         
-        Ex:    //Timeseries
-                .withFillCustomValue(123)
-               // Market Assessment
-                .withFillCustomValue(
-                settlement = 123,
-                open = 456,
-                close = 789,
-                high = 321,
-                low = 654,
-                volumePaid = 987,
-                volueGiven = 213,
-                volume = 435,
-                ) """
-        self._queryParameters.fill = FillCustomStategy(val)
+            Args:
+                value: value used to fill the missing timeserie points
+        """
+        self._queryParameters.fill = FillCustomStategy(value)
         return self
     def execute(self):
         """ Execute the Query. """
@@ -164,20 +174,26 @@ class _ActualQuery(_Query):
         return vr
 
 class NullFillStategy:
+    """ Class that sets the Null Filling Strategy."""
     def getUrlParams(self):
         return "fillerK=Null"
 
 class NoFillStategy:
+    """ Class that sets the No Filling Strategy."""
+    
     def getUrlParams(self):
         return "fillerK=NoFill"
 
 class FillLatestStategy:
+    """ Class that sets the Last Filling Strategy."""
+   
     def __init__(self, period):
         self.period = period
     def getUrlParams(self):
         return f"fillerK=LatestValidValue&fillerP={self.period}"
 
 class FillCustomStategy:
+    """Class that sets the Custom Filling Strategy."""
     def __init__(self, val):
         self.val = val
     def getUrlParams(self):

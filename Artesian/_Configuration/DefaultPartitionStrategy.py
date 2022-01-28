@@ -1,7 +1,4 @@
-from datetime import datetime
-import math
 import copy
-from sys import implementation
 
 from Artesian._Query.QueryParameters.ActualQueryParameters import ActualQueryParameters
 from Artesian._Query.QueryParameters.VersionedQueryParameters import VersionedQueryParameters
@@ -12,7 +9,7 @@ from Artesian._GMEPublicOffers.QueryParameters.GMEPOfferQueryParameters import G
 
 class DefaultPartitionStrategy:
     """
-    This class contains the strategy to partition Query Parameters.
+    This class sets the default strategy to partition Query Parameters.
 
     """
     maxNumberOfIds = 15
@@ -22,21 +19,21 @@ class DefaultPartitionStrategy:
         """ The partition strategy for the Actual Time Series Query.
 
             Returns:
-                The parameter returns the list  of Actual Time Series Query parameters to be partitioned. """
+                The input list of Actual Time Series Query parameters partitioned with the defined strategy. """
         return self._tsPartitionStrategy(actualQueryParameters)
 
     def PartitionAuction(self, auctionQueryParameters: list[AuctionQueryParameters]) -> list[AuctionQueryParameters]:
         """ The partition strategy for the Auction Time Series Query.
 
             Returns:
-                The parameter returns the list of Auction Time Series Query parameters to be partitioned. """
+                The input list of Auction Time Series Query parameters partitioned with the defined strategy. """
         return self._tsPartitionStrategy(auctionQueryParameters)
 
     def Partitionversioned(self, versionedQueryParameters: list[VersionedQueryParameters]) -> list[VersionedQueryParameters]:
         """ The partition strategy for the Versioned Time Series Query.
 
             Returns:
-                 The parameter returns the list of Versioned Time Series Query parameters to be partitioned."""
+                 The input list of Versioned Time Series Query parameters partitioned with the defined strategy."""
         return self._tsPartitionStrategy(versionedQueryParameters)
        
 
@@ -44,11 +41,14 @@ class DefaultPartitionStrategy:
         """ The partition strategy for the Market Assessment Query.
         
             Returns:
-                The parameter returns the list of Market Assessment Query parameters to be partitioned. """
+                The input list of Market Assessment Query parameters partitioned with the defined strategy. """
         return self._tsPartitionStrategy(masQueryParameters)
 
     def PartitionGMEPOffer(self, gmePOfferQueryParameters: list[GMEPOfferQueryParameters]) -> list[GMEPOfferQueryParameters]:
-        """ The partition strategy fot the GME Public Offer Query."""
+        """ The partition strategy fot the GME Public Offer Query.
+        
+            Returns:
+                The input list of GME Public Offer Query parameters partitioned with the defined strategy.  """
         return gmePOfferQueryParameters
 
     def _tsPartitionStrategy(self, Parameters):

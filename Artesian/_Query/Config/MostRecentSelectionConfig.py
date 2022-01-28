@@ -1,4 +1,5 @@
 class MostRecentSelectionConfig:
+    """ Most Recent Selection Configuration Class."""
     def __init__(self):
         """ Inits for the Most Recent Selection Configuration.
         
