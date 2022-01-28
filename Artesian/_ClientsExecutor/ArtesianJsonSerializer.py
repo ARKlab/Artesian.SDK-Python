@@ -15,6 +15,9 @@ def __artesianTagsDeserializer(
   result = ArtesianTags({})
   for item in obj:
     if (not instance_of(item['Key'], str)):
+      raise ValueError("Key must be a 'str'. For example: 'commodity'") 
+    if (not instance_of(item['Value'], List[str])):
+      raise ValueError("Value must be a 'list[str]. For example: 'gas','power'")
       raise ValueError("123 stella") # TODO
     if (not instance_of(item['Value'], List[str])):
       raise ValueError("456 stella") # TODO
