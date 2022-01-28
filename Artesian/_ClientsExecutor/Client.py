@@ -1,6 +1,7 @@
 import requests
 import pkg_resources  # part of setuptools
 import platform
+from Artesian._ClientsExecutor.ArtesianJsonSerializer import artesianJsonSerialize, artesianJsonDeserialize
 
 class _Client:
     def __init__(self, baseUrl, apiKey):
@@ -14,9 +15,11 @@ class _Client:
         return self
     def __exit__(self, *args):
         self.__session.__exit__(args)
-    async def exec(self, method, url, data):
-        r = requests.Request(method, self.__baseUrl + url, data=data)
+    async def exec(self, method: str, url: str, obj: object = None, retcls: type = None):
+        json = artesianJsonSerialize(obj)
+        r = requests.Request(method, self.__baseUrl + url, json=json)
         prep = self.__session.prepare_request(r)
         res = self.__session.send(prep)
         res.raise_for_status()
-        return res
+        ret = artesianJsonDeserialize(res.json(), retcls)
+        return ret
