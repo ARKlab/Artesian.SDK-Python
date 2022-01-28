@@ -17,7 +17,7 @@ def __artesianTagsDeserializer(
     if (not instance_of(item['Key'], str)):
       raise ValueError("Key must be a 'str'. For example: 'commodity'") 
     if (not instance_of(item['Value'], List[str])):
-      raise ValueError("Value must be a 'list[str]. For example: 'gas','power'")
+      raise ValueError("Value must be a 'list[str]'. For example: ['gas','power']")
 
     k = jsons.load(item['Key'], str, **{**kwargs, 'strict':True})
     v = jsons.load(item['Value'], List[str], **{**kwargs, 'strict':True})
