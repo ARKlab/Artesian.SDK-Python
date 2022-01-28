@@ -1,7 +1,7 @@
 from pandas import date_range
 
 class ExtractionRangeConfig:
-    """ This class sets the Extraction Range Configuration. """
+    """ Class for the Extraction Range Configuration. """
 
     def __init__(self): 
         """ 

@@ -8,11 +8,19 @@ from Artesian._Query.Config.ExtractionRangeType import ExtractionRangeType
 from Artesian._Query.QueryParameters.QueryParameters import _QueryParameters
 
 class ActualQueryParameters(_QueryParameters): 
-    """ This class sets up the Actual Query Parameters.
+    """ Class for the Actual Query Parameters.
 
-        Returns:
-            Query Type
-   """
+            Attributes:
+                ids: sets list of marketdata ID's to be queried
+                extractionRangeSelectionConfig: Sets the extraction range configuration.
+                extraxtionRangeType: Sets the extraction range type.
+                timezone: specifies the timezone of extracted marketdata.
+                filterId: filters marketdata ID to be queries.
+                granularity: sets  the granularity to be queried.        
+                transformId: sets time range.
+
+                Returns:
+                    Query Type """
 
     def __init__(self, ids: int, extractionRangeSelectionConfig: ExtractionRangeConfig, extractionRangeType: ExtractionRangeType, timezone: str, filterId: int, granularity: Granularity, transformId: int) -> _QueryParameters: 
         """ Inits ActualQueryParameters 

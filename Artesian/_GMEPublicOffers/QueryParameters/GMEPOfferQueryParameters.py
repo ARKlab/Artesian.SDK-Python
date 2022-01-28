@@ -12,7 +12,25 @@ from Artesian._GMEPublicOffers.Config.Zone import Zone
 
 
 class GMEPOfferQueryParameters: 
-    def __init__(self, scope: Scope, extractionRangeSelectionConfig: ExtractionRangeConfig, status: Status, unitType: UnitType, generationType: GenerationType, operator: str, unit: str, zone: Zone , market: Market, purpose: Purpose, page: int, pageSize: int, baType: BaType): 
+    """ Class for the GME Public Offer Query Parameters.
+    
+        Attributes:
+            scope: sets scope to be queried
+            extractionRangeSelectionConfig: Sets the Extraction Range Selection Configuration to be queried.
+            status: sets the Status to be queried.
+            unitType: sets the unit types to be queried.
+            generationType: that sets the generation type to be queried.
+            operator: sets the operators to be queried.
+            unit: sets the units to be queried.
+            zone: sets the zones to be queried.
+            market: sets the Market to be queried.
+            purpose: sets the Purpose to be queried.
+            page: sets the Page to be queried.
+            pageSize: sets the Page size to be queried.
+            baType: sets the BATypes to be queried."""
+
+
+    def __init__(self, scope: Scope, extractionRangeSelectionConfig: ExtractionRangeConfig, status: Status, unitType: UnitType, generationType: GenerationType, operator: str, unit: str, zone: Zone , market: Market, purpose: Purpose, page: int, pageSize: int, baType: BaType)  -> None : 
         """ 
        Inits the GME Public Offer Query Parameters with optional overrides.
        

@@ -15,7 +15,7 @@ class _RequestExecutor:
     """
         This class handles all of the requests sent by the Artesian Client.
     """
-    def __init__(self,policy):
+    def __init__(self,policy) -> None:
         self.__policy = policy
         self.__sem = None
 

@@ -1,10 +1,5 @@
 from enum import Enum
 class Granularity(Enum):
-
-    """ Class that sets the Granularity to be queried.
-    
-    The time granularity should always be specified.
-    """
     HOUR = 0
     DAY = 1
     WEEK = 2

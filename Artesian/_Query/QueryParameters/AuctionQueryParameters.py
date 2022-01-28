@@ -2,8 +2,15 @@ from Artesian._GMEPublicOffers.Config.ExtractionRangeConfig import ExtractionRan
 from Artesian._Query.Config.ExtractionRangeType import ExtractionRangeType
 from Artesian._Query.QueryParameters.QueryParameters import _QueryParameters
 class AuctionQueryParameters(_QueryParameters): 
-    """This class sets up the Auction Query Parameters.
-    
+    """Class for the Auction Query Parameters.
+
+        Attributes:
+            ids: sets list of marketdata ID's to be queried
+            extractionRangeSelectionConfig: Sets the extraction range configuration.
+            extraxtionRangeType: Sets the extraction range type.
+            timezone: pecifies the timezone of extracted marketdata.
+            filterId: filters marketdata ID to be queries.
+            
         Returns:
             Query type."""
 

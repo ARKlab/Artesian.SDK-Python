@@ -7,6 +7,8 @@ from Artesian._Query.Config.RelativeInterval import RelativeInterval
 import asyncio
 import itertools
 from typing import List
+from __future__ import annotations
+
 class _Query:
     def __init__(self, client: _ClientsExecutor, requestExecutor: RequestExecutor, queryParameters:QueryParameters):
         """ Inits _Query 
@@ -21,7 +23,7 @@ class _Query:
         self._queryParameters = queryParameters
         self._client = client
         self._requestExecutor = requestExecutor
-    def _forMarketData(self, ids: List[int]):
+    def _forMarketData(self, ids: List[int]) -> _Query:
         """ Set the list of marketdata to be queried.
 
             Args:
@@ -30,7 +32,7 @@ class _Query:
         self._queryParameters.ids = ids
         self._queryParameters.filterId = None
         return self
-    def _forFilterId(self, filterId: int):
+    def _forFilterId(self, filterId: int) -> _Query:
         """ Sets the list of filtered marketdata id to be queried
             
             Args:
@@ -38,15 +40,15 @@ class _Query:
         self._queryParameters.filterId = filterId
         self._queryParameters.ids = None
         return self
-    def _inTimezone(self, tz: str):
+    def _inTimezone(self, tz: str) -> _Query:
         """ Gets the Query in a specific TimeZone in IANA format.
 
             Args:
-                timezone: "UTC","CET","Europe/Istanbul"
+                tz: "UTC","CET","Europe/Istanbul"
         """
         self._queryParameters.timezone = tz
         return self
-    def _inAbsoluteDateRange(self, start:str, end:str):
+    def _inAbsoluteDateRange(self, start:str, end:str) -> _Query:
         """ Gets the Query in an absolute date range window. 
             The Absolute Date Range is in ISO8601 format.
             The Range is end exclusive (ex. "2022-01-01"->"2022-01-02" extracts a single day)
@@ -59,34 +61,37 @@ class _Query:
         self._queryParameters.extractionRangeSelectionConfig.dateStart = start
         self._queryParameters.extractionRangeSelectionConfig.dateEnd = end
         return self
-    def _inRelativePeriodRange(self, pstart, pend):
+    def _inRelativePeriodRange(self, pstart: str, pend: str) -> _Query:
         """ Gets the Query in a relative period range time window.
         
             Args:
-                pStart, pEnd: ("P-3D", "P10D")"""
-
+                pStart: the relative period start of the range of extracted timeseries. (ex. "P--3D")
+                pEnd: the relative period end of the range of the extracted timeseries. (ex. "P10D") 
+        """
 
         self._queryParameters.extractionRangeType = ExtractionRangeType.PERIOD_RANGE
         self._queryParameters.extractionRangeSelectionConfig.periodFrom = pstart
         self._queryParameters.extractionRangeSelectionConfig.periodTo = pend
         return self
-    def _inRelativePeriod(self, period):
+    def _inRelativePeriod(self, period: str) -> _Query:
         """ Gets the Query in a relative period of a time window.
         
             Args:
-                extractionPeriod: ("P5D")"""
+                extractionPeriod: the relative period of extracted timeseries. (ex. "P5D")
+        """
         self._queryParameters.extractionRangeType = ExtractionRangeType.PERIOD
         self._queryParameters.extractionRangeSelectionConfig.period = period
         return self
-    def _inRelativeInterval(self, relativeInterval):
+    def _inRelativeInterval(self, relativeInterval: str) -> _Query:
         """ Gets the Relative Interval considers a specific interval of time window.
         
             Args:
-                relativeInterval: ""RelativeInterval.ROLLING_WEEK"" or "RelativeInterval.ROLLING_MONTH"."""
+                relativeInterval: the relative interval of extracted timeseries. (ex. "RelativeInterval.ROLLING_WEEK" or "RelativeInterval.ROLLING_MONTH") 
+        """
         self._queryParameters.extractionRangeType = ExtractionRangeType.RELATIVE_INTERVAL
         self._queryParameters.extractionRangeSelectionConfig.relativeInterval = relativeInterval
         return self
-    def _buildExtractionRangeRoute(self, queryParamaters):
+    def _buildExtractionRangeRoute(self, queryParamaters) -> _Query:
         rela = None
         if queryParamaters.extractionRangeSelectionConfig.relativeInterval is not None:
             rela = self.__getRelativeInterval(queryParamaters.extractionRangeSelectionConfig.relativeInterval)
@@ -101,7 +106,7 @@ class _Query:
         if subPath == "ExtractionRangeType" or subPath is None :
             raise Exception("Not supported RangeType")
         return subPath
-    def _exec(self, urls):
+    def _exec(self, urls) -> list:
         loop = get_event_loop()
         rr = loop.run_until_complete(self._execAsync(urls))
         return rr

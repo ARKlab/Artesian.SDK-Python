@@ -2,8 +2,15 @@ from Artesian._GMEPublicOffers.Config.ExtractionRangeConfig import ExtractionRan
 from Artesian._Query.Config.ExtractionRangeType import ExtractionRangeType
 from Artesian._Query.QueryParameters.QueryParameters import _QueryParameters
 class MasQueryParameters(_QueryParameters): 
-    """This class sets up the Mas Query Parameters.
-    
+    """Class for the Mas Query Parameters.
+
+        Attributes:
+            ids: sets list of marketdata ID's to be queried
+            extractionRangeSelectionConfig: Sets the extraction range configuration.
+            extraxtionRangeType: Sets the extraction range type.
+            timezone: specifies the timezone of extracted marketdata.
+            filterId: filters marketdata ID to be queries.
+            products: sets products to be queried.
         Returns:
             Query Type."""
 
@@ -12,10 +19,10 @@ class MasQueryParameters(_QueryParameters):
         
         Args:
 
-            ids: An int that ets list of marketdata ID's to be queried
+            ids: An int that sets list of marketdata ID's to be queried
             extractionRangeSelectionConfig: Sets the extraction range configuration.
             extraxtionRangeType: Sets the extraction range type.
-            timezone: IANA Format. A string pecifies the timezone of extracted marketdata.
+            timezone: IANA Format. A string specifies the timezone of extracted marketdata.
             filterId: An int that filters marketdata ID to be queries.
             products: A string that sets products to be queried.
         """

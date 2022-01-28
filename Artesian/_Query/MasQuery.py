@@ -7,9 +7,11 @@ from Artesian._Query.Config.Granularity import Granularity
 from Artesian._Configuration.DefaultPartitionStrategy import DefaultPartitionStrategy
 import urllib
 from typing import List
+from __future__ import annotations
+
 class _MasQuery(_Query):
     __routePrefix = "mas"
-    def __init__(self, client: _ClientsExecutor, requestExecutor: RequestExecutor, partitionStrategy: DefaultPartitionStrategy):
+    def __init__(self, client: _ClientsExecutor, requestExecutor: RequestExecutor, partitionStrategy: DefaultPartitionStrategy) -> None:
         """ Inits _MasQuery 
         
         Args:
@@ -23,7 +25,7 @@ class _MasQuery(_Query):
         _Query.__init__(self, client, requestExecutor, queryParameters)
         self.__partition= partitionStrategy
 
-    def forMarketData(self, ids: List[int]):
+    def forMarketData(self, ids: List[int]) -> _MasQuery:
         """ Set the list of marketdata to be queried.
 
             Args:
@@ -31,87 +33,90 @@ class _MasQuery(_Query):
         """
         super()._forMarketData(ids)
         return self
-    def forFilterId(self, filterId: List[int]):
+    def forFilterId(self, filterId: int) -> _MasQuery:
         """ Sets the list of filtered marketdata id to be queried
             
             Args:
                 filterId: list of marketdata filtered by id"""
         super()._forFilterId(filterId)
         return self
-    def inTimeZone(self, tz: str):
+    def inTimeZone(self, tz: str) -> _MasQuery:
         """ Gets the Mas Query in a specific TimeZone in IANA format.
 
             Args:
-                timezone: "UTC","CET","Europe/Istanbul"
+                tz: "UTC","CET","Europe/Istanbul"
         """
         super()._inTimezone(tz)
         return self
-    def inAbsoluteDateRange(self, start, end):
+    def inAbsoluteDateRange(self, start: str, end: str) -> _MasQuery:
         """ Gets the Mas Query in an absolute date range window. 
             The Absolute Date Range is in ISO8601 format.
         
             Args:
-                start, end: ("2021-12-01", "2021-12-31")
+                start: the date start of the range of extracted timeserie, in ISO format. (ex. "2022-01-01")
+                end:  the EXCLUSIVE date end of the range of extracted timeserie, in ISO format. (ex. "2022-01-01")
         """
         super()._inAbsoluteDateRange(start, end)
         return self
-    def inRelativePeriodRange(self, pStart, pEnd):
+    def inRelativePeriodRange(self, pStart: str, pEnd: str) -> _MasQuery:
         """ Gets the Mas Query in a relative period range time window.
         
             Args:
-                pStart, pEnd: ("P-3D", "P10D")"""
+                pStart: the relative period start of the range of extracted timeseries. (ex. "P--3D")
+                pEnd: the relative period end of the range of the extracted timeseries. (ex. "P10D") 
+        """
 
         super()._inRelativePeriodRange(pStart, pEnd)
         return self
-    def inRelativePeriod(self, extractionPeriod: str):
+    def inRelativePeriod(self, extractionPeriod: str) -> _MasQuery:
         """ Gets the Mas Query in a relative period of a time window.
         
             Args:
-                extractionPeriod: ("P5D")"""
+                extractionPeriod: the relative period of extracted timeseries. (ex. "P5D")
+        """
         super()._inRelativePeriod(extractionPeriod)
         return self
-    def inRelativeInterval(self, relativeInterval: str):
+    def inRelativeInterval(self, relativeInterval: str) -> _MasQuery:
         """ Gets the Relative Interval considers a specific interval of time window.
         
             Args:
-                relativeInterval: ""RelativeInterval.ROLLING_WEEK"" or "RelativeInterval.ROLLING_MONTH"."""
+                relativeInterval: the relative interval of extracted timeseries. (ex. "RelativeInterval.ROLLING_WEEK" or "RelativeInterval.ROLLING_MONTH") 
+        """
         super()._inRelativeInterval(relativeInterval)
         return self
-    def forProducts(self, products: str):
+    def forProducts(self, products: str) -> _MasQuery:
         """ Gets the Products tor the BidAsk Query in a time window.
         
             Args:
                 forProducts: ["D+1","Feb-18"]"""
         self._queryParameters.products = products
         return self
-    def withFillNull(self):
+    def withFillNull(self) -> _MasQuery:
         """ Optional filler strategy for the extraction.
         
             Args: 
-                e.g.: withFillNull() """
-        self._queryParameters.fill = NullFillStategy()
+                ex.   withFillNull() """
+        self._queryParameters.fill = _NullFillStategy()
         return self
-    def withFillNone(self):
+    def withFillNone(self) -> _MasQuery:
         """ Optional filler strategy for the extraction.
         
             Args:
-                e.g.: withFillNone() """
-        self._queryParameters.fill = NoFillStategy()
+                ex.   withFillNone() """
+        self._queryParameters.fill = _NoFillStategy()
         return self
-    def withFillLatestValue(self, period):
+    def withFillLatestValue(self, period: str) -> _MasQuery:
         """ Optional filler strategy for the extraction.
         
             Args:
-               e.g.:   withFillLatestValue("P5D") """
-        self._queryParameters.fill = FillLatestStategy(period)
+                ex.   withFillLatestValue("P5D") """
+        self._queryParameters.fill = _FillLatestStategy(period)
         return self
-    def withFillCustomValue(self, **val):
+    def withFillCustomValue(self, **val) -> _MasQuery:
         """ Optional filler strategy for the extraction.
         
             Args:
-                e.g.:
-                //Timeseries
-                .withFillCustomValue(123)
+                ex. 
                // Market Assessment
                 .withFillCustomValue(
                 settlement = 123,
@@ -123,13 +128,13 @@ class _MasQuery(_Query):
                 volueGiven = 213,
                 volume = 435,
                 ) """
-        self._queryParameters.fill = FillCustomStategy(val)
+        self._queryParameters.fill = _FillCustomStategy(val)
         return self
-    def execute(self):
+    def execute(self) -> list:
         """ Execute the Query."""
         urls = self.__buildRequest()
         return super()._exec(urls)
-    def executeAsync(self):
+    def executeAsync(self) -> list:
         """ Execute Async Query."""
         urls = self.__buildRequest()
         return super()._execAsync(urls)
@@ -160,28 +165,21 @@ class _MasQuery(_Query):
                 raise Exception("Products must be provided for extraction. Use .ForProducts() argument takes a string or string array of products")
 
 
-class NullFillStategy:
-     """ Class that sets the Null Filling Strategy."""
+class _NullFillStategy:
     def getUrlParams(self):
         return "fillerK=Null"
 
-class NoFillStategy:
-    
-    """ Class that sets the No Filling Strategy."""
-    
+class _NoFillStategy:    
     def getUrlParams(self):
         return "fillerK=NoFill"
 
-class FillLatestStategy:
-    """ Class that sets the Last Filling Strategy."""
-    
+class _FillLatestStategy:    
     def __init__(self, period):
         self.period = period
     def getUrlParams(self):
         return f"fillerK=LatestValidValue&fillerP={self.period}"
 
-class FillCustomStategy:
-    """Class that sets the Custom Filling Strategy."""
+class _FillCustomStategy:
     def __init__(self, val):
         self.val = val
     def getUrlParams(self):

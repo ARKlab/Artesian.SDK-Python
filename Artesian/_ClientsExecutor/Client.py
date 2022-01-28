@@ -3,7 +3,7 @@ import pkg_resources  # part of setuptools
 import platform
 
 class _Client:
-    def __init__(self, baseUrl, apiKey):
+    def __init__(self, baseUrl, apiKey) -> None:
         sdkVersion = pkg_resources.require("artesian-sdk")[0].version
         artesianAgentString = "'ArtesianSDK-Python:" + sdkVersion + "," + platform.system() + " " + platform.release() + ":"  + platform.version() + ",Python:" + platform.python_version()
         self.__baseUrl = baseUrl

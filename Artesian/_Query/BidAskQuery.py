@@ -6,11 +6,12 @@ from Artesian._Configuration.DefaultPartitionStrategy import DefaultPartitionStr
 from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
 from Artesian._ClientsExecutor.Client import _Client
 from typing import List
+from __future__ import annotations
 
 import urllib
 class _BidAskQuery(_Query):
     __routePrefix = "ba"
-    def __init__(self, client: _Client, requestExecutor: _RequestExecutor, partitionStrategy: DefaultPartitionStrategy):
+    def __init__(self, client: _Client, requestExecutor: _RequestExecutor, partitionStrategy: DefaultPartitionStrategy) -> None:
         """ Inits _BidAskQuery 
             
             Args:
@@ -24,7 +25,7 @@ class _BidAskQuery(_Query):
         _Query.__init__(self, client, requestExecutor, queryParameters)
         self.__partition= partitionStrategy
 
-    def forMarketData(self, ids: List[int]):
+    def forMarketData(self, ids: List[int]) -> _BidAskQuery:
         """ Set the list of marketdata to be queried.
 
             Args:
@@ -32,105 +33,100 @@ class _BidAskQuery(_Query):
         """
         super()._forMarketData(ids)
         return self
-    def forFilterId(self, filterId: List[int]):
+    def forFilterId(self, filterId: int) -> _BidAskQuery:
         """ Sets the list of filtered marketdata id to be queried
             
             Args:
                 filterId: list of marketdata filtered by id"""
         super()._forFilterId(filterId)
         return self
-    def inTimeZone(self, tz: str):
+    def inTimeZone(self, tz: str) -> _BidAskQuery:
         """ Gets the BidAsk Query in a specific TimeZone in IANA format.
 
             Args:
-                timezone: "UTC","CET","Europe/Istanbul"
+                tz: "UTC","CET","Europe/Istanbul"
         """
         super()._inTimezone(tz)
         return self
-    def inAbsoluteDateRange(self, start, end):
+    def inAbsoluteDateRange(self, start: str, end: str) -> _BidAskQuery:
         """ Gets the BidAsk Query in an absolute date range window. 
             The Absolute Date Range is in ISO8601 format.
         
             Args:
-                start, end: ("2021-12-01", "2021-12-31")
+                start: the date start of the range of extracted timeserie, in ISO format. (ex. "2022-01-01")
+                end:  the EXCLUSIVE date end of the range of extracted timeserie, in ISO format. (ex. "2022-01-01")
         """
         super()._inAbsoluteDateRange(start, end)
         return self
-    def inRelativePeriodRange(self, pStart, pEnd):
+    def inRelativePeriodRange(self, pStart: str, pEnd: str) -> _BidAskQuery:
         """ Gets the BidAsk Query in a relative period range time window.
         
             Args:
-                pStart, pEnd: ("P-3D", "P10D")"""
+                pStart: the relative period start of the range of extracted timeseries. (ex. "P--3D")
+                pEnd: the relative period end of the range of the extracted timeseries. (ex. "P10D") 
+        """
 
         super()._inRelativePeriodRange(pStart, pEnd)
         return self
-    def inRelativePeriod(self, extractionPeriod: str):
+    def inRelativePeriod(self, extractionPeriod: str) -> _BidAskQuery:
         """ Gets the BidAsk Query in a relative period of a time window.
         
             Args:
-                extractionPeriod: ("P5D")"""
+                extractionPeriod: the relative period of extracted timeseries. (ex. "P5D")
+        """
         super()._inRelativePeriod(extractionPeriod)
         return self
-    def inRelativeInterval(self, relativeInterval: str):
+    def inRelativeInterval(self, relativeInterval: str) -> _BidAskQuery:
         """ Gets the Relative Interval considers a specific interval of time window.
         
             Args:
-                relativeInterval: ""RelativeInterval.ROLLING_WEEK"" or "RelativeInterval.ROLLING_MONTH"."""
+                relativeInterval: the relative interval of extracted timeseries. (ex. "RelativeInterval.ROLLING_WEEK" or "RelativeInterval.ROLLING_MONTH") 
+        """
         super()._inRelativeInterval(relativeInterval)
         return self
-    def forProducts(self, products: str):
+    def forProducts(self, products: str) -> _BidAskQuery:
         """ Gets the Products tor the BidAsk Query in a time window.
         
             Args:
                 forProducts: ["D+1","Feb-18"]"""
         self._queryParameters.products = products
         return self
-    def withFillNull(self):
+    def withFillNull(self) -> _BidAskQuery:
         """ Optional filler strategy for the extraction.
         
             Args: 
-                e.g.: withFillNull() """
+                ex.  withFillNull() """
         self._queryParameters.fill = _NullFillStategy()
         return self
-    def withFillNone(self):
+    def withFillNone(self) -> _BidAskQuery:
         """ Optional filler strategy for the extraction.
         
             Args:
-                e.g.: withFillNone() """
+                ex.  withFillNone() """
         self._queryParameters.fill = _NoFillStategy()
         return self
-    def withFillLatestValue(self, period):
+    def withFillLatestValue(self, period: str) -> _BidAskQuery:
         """ Optional filler strategy for the extraction.
         
             Args:
-               period:  e.g.:  withFillLatestValue("P5D") """
+               period:  ex.  withFillLatestValue("P5D") """
         self._queryParameters.fill = _FillLatestStategy(period)
         return self
-    def withFillCustomValue(self, **val):
+    def withFillCustomValue(self, **val) -> _BidAskQuery:
         """ Optional filler strategy for the extraction.
         
             Args:
-                e.g.:
+                ex. 
                 //Timeseries
                 .withFillCustomValue(123)
-               // Market Assessment
-                .withFillCustomValue(
-                settlement = 123,
-                open = 456,
-                close = 789,
-                high = 321,
-                low = 654,
-                volumePaid = 987,
-                volueGiven = 213,
-                volume = 435,
-                ) """
+         """
         self._queryParameters.fill = _FillCustomStategy(val)
         return self
-    def execute(self):
+    def execute(self) -> list:
         """ Execute the Query."""
         urls = self.__buildRequest()
         return super()._exec(urls)
-    def executeAsync(self):
+    async def executeAsync(self) -> list:
         """ Execute Async Query."""
         urls = self.__buildRequest()
         return super()._execAsync(urls)

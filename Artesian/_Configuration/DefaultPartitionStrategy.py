@@ -9,8 +9,15 @@ from Artesian._GMEPublicOffers.QueryParameters.GMEPOfferQueryParameters import G
 
 class DefaultPartitionStrategy:
     """
-    This class sets the default strategy to partition Query Parameters.
+    Class for the default strategy to partition Query Parameters.
 
+        Attributes:
+            PartitionActual: strategy for the Actual Time Series Query.
+            PartitionAuction: strategy for the Auction Time Series Query.
+            Partitionversioned: strategy for the Versioned Time Series Query.
+            PartitionMas: strategy for the Market Assessment Time Series Query.
+            PartitionGMEPOffer: strategy for the GME Public Offer Query.
+            
     """
     maxNumberOfIds = 15
     """ Only 15 allowed."""

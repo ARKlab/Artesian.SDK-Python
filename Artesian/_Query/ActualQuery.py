@@ -11,7 +11,7 @@ from __future__ import annotations
 
 class _ActualQuery(_Query):
     __routePrefix = "ts"
-    def __init__(self, client: _ClientsExecutor, requestExecutor: RequestExecutor, partitionStrategy: DefaultPartitionStrategy):
+    def __init__(self, client: _ClientsExecutor, requestExecutor: RequestExecutor, partitionStrategy: DefaultPartitionStrategy) -> None:
         """ Inits _ActualQuery
          
             Args:          
@@ -32,100 +32,114 @@ class _ActualQuery(_Query):
         """
         super()._forMarketData(ids)
         return self
-    def forFilterId(self, filterId: int):
+    def forFilterId(self, filterId: int) -> _ActualQuery:
         """ Sets the list of filtered marketdata id to be queried
             
             Args:
                 filterId: list of marketdata filtered by id"""
         super()._forFilterId(filterId)
         return self
-    def inTimeZone(self, tz):
+    def inTimeZone(self, tz: str) -> _ActualQuery:
         """ Gets the Actual Query in a specific TimeZone in IANA format.
 
             Args:
-                timezone: "UTC","CET","Europe/Istanbul"
+                tz: "UTC","CET","Europe/Istanbul"
         """
         super()._inTimezone(tz)
         return self
-    def inAbsoluteDateRange(self, start, end):
+    def inAbsoluteDateRange(self, start: str, end: str) -> _ActualQuery:
         """ Gets the Actual Query in an absolute date range window. 
             The Absolute Date Range is in ISO8601 format.
         
             Args:
-                start, end: ("2021-12-01", "2021-12-31")
+                start: the date start of the range of extracted timeserie, in ISO format. (ex. "2022-01-01")
+                end:  the EXCLUSIVE date end of the range of extracted timeserie, in ISO format. (ex. "2022-01-01")
+               
         """
         super()._inAbsoluteDateRange(start, end)
         return self
-    def inRelativePeriodRange(self, pStart, pEnd):
+    def inRelativePeriodRange(self, pStart: str, pEnd: str) -> _ActualQuery:
         """ Gets the Actual Query in a relative period range time window.
         
             Args:
-                pStart, pEnd: ("P-3D", "P10D")"""
+                pStart: the relative period start of the range of extracted timeseries. (ex. "P--3D")
+                pEnd: the relative period end of the range of the extracted timeseries. (ex. "P10D") 
+        """
 
         super()._inRelativePeriodRange(pStart, pEnd)
         return self
-    def inRelativePeriod(self, extractionPeriod: str):
+    def inRelativePeriod(self, extractionPeriod: str) -> _ActualQuery:
         """ Gets the Actual Query in a relative period of a time window.
         
             Args:
-                extractionPeriod: ("P5D")"""
+                extractionPeriod: the relative period of extracted timeseries. (ex. "P5D")
+                
+        """
         super()._inRelativePeriod(extractionPeriod)
         return self
-    def inRelativeInterval(self, relativeInterval: str):
+    def inRelativeInterval(self, relativeInterval: str) -> _ActualQuery:
         """ Gets the Relative Interval considers a specific interval of time window.
         
             Args:
-                relativeInterval: ""RelativeInterval.ROLLING_WEEK"" or "RelativeInterval.ROLLING_MONTH"."""
+                relativeInterval: the relative interval of extracted timeseries. (ex. "RelativeInterval.ROLLING_WEEK" or "RelativeInterval.ROLLING_MONTH") 
+        """
         super()._inRelativeInterval(relativeInterval)
         return self
-    def withTimeTransform(self, tr: str):
-        """Gets the Actual Query in a specific time transform to be queried.
+    def withTimeTransform(self, tr: str) -> _ActualQuery:
+        """ Gets the Actual Query in a specific time transform to be queried.
 
             Args:
-                timetransform:  "Custom", "GASDAY66", "THERMALYEAR" ."""
+                tr: "Custom", "GASDAY66", "THERMALYEAR" .
+        """
         self._queryParameters.transformId = tr
         return self
-    def inGranularity(self, granularity: Granularity):
+    def inGranularity(self, granularity: Granularity) -> _ActualQuery:
         """ Gets the Actual Query in a specific granularity to be queried.
         
             Args:
-                granularity: e.g.: "TenMinute", "FifteenMinute", "Hour", "Year" """
+                granularity: ex.  "TenMinute", "FifteenMinute", "Hour", "Year" 
+        """
         self._queryParameters.granularity = granularity
         return self
-    def withFillNull(self):
+    def withFillNull(self) -> _ActualQuery:
         """ Optional filler strategy for the extraction.
         
             Args: 
-                e.g.: withFillNull() """
-        self._queryParameters.fill = NullFillStategy()
+                ex.  withFillNull() 
+        """
+        self._queryParameters.fill = _NullFillStategy()
         return self
-    def withFillNone(self):
+    def withFillNone(self) -> _ActualQuery:
         """ Optional filler strategy for the extraction.
         
             Args:
-                e.g.: withFillNone() """
-        self._queryParameters.fill = NoFillStategy()
+                ex.  withFillNone() 
+        """
+        self._queryParameters.fill = _NoFillStategy()
         return self
-    def withFillLatestValue(self, period):
+    def withFillLatestValue(self, period: str) -> _ActualQuery:
         """ Optional filler strategy for the extraction.
         
             Args:
-               e.g.:   withFillLatestValue("P5D") """
-        self._queryParameters.fill = FillLatestStategy(period)
+                ex.    withFillLatestValue("P5D") 
+        """
+        self._queryParameters.fill = _FillLatestStategy(period)
         return self
     def withFillCustomValue(self, value:float) -> _ActualQuery:
         """ Optional filler strategy for the extraction.
         
             Args:
-                value: value used to fill the missing timeserie points
+                 ex. 
+                //Timeseries
+                .withFillCustomValue(123)
         """
-        self._queryParameters.fill = FillCustomStategy(value)
+        self._queryParameters.fill = _FillCustomStategy(value)
         return self
-    def execute(self):
+    def execute(self) -> list:
         """ Execute the Query. """
         urls = self.__buildRequest()
         return super()._exec(urls)
-    def executeAsync(self):
+    def executeAsync(self) -> list:
         """ Execute Async Query."""
 
         urls = self.__buildRequest()
@@ -173,27 +187,21 @@ class _ActualQuery(_Query):
             raise Exception("Not supported Granularity")
         return vr
 
-class NullFillStategy:
-    """ Class that sets the Null Filling Strategy."""
+class _NullFillStategy:
     def getUrlParams(self):
         return "fillerK=Null"
 
-class NoFillStategy:
-    """ Class that sets the No Filling Strategy."""
-    
+class _NoFillStategy:
     def getUrlParams(self):
         return "fillerK=NoFill"
 
-class FillLatestStategy:
-    """ Class that sets the Last Filling Strategy."""
-   
+class _FillLatestStategy:  
     def __init__(self, period):
         self.period = period
     def getUrlParams(self):
         return f"fillerK=LatestValidValue&fillerP={self.period}"
 
-class FillCustomStategy:
-    """Class that sets the Custom Filling Strategy."""
+class _FillCustomStategy:
     def __init__(self, val):
         self.val = val
     def getUrlParams(self):
