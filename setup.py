@@ -16,7 +16,9 @@ setuptools.setup(
     py_modules = ['artesian'], 
     install_requires=[
         'requests',
-        'six'
+        'six',
+        'asyncio',
+        'jsons'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

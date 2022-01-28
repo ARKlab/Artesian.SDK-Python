@@ -1,3 +1,4 @@
 requests
 six
-artesian-sdk
+asyncio
+jsons
