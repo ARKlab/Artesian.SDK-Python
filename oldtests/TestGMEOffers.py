@@ -7,10 +7,10 @@ qs = GMEPublicOfferService(cfg)
 
 test1 = qs.createQuery() \
     .forDate("2020-04-01") \
-    .forMarket([Market.MGP]) \
-    .forStatus(Status.ACC) \
-    .forPurpose(Purpose.BID) \
-    .forZone([Zone.NORD]) \
+    .forMarket([Market.Mgp]) \
+    .forStatus(Status.Acc) \
+    .forPurpose(Purpose.Bid) \
+    .forZone([Zone.Nord]) \
     .withPagination(1,10) \
     .execute()
 

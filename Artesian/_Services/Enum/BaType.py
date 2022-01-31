@@ -1,6 +1,6 @@
 from enum import Enum
 class BaType(Enum):
-    NULL = 1
-    NETT = 2
-    NREV = 3
-    REV = 4
+    Null = 1
+    Nett = 2
+    Nrev = 3
+    Rev = 4

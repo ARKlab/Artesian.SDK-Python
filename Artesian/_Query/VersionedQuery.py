@@ -1,9 +1,9 @@
 from Artesian._Query.Query import _Query
 from Artesian._Query.QueryParameters.VersionedQueryParameters import VersionedQueryParameters
 from Artesian._Query.Config.ExtractionRangeConfig import ExtractionRangeConfig
-from Artesian._Query.Config.VersionSelectionType import VersionSelectionType
+from Artesian._Services.Enum.VersionSelectionType import VersionSelectionType
 from Artesian._Configuration.DefaultPartitionStrategy import DefaultPartitionStrategy
-from Artesian._Query.Config.Granularity import Granularity
+from Artesian._Services.Enum.Granularity import Granularity
 import urllib
 class _VersionedQuery(_Query):
     __routePrefix = "vts"

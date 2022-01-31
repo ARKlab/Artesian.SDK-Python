@@ -40,7 +40,7 @@ class TestVersioned(unittest.TestCase):
             .forLastNVersions(1) \
             .inAbsoluteDateRange("2018-01-01","2018-01-02") \
             .inTimeZone("UTC") \
-            .inGranularity(Granularity.HOUR) \
+            .inGranularity(Granularity.Hour) \
             .withFillLatestValue("P5D") \
             .execute()
 
@@ -55,7 +55,7 @@ class TestVersioned(unittest.TestCase):
             .forLastNVersions(1) \
             .inAbsoluteDateRange("2018-01-01","2018-01-02") \
             .inTimeZone("UTC") \
-            .inGranularity(Granularity.HOUR) \
+            .inGranularity(Granularity.Hour) \
             .withFillCustomValue(10) \
             .execute()
 
@@ -69,7 +69,7 @@ class TestVersioned(unittest.TestCase):
             .forMarketData([100000001]) \
             .inAbsoluteDateRange("2018-01-01","2018-01-02") \
             .inTimeZone("UTC") \
-            .inGranularity(Granularity.HOUR) \
+            .inGranularity(Granularity.Hour) \
             .forMostRecent("2018-01-01","2018-01-02") \
             .withFillCustomValue(10) \
             .execute()
@@ -83,7 +83,7 @@ class TestVersioned(unittest.TestCase):
             .forMarketData([100000001]) \
             .inAbsoluteDateRange("2021-09-22","2021-09-23") \
             .inTimeZone("CET") \
-            .inGranularity(Granularity.DAY) \
+            .inGranularity(Granularity.Day) \
             .forMostRecent("2021-09-22T12:30:05","2021-09-23T00:00:00") \
             .withFillCustomValue(10) \
             .execute()
@@ -97,7 +97,7 @@ class TestVersioned(unittest.TestCase):
             .forMarketData([100000001]) \
             .inAbsoluteDateRange("2021-09-22","2021-09-23") \
             .inTimeZone("CET") \
-            .inGranularity(Granularity.DAY) \
+            .inGranularity(Granularity.Day) \
             .forMostRecent("2021-09-22T12:30:05","2021-09-23T00:00:00") \
             .withFillNull() \
             .execute()

@@ -1,4 +1,4 @@
 from enum import Enum
 class Purpose(Enum):
-    BID = 1
-    OFF = 2
+    Bid = 1
+    Off = 2

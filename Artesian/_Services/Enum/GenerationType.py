@@ -1,15 +1,15 @@
 from enum import Enum
 class GenerationType(Enum):
-    UNKNOWN = 1
-    OTHER = 2
-    AUTOGENERATION = 3
-    BIOMASS = 4
-    COAL = 5
-    WIND = 6
-    PV = 7
-    GAS = 8
-    GASOIL = 9
-    THERMAL = 10
-    HYDRO = 11
-    MIXED =12
-    OIL = 13
+    Unknown = 1
+    Other = 2
+    Autogeneration = 3
+    Biomass = 4
+    Coal = 5
+    Wind = 6
+    Pv = 7
+    Gas = 8
+    Gasoil = 9
+    Thermal = 10
+    Hydro = 11
+    Mixed =12
+    Oil = 13

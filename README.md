@@ -31,7 +31,7 @@ data = qs.createActual() \
     .forMarketData([100011484,100011472,100011477,100011490,100011468,100011462,100011453]) \
     .inAbsoluteDateRange("2018-01-01","2018-01-02") \
     .inTimeZone("UTC") \
-    .inGranularity(Granularity.HOUR) \
+    .inGranularity(Granularity.Hour) \
     .execute()
 
 ```
@@ -54,7 +54,7 @@ q = qs.createVersioned() \
     .forMarketData([100042422,100042283,100042285,100042281,100042287,100042291,100042289]) \
     .inAbsoluteDateRange("2018-01-01","2018-01-02") \
     .inTimeZone("UTC") \
-    .inGranularity(Granularity.HOUR)
+    .inGranularity(Granularity.Hour)
 
 
 q.forMUV().execute()
@@ -157,7 +157,7 @@ Date Range
 ```
 Relative Interval
 ```Python
- .inRelativeInterval(RelativeInterval.ROLLING_WEEK)
+ .inRelativeInterval(RelativeInterval.RollingWeek)
 ```
 Period
 ```Python

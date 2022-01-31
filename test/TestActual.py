@@ -13,7 +13,7 @@ class TestActual(unittest.TestCase):
             .forFilterId(1003) \
             .inAbsoluteDateRange("2018-01-01","2018-01-02") \
             .inTimeZone("UTC") \
-            .inGranularity(Granularity.HOUR) \
+            .inGranularity(Granularity.Hour) \
             .withFillNull() \
             .execute()
             
@@ -25,7 +25,7 @@ class TestActual(unittest.TestCase):
             .forFilterId(1003) \
             .inAbsoluteDateRange("2018-01-01","2018-01-02") \
             .inTimeZone("UTC") \
-            .inGranularity(Granularity.HOUR) \
+            .inGranularity(Granularity.Hour) \
             .withFillNone() \
             .execute()
             
@@ -37,7 +37,7 @@ class TestActual(unittest.TestCase):
             .forFilterId(1003) \
             .inAbsoluteDateRange("2018-01-01","2018-01-02") \
             .inTimeZone("UTC") \
-            .inGranularity(Granularity.HOUR) \
+            .inGranularity(Granularity.Hour) \
             .withFillLatestValue("P5D") \
             .execute()
 
@@ -51,7 +51,7 @@ class TestActual(unittest.TestCase):
             .forFilterId(1003) \
             .inAbsoluteDateRange("2018-01-01","2018-01-02") \
             .inTimeZone("UTC") \
-            .inGranularity(Granularity.HOUR) \
+            .inGranularity(Granularity.Hour) \
             .withFillCustomValue(10) \
             .execute()
 

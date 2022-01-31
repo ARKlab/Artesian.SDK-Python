@@ -39,7 +39,7 @@ testSplit = qs.createActual() \
                     100011472,100011562,100029035,100029048,100032778,100011484,100011497,100011507,100011574,100029034,100029047,100032777]) \
     .inAbsoluteDateRange("2018-01-01","2018-01-02") \
     .inTimeZone("UTC") \
-    .inGranularity(Granularity.DAY) \
+    .inGranularity(Granularity.Day) \
     .execute()
 print(testSplit[1])
 
@@ -47,7 +47,7 @@ print(testSplit[1])
 testTT = qs.createActual() \
     .forMarketData([100011484,100011472,100011477,100011490,100011468,100011462,100011453]) \
     .inAbsoluteDateRange("2018-01-01","2018-01-02") \
-    .inGranularity(Granularity.DAY) \
+    .inGranularity(Granularity.Day) \
     .withTimeTransform(1) \
     .execute()
 print(testTT[1])
@@ -56,6 +56,6 @@ testF = qs.createActual() \
     .forFilterId(1001) \
     .inAbsoluteDateRange("2018-01-01","2018-01-02") \
     .inTimeZone("UTC") \
-    .inGranularity(Granularity.HOUR) \
+    .inGranularity(Granularity.Hour) \
     .execute()
 print(testF[1])

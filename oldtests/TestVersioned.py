@@ -9,7 +9,7 @@ test1 = qs.createVersioned() \
     .forMarketData([100011126]) \
     .inAbsoluteDateRange("2018-01-01","2018-01-02") \
     .inTimeZone("UTC") \
-    .inGranularity(Granularity.HOUR)
+    .inGranularity(Granularity.Hour)
 
 
 res= test1.forMUV().execute()
