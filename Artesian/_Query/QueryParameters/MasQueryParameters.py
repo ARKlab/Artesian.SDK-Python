@@ -19,7 +19,7 @@ class MasQueryParameters(_QueryParameters):
                        extractionRangeType: ExtractionRangeType, 
                        timezone: str, 
                        filterId: int, 
-                       products: str) -> _QueryParameters:
+                       products: list[str]) -> _QueryParameters:
         """ 
             Inits ActualQueryParameters 
         

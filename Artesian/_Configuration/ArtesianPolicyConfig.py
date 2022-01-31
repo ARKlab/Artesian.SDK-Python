@@ -2,7 +2,7 @@ class ArtesianPolicyConfig:
     """ 
          Artesian Policy Configuration
 
-         The class for the configuration to the connection with Artesian where are specified the retry, the waiting time and the parallelism as parameters.
+         Class for the configuration to the connection with Artesian where are specified the retry, the waiting time and the parallelism as parameters.
 
          Attributes:
              maxRetry: An int indicating the number of retries.

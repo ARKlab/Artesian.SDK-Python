@@ -71,7 +71,7 @@ class _GMEPOfferQuery:
             Set the date to be queried.
 
             Args:
-                date: string for the date, in (ISO) format, for the GME Public Offer to be queried.
+                date: string for the date in (ISO format) for the GME Public Offer to be queried.
 
             Returns:
                 GMEPublicOfferQuery.

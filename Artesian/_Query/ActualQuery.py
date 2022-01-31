@@ -39,7 +39,7 @@ class _ActualQuery(_Query):
             Sets the list of filtered marketdata id to be queried
             
             Args:
-                filterId: marketdata filtered by id
+                filterId: marketdata filtered by id to be queried.
 
             Returns: 
                 ActualQuery.

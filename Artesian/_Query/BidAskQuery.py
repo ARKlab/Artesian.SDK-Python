@@ -2,7 +2,6 @@ from Artesian._Query.Config.RelativeInterval import RelativeInterval
 from Artesian._Query.Query import _Query
 from Artesian._Query.QueryParameters.BidAskQueryParameters import BidAskQueryParameters
 from Artesian._Query.Config.ExtractionRangeConfig import ExtractionRangeConfig
-from Artesian._Query.Config.Granularity import Granularity
 from Artesian._Configuration.DefaultPartitionStrategy import DefaultPartitionStrategy
 from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
 from Artesian._ClientsExecutor.Client import _Client
