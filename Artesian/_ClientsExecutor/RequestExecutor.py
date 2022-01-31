@@ -7,7 +7,6 @@ import sys
 import time
 import traceback
 
-
 # sys.maxint / 2, since Python 3.2 doesn't have a sys.maxint...
 MAX_WAIT = 1073741823
 
@@ -132,10 +131,8 @@ class Retrying(object):
         return delay_since_first_attempt_ms >= self._stop_max_delay
 
     @staticmethod
-   
     def no_sleep(previous_attempt_number, delay_since_first_attempt_ms):
-        """Don't sleep at all before retrying."""
-        
+        """Don't sleep at all before retrying."""     
         return 0
 
     def fixed_sleep(self, previous_attempt_number, delay_since_first_attempt_ms):
@@ -173,9 +170,6 @@ class Retrying(object):
 
     @staticmethod
     def always_reject(result):
-        # TO DO ????
-
-
         return True
 
     def should_reject(self, attempt):
@@ -188,13 +182,11 @@ class Retrying(object):
         return reject
 
     async def call(self, fn, *args, **kwargs):
-        #??
         start_time = int(round(time.time() * 1000))
         attempt_number = 1
         while True:
             if self._before_attempts:
                 self._before_attempts(attempt_number)
-
             try:
                 res = await fn(*args, **kwargs)
                 attempt = Attempt(res, attempt_number, False)

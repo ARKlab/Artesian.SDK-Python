@@ -5,7 +5,8 @@ class VersionSelectionConfig:
         Attributes:
             lastN: last N for version selection.
             version: for the selection
-            versionRange: based on the version range selection configuration."""
+            versionRange: based on the version range selection configuration.
+    """
             
     def __init__(self):
         """ Inits for the Version Selection Configuration. """

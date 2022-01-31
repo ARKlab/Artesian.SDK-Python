@@ -1,7 +1,6 @@
-
 from types import GeneratorType
-from Artesian import _ClientsExecutor
-from Artesian._ClientsExecutor import RequestExecutor
+from Artesian import _Client
+from Artesian._ClientsExecutor import _RequestExecutor
 from Artesian._GMEPublicOffers.QueryParameters.GMEPOfferQueryParameters import GMEPOfferQueryParameters
 from Artesian._GMEPublicOffers.Config.ExtractionRangeConfig import ExtractionRangeConfig
 from Artesian._Configuration.DefaultPartitionStrategy import DefaultPartitionStrategy
@@ -15,23 +14,15 @@ from Artesian._GMEPublicOffers.Config.Zone import Zone
 from Artesian._GMEPublicOffers.Config.BaType import BaType
 
 import asyncio
-import itertools
 import urllib
 from __future__ import annotations
 
 class _GMEPOfferQuery:
     __routePrefix = "extract"
-    def __init__(self, client: _ClientsExecutor , requestExecutor: RequestExecutor, partitionStrategy: DefaultPartitionStrategy) -> None: 
-        """ Inits _GME Public Offer Query
-        
-        Args:
-                client
-                
-                requestExecutor
-                
-                partitionStrategy. 
-
-        """
+    def __init__(self, client: _Client , 
+                       requestExecutor: _RequestExecutor, 
+                       partitionStrategy: DefaultPartitionStrategy) -> None: 
+        """ Inits _GME Public Offer Query """
 
         queryParameters = GMEPOfferQueryParameters(None,ExtractionRangeConfig(), None, None, None, None, None, None, None, None, None, None, None )
         self._queryParameters = queryParameters
@@ -40,102 +31,167 @@ class _GMEPOfferQuery:
         self.__partition= partitionStrategy
 
     def forScope(self, scope: Scope) -> _GMEPOfferQuery:
-        """ Set the scopes to be queried.
-        
+        """ 
+            Set the scopes to be queried.
+
+            Args:
+                scope: Enum for the GME Public Offer scope to be queried.
+
             Returns:
-                GMEPublicOfferQuery."""
+                GMEPublicOfferQuery.
+        """
         self._queryParameters.scope = scope 
         return self
     def forStatus(self, status: Status) -> _GMEPOfferQuery:
-        """ Set the status to be queried.
-        
+        """ 
+            Set the status to be queried.
+
+            Args:
+                status: Enum for the GME Public Offer status to be queried.
+
             Returns:
-                GMEPublicOfferQuery."""
+                GMEPublicOfferQuery.
+        """
         self._queryParameters.status = status
         return self
     def forUnitType(self, unitType: UnitType) -> _GMEPOfferQuery:
-        """ Set the unit types to be queried.
-        
+        """ 
+            Set the unit types to be queried.
+
+            Args: 
+                unitType: Enum for the GME Public Offer Unit Type to be queried.
+
             Returns:
-                GMEPublicOfferQuery."""
+                GMEPublicOfferQuery.
+        """
         self._queryParameters.unitType = unitType
         return self
     def forDate(self, date: str) -> _GMEPOfferQuery:
-        """ Set the date to be queried.
-        
+        """ 
+            Set the date to be queried.
+
+            Args:
+                date: string for the date, in (ISO) format, for the GME Public Offer to be queried.
+
             Returns:
-                GMEPublicOfferQuery."""
+                GMEPublicOfferQuery.
+        """
         self._queryParameters.extractionRangeSelectionConfig.date = date
         return self
-    def forUnit(self, unit: int) -> _GMEPOfferQuery:
-        """ Set the units to be queried.
+    def forUnit(self, unit: str) -> _GMEPOfferQuery:
+        """ 
+            Set the units to be queried.
             
+            Args:
+                unit: string fot the GME Public Offer unit to be queried. 
+
             Returns:
-                GMEPublicOfferQuery."""
+                GMEPublicOfferQuery.
+        """
         self._queryParameters.unit = unit
         return self
     def forOperator(self, operator: str) -> _GMEPOfferQuery:
-        """ Set the operators to be queried.
+        """ 
+            Set the operators to be queried.
             
+            Args:
+                operator: string for the GME Public Offer operator to be queried.
+
             Returns:
-                GMEPublicOfferQuery."""
+                GMEPublicOfferQuery.
+        """
         self._queryParameters.operator = operator
         return self
     def forZone(self, zone: Zone) -> _GMEPOfferQuery:
-        """ Set the zones to be queried.
-        
+        """ 
+            Set the zones to be queried.
+
+            Args:
+                zone: Enum for the GME Public Offer zone to be queried.
+
             Returns:
-                GMEPublicOfferQuery."""
+                GMEPublicOfferQuery.
+        """
         self._queryParameters.zone = zone
         return self
     def forMarket(self, market: Market) -> _GMEPOfferQuery:
-        """ Set the markets to be queried.
-        
+        """ 
+            Set the markets to be queried.
+
+            Args:
+                market: Enum for the GME Public Offer market to be queried.
+
             Returns:
-                GMEPublicOfferQuery."""
+                GMEPublicOfferQuery.
+        """
         self._queryParameters.market = market
         return self
     def forPurpose(self, purpose: Purpose) -> _GMEPOfferQuery:
-        """ Set the Purpose to be queried.
-        
+        """ 
+            Set the Purpose to be queried.
+
+            Args:
+                purpose: Enum for the GME Public Offer purpose to be queried.
+
             Returns:
-                GMEPublicOfferQuery."""
+                GMEPublicOfferQuery.
+        """
         self._queryParameters.purpose = purpose
         return self
     def forBAType(self, baType: BaType) -> _GMEPOfferQuery:
-        """ Set the BATypes to be queried.
-        
+        """ 
+            Set the BATypes to be queried.
+
+            Args:
+                baType: Enum for the GME Public Offer baType to be queried.
+
             Returns:
-                GMEPublicOfferQuery."""
+                GMEPublicOfferQuery.
+        """
         self._queryParameters.baType = baType
         return self
     def forGenerationType(self, generationType: GeneratorType) -> _GMEPOfferQuery:
-        """ Set the generation types to be queried.
-        
+        """ 
+            Set the generation types to be queried.
+
+            Args:
+                generationType: Enum for the GME Public Offer generation type to be queried.
+
             Returns:
-                GMEPublicOfferQuery."""
+                GMEPublicOfferQuery.
+        """
         self._queryParameters.baType = generationType
         return self
     def withPagination(self, pagenumber: int, pagesize: int) -> _GMEPOfferQuery:
-        """ Set the request pagination.
-        
+        """ 
+            Set the request pagination.
+
+            Args:
+                pagenumber: int for the GME Public Offer pagenumber to be queried. The pagenumber is (1-based).
+                pagesize: int for the GME Public Offer pagesize to be queried.
+
             Returns:
-                GMEPublicOfferQuery."""
+                GMEPublicOfferQuery.
+        """
         self._queryParameters.page = pagenumber
         self._queryParameters.pageSize = pagesize
         return self
     def execute(self) -> _GMEPOfferQuery:
-        """ Execute GME Public Offer Query.
+        """ 
+            Execute GME Public Offer Query.
         
             Returns:
-                GMEPublicOfferQuery."""
+                GMEPublicOfferQuery.
+        """
         url = self.__buildRequest()
         return self._exec(url)
     def executeAsync(self) -> _GMEPOfferQuery:
-        """ Execute GME Public Offer Query.
+        """ 
+            Execute GME Public Offer Query.
         
             Returns:
-                Enumerable of TimeSerieRow Actual."""
+                Enumerable of TimeSerieRow Actual.
+        """
         url = self.__buildRequest()
         return self._execAsync(url)
     def __buildRequest(self):

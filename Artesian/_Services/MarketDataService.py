@@ -6,8 +6,12 @@ import asyncio
 import itertools
 
 class MarketDataService:
-    """ A MarketData Entity represents a data curve enriched by its metadata.
-    each entity is composed of some fundamental parameters:
+    """ 
+        A MarketData Entity represents a data curve enriched by its metadata.
+        Each entity is composed of some fundamental parameters:
+
+        Attributes:
+            artesianConfig: The Artesian Configuration.
     """
 
     __queryRoute = "marketdata/entity" 
@@ -15,10 +19,10 @@ class MarketDataService:
     def __init__(self, artesianConfig: ArtesianConfig):
         """ Inits the MarketData Service 
         
-        Using the ArtesianServiceConfig, is possible to create an istance of the MarketDataService which is used to retrieve and edit MarketData references.
+            Using the ArtesianServiceConfig, is possible to create an istance of the MarketDataService which is used to retrieve and edit MarketData references.
 
             Args:
-                Artesian Config.
+                artesianConfiguration: The Artesian Configuration.
 
 
         """

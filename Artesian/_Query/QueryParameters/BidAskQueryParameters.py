@@ -2,30 +2,36 @@ from Artesian._GMEPublicOffers.Config.ExtractionRangeConfig import ExtractionRan
 from Artesian._Query.Config.ExtractionRangeType import ExtractionRangeType
 from Artesian._Query.QueryParameters.QueryParameters import _QueryParameters
 class BidAskQueryParameters(_QueryParameters): 
-    """Class for the Bid Ask Query Parameters.
+    """  
+         Class for the Bid Ask Query Parameters.
         
-        Attributes:
-            ids: sets list of marketdata ID's to be queried
-            extractionRangeSelectionConfig: Sets the extraction range configuration.
-            extraxtionRangeType: Sets the extraction range type.
-            timezone:specifies the timezone of extracted marketdata.
-            filterId: filters marketdata ID to be queries.
-            products: sets products to be queried.
+         Attributes:
+             ids: sets list of marketdata ID's to be queried
+             extractionRangeSelectionConfig: Sets the extraction range configuration.
+             extraxtionRangeType: Sets the extraction range type.
+             timezone:specifies the timezone of extracted marketdata.
+             filterId: filters marketdata ID to be queries.
+             products: sets products to be queried.
 
-        Returns:
-            Query Type."""
+    """
 
-    def __init__(self, ids: int, extractionRangeSelectionConfig: ExtractionRangeConfig, extractionRangeType: ExtractionRangeType, timezone: str, filterId: int, products: str) -> _QueryParameters:
-        """ Inits ActualQueryParameters 
+    def __init__(self, ids: int, 
+                       extractionRangeSelectionConfig: ExtractionRangeConfig, 
+                       extractionRangeType: ExtractionRangeType, 
+                       timezone: str, 
+                       filterId: int, 
+                       products: str) -> _QueryParameters:
+        """ 
+            Inits ActualQueryParameters 
         
-        Args:
+            Args:
 
-            ids: An int that sets list of marketdata ID's to be queried
-            extractionRangeSelectionConfig: Sets the extraction range configuration.
-            extraxtionRangeType: Sets the extraction range type.
-            timezone: IANA Format. A string specifies the timezone of extracted marketdata.
-            filterId: An int that filters marketdata ID to be queries.
-            products: A string that sets products to be queried.
+                ids: An int that sets list of marketdata ID's to be queried
+                extractionRangeSelectionConfig: Sets the extraction range configuration.
+                extraxtionRangeType: Sets the extraction range type.
+                timezone: IANA Format. A string specifies the timezone of extracted marketdata.
+                filterId: An int that filters marketdata ID to be queries.
+                products: A string that sets products to be queried.
         """
 
 

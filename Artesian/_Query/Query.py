@@ -1,5 +1,5 @@
-from Artesian import _ClientsExecutor
-from Artesian._ClientsExecutor import RequestExecutor
+from Artesian import _Client
+from Artesian._ClientsExecutor import _RequestExecutor
 from Artesian._GMEPublicOffers import QueryParameters
 from Artesian._Query.Config.ExtractionRangeType import ExtractionRangeType
 from Artesian._Query.QueryParameters.QueryParameters import _QueryParameters
@@ -10,15 +10,10 @@ from typing import List
 from __future__ import annotations
 
 class _Query:
-    def __init__(self, client: _ClientsExecutor, requestExecutor: RequestExecutor, queryParameters:QueryParameters):
-        """ Inits _Query 
-        
-        Args:
-            client 
-
-            requestExecutor
-
-            queryParameters. """
+    def __init__(self, client: _Client, 
+                       requestExecutor: _RequestExecutor, 
+                       queryParameters: QueryParameters) -> None:
+        """ Inits _Query """
             
         self._queryParameters = queryParameters
         self._client = client
@@ -27,7 +22,10 @@ class _Query:
         """ Set the list of marketdata to be queried.
 
             Args:
-                ids: list of marketdata id's to be queried. E.g.: 100000xxx
+                ids: list of marketdata id's to be queried. Ex.: 100000xxx
+            
+            Returns:
+                Query.
         """
         self._queryParameters.ids = ids
         self._queryParameters.filterId = None
@@ -36,7 +34,11 @@ class _Query:
         """ Sets the list of filtered marketdata id to be queried
             
             Args:
-                filterId: list of marketdata filtered by id"""
+                filterId: marketdata filtered by id
+            
+            Returns:
+                Query.
+        """
         self._queryParameters.filterId = filterId
         self._queryParameters.ids = None
         return self
@@ -45,17 +47,23 @@ class _Query:
 
             Args:
                 tz: "UTC","CET","Europe/Istanbul"
+        
+             Returns:
+                Query.
         """
         self._queryParameters.timezone = tz
         return self
     def _inAbsoluteDateRange(self, start:str, end:str) -> _Query:
         """ Gets the Query in an absolute date range window. 
             The Absolute Date Range is in ISO8601 format.
-            The Range is end exclusive (ex. "2022-01-01"->"2022-01-02" extracts a single day)
+            The Range is end exclusive (ex.: "2022-01-01"->"2022-01-02" extracts a single day)
         
             Args:
-                start: the date start of the range of extracted timeserie, in ISO format. (ex. "2022-01-01")
-                end:  the EXCLUSIVE date end of the range of extracted timeserie, in ISO format. (ex. "2022-01-01")
+                start: string for the date start of the range of extracted timeserie, in ISO format. (ex.: "2022-01-01")
+                end: string for the EXCLUSIVE date end of the range of extracted timeserie, in ISO format. (ex.: "2022-01-01")
+
+            Returns:
+                Query.
         """
         self._queryParameters.extractionRangeType = ExtractionRangeType.DATE_RANGE
         self._queryParameters.extractionRangeSelectionConfig.dateStart = start
@@ -65,8 +73,11 @@ class _Query:
         """ Gets the Query in a relative period range time window.
         
             Args:
-                pStart: the relative period start of the range of extracted timeseries. (ex. "P--3D")
-                pEnd: the relative period end of the range of the extracted timeseries. (ex. "P10D") 
+                pStart: string for the relative period start of the range of extracted timeseries. (ex.: "P-3D")
+                pEnd: string for the relative period end of the range of the extracted timeseries. (ex.: "P10D") 
+
+            Returns:
+                Query.
         """
 
         self._queryParameters.extractionRangeType = ExtractionRangeType.PERIOD_RANGE
@@ -77,16 +88,22 @@ class _Query:
         """ Gets the Query in a relative period of a time window.
         
             Args:
-                extractionPeriod: the relative period of extracted timeseries. (ex. "P5D")
+                extractionPeriod: string for the relative period of extracted timeseries. (ex.: "P5D")
+
+            Returns:
+                Query.
         """
         self._queryParameters.extractionRangeType = ExtractionRangeType.PERIOD
         self._queryParameters.extractionRangeSelectionConfig.period = period
         return self
-    def _inRelativeInterval(self, relativeInterval: str) -> _Query:
+    def _inRelativeInterval(self, relativeInterval: RelativeInterval) -> _Query:
         """ Gets the Relative Interval considers a specific interval of time window.
         
             Args:
-                relativeInterval: the relative interval of extracted timeseries. (ex. "RelativeInterval.ROLLING_WEEK" or "RelativeInterval.ROLLING_MONTH") 
+                relativeInterval: Enum the relative interval of extracted timeseries. (ex.: "RelativeInterval.ROLLING_WEEK" or "RelativeInterval.ROLLING_MONTH") 
+
+            Returns:
+                Query.
         """
         self._queryParameters.extractionRangeType = ExtractionRangeType.RELATIVE_INTERVAL
         self._queryParameters.extractionRangeSelectionConfig.relativeInterval = relativeInterval

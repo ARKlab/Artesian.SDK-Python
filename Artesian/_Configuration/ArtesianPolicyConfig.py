@@ -1,15 +1,13 @@
-from email.policy import default
-
-
 class ArtesianPolicyConfig:
-    """ Artesian Policy Configuration
+    """ 
+         Artesian Policy Configuration
 
-    This class sets up the configuration to the connection with Artesian where are specified the retry, the waiting time and the parallelism as parameters.
+         The class for the configuration to the connection with Artesian where are specified the retry, the waiting time and the parallelism as parameters.
 
-   Attributes:
-            maxRetry: An int indicating the number of retries.
-            retryWaitTime: An int indicating the time in milliseconds to wait fot the backoff.
-            maxParallelism: An int indicating the maximum of executions through the bulkhead.
+         Attributes:
+             maxRetry: An int indicating the number of retries.
+             retryWaitTime: An int indicating the time in milliseconds to wait fot the backoff.
+             maxParallelism: An int indicating the maximum of executions through the bulkhead.
      """
 
 

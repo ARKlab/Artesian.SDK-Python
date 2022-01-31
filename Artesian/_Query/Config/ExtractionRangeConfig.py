@@ -3,14 +3,7 @@ from Artesian._GMEPublicOffers import QueryParameters
 
 class ExtractionRangeConfig:
      """ This class sets up the Extraction Range Configuration. 
-     
-          The DateTime is set in ISO8601 format
-
-           versionFrom:
-             the start version timestamp in ISO8601 (ex. "2022-01-01T00:01:02.123456")
-          downloadedAt:
-             the timestamp of the data in ISO8601 UTC (ex. "2022-01-01T00:01:02.123456Z")
-             
+            
           Attributes:
                dateStart: start day for the Date Range extraction.
                dateEnd: end date for the Date Range extraction.
@@ -18,20 +11,18 @@ class ExtractionRangeConfig:
                periodFrom: period start range for extraction.
                periodTo: period end range for extraction.
                relativeInterval: relative interval range for extraction.
-               """
+     """
      def __init__(self):
-        """ Init for the Extraction Range Configuration. 
-
-        """
+        """ Init for the Extraction Range Configuration. """
         self.dateStart = None
-        """ Start date for the Date Range for extraction. """
+        """ Start date for the Date Range for extraction. (ISO format) """
         self.dateEnd = None
-        """ End date for Date Renge for extraction. """
+        """ End date for Date Renge for extraction. (ISO format)"""
         self.period = None
-        """ Period range for extraction. """
+        """ Period range for extraction. (ISO format)"""
         self.periodFrom = None
-        """ Period start range for extraction. """
+        """ Period start range for extraction. (ISO format)"""
         self.periodTo = None
-        """ Period end range for extraction. """
+        """ Period end range for extraction. (ISO format)"""
         self.relativeInterval = None
-        """ Relative Interval range for extraction. """
+        """ Relative Interval range for extraction. (ISO format)"""
