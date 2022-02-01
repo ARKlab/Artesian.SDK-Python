@@ -4,7 +4,7 @@ import setuptools
 
 here = os.path.abspath(os.path.dirname(__file__))
 meta_info = {}
-with open(os.path.join(here, 'jsons', '_package_info.py'), 'r') as f:
+with open(os.path.join(here, 'Artesian', '_package_info.py'), 'r') as f:
     exec(f.read(), meta_info)
 
 with open("README.md", "r") as fh:
@@ -32,7 +32,7 @@ setuptools.setup(
     python_requires='>=3.8',
     extras_require={
         'test': [
-            'unittest'
+            'responses'
         ]
     },
     test_suite='tests',
