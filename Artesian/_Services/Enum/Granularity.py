@@ -1,5 +1,4 @@
 from enum import Enum
-
 class Granularity(Enum):
     Hour = 0
     Day = 1

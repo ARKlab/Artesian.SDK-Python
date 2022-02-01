@@ -1,5 +1,4 @@
 from enum import Enum
-
 class VersionSelectionType(Enum):
     LastN =  1
     Muv = 2

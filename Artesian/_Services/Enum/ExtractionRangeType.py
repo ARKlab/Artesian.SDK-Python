@@ -1,5 +1,4 @@
 from enum import Enum
-
 class ExtractionRangeType(Enum):
     DateRange = 1
     Period = 2

@@ -1,5 +1,4 @@
 from enum import Enum
-
 class MarketDataType(Enum):
     ActualTimeSerie = 0
     VersionedTimeSerie = 1

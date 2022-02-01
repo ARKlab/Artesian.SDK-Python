@@ -1,5 +1,4 @@
 from enum import Enum
-
 class RelativeInterval(Enum):
     RollingWeek =  1
     RollingMonth = 2
