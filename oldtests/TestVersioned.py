@@ -12,7 +12,7 @@ test1 = qs.createVersioned() \
     .inGranularity(Granularity.Hour)
 
 
-res= test1.forMUV().execute()
+res= test1.forMuv().execute()
 res=test1.forLastNVersions(2).execute()
 res=test1.forLastOfDays("2019-03-12","2019-03-16").execute()
 res=test1.forLastOfDays("P0Y0M-2D","P0Y0M2D").execute()

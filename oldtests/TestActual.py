@@ -9,14 +9,14 @@ test1 = qs.createActual() \
     .forMarketData([100011484,100011472,100011477,100011490,100011468,100011462,100011453]) \
     .inAbsoluteDateRange("2018-01-01","2018-01-02") \
     .inTimeZone("UTC") \
-    .inGranularity(Granularity.HOUR) \
+    .inGranularity(Granularity.Hour) \
     .execute()
 print(test1[1])
 #MonoIds 
 testR = qs.createActual() \
     .forMarketData([100011484]) \
     .inTimeZone("UTC") \
-    .inGranularity(Granularity.HOUR)
+    .inGranularity(Granularity.Hour)
 #RelatiuvePreriodRange
 testPR=testR.inRelativePeriodRange("P0Y0M-1D","P0Y0M1D") \
     .execute()
@@ -26,7 +26,7 @@ testP=testR.inRelativePeriod("P0Y0M-1D") \
     .execute()
 print(testP[1])
 #InRelativeInterval
-testI=testR.inRelativeInterval(RelativeInterval.ROLLING_WEEK) \
+testI=testR.inRelativeInterval(RelativeInterval.RollingWeek) \
     .execute()
 print(testI[1])
 

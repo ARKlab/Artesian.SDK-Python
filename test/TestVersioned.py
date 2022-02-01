@@ -14,7 +14,7 @@ class TestVersioned(unittest.TestCase):
             .forLastNVersions(1) \
             .inAbsoluteDateRange("2018-01-01","2018-01-02") \
             .inTimeZone("UTC") \
-            .inGranularity(Granularity.HOUR) \
+            .inGranularity(Granularity.Hour) \
             .withFillNull() \
             .execute()
             
@@ -27,7 +27,7 @@ class TestVersioned(unittest.TestCase):
             .forLastNVersions(1) \
             .inAbsoluteDateRange("2018-01-01","2018-01-02") \
             .inTimeZone("UTC") \
-            .inGranularity(Granularity.HOUR) \
+            .inGranularity(Granularity.Hour) \
             .withFillNone() \
             .execute()
             

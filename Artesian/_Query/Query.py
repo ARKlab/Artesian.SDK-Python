@@ -20,21 +20,21 @@ class _Query:
         self._queryParameters.timezone = tz
         return self
     def _inAbsoluteDateRange(self, start, end):
-        self._queryParameters.extractionRangeType = ExtractionRangeType.DATE_RANGE
+        self._queryParameters.extractionRangeType = ExtractionRangeType.DateRange
         self._queryParameters.extractionRangeSelectionConfig.dateStart = start
         self._queryParameters.extractionRangeSelectionConfig.dateEnd = end
         return self
     def _inRelativePeriodRange(self, pstart, pend):
-        self._queryParameters.extractionRangeType = ExtractionRangeType.PERIOD_RANGE
+        self._queryParameters.extractionRangeType = ExtractionRangeType.PeriodRange
         self._queryParameters.extractionRangeSelectionConfig.periodFrom = pstart
         self._queryParameters.extractionRangeSelectionConfig.periodTo = pend
         return self
     def _inRelativePeriod(self, period):
-        self._queryParameters.extractionRangeType = ExtractionRangeType.PERIOD
+        self._queryParameters.extractionRangeType = ExtractionRangeType.Period
         self._queryParameters.extractionRangeSelectionConfig.period = period
         return self
     def _inRelativeInterval(self, relativeInterval):
-        self._queryParameters.extractionRangeType = ExtractionRangeType.RELATIVE_INTERVAL
+        self._queryParameters.extractionRangeType = ExtractionRangeType.RelativeInterval
         self._queryParameters.extractionRangeSelectionConfig.relativeInterval = relativeInterval
         return self
     def _buildExtractionRangeRoute(self, queryParamaters):
@@ -43,10 +43,10 @@ class _Query:
             rela = self.__getRelativeInterval(queryParamaters.extractionRangeSelectionConfig.relativeInterval)
         
         switcher = {
-            ExtractionRangeType.DATE_RANGE: f"{self.__toUrlParam(queryParamaters.extractionRangeSelectionConfig.dateStart, queryParamaters.extractionRangeSelectionConfig.dateEnd)}",
-            ExtractionRangeType.PERIOD: f"{queryParamaters.extractionRangeSelectionConfig.period}",
-            ExtractionRangeType.PERIOD_RANGE: f"{queryParamaters.extractionRangeSelectionConfig.periodFrom}/{queryParamaters.extractionRangeSelectionConfig.periodTo}",
-            ExtractionRangeType.RELATIVE_INTERVAL: f"{rela}"
+            ExtractionRangeType.DateRange: f"{self.__toUrlParam(queryParamaters.extractionRangeSelectionConfig.dateStart, queryParamaters.extractionRangeSelectionConfig.dateEnd)}",
+            ExtractionRangeType.Period: f"{queryParamaters.extractionRangeSelectionConfig.period}",
+            ExtractionRangeType.PeriodRange: f"{queryParamaters.extractionRangeSelectionConfig.periodFrom}/{queryParamaters.extractionRangeSelectionConfig.periodTo}",
+            ExtractionRangeType.RelativeInterval: f"{rela}"
         }
         subPath = switcher.get(queryParamaters.extractionRangeType, "ExtractionRangeType")
         if subPath == "ExtractionRangeType" or subPath is None :
@@ -69,14 +69,14 @@ class _Query:
             raise Exception("Marketadata ids OR filterId must be provided for extraction. Use .ForMarketData() OR .ForFilterId() and provide an integer or integer array as an argument")
     def __getRelativeInterval(self,interval):
         switcher = {
-            RelativeInterval.ROLLING_WEEK : "RollingWeek",
-            RelativeInterval.ROLLING_YEAR : "RollingYear",
-            RelativeInterval.WEEK_TO_DATE : "WeekToDate",
-            RelativeInterval.MONTH_TO_DATE : "MonthToDate",
-            RelativeInterval.QUARTER_TO_DATE : "QuarterToDate",
-            RelativeInterval.ROLLING_MONTH : "RollingMonth",
-            RelativeInterval.ROLLING_QUARTER : "RollingQuarter",
-            RelativeInterval.YEAR_TO_DATE : "YearToDate"
+            RelativeInterval.RollingWeek : "RollingWeek",
+            RelativeInterval.RollingYear : "RollingYear",
+            RelativeInterval.WeekToDate : "WeekToDate",
+            RelativeInterval.MonthToDate : "MonthToDate",
+            RelativeInterval.QuarterToDate : "QuarterToDate",
+            RelativeInterval.RollingMonth : "RollingMonth",
+            RelativeInterval.RollingQuarter : "RollingQuarter",
+            RelativeInterval.YearToDate : "YearToDate"
 
         }
         subPath = switcher.get(interval, "RelativeInterval")

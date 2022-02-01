@@ -57,7 +57,7 @@ q = qs.createVersioned() \
     .inGranularity(Granularity.Hour)
 
 
-q.forMUV().execute()
+q.forMuv().execute()
 q.forLastNVersions(2).execute()
 q.forLastOfDays("2019-03-12","2019-03-16").execute()
 q.forLastOfDays("P0Y0M-2D","P0Y0M2D").execute()

@@ -4,8 +4,9 @@ from Enum import MarketDataType
 from Enum import AggregationRule
 from Enum import Granularity
 
-
 class MarketDataEntityInput:
+    """ Class for the Market Data Entity Input. """
+    
     providerName: str
     marketDataName: str
     originalGranularity: Granularity

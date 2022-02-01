@@ -1,4 +1,3 @@
-import math
 import copy
 class DefaultPartitionStrategy:
     maxNumberOfIds = 15

@@ -40,10 +40,10 @@ class _VersionedQuery(_Query):
         self._queryParameters.granularity = granularity
         return self
     def forMUV(self):
-        self._queryParameters.versionSelectionType = VersionSelectionType.MUV
+        self._queryParameters.versionSelectionType = VersionSelectionType.Muv
         return self
     def forLastOfDays(self, start, end=None):
-        self._queryParameters.versionSelectionType = VersionSelectionType.LAST_OF_DAYS      
+        self._queryParameters.versionSelectionType = VersionSelectionType.LastOfDays      
         if(start.startswith("P")):
             if(end is None):
                 self._queryParameters.versionSelectionConfig.versionsRange.period = start
@@ -55,7 +55,7 @@ class _VersionedQuery(_Query):
             self._queryParameters.versionSelectionConfig.versionsRange.dateEnd = end
         return self
     def forLastOfMonths(self, start, end=None):
-        self._queryParameters.versionSelectionType = VersionSelectionType.LAST_OF_MONTHS
+        self._queryParameters.versionSelectionType = VersionSelectionType.LastOfMonths
         if(start.startswith("P")):
             if(end is None):
                 self._queryParameters.versionSelectionConfig.versionsRange.period = start
@@ -67,15 +67,15 @@ class _VersionedQuery(_Query):
             self._queryParameters.versionSelectionConfig.versionsRange.dateEnd = end
         return self
     def forLastNVersions(self, lastN):
-        self._queryParameters.versionSelectionType = VersionSelectionType.LASTN
+        self._queryParameters.versionSelectionType = VersionSelectionType.LastN
         self._queryParameters.versionSelectionConfig.lastN = lastN
         return self
     def forVersion(self, version):
-        self._queryParameters.versionSelectionType = VersionSelectionType.VERSION
+        self._queryParameters.versionSelectionType = VersionSelectionType.Version
         self._queryParameters.versionSelectionConfig.version = version
         return self
     def forMostRecent(self, start, end=None):
-        self._queryParameters.versionSelectionType = VersionSelectionType.MOST_RECENT
+        self._queryParameters.versionSelectionType = VersionSelectionType.MostRecent
         if(start.startswith("P")):
             if(end is None):
                 self._queryParameters.versionSelectionConfig.versionsRange.period = start
@@ -133,12 +133,12 @@ class _VersionedQuery(_Query):
             raise Exception("Version selection must be provided. Provide a version to query. eg .ForLastOfDays() arguments take a date range , period or period range")
     def __buildVersionRoute(self):
         switcher = {
-            VersionSelectionType.LASTN: f"Last{self._queryParameters.versionSelectionConfig.lastN}",
-            VersionSelectionType.MUV: f"MUV",
-            VersionSelectionType.LAST_OF_DAYS: f"LastOfDays/" + self.__buildVersionRange(),
-            VersionSelectionType.LAST_OF_MONTHS: f"LastOfMonths/" + self.__buildVersionRange(),
-            VersionSelectionType.MOST_RECENT: f"MostRecent/" + self.__buildVersionRange(),
-            VersionSelectionType.VERSION: f"Version/{self._queryParameters.versionSelectionConfig.version}"
+            VersionSelectionType.LastN: f"Last{self._queryParameters.versionSelectionConfig.lastN}",
+            VersionSelectionType.Muv: f"Muv",
+            VersionSelectionType.LastOfDays: f"LastOfDays/" + self.__buildVersionRange(),
+            VersionSelectionType.LLastOfMonths: f"LastOfMonths/" + self.__buildVersionRange(),
+            VersionSelectionType.MostRecent: f"MostRecent/" + self.__buildVersionRange(),
+            VersionSelectionType.Version: f"Version/{self._queryParameters.versionSelectionConfig.version}"
         }
         vr = switcher.get(self._queryParameters.versionSelectionType, "VType")
         if vr == "VType" :
@@ -155,16 +155,16 @@ class _VersionedQuery(_Query):
         return vr
     def __getGranularityPath(self,granularity):
         switcher = {
-            Granularity.DAY: "Day",
-            Granularity.FIFTEEN_MINUTE: "FifteenMinute",
-            Granularity.HOUR: "Hour" ,
-            Granularity.MINUTE: "Minute",
-            Granularity.MONTH: "Month",
-            Granularity.QUARTER: "Quarter",
-            Granularity.TEN_MINUTE: "TenMinute",
-            Granularity.THIRTY_MINUTE: "ThirtyMinute",
-            Granularity.WEEK: "Week",
-            Granularity.YEAR: "Year",
+            Granularity.Day: "Day",
+            Granularity.FifteenMinute: "FifteenMinute",
+            Granularity.Hour: "Hour" ,
+            Granularity.Minute: "Minute",
+            Granularity.Month: "Month",
+            Granularity.Quarter: "Quarter",
+            Granularity.TenMinute: "TenMinute",
+            Granularity.ThirtyMinute: "ThirtyMinute",
+            Granularity.Week: "Week",
+            Granularity.Year: "Year",
         }
         vr = switcher.get(granularity, "VGran")
         if vr == "VGran" :

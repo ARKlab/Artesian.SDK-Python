@@ -83,16 +83,16 @@ class _ActualQuery(_Query):
                 raise Exception("Extraction granularity must be provided. Use .InGranularity() argument takes a granularity type")
     def __getGranularityPath(self,granularity):
         switcher = {
-            Granularity.DAY: "Day",
-            Granularity.FIFTEEN_MINUTE: "FifteenMinute",
-            Granularity.HOUR: "Hour" ,
-            Granularity.MINUTE: "Minute",
-            Granularity.MONTH: "Month",
-            Granularity.QUARTER: "Quarter",
-            Granularity.TEN_MINUTE: "TenMinute",
-            Granularity.THIRTY_MINUTE: "ThirtyMinute",
-            Granularity.WEEK: "Week",
-            Granularity.YEAR: "Year",
+            Granularity.Day: "Day",
+            Granularity.FifteenMinute: "FifteenMinute",
+            Granularity.Hour: "Hour" ,
+            Granularity.Minute: "Minute",
+            Granularity.Month: "Month",
+            Granularity.Quarter: "Quarter",
+            Granularity.TenMinute: "TenMinute",
+            Granularity.ThirtyMinute: "ThirtyMinute",
+            Granularity.Week: "Week",
+            Granularity.Year: "Year",
         }
         vr = switcher.get(granularity, "VGran")
         if vr == "VGran" :
