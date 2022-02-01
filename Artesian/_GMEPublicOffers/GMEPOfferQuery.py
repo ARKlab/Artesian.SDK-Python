@@ -251,7 +251,7 @@ class _GMEPOfferQuery:
     async def _execAsync(self, url):
         with self.__client as c:
             res = await asyncio.gather(*[self.__executor.exec(c.exec, 'GET', url, None)])
-            return res[0].json()
+            return res[0]
     def __toUrlParam(self, date):
         return f"{date}"   
     def _validateQuery(self):

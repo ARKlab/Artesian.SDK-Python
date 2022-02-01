@@ -59,7 +59,7 @@ class _Query:
     async def _execAsync(self, urls):
             with self._client as c:
                 res = await asyncio.gather(*[self._requestExecutor.exec(c.exec, 'GET', i, None) for i in urls])
-                return list(itertools.chain(*map(lambda r: r.json(),res)))
+                return list(itertools.chain(res))
     def __toUrlParam(self, start, end):
         return f"{start}/{end}"
     def _validateQuery(self):
