@@ -132,7 +132,7 @@ class _VersionedQuery(_Query):
         """
         self._queryParameters.versionSelectionType = VersionSelectionType.MUV
         return self
-    def forLastOfDays(self, start: str, end=None) -> _VersionedQuery:
+    def forLastOfDays(self, start: str, end: str =None) -> _VersionedQuery:
         """ Gets the lastest version of a versioned timeseries of each day in a time window..
             
             Args:
@@ -154,7 +154,7 @@ class _VersionedQuery(_Query):
             self._queryParameters.versionSelectionConfig.versionsRange.dateStart = start
             self._queryParameters.versionSelectionConfig.versionsRange.dateEnd = end
         return self
-    def forLastOfMonths(self, start: str, end=None) -> _VersionedQuery:
+    def forLastOfMonths(self, start: str, end: str =None) -> _VersionedQuery:
         """ Gets the lastest version of a versioned timeseries of each month in a time window.
             
             Args:

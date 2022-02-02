@@ -29,7 +29,20 @@ class _GMEPOfferQuery:
         self.__client = client
         self.__executor = requestExecutor
         self.__partition= partitionStrategy
+    def withPagination(self, pagenumber: int, pagesize: int) -> _GMEPOfferQuery:
+        """ 
+            Set the request pagination.
 
+            Args:
+                pagenumber: int for the GME Public Offer pagenumber to be queried. The pagenumber is (1-based).
+                pagesize: int for the GME Public Offer pagesize to be queried.
+
+            Returns:
+                GMEPublicOfferQuery.
+        """
+        self._queryParameters.page = pagenumber
+        self._queryParameters.pageSize = pagesize
+        return self
     def forScope(self, scope: Scope) -> _GMEPOfferQuery:
         """ 
             Set the scopes to be queried.
@@ -161,20 +174,6 @@ class _GMEPOfferQuery:
                 GMEPublicOfferQuery.
         """
         self._queryParameters.baType = generationType
-        return self
-    def withPagination(self, pagenumber: int, pagesize: int) -> _GMEPOfferQuery:
-        """ 
-            Set the request pagination.
-
-            Args:
-                pagenumber: int for the GME Public Offer pagenumber to be queried. The pagenumber is (1-based).
-                pagesize: int for the GME Public Offer pagesize to be queried.
-
-            Returns:
-                GMEPublicOfferQuery.
-        """
-        self._queryParameters.page = pagenumber
-        self._queryParameters.pageSize = pagesize
         return self
     def execute(self) -> _GMEPOfferQuery:
         """ 

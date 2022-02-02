@@ -28,7 +28,9 @@ class GMEPOfferQueryParameters:
     """
 
 
-    def __init__(self, scope: Scope, 
+    def __init__(self, page: int, 
+                       pageSize: int,
+                       scope: Scope, 
                        extractionRangeSelectionConfig: ExtractionRangeConfig, 
                        status: Status, 
                        unitType: UnitType, 
@@ -38,8 +40,6 @@ class GMEPOfferQueryParameters:
                        zone: Zone , 
                        market: Market, 
                        purpose: Purpose, 
-                       page: int, 
-                       pageSize: int, 
                        baType: BaType)  -> None : 
         """ 
             Inits the GME Public Offer Query Parameters with optional overrides.
@@ -60,6 +60,8 @@ class GMEPOfferQueryParameters:
                 baType: An enum that sets the BATypes to be queried.
         """
 
+        self.page = page
+        self.pageSize = pageSize
         self.scope = scope
         self.extractionRangeSelectionConfig = extractionRangeSelectionConfig
         self.status = status
@@ -70,7 +72,5 @@ class GMEPOfferQueryParameters:
         self.zone = zone
         self.market = market
         self.purpose = purpose
-        self.page = page
-        self.pageSize = pageSize
         self.baType = baType
          
