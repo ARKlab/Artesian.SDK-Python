@@ -67,7 +67,7 @@ class _VersionedQuery(_Query):
         """
         super()._inAbsoluteDateRange(start, end)
         return self
-    def inRelativePeriodRange(self, pStart: str, pEnd=None) -> _VersionedQuery:
+    def inRelativePeriodRange(self, pStart: str, pEnd: str =None) -> _VersionedQuery:
         """ Gets the Versioned Query in a relative period range time window.
         
             Args:
