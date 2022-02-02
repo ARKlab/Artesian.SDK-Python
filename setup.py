@@ -32,7 +32,7 @@ setuptools.setup(
     python_requires='>=3.8',
     extras_require={
         'test': [
-            'responses'
+            'responses>=0.19'
         ]
     },
     test_suite='tests',
