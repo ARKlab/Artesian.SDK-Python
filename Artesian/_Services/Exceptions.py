@@ -7,7 +7,7 @@ class ArtesianSdkException(Exception):
 
     def __init__(self, message: str) -> None:
         """
-            Constructor.
+            Inits the Artesian Sdk Exception.
 
             Args:
                 message: the message describing the problem.
@@ -22,11 +22,11 @@ class ArtesianSdkException(Exception):
         
 class ArtesianSdkRemoteException(ArtesianSdkException):
     """
-        Raised when the Artesian Service validation of an object failed.
+        Artesian generic remote exception.
     """
     def __init__(self, method: str, url: str, statusCode: int,  problemDetails: dict = None, errorText:str = None) -> None:
         """
-            Constructor.
+            Inits the Artesian Sdk Remote Exception.
 
             Args:
                 method: the HTTP method used
@@ -42,13 +42,13 @@ class ArtesianSdkRemoteException(ArtesianSdkException):
         self._errorText = errorText
 
         if problemDetails is not None:
-            details = problemDetails.get('details', None) or problemDetails.get('title', None) or problemDetails.get('type', None)
+            detail = problemDetails.get('details', None) or problemDetails.get('title', None) or problemDetails.get('type', None)
         else:
-            details = errorText
+            detail = errorText
 
         params = {'method': method, 'url':url, 'statusCode': statusCode }
         message = "Failed REST call to Artesian. {method} {url} returned {statusCode}.".format(**params)
-        if details is not None:
+        if detail is not None:
             message = message + " " + details
         
         ArtesianSdkException.__init__(self, message)
@@ -75,11 +75,11 @@ class ArtesianSdkRemoteException(ArtesianSdkException):
     
 class ArtesianSdkValidationException(ArtesianSdkRemoteException):
     """
-        Raised when the Artesian Service validation of an object failed.
+        Artesian validation exception. Raised when the Artesian Service object fails.
     """
     def __init__(self, method: str, url: str, statusCode: int,  problemDetails: dict = None, errorText:str = None) -> None:
         """
-            Constructor.
+            Inits the Artesian Sdk Validation Exception.
 
             Args:
                 method: the HTTP method used
@@ -92,11 +92,11 @@ class ArtesianSdkValidationException(ArtesianSdkRemoteException):
         
 class ArtesianSdkOptimisticConcurrencyException(ArtesianSdkRemoteException):
     """
-        Raised when the Artesian Service validation of an object failed.
+        Artesian optimistic concurrency exception.
     """
     def __init__(self, method: str, url: str, statusCode: int,  problemDetails: dict = None, errorText:str = None) -> None:
         """
-            Constructor.
+            Inits the Artesian Sdk Optimistic Concurrency Exception.
 
             Args:
                 method: the HTTP method used
@@ -109,11 +109,11 @@ class ArtesianSdkOptimisticConcurrencyException(ArtesianSdkRemoteException):
         
 class ArtesianSdkForbiddenException(ArtesianSdkRemoteException):
     """
-        Raised when the Artesian Service validation of an object failed.
+        Artesian forbidden exception.
     """
     def __init__(self, method: str, url: str, statusCode: int,  problemDetails: dict = None, errorText:str = None) -> None:
         """
-            Constructor.
+            Inits the Artesian Sdk Forbidden Exception.
 
             Args:
                 method: the HTTP method used

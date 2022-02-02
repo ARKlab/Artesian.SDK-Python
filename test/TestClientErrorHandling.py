@@ -36,6 +36,7 @@ class TestClientErrorHandling(unittest.IsolatedAsyncioTestCase):
             (412, ArtesianSdkOptimisticConcurrencyException),
             (401, ArtesianSdkForbiddenException),
             (403, ArtesianSdkForbiddenException),
+            (500, ArtesianSdkRemoteException)
             ]
         for code, excls in cases:
             with self.subTest(str(code) + "=>" + excls.__name__):
@@ -75,6 +76,7 @@ class TestClientErrorHandling(unittest.IsolatedAsyncioTestCase):
             (412, ArtesianSdkOptimisticConcurrencyException),
             (401, ArtesianSdkForbiddenException),
             (403, ArtesianSdkForbiddenException),
+            (500, ArtesianSdkRemoteException)
             ]
         for code, excls in cases:
             with self.subTest(str(code) + "=>" + excls.__name__):

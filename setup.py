@@ -32,7 +32,8 @@ setuptools.setup(
     python_requires='>=3.8',
     extras_require={
         'test': [
-            'responses>=0.19'
+            'responses>=0.17'
+            #ideal will be 0.19 WHEN published
         ]
     },
     test_suite='tests',
