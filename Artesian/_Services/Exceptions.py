@@ -50,7 +50,7 @@ class ArtesianSdkRemoteException(ArtesianSdkException):
         message = "Failed REST call to Artesian. {method} {url} returned {statusCode}.".format(**params)
         if details is not None:
             message = message + " " + details
-
+        
         ArtesianSdkException.__init__(self, message)
 
     @property
@@ -88,7 +88,7 @@ class ArtesianSdkValidationException(ArtesianSdkRemoteException):
                 problemDetails: the returned problemDetails object (if any)
                 errorText: the response as text if problem details is not provided
         """
-        ArtesianSdkRemoteException.__init__(method, url, statusCode, problemDetails, errorText)
+        ArtesianSdkRemoteException.__init__(self, method, url, statusCode, problemDetails, errorText)
         
 class ArtesianSdkOptimisticConcurrencyException(ArtesianSdkRemoteException):
     """
@@ -105,7 +105,7 @@ class ArtesianSdkOptimisticConcurrencyException(ArtesianSdkRemoteException):
                 problemDetails: the returned problemDetails object (if any)
                 errorText: the response as text if problem details is not provided
         """
-        ArtesianSdkRemoteException.__init__(method, url, statusCode, problemDetails, errorText)
+        ArtesianSdkRemoteException.__init__(self, method, url, statusCode, problemDetails, errorText)
         
 class ArtesianSdkForbiddenException(ArtesianSdkRemoteException):
     """
@@ -122,4 +122,4 @@ class ArtesianSdkForbiddenException(ArtesianSdkRemoteException):
                 problemDetails: the returned problemDetails object (if any)
                 errorText: the response as text if problem details is not provided
         """
-        ArtesianSdkRemoteException.__init__(method, url, statusCode, problemDetails, errorText)
+        ArtesianSdkRemoteException.__init__(self, method, url, statusCode, problemDetails, errorText)

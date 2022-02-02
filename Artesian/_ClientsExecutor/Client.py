@@ -23,13 +23,21 @@ class _Client:
         prep = self.__session.prepare_request(r)
         res = self.__session.send(prep)
 
+        mimetype, _ = cgi.parse_header(res.headers['Content-Type'])
+
         if res.status_code >= 200 and res.status_code < 300:
-            return artesianJsonDeserialize(res.json(), retcls)
+            if mimetype == 'application/json':
+                return artesianJsonDeserialize(res.json(), retcls)
+            if mimetype.split('/')[0] == 'text':
+                return res.text
+            return res.content
 
         if res.status_code == 404:
             return None
         
-        mimetype, _ = cgi.parse_header(res.headers['Content-Type'])
+        problemDetails = None
+        errorText = None
+
         if mimetype == 'application/problem+json':
             problemDetails = res.json()
         if mimetype == 'application/json' or mimetype.split('/')[0] == 'text':
