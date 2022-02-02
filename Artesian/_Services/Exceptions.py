@@ -33,7 +33,7 @@ class ArtesianSdkRemoteException(ArtesianSdkException):
                 url: the url of the request
                 statusCode: the response status code
                 problemDetails: the returned problemDetails object (if any)
-                errorText: the response as text if problem details is not provided
+                errorText: the response as text if problem details are not provided
         """
         self._method = method
         self._url = url
@@ -42,14 +42,14 @@ class ArtesianSdkRemoteException(ArtesianSdkException):
         self._errorText = errorText
 
         if problemDetails is not None:
-            detail = problemDetails.get('details', None) or problemDetails.get('title', None) or problemDetails.get('type', None)
+            detail = problemDetails.get('detail', None) or problemDetails.get('title', None) or problemDetails.get('type', None)
         else:
             detail = errorText
 
         params = {'method': method, 'url':url, 'statusCode': statusCode }
         message = "Failed REST call to Artesian. {method} {url} returned {statusCode}.".format(**params)
         if detail is not None:
-            message = message + " " + details
+            message = message + " " + detail
         
         ArtesianSdkException.__init__(self, message)
 
@@ -86,7 +86,7 @@ class ArtesianSdkValidationException(ArtesianSdkRemoteException):
                 url: the url of the request
                 statusCode: the response status code
                 problemDetails: the returned problemDetails object (if any)
-                errorText: the response as text if problem details is not provided
+                errorText: the response as text if problem details are not provided
         """
         ArtesianSdkRemoteException.__init__(self, method, url, statusCode, problemDetails, errorText)
         
@@ -103,7 +103,7 @@ class ArtesianSdkOptimisticConcurrencyException(ArtesianSdkRemoteException):
                 url: the url of the request
                 statusCode: the response status code
                 problemDetails: the returned problemDetails object (if any)
-                errorText: the response as text if problem details is not provided
+                errorText: the response as text if problem details are not provided
         """
         ArtesianSdkRemoteException.__init__(self, method, url, statusCode, problemDetails, errorText)
         
@@ -120,6 +120,6 @@ class ArtesianSdkForbiddenException(ArtesianSdkRemoteException):
                 url: the url of the request
                 statusCode: the response status code
                 problemDetails: the returned problemDetails object (if any)
-                errorText: the response as text if problem details is not provided
+                errorText: the response as text if problem details are not provided
         """
         ArtesianSdkRemoteException.__init__(self, method, url, statusCode, problemDetails, errorText)

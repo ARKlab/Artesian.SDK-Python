@@ -1,9 +1,7 @@
 from Artesian import *
 from Artesian._ClientsExecutor.Client import _Client
-import helpers
 import unittest
 import responses
-import requests
 
 class TestClientErrorHandling(unittest.IsolatedAsyncioTestCase):
 
@@ -41,7 +39,7 @@ class TestClientErrorHandling(unittest.IsolatedAsyncioTestCase):
         for code, excls in cases:
             with self.subTest(str(code) + "=>" + excls.__name__):
                 with responses.RequestsMock() as rsps:
-                    problemDetails = {'type': "TYPE", 'title':"TITLE", 'details':"DETAILS", 'other': { 'more': "data" } }
+                    problemDetails = {'type': "TYPE", 'title':"TITLE", 'detail':"DETAIL", 'other': { 'more': "data" } }
                     rsps.add('GET', 'https://baseurl.com/'+str(code), json=problemDetails, status=code, content_type='application/problem+json')
 
                     with self.assertRaises(excls) as ex:
