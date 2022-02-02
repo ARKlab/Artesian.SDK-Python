@@ -1,5 +1,5 @@
-from Artesian import _Client
 from Artesian._ClientsExecutor import _RequestExecutor
+from Artesian._ClientsExecutor.Client import _Client
 from Artesian._Query.Config.RelativeInterval import RelativeInterval
 from Artesian._Query.Query import _Query
 from Artesian._Query.QueryParameters.MasQueryParameters import MasQueryParameters

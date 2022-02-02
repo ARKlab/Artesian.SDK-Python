@@ -1,5 +1,5 @@
-from Artesian import _Client
 from Artesian._ClientsExecutor import _RequestExecutor
+from Artesian._ClientsExecutor.Client import _Client
 from Artesian._GMEPublicOffers import QueryParameters
 from Artesian._Query.Config.ExtractionRangeType import ExtractionRangeType
 from Artesian._Query.QueryParameters.QueryParameters import _QueryParameters

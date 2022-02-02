@@ -1,6 +1,7 @@
 from types import GeneratorType
-from Artesian import _Client
+
 from Artesian._ClientsExecutor import _RequestExecutor
+from Artesian._ClientsExecutor.Client import _Client
 from Artesian._GMEPublicOffers.QueryParameters.GMEPOfferQueryParameters import GMEPOfferQueryParameters
 from Artesian._GMEPublicOffers.Config.ExtractionRangeConfig import ExtractionRangeConfig
 from Artesian._Configuration.DefaultPartitionStrategy import DefaultPartitionStrategy
