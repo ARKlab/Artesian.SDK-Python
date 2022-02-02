@@ -16,8 +16,6 @@ class QueryService:
     """ 
         QueryService class contains query types to be created.
     
-        Attributes:
-            artesianConfig: The Artesian Configurazion.
     """
     __queryRoute = "query" 
     __queryVersion = "v1.0"

@@ -178,8 +178,7 @@ class _VersionedQuery(_Query):
         """ Gets the lastest N timeseries versions that have at least a not-null value .
             
             Args:
-                lastN: an int > 0. 
-                Ex.: forLastNVersions(2)
+                lastN: an int > 0. Ex.: forLastNVersions(2)
             
             Returns: 
                 VersionedQuery.
@@ -191,8 +190,7 @@ class _VersionedQuery(_Query):
         """ Gets the specified version of a versioned timeseries.
         
             Args:
-                version: int of a specific version. 
-                Ex.: forVersion("2021-03-12T14:30:00")
+                version: int of a specific version. Ex.: forVersion("2021-03-12T14:30:00")
             
             Returns: 
                 VersionedQuery.
@@ -204,10 +202,9 @@ class _VersionedQuery(_Query):
         """ Gets the most recent version of a versioned timeseries in a time window.
         
             Args:
-                start: string for the start of the most recent version.
-                Ex.: (forMostRecent("2021-03-12",...)) 
-                end: string for the end of the most recent version.
-                Ex.: (forMostRecent("2021-03-12","2021-03-16")) 
+                start: string for the start of the most recent version. Ex.: (forMostRecent("2021-03-12",...))
+                
+                end: string for the end of the most recent version. Ex.: (forMostRecent("2021-03-12","2021-03-16")) 
             
             Returns: 
                 VersionedQuery.
@@ -247,8 +244,7 @@ class _VersionedQuery(_Query):
         """ Optional filler strategy for the extraction.
         
             Args:
-                period: string of the last period value to fill in case there are missing values
-                Ex.:   withFillLatestValue("P5D") 
+                period: string of the last period value to fill in case there are missing values. Ex.:   withFillLatestValue("P5D") 
             
             Returns: 
                 VersionedQuery.
@@ -259,8 +255,7 @@ class _VersionedQuery(_Query):
         """ Optional filler strategy for the extraction.
         
             Args:
-               val: float value to fill in case there are missing values. 
-               Ex.: withFillCustomValue(10)
+               val: float value to fill in case there are missing values. Ex.: withFillCustomValue(10)
 
             Returns: 
                 VersionedQuery.

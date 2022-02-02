@@ -62,6 +62,7 @@ class _AuctionQuery(_Query):
         
             Args:
                 start: string for the date start of the range of extracted timeserie, in ISO format. (ex.: "2022-01-01")
+                
                 end:  string for the EXCLUSIVE date end of the range of extracted timeserie, in ISO format. (ex.: "2022-01-01")
 
             Returns:
@@ -75,6 +76,7 @@ class _AuctionQuery(_Query):
         
             Args:
                 pStart: string for the relative period start of the range of extracted timeseries. (ex.: "P-3D")
+                
                 pEnd: string for the relative period end of the range of the extracted timeseries. (ex.: "P10D") 
             
             Returns:

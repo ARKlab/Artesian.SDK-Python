@@ -64,6 +64,7 @@ class _MasQuery(_Query):
         
             Args:
                 start: string for the date start of the range of extracted timeserie, in ISO format. (ex.: "2022-01-01")
+                
                 end: string for the EXCLUSIVE date end of the range of extracted timeserie, in ISO format. (ex.: "2022-01-01")
             
             Returns:
@@ -77,6 +78,7 @@ class _MasQuery(_Query):
         
             Args:
                 pStart: string for the relative period start of the range of extracted timeseries. (ex.: "P-3D")
+                
                 pEnd: string for the relative period end of the range of the extracted timeseries. (ex.: "P10D") 
             
             Returns:
@@ -148,8 +150,7 @@ class _MasQuery(_Query):
             Optional filler strategy for the extraction.
         
             Args:
-                period: string of the last period value to fill in case there are missing values
-                Ex.:   withFillLatestValue("P5D") 
+                period: string of the last period value to fill in case there are missing values. Ex.:   withFillLatestValue("P5D") 
             
             Returns:
                 MasQuery.
@@ -162,15 +163,8 @@ class _MasQuery(_Query):
         
             Args:
                val: float value to fill in case there are missing values. 
-               Ex.: withFillCustomValue(
-                settlement = 1,
-                open = 2,
-                close = 3,
-                high = 4,
-                low = 5,
-                volumePaid = 6,
-                volueGiven = 7,
-                volume = 8)
+                    Ex.: withFillCustomValue(
+                        settlement = 1,open = 2,close = 3,high = 4,low = 5,volumePaid = 6,volueGiven = 7,volume = 8)
 
             Returns:
                 MasQuery.

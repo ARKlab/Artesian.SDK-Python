@@ -63,6 +63,7 @@ class _BidAskQuery(_Query):
         
             Args:
                 start: string for the date start of the range of extracted timeserie, in ISO format. (ex.: "2022-01-01")
+                
                 end: string for the EXCLUSIVE date end of the range of extracted timeserie, in ISO format. (ex.: "2022-01-01")
 
             Results:
@@ -76,6 +77,7 @@ class _BidAskQuery(_Query):
         
             Args:
                 pStart: string for the relative period start of the range of extracted timeseries. (ex.: "P-3D")
+                
                 pEnd: string for the relative period end of the range of the extracted timeseries. (ex.: "P10D") 
             
             Results:
@@ -147,8 +149,7 @@ class _BidAskQuery(_Query):
             Optional filler strategy for the extraction.
         
             Args:
-               period: string of the last period value to fill in case there are missing values 
-               Ex.:  .withFillLatestValue("P5D") 
+               period: string of the last period value to fill in case there are missing values. Ex.:  .withFillLatestValue("P5D") 
                
             Results:
                 BidAskQuery.

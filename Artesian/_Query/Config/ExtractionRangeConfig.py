@@ -25,4 +25,4 @@ class ExtractionRangeConfig:
         self.periodTo = None
         """ Period end range for extraction. (ISO format)"""
         self.relativeInterval = None
-        """ Relative Interval range for extraction. (ISO format)"""
+        """ Relative Interval range for extraction."""
