@@ -8,12 +8,7 @@ from Artesian._Services.Dto.MarketDataEntityInput import MarketDataEntityInput
 from Artesian._Services.Dto.MarketDataEntityOutput import MarketDataEntityOutput
 
 class MarketDataService:
-    """ 
-        Class for the Market Data Service.
-        
-        Attributes:
-            artesianConfig: The Artesian Configuration.
-    """
+    """ Class for the Market Data Service. """
     __version = "v2.1"
     def __init__(self, artesianConfig: ArtesianConfig) -> None:
         """ 
@@ -223,6 +218,12 @@ class MarketDataService:
     # POST /v2.1/marketdata/entity -->> Register a given MarketData entity
     #async def registerMarketDataAsync(self, id: int, marketDataEntityInput: MarketDataEntityInput):
     #REQUEST BODY
+
+    #NON _ ASYNC
+    url = "/marketdata/entity/" 
+        with self.__client as c:
+            res = await asyncio.gather(*[self.__executor.exec(c.exec, 'POST', url, entity, MarketDataEntityOutput)])
+            return res[0]
 
 
 def get_event_loop():
