@@ -2,10 +2,9 @@ from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
 from Artesian._ClientsExecutor.Client import _Client
 from Artesian._Configuration.ArtesianConfig import ArtesianConfig
 from Artesian._Configuration.ArtesianPolicyConfig import ArtesianPolicyConfig
-import asyncio
-
 from Artesian._Services.Dto.MarketDataEntityInput import MarketDataEntityInput
 from Artesian._Services.Dto.MarketDataEntityOutput import MarketDataEntityOutput
+import asyncio
 
 class MarketDataService:
     """ Class for the Market Data Service. """
@@ -135,11 +134,7 @@ class MarketDataService:
             Returns:
                 MarketData Entity Output.
         """
-        url = str(id)
-        url = url
-        loop = get_event_loop()
-        rr = loop.run_until_complete(self.updateMarketDataAsync(id))
-        return rr
+        return asyncio.get_event_loop().run_until_complete(self.updateMarketDataAsync(id))
 
     # 3 ASYNC
     # DELETE /v2.1/marketdata/entity/{id} -->> REMEMBER TO REMOVE
@@ -172,11 +167,7 @@ class MarketDataService:
             Returns:
                 MarketData Entity Output.
         """
-        url = str(id)
-        url = url
-        loop = get_event_loop()
-        rr = loop.run_until_complete(self.deleteMarketDataAsync(id))
-        return rr
+        return asyncio.get_event_loop().run_until_complete(self.deleteMarketDataAsync(id))
     # 4 ASYNC
     # GET /v2.1/marketdata/entity
     # Gets MarketData entity by provider and curveName
@@ -214,17 +205,35 @@ class MarketDataService:
         """
         return asyncio.get_event_loop().run_until_complete(self.readMarketDataRegistryByNameAsync(provider, curveName))
 
-    #5 ASYNC
-    # POST /v2.1/marketdata/entity -->> Register a given MarketData entity
-    #async def registerMarketDataAsync(self, id: int, marketDataEntityInput: MarketDataEntityInput):
-    #REQUEST BODY
+    
+    # POST ASYNC
+    async def postMarketDataAsync(self, entity: MarketDataEntityInput):
+        """
+            Register a new MarketData entity.
 
-    #NON _ ASYNC
-    url = "/marketdata/entity/" 
+            Args:
+                entity: The Market Data Entity Input
+                
+            Returns:
+                MarketData Entity Output (Async).
+        """
+        url = "/marketdata/entity"
         with self.__client as c:
             res = await asyncio.gather(*[self.__executor.exec(c.exec, 'POST', url, entity, MarketDataEntityOutput)])
             return res[0]
 
+    # POST NON-ASYNC
+    def postMarketData(self, entity: MarketDataEntityInput):
+        """
+            Register a new MarketData entity.
+
+            Args:
+                entity: The Market Data Entity Input
+                
+            Returns:
+                MarketData Entity Output.
+        """
+        return asyncio.get_event_loop().run_until_complete(self.postMarketDataAsync(id))
 
 def get_event_loop():
     """
