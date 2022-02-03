@@ -37,14 +37,14 @@ __artesianJsonKwArgs = {
   'fork_inst': __artesianJsonSerializer,
 }
 
-def artesianJsonSerialize(obj: str, cls: type = None, **kwargs: list[str]):
+def artesianJsonSerialize(obj: str, cls: type = None, **kwargs):
   """ 
       Sets the Artesian Json Serializer.
 
       Args:
         obj: string for the object for the serialization
         cls: type for the serialization
-        kwargs: list of strings for the serialization
+        kwargs: override the dump
       
       Returns:
         JsonSerializer.
@@ -52,14 +52,14 @@ def artesianJsonSerialize(obj: str, cls: type = None, **kwargs: list[str]):
   kwargs_ = {**__artesianJsonKwArgs, **kwargs}
   return jsons.dump(obj, cls, key_transformer=jsons.KEY_TRANSFORMER_PASCALCASE, **kwargs_)
 
-def artesianJsonDeserialize(obj: str, cls: type = None, **kwargs: list[str]):
+def artesianJsonDeserialize(obj: str, cls: type = None, **kwargs):
   """ 
       Sets the Artesian Json Deserializer.
 
       Args:
         obj: string for the object for the deserialization
         cls: type for the deserialization
-        kwargs: list of strings for the deserialization
+        kwargs: override the load
       
       Returns:
         JsonDeserializer.
