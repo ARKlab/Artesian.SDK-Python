@@ -1,25 +1,72 @@
 from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
 from Artesian._ClientsExecutor.Client import _Client
+from Artesian._Configuration.ArtesianConfig import ArtesianConfig
 from Artesian._Configuration.ArtesianPolicyConfig import ArtesianPolicyConfig
 import asyncio
 import itertools
+
 class MarketDataService:
+    """ 
+        A MarketData Entity represents a data curve enriched by its metadata.
+        Each entity is composed of some fundamental parameters:
+
+    """
+
     __queryRoute = "marketdata/entity" 
     __version = "v2.1"
-    def __init__(self, artesianConfig):
+    def __init__(self, artesianConfig: ArtesianConfig):
+        """ Inits the MarketData Service 
+        
+            Using the ArtesianServiceConfig, is possible to create an istance of the MarketDataService which is used to retrieve and edit MarketData references.
+
+            Args:
+                artesianConfiguration: The Artesian Configuration.
+
+
+        """
         self.__config = artesianConfig
         self.__policy = ArtesianPolicyConfig(None, None, None)
         self.__queryBaseurl = self.__config.baseUrl + "/" + self.__version + "/" + self.__queryRoute 
         self.__executor = _RequestExecutor(self.__policy)
         self.__client = _Client(self.__queryBaseurl ,self.__config.apiKey)
-    async def readCurveRangeAsync(self, id, page, pageSize, product=None, versionFrom=None, versionTo=None):
+
+    async def readCurveRangeAsync(self, id: int, page: int, pageSize: int, product: str =None, versionFrom: str =None, versionTo: str =None): 
+        """ 
+            Reads paged set of available versions of the marketdata by id.
+
+            Args:
+                id: int for the id of the marketdata to be retrieved.
+                page: int for the page number (1-based).
+                pageSize: int for the page size.
+                product: string for the market product in the case of Market Assessment.
+                versionFrom: String for the start date of version range (ISO format).
+                versionTo: String for the end date of version range (ISO format).
+            
+            Returns:
+                Paged result of CurveRange entity (Async).
+        """
         url = "/" + str(id) + "/curves?page=" + str(page) + "&pagesize=" + str(pageSize) 
         if(versionFrom is not None and versionTo is not None):
             url = url + "&versionFrom=" + versionFrom + "&versionTo=" + versionTo 
         with self.__client as c:
             res = await asyncio.gather(*[self.__executor.exec(c.exec, 'GET', url, None)])
             return res[0].json()
-    def readCurveRange(self, id, page, pageSize, product=None, versionFrom=None, versionTo=None):
+
+    def readCurveRange(self, id: int, page: int, pageSize: int, product=None, versionFrom=None, versionTo=None):
+        """ 
+            Reads paged set of available versions of the marketdata by id.
+
+            Args:
+                id: int for the id of the marketdata to be retrieved.
+                page: int for the page number (1-based).
+                pageSize: int for the page size.
+                product: string for the market product in the case of Market Assessment.
+                versionFrom: String for the start date of version range (ISO format).
+                versionTo: String for the end date of version range (ISO format).
+            
+            Returns:
+                Paged result of CurveRange entity.
+        """
         url = str(id) + "/curves?page=" + str(page) + "&pagesize=" + str(pageSize) 
         if(versionFrom is not None and versionTo is not None):
             url = url + "&versionFrom=" + versionFrom + "&versionTo=" + versionTo 

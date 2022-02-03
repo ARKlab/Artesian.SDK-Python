@@ -1,6 +1,7 @@
 import cgi
 import requests
 import platform
+
 from Artesian._ClientsExecutor.ArtesianJsonSerializer import artesianJsonSerialize, artesianJsonDeserialize
 from Artesian._package_info import __version__
 from Artesian._Services.Exceptions import (ArtesianSdkRemoteException, ArtesianSdkValidationException, ArtesianSdkForbiddenException, ArtesianSdkOptimisticConcurrencyException)
@@ -8,6 +9,7 @@ from Artesian._Services.Exceptions import (ArtesianSdkRemoteException, ArtesianS
 class _Client:
     def __init__(self, baseUrl, apiKey):
         sdkVersion = __version__
+
         artesianAgentString = "'ArtesianSDK-Python:" + sdkVersion + "," + platform.system() + " " + platform.release() + ":"  + platform.version() + ",Python:" + platform.python_version()
         self.__baseUrl = baseUrl
         self.__session = requests.Session()

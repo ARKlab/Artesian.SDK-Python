@@ -10,3 +10,4 @@ class Granularity(Enum):
     FIFTEEN_MINUTE = 7
     MINUTE = 8
     THIRTY_MINUTE = 9
+    
