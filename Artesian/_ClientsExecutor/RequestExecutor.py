@@ -1,6 +1,5 @@
 import asyncio
 import requests
-from concurrent.futures import ThreadPoolExecutor
 import random
 import six
 import sys
