@@ -2,7 +2,6 @@ from Artesian._GMEPublicOffers.QueryParameters.GMEPOfferQueryParameters import G
 from Artesian._GMEPublicOffers.Config.ExtractionRangeConfig import ExtractionRangeConfig
 from Artesian._Configuration.DefaultPartitionStrategy import DefaultPartitionStrategy
 from Artesian._Services.Enum import GenerationType, Market,Purpose,Scope,Status,UnitType,Zone,BaType
-
 import asyncio
 import urllib
 
@@ -111,14 +110,14 @@ class _GMEPOfferQuery:
 
     def __getScope(self,scope):
         switcher = {
-            Scope.Acc: "Acc", 
-            Scope.As: "As",
-            Scope.Ca: "Ca",
-            Scope.Gr1: "Gr1", 
-            Scope.Gr2: "Gr2",
-            Scope.Gr3: "Gr3", 
-            Scope.Gr4: "Gr4", 
-            Scope.Rs: "Rs"
+            Scope.ACC: "ACC", 
+            Scope.AS: "AS",
+            Scope.CA: "CA",
+            Scope.GR1: "GR1", 
+            Scope.GR2: "GR2",
+            Scope.GR3: "GR3", 
+            Scope.GR4: "GR4", 
+            Scope.RS: "RS"
         }
         vr = switcher.get(scope, "DefScope")
         if vr == "DefScope" :
@@ -126,18 +125,18 @@ class _GMEPOfferQuery:
         return vr
     def __getGenerationType(self,generationType):
         switcher = {
-            GenerationType.Autogeneration: "Autogeneration", 
-            GenerationType.Biomass: "Biomass",
-            GenerationType.Coal: "Coal",
-            GenerationType.Gas: "Gas", 
-            GenerationType.Gasoil: "Gasoil",
-            GenerationType.Hydro: "Hydro", 
-            GenerationType.Mixed: "Mixed", 
-            GenerationType.Oil: "Rs",
-            GenerationType.Other: "Other", 
-            GenerationType.Pv: "Pv",
-            GenerationType.Thermal: "Thermal", 
-            GenerationType.Wind: "Wind"
+            GenerationType.AUTOGENERATION: "AUTOGENERATION", 
+            GenerationType.BIOMASS: "BIOMASS",
+            GenerationType.COAL: "COAL",
+            GenerationType.GAS: "GAS", 
+            GenerationType.GASOIL: "GASOIL",
+            GenerationType.HYDRO: "HYDRO", 
+            GenerationType.MIXED: "MIXED", 
+            GenerationType.OIL: "RS",
+            GenerationType.OTHER: "OTHER", 
+            GenerationType.PV: "PV",
+            GenerationType.THERMAL: "THERMAL", 
+            GenerationType.WIND: "WIND"
         }
         vr = switcher.get(generationType, "DefGen")
         if vr == "DefGen" :
@@ -145,21 +144,21 @@ class _GMEPOfferQuery:
         return vr
     def __getMarket(self,market):
         switcher = {
-            Market.Mgp: "Mgp", 
-            Market.Msd: "Msd",
-            Market.Mi1: "Mi1",
-            Market.Mi2: "Mi2",
-            Market.Mi3: "Mi3",
-            Market.Mi4: "Mi4",
-            Market.Mi5: "Mi5",
-            Market.Mi6: "Mi6",
-            Market.Mi7: "Mi7",
-            Market.Mb: "Mb",
-            Market.Mb2: "Mb2",
-            Market.Mb3: "Mb3",
-            Market.Mb4: "Mb4",
-            Market.Mb5: "Mb5",
-            Market.Mb6: "Mb6"
+            Market.MGP: "MGP", 
+            Market.MSD: "MSD",
+            Market.MI1: "MI1",
+            Market.MI2: "MI2",
+            Market.MI3: "MI3",
+            Market.MI4: "MI4",
+            Market.MI5: "MI5",
+            Market.MI6: "MI6",
+            Market.MI7: "MI7",
+            Market.MB: "MB",
+            Market.MB2: "MB2",
+            Market.MB3: "MB3",
+            Market.MB4: "MB4",
+            Market.MB5: "MB5",
+            Market.MB6: "MB6"
         }
         vr = switcher.get(market, "DefMarket")
         if vr == "DefMarket" :
@@ -167,8 +166,8 @@ class _GMEPOfferQuery:
         return vr
     def __getPurpose(self,purpose):
         switcher = {
-            Purpose.Bid: "Bid", 
-            Purpose.Off: "Off"
+            Purpose.BID: "BID", 
+            Purpose.OFF: "OFF"
         }
         vr = switcher.get(purpose, "Defpurp")
         if vr == "Defpurp" :
@@ -176,12 +175,12 @@ class _GMEPOfferQuery:
         return vr
     def __getStatus(self,status):
         switcher = {
-            Status.Acc: "Acc", 
-            Status.Inc: "Inc",
-            Status.Rej: "Rej",
-            Status.Rep: "Rep",
-            Status.Rev: "Rev",
-            Status.Sub: "Sub"
+            Status.ACC: "ACC", 
+            Status.INC: "INC",
+            Status.REJ: "REJ",
+            Status.REP: "REP",
+            Status.REV: "REV",
+            Status.SUB: "SUB"
         }
         vr = switcher.get(status, "DefStatus")
         if vr == "DefStatus" :
@@ -189,10 +188,10 @@ class _GMEPOfferQuery:
         return vr    
     def __getUnitType(self,unitType):
         switcher = {
-            UnitType.Up: "Up", 
-            UnitType.Uc: "Uc",
-            UnitType.Upv: "Upv",
-            UnitType.Ucv: "Ucv"
+            UnitType.UP: "UP", 
+            UnitType.UC: "UC",
+            UnitType.UPV: "UPV",
+            UnitType.UCV: "UCV"
         }
         vr = switcher.get(unitType, "DefunitType")
         if vr == "DefunitType" :
@@ -200,10 +199,10 @@ class _GMEPOfferQuery:
         return vr
     def __getBaType(self,baType):
         switcher = {
-            BaType.Null: "Null", 
-            BaType.Nrev: "Nrev",
-            BaType.Rev: "Rev",
-            BaType.Nett: "Nett"
+            BaType.NULL: "NULL", 
+            BaType.NREV: "NREV",
+            BaType.REV: "REV",
+            BaType.NETT: "NETT"
         }
         vr = switcher.get(baType, "DefbaType")
         if vr == "DefbaType" :
@@ -211,25 +210,25 @@ class _GMEPOfferQuery:
         return vr
     def __getZone(self,zone):
         switcher = {
-            Zone.Aust: "Aust", 
-            Zone.Brnn: "Brnn",
-            Zone.Cnor: "Cnor",
-            Zone.Coac: "Coac",
-            Zone.Cors: "Cors",
-            Zone.Csud: "Csud",
-            Zone.Fogn: "Fogn",
-            Zone.Fran: "Fran",
-            Zone.Grec: "Grec",
-            Zone.Malt: "Malt",
-            Zone.Nord: "Nord",
-            Zone.Prgp: "Prgp",
-            Zone.Rosn: "Rosn",
-            Zone.Sard: "Sard",
-            Zone.Sici: "Sici",
-            Zone.Slov: "Slov",
-            Zone.Sud: "Sud",
-            Zone.Sviz: "Sviz",
-            Zone.Cala: "Cala"
+            Zone.AUST: "AUST", 
+            Zone.BRNN: "BRNN",
+            Zone.CNOR: "CNOR",
+            Zone.COAC: "COAC",
+            Zone.CORS: "CORS",
+            Zone.CSUD: "CSUD",
+            Zone.FOGN: "FOGN",
+            Zone.FRAN: "FRAN",
+            Zone.GREC: "GREC",
+            Zone.MALT: "MALT",
+            Zone.NORD: "NORD",
+            Zone.PRGP: "PRGP",
+            Zone.ROSN: "ROSN",
+            Zone.SARD: "SARD",
+            Zone.SICI: "SICI",
+            Zone.SLOV: "SLOV",
+            Zone.SUD: "SUD",
+            Zone.SVIZ: "SVIZ",
+            Zone.CALA: "CALA"
         }
         vr = switcher.get(zone, "DefZone")
         if vr == "DefZone" :

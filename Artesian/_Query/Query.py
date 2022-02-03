@@ -1,5 +1,4 @@
 from Artesian._Services.Enum.ExtractionRangeType import ExtractionRangeType
-from Artesian._Query.QueryParameters.QueryParameters import _QueryParameters
 from Artesian._Services.Enum.RelativeInterval import RelativeInterval
 import asyncio
 import itertools

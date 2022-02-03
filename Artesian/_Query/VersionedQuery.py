@@ -2,7 +2,6 @@ from Artesian._Query.Query import _Query
 from Artesian._Query.QueryParameters.VersionedQueryParameters import VersionedQueryParameters
 from Artesian._Query.Config.ExtractionRangeConfig import ExtractionRangeConfig
 from Artesian._Services.Enum.VersionSelectionType import VersionSelectionType
-from Artesian._Configuration.DefaultPartitionStrategy import DefaultPartitionStrategy
 from Artesian._Services.Enum.Granularity import Granularity
 import urllib
 class _VersionedQuery(_Query):
@@ -136,7 +135,7 @@ class _VersionedQuery(_Query):
             VersionSelectionType.LastN: f"Last{self._queryParameters.versionSelectionConfig.lastN}",
             VersionSelectionType.Muv: f"Muv",
             VersionSelectionType.LastOfDays: f"LastOfDays/" + self.__buildVersionRange(),
-            VersionSelectionType.LLastOfMonths: f"LastOfMonths/" + self.__buildVersionRange(),
+            VersionSelectionType.LastOfMonths: f"LastOfMonths/" + self.__buildVersionRange(),
             VersionSelectionType.MostRecent: f"MostRecent/" + self.__buildVersionRange(),
             VersionSelectionType.Version: f"Version/{self._queryParameters.versionSelectionConfig.version}"
         }

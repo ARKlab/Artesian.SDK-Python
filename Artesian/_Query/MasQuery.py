@@ -1,8 +1,6 @@
 from Artesian._Query.Query import _Query
 from Artesian._Query.QueryParameters.MasQueryParameters import MasQueryParameters
 from Artesian._Query.Config.ExtractionRangeConfig import ExtractionRangeConfig
-from Artesian._Services.Enum.Granularity import Granularity
-from Artesian._Configuration.DefaultPartitionStrategy import DefaultPartitionStrategy
 import urllib
 class _MasQuery(_Query):
     __routePrefix = "mas"

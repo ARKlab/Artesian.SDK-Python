@@ -1,7 +1,6 @@
 from Artesian._Query.Query import _Query
 from Artesian._Query.QueryParameters.AuctionQueryParameters import AuctionQueryParameters
 from Artesian._Query.Config.ExtractionRangeConfig import ExtractionRangeConfig
-from Artesian._Configuration.DefaultPartitionStrategy import DefaultPartitionStrategy
 import urllib
 class _AuctionQuery(_Query):
     __routePrefix = "auction"
