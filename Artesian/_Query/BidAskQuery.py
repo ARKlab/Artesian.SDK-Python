@@ -1,3 +1,4 @@
+from __future__ import annotations
 from Artesian._Query.Query import _Query
 from Artesian._Query.QueryParameters.BidAskQueryParameters import BidAskQueryParameters
 from Artesian._Query.Config.ExtractionRangeConfig import ExtractionRangeConfig
@@ -5,7 +6,6 @@ from Artesian._Configuration.DefaultPartitionStrategy import DefaultPartitionStr
 from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
 from Artesian._ClientsExecutor.Client import _Client
 from typing import List
-from __future__ import annotations
 
 import urllib
 

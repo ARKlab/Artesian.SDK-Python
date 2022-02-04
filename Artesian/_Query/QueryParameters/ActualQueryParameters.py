@@ -1,11 +1,11 @@
 import enum
 
-from Artesian import Granularity
 from Artesian._GMEPublicOffers import QueryParameters
 from Artesian._GMEPublicOffers.Config.ExtractionRangeConfig import ExtractionRangeConfig
-from Artesian._Query.Config.ExtractionRangeType import ExtractionRangeType
 
 from Artesian._Query.QueryParameters.QueryParameters import _QueryParameters
+from Artesian._Services.Enum.ExtractionRangeType import ExtractionRangeType
+from Artesian._Services.Enum.Granularity import Granularity
 
 class ActualQueryParameters(_QueryParameters): 
     """ 

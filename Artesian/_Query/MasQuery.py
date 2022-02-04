@@ -1,12 +1,14 @@
-from Artesian._ClientsExecutor import _RequestExecutor
+from __future__ import annotations
+from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
 from Artesian._ClientsExecutor.Client import _Client
-from Artesian._Query.Config.RelativeInterval import RelativeInterval
+from Artesian._Configuration.DefaultPartitionStrategy import DefaultPartitionStrategy
 from Artesian._Query.Query import _Query
 from Artesian._Query.QueryParameters.MasQueryParameters import MasQueryParameters
 from Artesian._Query.Config.ExtractionRangeConfig import ExtractionRangeConfig
 import urllib
 from typing import List
-from __future__ import annotations
+
+from Artesian._Services.Enum.RelativeInterval import RelativeInterval
 
 class _MasQuery(_Query):
     __routePrefix = "mas"

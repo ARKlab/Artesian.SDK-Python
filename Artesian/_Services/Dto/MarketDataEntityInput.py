@@ -1,8 +1,8 @@
 from dataclasses import field
-from ArtesianTags import ArtesianTags
-from Enum import MarketDataType
-from Enum import AggregationRule
-from Enum import Granularity
+from .ArtesianTags import ArtesianTags
+from ..Enum import MarketDataType
+from ..Enum import AggregationRule
+from ..Enum import Granularity
 
 class MarketDataEntityInput:
     """ 

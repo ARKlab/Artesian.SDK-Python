@@ -1,7 +1,7 @@
-from ArtesianTags import ArtesianTags
+from .ArtesianTags import ArtesianTags
 import datetime
 from typing import Optional
-from MarketDataEntityInput import MarketDataEntityInput
+from .MarketDataEntityInput import MarketDataEntityInput
 
 class MarketDataEntityOutput(MarketDataEntityInput):
     """ 

@@ -1,5 +1,5 @@
 from Artesian._GMEPublicOffers.Config import ExtractionRangeConfig
-from Artesian._Query.Config.ExtractionRangeType import ExtractionRangeType
+from Artesian._Services.Enum.ExtractionRangeType import ExtractionRangeType
 
 
 class _QueryParameters: 

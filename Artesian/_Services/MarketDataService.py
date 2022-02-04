@@ -166,7 +166,7 @@ class MarketDataService:
             Returns:
                 MarketData Entity Output (Async).
         """
-        url = "/marketdata/entity?" 
+        url = "/marketdata/entity" 
         params = {"provider": provider , "curveName":curveName}
         with self.__client as c:
             res = await asyncio.gather(*[self.__executor.exec(c.exec, 'GET', url, None, retcls=MarketDataEntityOutput, params = params)])

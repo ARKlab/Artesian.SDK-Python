@@ -49,7 +49,7 @@ class TestClientErrorHandling(unittest.IsolatedAsyncioTestCase):
                     self.assertEqual(ex.exception.statusCode, code)
                     self.assertIsNone(ex.exception.errorText)
                     self.assertEqual(ex.exception.problemDetails, problemDetails)
-                    self.assertEqual(ex.exception.message, "Failed REST call to Artesian. GET https://baseurl.com/{} returned {}. DETAILS".format(code,code))
+                    self.assertEqual(ex.exception.message, "Failed REST call to Artesian. GET https://baseurl.com/{} returned {}. DETAIL".format(code,code))
 
     
     async def test_problemDetailsWithoutDetails(self):

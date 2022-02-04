@@ -1,9 +1,9 @@
 from Artesian._GMEPublicOffers.Config.ExtractionRangeConfig import ExtractionRangeConfig
-from Artesian._Query.Config.ExtractionRangeType import ExtractionRangeType
-from Artesian._Query.Config.Granularity import Granularity
-from Artesian._Query.Config.VersionSelectionType import VersionSelectionType
 from Artesian._Query.QueryParameters.QueryParameters import _QueryParameters
 from Artesian._Query.Config.VersionSelectionConfig import VersionSelectionConfig
+from Artesian._Services.Enum.ExtractionRangeType import ExtractionRangeType
+from Artesian._Services.Enum.Granularity import Granularity
+from Artesian._Services.Enum.VersionSelectionType import VersionSelectionType
 class VersionedQueryParameters(_QueryParameters): 
     """
         Class for the Versioned Query Parameters.

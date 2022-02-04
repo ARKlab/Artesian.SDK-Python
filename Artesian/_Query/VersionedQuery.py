@@ -1,4 +1,5 @@
-from Artesian._ClientsExecutor import _RequestExecutor
+from __future__ import annotations
+from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
 from Artesian._ClientsExecutor.Client import _Client
 from Artesian._Configuration.DefaultPartitionStrategy import DefaultPartitionStrategy
 from Artesian._Query.Query import _Query
@@ -8,7 +9,6 @@ from Artesian._Services.Enum.RelativeInterval import RelativeInterval
 from Artesian._Services.Enum.VersionSelectionType import VersionSelectionType
 from Artesian._Services.Enum.Granularity import Granularity
 import urllib
-from __future__ import annotations
 
 class _VersionedQuery(_Query):
     __routePrefix = "vts"
@@ -308,7 +308,7 @@ class _VersionedQuery(_Query):
     def __buildVersionRoute(self):
         switcher = {
             VersionSelectionType.LastN: f"Last{self._queryParameters.versionSelectionConfig.lastN}",
-            VersionSelectionType.Muv: f"Muv",
+            VersionSelectionType.MUV: f"Muv",
             VersionSelectionType.LastOfDays: f"LastOfDays/" + self.__buildVersionRange(),
             VersionSelectionType.LastOfMonths: f"LastOfMonths/" + self.__buildVersionRange(),
             VersionSelectionType.MostRecent: f"MostRecent/" + self.__buildVersionRange(),

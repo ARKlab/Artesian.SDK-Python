@@ -1,13 +1,13 @@
+from __future__ import annotations
 from Artesian._Services.Enum.ExtractionRangeType import ExtractionRangeType
 from Artesian._Services.Enum.RelativeInterval import RelativeInterval
-from Artesian._ClientsExecutor import _RequestExecutor
+from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
 from Artesian._ClientsExecutor.Client import _Client
 from Artesian._Query.QueryParameters.QueryParameters import _QueryParameters
 
 import asyncio
 import itertools
 from typing import List
-from __future__ import annotations
 
 class _Query:
     def __init__(self, client: _Client, 

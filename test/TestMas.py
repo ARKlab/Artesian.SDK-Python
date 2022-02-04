@@ -55,7 +55,7 @@ class TestMas(unittest.TestCase):
                 high = 4,
                 low = 5,
                 volumePaid = 6,
-                volueGiven = 7,
+                volumeGiven = 7,
                 volume = 8
             ) \
             .execute()

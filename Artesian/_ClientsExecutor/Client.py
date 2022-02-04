@@ -23,7 +23,7 @@ class _Client:
     async def exec(self, method: str, url: str, obj: object = None, retcls: type = None, params = None):
         json = artesianJsonSerialize(obj)
         if(params is not None):
-            url = url + urllib.parse.urlencode(params)
+            url = url + "?" + urllib.parse.urlencode(params)
         r = requests.Request(method, self.__baseUrl + url, json=json)
         prep = self.__session.prepare_request(r)
         res = self.__session.send(prep)

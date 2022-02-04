@@ -1,6 +1,6 @@
-from types import GeneratorType
 
-from Artesian._ClientsExecutor import _RequestExecutor
+from __future__ import annotations
+from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
 from Artesian._ClientsExecutor.Client import _Client
 from Artesian._GMEPublicOffers.QueryParameters.GMEPOfferQueryParameters import GMEPOfferQueryParameters
 from Artesian._GMEPublicOffers.Config.ExtractionRangeConfig import ExtractionRangeConfig
@@ -8,7 +8,6 @@ from Artesian._Configuration.DefaultPartitionStrategy import DefaultPartitionStr
 from Artesian._Services.Enum import GenerationType, Market,Purpose,Scope,Status,UnitType,Zone,BaType
 import asyncio
 import urllib
-from __future__ import annotations
 
 class _GMEPOfferQuery:
     __routePrefix = "extract"
@@ -156,7 +155,7 @@ class _GMEPOfferQuery:
         """
         self._queryParameters.baType = baType
         return self
-    def forGenerationType(self, generationType: GeneratorType) -> _GMEPOfferQuery:
+    def forGenerationType(self, generationType: GenerationType) -> _GMEPOfferQuery:
         """ 
             Set the generation types to be queried.
 
@@ -166,7 +165,7 @@ class _GMEPOfferQuery:
             Returns:
                 GMEPublicOfferQuery.
         """
-        self._queryParameters.baType = generationType
+        self._queryParameters.generationType = generationType
         return self
     def execute(self) -> _GMEPOfferQuery:
         """ 

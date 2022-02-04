@@ -1,6 +1,6 @@
 from Artesian._GMEPublicOffers.Config.ExtractionRangeConfig import ExtractionRangeConfig
-from Artesian._Query.Config.ExtractionRangeType import ExtractionRangeType
 from Artesian._Query.QueryParameters.QueryParameters import _QueryParameters
+from Artesian._Services.Enum.ExtractionRangeType import ExtractionRangeType
 class AuctionQueryParameters(_QueryParameters): 
     """ 
         Class for the Auction Query Parameters.
