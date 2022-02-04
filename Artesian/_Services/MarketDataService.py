@@ -5,13 +5,26 @@ from Artesian._Configuration.ArtesianPolicyConfig import ArtesianPolicyConfig
 from Artesian._Services.Dto.MarketDataEntityInput import MarketDataEntityInput
 from Artesian._Services.Dto.MarketDataEntityOutput import MarketDataEntityOutput
 import asyncio
-import urllib
+import itertools
 
 class MarketDataService:
-    """ Class for the Market Data Service. """
+    """ 
+        A MarketData Entity represents a data curve enriched by its metadata.
+        Each entity is composed of some fundamental parameters:
+
+    """
+
     __version = "v2.1"
     def __init__(self, artesianConfig: ArtesianConfig) -> None:
-        """ Inits for the Market Data Service. """
+        """ Inits the MarketData Service 
+        
+            Using the ArtesianServiceConfig, is possible to create an istance of the MarketDataService which is used to retrieve and edit MarketData references.
+
+            Args:
+                artesianConfiguration: The Artesian Configuration.
+
+
+        """
         self.__config = artesianConfig
         self.__policy = ArtesianPolicyConfig(None, None, None)
         self.__serviceBaseurl = self.__config.baseUrl + "/" + self.__version
@@ -58,7 +71,7 @@ class MarketDataService:
             Returns:
                 Paged result of CurveRange entity.
         """
-        return asyncio.get_event_loop().run_until_complete(self.readCurveRangeAsync(id, page, pageSize, product, versionFrom, versionTo))
+        return _get_event_loop().run_until_complete(self.readCurveRangeAsync(id, page, pageSize, product, versionFrom, versionTo))
 
 
     async def readMarketDataRegistryByIdAsync(self, id: int):
@@ -86,7 +99,7 @@ class MarketDataService:
             Returns:
                 MarketData Entity Output.
         """ 
-        return asyncio.get_event_loop().run_until_complete(self.readMarketDataRegistryByIdAsync(id))
+        return _get_event_loop().run_until_complete(self.readMarketDataRegistryByIdAsync(id))
 
     async def updateMarketDataAsync(self, entity: MarketDataEntityInput):
         """ 
@@ -113,7 +126,7 @@ class MarketDataService:
             Returns:
                 MarketData Entity Output.
         """
-        return asyncio.get_event_loop().run_until_complete(self.updateMarketDataAsync(id))
+        return _get_event_loop().run_until_complete(self.updateMarketDataAsync(id))
 
     async def deleteMarketDataAsync(self, id: int):
         """ 
@@ -140,7 +153,7 @@ class MarketDataService:
             Returns:
                 MarketData Entity Output.
         """
-        return asyncio.get_event_loop().run_until_complete(self.deleteMarketDataAsync(id))
+        return _get_event_loop().run_until_complete(self.deleteMarketDataAsync(id))
 
     async def readMarketDataRegistryByNameAsync(self, provider: str, curveName: str):
         """
@@ -170,7 +183,7 @@ class MarketDataService:
             Returns:
                 MarketData Entity Output.
         """
-        return asyncio.get_event_loop().run_until_complete(self.readMarketDataRegistryByNameAsync(provider, curveName))
+        return _get_event_loop().run_until_complete(self.readMarketDataRegistryByNameAsync(provider, curveName))
 
     async def registerMarketDataAsync(self, entity: MarketDataEntityInput):
         """
@@ -197,11 +210,11 @@ class MarketDataService:
             Returns:
                 MarketData Entity Output.
         """
-        return asyncio.get_event_loop().run_until_complete(self.registerMarketDataAsync(id))
+        return _get_event_loop().run_until_complete(self.registerMarketDataAsync(id))
 
 
 
-def get_event_loop():
+def _get_event_loop():
     """
     Wrapper around asyncio get_event_loop.
     Ensures that there is an event loop available.

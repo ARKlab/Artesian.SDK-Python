@@ -6,12 +6,14 @@ import sys
 import time
 import traceback
 
-
 # sys.maxint / 2, since Python 3.2 doesn't have a sys.maxint...
 MAX_WAIT = 1073741823
 
 class _RequestExecutor:
-    def __init__(self,policy):
+    """
+        This class handles all of the requests sent by the Artesian Client.
+    """
+    def __init__(self,policy) -> None:
         self.__policy = policy
         self.__sem = None
 
@@ -129,7 +131,7 @@ class Retrying(object):
 
     @staticmethod
     def no_sleep(previous_attempt_number, delay_since_first_attempt_ms):
-        """Don't sleep at all before retrying."""
+        """Don't sleep at all before retrying."""     
         return 0
 
     def fixed_sleep(self, previous_attempt_number, delay_since_first_attempt_ms):
@@ -184,7 +186,6 @@ class Retrying(object):
         while True:
             if self._before_attempts:
                 self._before_attempts(attempt_number)
-
             try:
                 res = await fn(*args, **kwargs)
                 attempt = Attempt(res, attempt_number, False)
