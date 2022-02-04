@@ -109,6 +109,6 @@ class FillCustomStategy:
             ["fillerDVh", self.val.get("high")],
             ["fillerDVl", self.val.get("low")],
             ["fillerDVvp", self.val.get("volumePaid")],
-            ["fillerDVvg", self.val.get("volueGiven")],
+            ["fillerDVvg", self.val.get("volumeGiven")],
             ["fillerDVvt", self.val.get("volume")],
         ])                
