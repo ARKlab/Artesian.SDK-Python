@@ -6,12 +6,16 @@ from typish import instance_of
 def __artesianTagsSerializer(
         obj: ArtesianTags,
         **kwargs) -> list:
+  if obj is None:
+    return None
   return [{'Key': k, 'Value': v} for k,v in obj.items()]
 
 def __artesianTagsDeserializer(
         obj: list,
         cls: type,
         **kwargs) -> ArtesianTags:
+  if obj is None:
+    return None
   result = ArtesianTags({})
   for item in obj:
     if (not instance_of(item['Key'], str)):
@@ -37,7 +41,7 @@ __artesianJsonKwArgs = {
   'fork_inst': __artesianJsonSerializer,
 }
 
-def artesianJsonSerialize(obj: str, cls: type = None, **kwargs):
+def artesianJsonSerialize(obj: str, cls: type = None, **kwargs) -> dict:
   """ 
       Sets the Artesian Json Serializer.
 
@@ -52,7 +56,7 @@ def artesianJsonSerialize(obj: str, cls: type = None, **kwargs):
   kwargs_ = {**__artesianJsonKwArgs, **kwargs}
   return jsons.dump(obj, cls, key_transformer=jsons.KEY_TRANSFORMER_PASCALCASE, **kwargs_)
 
-def artesianJsonDeserialize(obj: str, cls: type = None, **kwargs):
+def artesianJsonDeserialize(obj: str, cls: type = None, **kwargs) -> object:
   """ 
       Sets the Artesian Json Deserializer.
 

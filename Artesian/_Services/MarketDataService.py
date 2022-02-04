@@ -185,7 +185,7 @@ class MarketDataService:
         """
         return _get_event_loop().run_until_complete(self.readMarketDataRegistryByNameAsync(provider, curveName))
 
-    async def registerMarketDataAsync(self, entity: MarketDataEntityInput):
+    async def registerMarketDataAsync(self, entity: MarketDataEntityInput) -> MarketDataEntityOutput:
         """
             Register a new MarketData entity.
 

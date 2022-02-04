@@ -27,7 +27,8 @@ setuptools.setup(
         'six',
         'asyncio',
         'jsons>=1.6.1',
-        'dataclasses'
+        'dataclasses',
+        'tzdata'
     ],
     python_requires='>=3.8',
     extras_require={
