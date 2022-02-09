@@ -20,11 +20,9 @@ class _Client:
         return self
     def __exit__(self, *args):
         self.__session.__exit__(args)
-    async def exec(self, method: str, url: str, obj: object = None, retcls: type = None, params = None):
+    async def exec(self, method: str, url: str, obj: object = None, retcls: type = None, params:dict = None):
         json = artesianJsonSerialize(obj)
-        if(params is not None):
-            url = url + "?" + urllib.parse.urlencode(params)
-        r = requests.Request(method, self.__baseUrl + url, json=json)
+        r = requests.Request(method, self.__baseUrl + url, json=json, params=params)
         prep = self.__session.prepare_request(r)
         res = self.__session.send(prep)
 

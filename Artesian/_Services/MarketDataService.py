@@ -2,10 +2,12 @@ from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
 from Artesian._ClientsExecutor.Client import _Client
 from Artesian._Configuration.ArtesianConfig import ArtesianConfig
 from Artesian._Configuration.ArtesianPolicyConfig import ArtesianPolicyConfig
+from Artesian._Services.Dto.PagedResult import PagedResultCurveRangeEntity
 from Artesian._Services.Dto.MarketDataEntityInput import MarketDataEntityInput
 from Artesian._Services.Dto.MarketDataEntityOutput import MarketDataEntityOutput
 import asyncio
-import itertools
+
+from typing import NewType
 
 class MarketDataService:
     """ 
@@ -16,13 +18,13 @@ class MarketDataService:
 
     __version = "v2.1"
     def __init__(self, artesianConfig: ArtesianConfig) -> None:
-        """ Inits the MarketData Service 
+        """ 
+            Inits the MarketData Service 
         
             Using the ArtesianServiceConfig, is possible to create an istance of the MarketDataService which is used to retrieve and edit MarketData references.
 
             Args:
                 artesianConfiguration: The Artesian Configuration.
-
 
         """
         self.__config = artesianConfig
@@ -31,7 +33,8 @@ class MarketDataService:
         self.__executor = _RequestExecutor(self.__policy)
         self.__client = _Client(self.__serviceBaseurl ,self.__config.apiKey)
 
-    async def readCurveRangeAsync(self, id: int, page: int, pageSize: int, product: str=None, versionFrom: str=None, versionTo: str=None):
+    async def readCurveRangeAsync(self, id: int, page: int, pageSize: int, 
+        product: str=None, versionFrom: str=None, versionTo: str=None) -> PagedResultCurveRangeEntity:
         """
             Reads paged set of available versions of the marketdata by id.
 
@@ -47,16 +50,23 @@ class MarketDataService:
                 Paged result of CurveRange entity (Async).
         """
 
-        url = "/marketdata/entity/" + str(id) + "/curves?page=" + str(page) + "&pagesize=" + str(pageSize) 
-        if(versionFrom is not None):
-            url = url + "&versionFrom=" + versionFrom
+        url = "/marketdata/entity/" + str(id) + "/curves"
+        params ={
+                  'page':page,
+                  'pageSize':pageSize            
+                }
+        if(versionFrom is not None):            
+            params['versionFrom'] = versionFrom
         if(versionTo is not None):
-            url = url + "&versionTo=" + versionTo 
+            params['versionTo'] = versionTo
+        if(product is not None):
+            params['product'] = product       
         with self.__client as c:
-            res = await asyncio.gather(*[self.__executor.exec(c.exec, 'GET', url, None)])
+            res = await asyncio.gather(*[self.__executor.exec(c.exec, 'GET', url, retcls=PagedResultCurveRangeEntity, params=params)])
             return res[0]
 
-    def readCurveRange(self, id: int, page: int, pageSize: int, product: str=None, versionFrom: str=None, versionTo: str=None):
+    def readCurveRange(self, id: int, page: int, pageSize: int, 
+        product: str=None, versionFrom: str=None, versionTo: str=None) -> PagedResultCurveRangeEntity:
         """
             Reads paged set of available versions of the marketdata by id.
 
@@ -74,7 +84,7 @@ class MarketDataService:
         return _get_event_loop().run_until_complete(self.readCurveRangeAsync(id, page, pageSize, product, versionFrom, versionTo))
 
 
-    async def readMarketDataRegistryByIdAsync(self, id: int):
+    async def readMarketDataRegistryByIdAsync(self, id: int) -> MarketDataEntityOutput:
         """
             Reads MarketData by id with MarketDataID.
 
@@ -89,7 +99,7 @@ class MarketDataService:
             res = await asyncio.gather(*[self.__executor.exec(c.exec, 'GET', url, None, retcls=MarketDataEntityOutput)])
             return res[0]
 
-    def readMarketDataRegistryById(self, id: int):  
+    def readMarketDataRegistryById(self, id: int) -> MarketDataEntityOutput :  
         """
             Reads MarketData by curve name with MarketDataID.
 
@@ -101,7 +111,7 @@ class MarketDataService:
         """ 
         return _get_event_loop().run_until_complete(self.readMarketDataRegistryByIdAsync(id))
 
-    async def updateMarketDataAsync(self, entity: MarketDataEntityInput):
+    async def updateMarketDataAsync(self, id: int, entity: MarketDataEntityInput) -> MarketDataEntityOutput :
         """ 
             Saves the given MarketData Entity
 
@@ -111,7 +121,7 @@ class MarketDataService:
             Returns:
                 MarketData Entity Output (Async).
         """
-        url = "/marketdata/entity/" + str(entity.marketDataId) 
+        url = "/marketdata/entity/" + str(id) 
         with self.__client as c:
             res = await asyncio.gather(*[self.__executor.exec(c.exec, 'PUT', url, entity, MarketDataEntityOutput)])
             return res[0]
@@ -128,7 +138,7 @@ class MarketDataService:
         """
         return _get_event_loop().run_until_complete(self.updateMarketDataAsync(id))
 
-    async def deleteMarketDataAsync(self, id: int):
+    async def deleteMarketDataAsync(self, id: int) -> None :
         """ 
             Delete the specific MarketData entity by id
 
@@ -143,11 +153,11 @@ class MarketDataService:
             res = await asyncio.gather(*[self.__executor.exec(c.exec, 'DELETE', url, None)])
             return res[0]
 
-    def deleteMarketData(self, id: int):
+    def deleteMarketData(self, id: int) -> None :
         """ 
             Delete the specific MarketData entity by id
 
-            Args:
+            Args: 
                 id: int of the marketdata to be deleted
 
             Returns:
@@ -155,7 +165,7 @@ class MarketDataService:
         """
         return _get_event_loop().run_until_complete(self.deleteMarketDataAsync(id))
 
-    async def readMarketDataRegistryByNameAsync(self, provider: str, curveName: str):
+    async def readMarketDataRegistryByNameAsync(self, provider: str, curveName: str) -> MarketDataEntityOutput:
         """
             Reads MarketData by provider and curve name.
 
@@ -172,7 +182,7 @@ class MarketDataService:
             res = await asyncio.gather(*[self.__executor.exec(c.exec, 'GET', url, None, retcls=MarketDataEntityOutput, params = params)])
             return res[0]
 
-    def readMarketDataRegistryByName(self, provider: str, curveName: str):
+    def readMarketDataRegistryByName(self, provider: str, curveName: str) -> MarketDataEntityOutput:
         """
             Reads MarketData by provider and curve name.
 
@@ -200,7 +210,7 @@ class MarketDataService:
             res = await asyncio.gather(*[self.__executor.exec(c.exec, 'POST', url, entity, MarketDataEntityOutput)])
             return res[0]
 
-    def registerMarketData(self, entity: MarketDataEntityInput):
+    def registerMarketData(self, entity: MarketDataEntityInput) -> MarketDataEntityOutput:
         """
             Register a new MarketData entity.
 
