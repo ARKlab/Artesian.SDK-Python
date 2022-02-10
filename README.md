@@ -11,13 +11,22 @@ pip install artesian-sdk
 ```
 Alternatively, to install this package go to the [release page](https://github.com/ARKlab/Artesian.SDK-Python/releases)  .
 
-## How to use
+### How to use
 The Artesian.SDK instance can be configured using API-Key authentication
 ```Python
 from Artesian import *
 
 cfg = ArtesianConfig("https://fake-artesian-env/", "{api-key}")
 ```
+
+### BREAKING CHANGES: Upgrade v2->v3  
+
+The following breaking changes has been introduced in v3 respect to v2.
+
+Enums has been rewritten and changed of Module.
+
+
+
 
 ## QueryService
 Using the ArtesianConfig `cfg` we create an instance of the QueryService which is used to create Actual, Versioned and Market Assessment time series queries

@@ -1,35 +1,9 @@
+from collections import defaultdict
 from datetime import datetime
 from dateutil import parser
 import jsons
-from Artesian._Services.Dto import ArtesianTags
-from typing import Callable, Dict, List, Optional
+from typing import Callable, Dict, List, Optional, get_args
 from typish import instance_of
-
-def __artesianTagsSerializer(
-        obj: ArtesianTags,
-        **kwargs) -> list:
-  if obj is None:
-    return None
-  return [{'Key': k, 'Value': v} for k,v in obj.items()]
-
-def __artesianTagsDeserializer(
-        obj: list,
-        cls: type,
-        **kwargs) -> ArtesianTags:
-  if obj is None:
-    return None
-  result = ArtesianTags({})
-  for item in obj:
-    if (not instance_of(item['Key'], str)):
-      raise ValueError("Key must be a 'str'. For example: 'commodity'") 
-    if (not instance_of(item['Value'], List[str])):
-      raise ValueError("Value must be a 'list[str]'. For example: ['gas','power']")
-
-    k = jsons.load(item['Key'], str, **{**kwargs, 'strict':True})
-    v = jsons.load(item['Value'], List[str], **{**kwargs, 'strict':True})
-    result[k]=v
-  
-  return result
 
 def __artesianDatetimeSerializer(
     obj:datetime,
@@ -64,7 +38,7 @@ def __artesianDictSerializer(
     *,
     key_transformer: Optional[Callable[[str], str]] = None,
     **kwargs) -> dict:
-  result = dict()
+  result = []
   for key in obj:
     obj_ = obj[key]
     key_ = key if __is_valid_json_key(key) else jsons.dump(key, 
@@ -74,15 +48,27 @@ def __artesianDictSerializer(
       obj_,
       key_transformer=key_transformer,
       **kwargs)
-    result[key_] = elem
+    result.append({'Key': key_, 'Value': elem})
   return result
 
+def __artesianDictDeserializer(
+    obj: list,
+    cls: type,
+    *args,
+    **kwargs) -> dict:
+  key, value = get_args(cls)
+  default_factory = value
+  result = Dict[key, value]()
+  for item in obj:
+    key = jsons.load(item['Key'], key, *args, **kwargs)
+    val = jsons.load(item['Value'], value, *args, **kwargs)
+    result[key]=val
+  defaultdict(default_factory, result)
+  
 __artesianJsonSerializer = jsons.JsonSerializable.fork()
 
 jsons.set_serializer(__artesianDictSerializer, Dict, high_prio=True, fork_inst=__artesianJsonSerializer)
-
-jsons.set_serializer(__artesianTagsSerializer, ArtesianTags, high_prio=True, fork_inst=__artesianJsonSerializer)
-jsons.set_deserializer(__artesianTagsDeserializer, ArtesianTags, high_prio=True, fork_inst=__artesianJsonSerializer)
+jsons.set_serializer(__artesianDictDeserializer, Dict, high_prio=True, fork_inst=__artesianJsonSerializer)
 
 jsons.set_serializer(__artesianDatetimeSerializer, datetime, high_prio=True, fork_inst=__artesianJsonSerializer)
 jsons.set_deserializer(__artesianDatetimeDeserializer, datetime, high_prio=True, fork_inst=__artesianJsonSerializer)

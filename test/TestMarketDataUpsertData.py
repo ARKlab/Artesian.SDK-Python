@@ -1,11 +1,9 @@
-from Artesian import *
+from Artesian import ArtesianConfig
 import responses
 import unittest
 from datetime import date, datetime
 from Artesian._ClientsExecutor.ArtesianJsonSerializer import artesianJsonSerialize
-from Artesian._Services.Dto import UpsertData
-from Artesian._Services.Dto.MarketDataIdentifier import MarketDataIdentifier
-from Artesian._Services.Dto.UpsertData import *
+from Artesian.MarketData import MarketDataService,MarketDataIdentifier,UpsertData,MarketAssessmentValue,BidAskValue,AuctionBids,AuctionBidValue
 
 import dateutil
 
@@ -22,15 +20,15 @@ class TestMarketDataServiceUpsertData(unittest.IsolatedAsyncioTestCase):
 
     async def test_upsertDateSerie(self):
         expectedJson={
-            'ID':{
+            'ID': {
                 'Provider': "PROVIDER",
                 'Name': "CURVENAME"
             },
             'Timezone': "CET",
-            'Rows':{
-                '2020-01-01T00:00:00.000000': 42.0,
-                '2020-01-02T00:00:00.000000': 43.0
-            },
+            'Rows': [
+                { 'Key': '2020-01-01T00:00:00.000000', 'Value': 42.0 },
+                { 'Key': '2020-01-02T00:00:00.000000', 'Value': 43.0 }
+            ],
             'DeferCommandExecution': True,
             'DeferDataGeneration': True,
             'KeepNulls': False,

@@ -2,10 +2,9 @@ import cgi
 import requests
 import platform
 
-from Artesian._ClientsExecutor.ArtesianJsonSerializer import artesianJsonSerialize, artesianJsonDeserialize
+from .ArtesianJsonSerializer import artesianJsonSerialize, artesianJsonDeserialize
 from Artesian._package_info import __version__
-from Artesian._Services.Exceptions import (ArtesianSdkRemoteException, ArtesianSdkValidationException, ArtesianSdkForbiddenException, ArtesianSdkOptimisticConcurrencyException)
-import urllib.parse
+from Artesian.Exceptions import (ArtesianSdkServerException, ArtesianSdkValidationException, ArtesianSdkForbiddenException, ArtesianSdkOptimisticConcurrencyException)
 
 class _Client:
     def __init__(self, baseUrl, apiKey):
@@ -54,4 +53,4 @@ class _Client:
             raise ArtesianSdkForbiddenException(method, self.__baseUrl + url, res.status_code, problemDetails, errorText)
         
         # if we reached here it means that is a 500 or another unknown error
-        raise ArtesianSdkRemoteException(method, self.__baseUrl + url, res.status_code, problemDetails, errorText)
+        raise ArtesianSdkServerException(method, self.__baseUrl + url, res.status_code, problemDetails, errorText)

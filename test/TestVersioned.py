@@ -1,4 +1,7 @@
-from Artesian import *
+from Artesian import ArtesianConfig
+from Artesian.Query import QueryService
+from Artesian.MarketData import Granularity
+
 import helpers
 import unittest
 

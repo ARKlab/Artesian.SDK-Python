@@ -1,4 +1,5 @@
-from Artesian import *
+from Artesian import ArtesianConfig
+from Artesian.Query import QueryService
 import helpers
 import unittest
 

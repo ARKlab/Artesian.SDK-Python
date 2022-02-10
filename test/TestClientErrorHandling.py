@@ -1,4 +1,4 @@
-from Artesian import *
+from Artesian import ArtesianSdkValidationException,ArtesianSdkOptimisticConcurrencyException,ArtesianSdkForbiddenException,ArtesianSdkServerException
 from Artesian._ClientsExecutor.Client import _Client
 import unittest
 import responses
@@ -34,7 +34,7 @@ class TestClientErrorHandling(unittest.IsolatedAsyncioTestCase):
             (412, ArtesianSdkOptimisticConcurrencyException),
             (401, ArtesianSdkForbiddenException),
             (403, ArtesianSdkForbiddenException),
-            (500, ArtesianSdkRemoteException)
+            (500, ArtesianSdkServerException)
             ]
         for code, excls in cases:
             with self.subTest(str(code) + "=>" + excls.__name__):
@@ -74,7 +74,7 @@ class TestClientErrorHandling(unittest.IsolatedAsyncioTestCase):
             (412, ArtesianSdkOptimisticConcurrencyException),
             (401, ArtesianSdkForbiddenException),
             (403, ArtesianSdkForbiddenException),
-            (500, ArtesianSdkRemoteException)
+            (500, ArtesianSdkServerException)
             ]
         for code, excls in cases:
             with self.subTest(str(code) + "=>" + excls.__name__):

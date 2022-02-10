@@ -1,12 +1,10 @@
-from Artesian import *
+from Artesian import ArtesianConfig
 import responses
 import unittest
 from Artesian._ClientsExecutor.ArtesianJsonSerializer import artesianJsonSerialize
-from Artesian._Services.Dto.CurveRangeEntity import CurveRangeEntity
-from Artesian._Services.Dto.PagedResult import PagedResultCurveRangeEntity
+from Artesian.MarketData import *
 
 cfg = ArtesianConfig("https://baseurl.com","apikey")
-
 
 class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
     def setUp(self) -> None:
