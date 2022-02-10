@@ -183,19 +183,19 @@ var versionedSeries = qs
   .execute()
 ```
 
-Null
+Use 'Null' to fill the missing timepoint with 'None' values.
 
 ```python
  .withFillNull()
 ```
 
-None
+Use 'None' to not fill at all: timepoints are not returned if not present.
 
 ```python
  .withFillNone()
 ```
 
-Custom Value
+Custom Value can be provided for each MarketDataType.
 
 ```python
  //Timeseries
@@ -213,7 +213,7 @@ Custom Value
   )
 ```
 
-Latest Value
+Latest Value to propagate the latest value, not older than a certain threshold.
 
 ```python
  .withFillLatestValue("P5D")
@@ -247,9 +247,160 @@ Artesian SDK uses asyncio internally, this causes a conflict with Jupyter. You c
 !pip install nest_asyncio
 
 import nest_asyncio
-nest_asyncio.apply()
+nest_asyncio.apply() 
+
 
 ```
+
+## Write Data in Artesian
+
+
+Using the MarketDataService is possible to register MarketData and write curves into it using the UpsertData method.
+
+Depending on the Type of the MarketData, the UpsertData should be composed as per example below.
+
+### Write Data in a ActualTimeSerie
+
+```Python
+cfg = ArtesianConfg()
+mkservice = MarketDataService(cfg)
+
+mkdid = MarketDataIdentifier('PROVIDER', 'CURVENAME')
+mkd = MarketDataEntityInput(
+      providerName = mkdid.provider,
+      marketDataName = mkdid.curveName,
+      originalGranularity=Granularity.Day,
+      type=MarketDataType.ActualTimeSerie,
+      originalTimezone="CET"
+  )
+
+registered = mkservice.readMarketDataByName(mkdid.provider, mkdid.curveName)
+if (registered is None):
+  registered = mkservice.registerMarketData(mkd)
+
+data = UpsertData(mkdid, 'CET', 
+  rows=
+  {
+      datetime(2020,1,1): 42.0,
+      datetime(2020,1,2): 43.0,
+  },
+  downloadedAt=datetime(2020,1,3).replace(tzinfo=dateutil.tz.UTC)
+  )
+
+mkservice.upsertData(data)
+
+```
+
+### Write Data in a MarketAssessment
+
+```Python
+cfg = ArtesianConfg()
+mkservice = MarketDataService(cfg)
+
+mkdid = MarketDataIdentifier('PROVIDER', 'CURVENAME')
+mkd = MarketDataEntityInput(
+      providerName = mkdid.provider,
+      marketDataName = mkdid.curveName,
+      originalGranularity=Granularity.Day,
+      type=MarketDataType.MarketAssessment,
+      originalTimezone="CET"
+  )
+
+marketAssessment = UpsertData(MarketDataIdentifier('PROVIDER', 'CURVENAME'), 'CET', 
+  marketAssessment=
+  {
+      datetime(2020,1,1):
+      {
+         "Feb-20": MarketAssessmentValue(open=10.0, close=11.0),
+         "Mar-20": MarketAssessmentValue(open=20.0, close=21.0)
+      },
+          datetime(2020,1,2):
+          {
+              "Feb-20": MarketAssessmentValue(open=11.0, close=12.0),
+              "Mar-20": MarketAssessmentValue(open=21.0, close=22.0)
+          }
+  },
+  downloadedAt=datetime(2020,1,3).replace(tzinfo=dateutil.tz.UTC)
+  )
+
+mkservice.upsertData(marketAssessment)
+
+```
+
+### Write Data in a BidAsk
+
+```Python
+cfg = ArtesianConfg()
+mkservice = MarketDataService(cfg)
+
+mkdid = MarketDataIdentifier('PROVIDER', 'CURVENAME')
+mkd = MarketDataEntityInput(
+      providerName = mkdid.provider,
+      marketDataName = mkdid.curveName,
+      originalGranularity=Granularity.Day,
+      type=MarketDataType.BidAsk,
+      originalTimezone="CET"
+  )
+
+
+bidAsk = UpsertData(MarketDataIdentifier('PROVIDER', 'CURVENAME'), 'CET', 
+  bidAsk={
+      datetime(2020,1,1):
+      {
+          "Feb-20":BidAskValue(bestBidPrice=15.0, lastQuantity=14.0),
+          "Mar-20":BidAskValue(bestBidPrice=25.0, lastQuantity=24.0)
+      },
+      datetime(2020,1,2):
+      {
+          "Feb-20":BidAskValue(bestBidPrice=15.0, lastQuantity=14.0),
+          "Mar-20":BidAskValue(bestBidPrice=25.0, lastQuantity=24.0)
+      }        
+
+  },
+  downloadedAt=datetime(2020,1,3).replace(tzinfo=dateutil.tz.UTC)
+  )
+
+mkservice.upsertData(bidAsk)
+```
+
+### Write Data in a Auction
+
+```Python
+cfg = ArtesianConfg()
+mkservice = MarketDataService(cfg)
+
+mkdid = MarketDataIdentifier('PROVIDER', 'CURVENAME')
+mkd = MarketDataEntityInput(
+      providerName = mkdid.provider,
+      marketDataName = mkdid.curveName,
+      originalGranularity=Granularity.Day,
+      type=MarketDataType.Auction,
+      originalTimezone="CET"
+  )
+
+ 
+auctionRows = UpsertData(MarketDataIdentifier('PROVIDER', 'CURVENAME'), 'CET', 
+  auctionRows={
+      datetime(2020,1,1): AuctionBids(datetime(2020,1,1), 
+          bid=[
+              AuctionBidValue(11.0, 12.0),
+              AuctionBidValue(13.0, 14.0),
+          ],
+          offer=[
+              AuctionBidValue(21.0, 22.0),
+              AuctionBidValue(23.0, 24.0),
+          ]
+      ) 
+  },
+  downloadedAt=datetime(2020,1,3).replace(tzinfo=dateutil.tz.UTC)
+  )
+
+  mkservice.upsertData(auctionRows)
+
+
+```
+
+
 [Issue #3397 with workaround](https://github.com/jupyter/notebook/issues/3397#issuecomment-419386811)
 
 ## Links

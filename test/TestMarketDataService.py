@@ -1,6 +1,3 @@
-from dataclasses import asdict
-
-import urllib.parse
 from Artesian import *
 import responses
 import unittest
@@ -11,7 +8,7 @@ from Artesian._Services.Dto.PagedResult import PagedResultCurveRangeEntity
 cfg = ArtesianConfig("https://baseurl.com","apikey")
 
 
-class TestMarketDataService(unittest.IsolatedAsyncioTestCase):
+class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
     def setUp(self) -> None:
         self.__service = MarketDataService(cfg)
         self.__sampleOutput = MarketDataEntityOutput(
@@ -98,6 +95,6 @@ class TestMarketDataService(unittest.IsolatedAsyncioTestCase):
             rsps.add('GET', self.__baseurl + '/marketdata/entity/' + str(self.__id) + "/curves", 
                 match=[responses.matchers.query_param_matcher(params)], 
                 json=self.__curveRangeSerializedOutput, status = 200)         
-            output = await self.__service.readCurveRangeAsync(self.__id,params['page'],params['pageSize'],params['versionFrom'], params['versionTo'])        
+            output = await self.__service.readCurveRangeAsync(self.__id,params['page'],params['pageSize'], None, params['versionFrom'], params['versionTo'])        
             self.assertEqual(output, self.__curveRangeOutput)
     

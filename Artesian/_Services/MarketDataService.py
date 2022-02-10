@@ -9,6 +9,8 @@ import asyncio
 
 from typing import NewType
 
+from Artesian._Services.Dto.UpsertData import UpsertData
+
 class MarketDataService:
     """ 
         A MarketData Entity represents a data curve enriched by its metadata.
@@ -222,7 +224,14 @@ class MarketDataService:
         """
         return _get_event_loop().run_until_complete(self.registerMarketDataAsync(id))
 
-
+    async def upsertDataAsync(self, data:UpsertData) -> None:
+        url = "/upsertdata"
+        with self.__client as c:
+            res = await asyncio.gather(*[self.__executor.exec(c.exec, 'POST', url, data)])
+            return res[0]
+    
+    def upsertData(self, data:UpsertData) -> None:
+        return _get_event_loop().run_until_complete(self.upsertDataAsync(data))
 
 def _get_event_loop():
     """

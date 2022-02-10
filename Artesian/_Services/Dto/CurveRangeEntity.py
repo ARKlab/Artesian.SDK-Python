@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 import datetime
 from typing import Optional
-from zoneinfo import ZoneInfo
+import dateutil
 
 
 @dataclass
@@ -13,8 +13,8 @@ class CurveRangeEntity:
     marketDataId: int = 0
     product: str = None
     version: str = None
-    lastUpdated: datetime.datetime = datetime.datetime.min.replace(tzinfo=ZoneInfo('UTC'))
-    created: datetime.datetime = datetime.datetime.min.replace(tzinfo=ZoneInfo('UTC'))
+    lastUpdated: datetime.datetime = datetime.datetime.min.replace(tzinfo=dateutil.tz.UTC)
+    created: datetime.datetime = datetime.datetime.min.replace(tzinfo=dateutil.tz.UTC)
     dataRangeStart: Optional[datetime.date] = None
     dataRangeEnd: Optional[datetime.date] = None
 
