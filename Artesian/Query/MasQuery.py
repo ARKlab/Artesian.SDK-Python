@@ -215,18 +215,4 @@ class MasQuery(_Query):
         if (self._queryParameters.products is None):
                 raise Exception("Products must be provided for extraction. Use .ForProducts() argument takes a string or string array of products")
 
-class _NullFillStategy:
-    def getUrlParams(self):
-        return "fillerK=Null"
-
-class _NoFillStategy:    
-    def getUrlParams(self):
-        return "fillerK=NoFill"
-
-class _FillLatestStategy:    
-    def __init__(self, period):
-        self.period = period
-    def getUrlParams(self):
-        return f"fillerK=LatestValidValue&fillerP={self.period}"
-
              

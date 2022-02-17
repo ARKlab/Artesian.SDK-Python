@@ -66,16 +66,7 @@ class _FillCustomMasStrategy(_FillStrategy):
             ["fillerDVvp", self.val.get("volumePaid")],
             ["fillerDVvg", self.val.get("volumeGiven")],
             ["fillerDVvt", self.val.get("volume")],
-        ])   
-     
-class _FillCustomVersionedStrategy(_FillStrategy):
-    def __init__(self, val):
-        self.val = val
-    def getUrlParams(self):
-        return f"fillerK=CustomValue&fillerDV={self.val}"
-
-
-       
+        ])    
 class _QueryParameters: 
     def __init__(self, ids: Optional[List[int]], 
                        extractionRangeConfig: ExtractionRangeConfig = None, 

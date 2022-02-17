@@ -1,5 +1,4 @@
 from __future__ import annotations
-from Artesian.Query.MasQuery import _NullFillStategy
 from Artesian.Query._QueryParameters.QueryParameters import _FillCustomTimeserieStrategy, _FillLatestStrategy, _NoFillStrategy, _NullFillStrategy
 from .._ClientsExecutor.RequestExecutor import _RequestExecutor
 from .._ClientsExecutor.Client import _Client

@@ -12,7 +12,7 @@ class TestVersioned(unittest.TestCase):
     @helpers.TrackRequests
     def test_Null_Fill(self, requests):
         url = qs.createVersioned() \
-            .forFilterId(int("1003")) \
+            .forFilterId(1003) \
             .forLastNVersions(1) \
             .inAbsoluteDateRange("2018-01-01","2018-01-02") \
             .inTimeZone("UTC") \
@@ -25,7 +25,7 @@ class TestVersioned(unittest.TestCase):
     @helpers.TrackRequests
     def test_No_Fill(self, requests):
         url = qs.createVersioned() \
-            .forFilterId(int("1003")) \
+            .forFilterId(1003) \
             .forLastNVersions(1) \
             .inAbsoluteDateRange("2018-01-01","2018-01-02") \
             .inTimeZone("UTC") \
@@ -38,7 +38,7 @@ class TestVersioned(unittest.TestCase):
     @helpers.TrackRequests
     def test_Latest_Fill(self, requests):
         url = qs.createVersioned() \
-            .forFilterId(int("1003")) \
+            .forFilterId(1003) \
             .forLastNVersions(1) \
             .inAbsoluteDateRange("2018-01-01","2018-01-02") \
             .inTimeZone("UTC") \
@@ -53,7 +53,7 @@ class TestVersioned(unittest.TestCase):
     @helpers.TrackRequests
     def test_Custom_Value_Fill(self, requests):
         url = qs.createVersioned() \
-            .forFilterId(int("1003")) \
+            .forFilterId(1003) \
             .forLastNVersions(1) \
             .inAbsoluteDateRange("2018-01-01","2018-01-02") \
             .inTimeZone("UTC") \

@@ -13,7 +13,6 @@ test1 = qs.createVersioned() \
     .inTimeZone("UTC") \
     .inGranularity(Granularity.Hour)
 
-
 res= test1.forMUV().execute()
 res=test1.forLastNVersions(2).execute()
 res=test1.forLastOfDays("2019-03-12","2019-03-16").execute()

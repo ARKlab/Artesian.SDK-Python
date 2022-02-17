@@ -5,7 +5,7 @@ from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
 from Artesian._ClientsExecutor.Client import _Client
 from .DefaultPartitionStrategy import DefaultPartitionStrategy
 from ._Query import _Query
-from Artesian.Query._QueryParameters.QueryParameters import _FillCustomMasStrategy, _FillCustomVersionedStrategy, _FillLatestStrategy, _NoFillStrategy, _NullFillStrategy
+from Artesian.Query._QueryParameters.QueryParameters import _FillCustomMasStrategy, _FillCustomTimeserieStrategy, _FillLatestStrategy, _NoFillStrategy, _NullFillStrategy
 from ._QueryParameters.VersionedQueryParameters import VersionedQueryParameters
 from ._QueryParameters.ExtractionRangeConfig import ExtractionRangeConfig
 from ._QueryParameters.VersionSelectionType import VersionSelectionType
@@ -263,7 +263,7 @@ class VersionedQuery(_Query):
             Returns: 
                 VersionedQuery.
          """
-        self._queryParameters.fill = _FillCustomVersionedStrategy(val)
+        self._queryParameters.fill = _FillCustomTimeserieStrategy(val)
         return self
     def execute(self) -> list:
         """ 
@@ -345,10 +345,6 @@ class VersionedQuery(_Query):
             Granularity.Year: "Year",
         }
         vr = switcher.get(granularity, "VGran")
-        if vr == "VGran" :
-            raise Exception("Not supported Granularity")
-        return vr
-
 class _NullFillStategy:    
     def getUrlParams(self):
         return "fillerK=Null"

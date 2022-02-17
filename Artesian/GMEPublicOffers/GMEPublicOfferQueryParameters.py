@@ -14,7 +14,7 @@ class _GMEPublicOfferQueryParameters:
     
         Attributes:
             scope: sets scope to be queried
-            extractionRangeConfig: Sets the Extraction Range Selection Configuration to be queried.
+            extractionRangeConfig: Sets the Extraction Range Configuration to be queried.
             status: sets the Status to be queried.
             unitType: sets the unit types to be queried.
             generationType: that sets the generation type to be queried.
@@ -47,7 +47,7 @@ class _GMEPublicOfferQueryParameters:
             Args:
                 page: An int that sets the Page to be queried.
                 pageSize: An int that sets the Page size to be queried.
-                extractionRangeConfig: Sets the Extraction Range Selection Configuration to be queried.
+                extractionRangeConfig: Sets the Extraction Range Configuration to be queried.
                 scope: An enum that sets scope to be queried
                 status:An enum that sets the Status to be queried.
                 unitType: An enum that sets the unit types to be queried.
