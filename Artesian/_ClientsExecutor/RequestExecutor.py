@@ -6,6 +6,8 @@ import sys
 import time
 import traceback
 
+from Artesian.Exceptions import ArtesianSdkRequestException, ArtesianSdkServerException
+
 # sys.maxint / 2, since Python 3.2 doesn't have a sys.maxint...
 MAX_WAIT = 1073741823
 
@@ -27,7 +29,7 @@ class _RequestExecutor:
             return await callback(*args, **kwargs)
 
     async def exec(self, callback, *args, **kwargs):
-        r = Retrying(wait_fixed = self.__policy.retryWaitTime, stop_max_attempt_number= self.__policy.maxRetry, retry_on_exception= lambda e : not (isinstance(e, requests.HTTPError) and e.response.status_code >= 400 and e.response.status_code < 500))
+        r = Retrying(wait_fixed = self.__policy.retryWaitTime, stop_max_attempt_number= self.__policy.maxRetry, retry_on_exception= lambda e : isinstance(e, ArtesianSdkServerException) or isinstance(e, ArtesianSdkRequestException))
         return await r.call(self.__do, callback, *args, **kwargs)
 
 
@@ -49,7 +51,7 @@ class Retrying(object):
                  wait_func=None,
                  wait_jitter_max=None,
                  before_attempts=None,
-                 after_attempts=None):
+                 after_attempts=None) -> None:
 
         self._stop_max_attempt_number = 5 if stop_max_attempt_number is None else stop_max_attempt_number
         self._stop_max_delay = 100 if stop_max_delay is None else stop_max_delay
@@ -85,7 +87,7 @@ class Retrying(object):
 
         # TODO add chaining of wait behaviors
         # wait behavior
-        wait_funcs = [lambda *args, **kwargs: 0]
+        wait_funcs = []
         if wait_fixed is not None:
             wait_funcs.append(self.fixed_sleep)
 
@@ -134,18 +136,18 @@ class Retrying(object):
         """Don't sleep at all before retrying."""     
         return 0
 
-    def fixed_sleep(self, previous_attempt_number, delay_since_first_attempt_ms):
+    def fixed_sleep(self, previous_attempt_number:int, delay_since_first_attempt_ms:int) -> int:
         """Sleep a fixed amount of time between each retry."""
         return self._wait_fixed
 
-    def random_sleep(self, previous_attempt_number, delay_since_first_attempt_ms):
+    def random_sleep(self, previous_attempt_number:int, delay_since_first_attempt_ms:int) -> int:
         """Sleep a random amount of time between wait_random_min and wait_random_max"""
         return random.randint(self._wait_random_min, self._wait_random_max)
 
-    def incrementing_sleep(self, previous_attempt_number, delay_since_first_attempt_ms):
+    def incrementing_sleep(self, previous_attempt_number:int, delay_since_first_attempt_ms:int) -> int:
         """
-        Sleep an incremental amount of time after each attempt, starting at
-        wait_incrementing_start and incrementing by wait_incrementing_increment
+            Sleep an incremental amount of time after each attempt, starting at
+            wait_incrementing_start and incrementing by wait_incrementing_increment
         """
         result = self._wait_incrementing_start + (self._wait_incrementing_increment * (previous_attempt_number - 1))
         if result > self._wait_incrementing_max:
@@ -154,7 +156,7 @@ class Retrying(object):
             result = 0
         return result
 
-    def exponential_sleep(self, previous_attempt_number, delay_since_first_attempt_ms):
+    def exponential_sleep(self, previous_attempt_number:int, delay_since_first_attempt_ms:int) -> int:
         exp = 2 ** previous_attempt_number
         result = self._wait_exponential_multiplier * exp
         if result > self._wait_exponential_max:
@@ -203,7 +205,7 @@ class Retrying(object):
             if self.stop(attempt_number, delay_since_first_attempt_ms):
                 if not self._wrap_exception and attempt.has_exception:
                     # get() on an attempt with an exception should cause it to be raised, but raise just in case
-                    raise attempt.get()
+                    attempt.get()
                 else:
                     raise RetryError(attempt)
             else:
@@ -218,21 +220,21 @@ class Retrying(object):
 
 class Attempt(object):
     """
-    An Attempt encapsulates a call to a target function that may end as a
-    normal return value from the function or an Exception depending on what
-    occurred during the execution.
+        An Attempt encapsulates a call to a target function that may end as a
+        normal return value from the function or an Exception depending on what
+        occurred during the execution.
     """
 
-    def __init__(self, value, attempt_number, has_exception):
+    def __init__(self, value, attempt_number, has_exception) -> None:
         self.value = value
         self.attempt_number = attempt_number
         self.has_exception = has_exception
 
     def get(self, wrap_exception=False):
         """
-        Return the return value of this Attempt instance or raise an Exception.
-        If wrap_exception is true, this Attempt is wrapped inside of a
-        RetryError before being raised.
+            Return the return value of this Attempt instance or raise an Exception.
+            If wrap_exception is true, this Attempt is wrapped inside of a
+            RetryError before being raised.
         """
         if self.has_exception:
             if wrap_exception:
@@ -251,10 +253,10 @@ class Attempt(object):
 
 class RetryError(Exception):
     """
-    A RetryError encapsulates the last Attempt instance right before giving up.
+        A RetryError encapsulates the last Attempt instance right before giving up.
     """
 
-    def __init__(self, last_attempt):
+    def __init__(self, last_attempt) -> None:
         self.last_attempt = last_attempt
 
     def __str__(self):

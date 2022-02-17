@@ -4,7 +4,6 @@ from ._QueryParameters.ExtractionRangeType import ExtractionRangeType
 from .RelativeInterval import RelativeInterval
 from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
 from Artesian._ClientsExecutor.Client import _Client
-
 import asyncio
 import itertools
 from typing import List
@@ -66,8 +65,8 @@ class _Query:
                 Query.
         """
         self._queryParameters.extractionRangeType = ExtractionRangeType.DateRange
-        self._queryParameters.extractionRangeSelectionConfig.dateStart = start
-        self._queryParameters.extractionRangeSelectionConfig.dateEnd = end
+        self._queryParameters.extractionRangeConfig.dateStart = start
+        self._queryParameters.extractionRangeConfig.dateEnd = end
         return self
     def _inRelativePeriodRange(self, pstart: str, pend: str) -> _Query:
         """ Gets the Query in a relative period range time window.
@@ -81,8 +80,8 @@ class _Query:
         """
 
         self._queryParameters.extractionRangeType = ExtractionRangeType.PeriodRange
-        self._queryParameters.extractionRangeSelectionConfig.periodFrom = pstart
-        self._queryParameters.extractionRangeSelectionConfig.periodTo = pend
+        self._queryParameters.extractionRangeConfig.periodFrom = pstart
+        self._queryParameters.extractionRangeConfig.periodTo = pend
         return self
     def _inRelativePeriod(self, period: str) -> _Query:
         """ Gets the Query in a relative period of a time window.
@@ -94,7 +93,7 @@ class _Query:
                 Query.
         """
         self._queryParameters.extractionRangeType = ExtractionRangeType.Period
-        self._queryParameters.extractionRangeSelectionConfig.period = period
+        self._queryParameters.extractionRangeConfig.period = period
         return self
     def _inRelativeInterval(self, relativeInterval: RelativeInterval) -> _Query:
         """ Gets the Relative Interval considers a specific interval of time window.
@@ -106,21 +105,22 @@ class _Query:
                 Query.
         """
         self._queryParameters.extractionRangeType = ExtractionRangeType.RelativeInterval
-        self._queryParameters.extractionRangeSelectionConfig.relativeInterval = relativeInterval
+        self._queryParameters.extractionRangeConfig.relativeInterval = relativeInterval
         return self
-    def _buildExtractionRangeRoute(self, queryParamaters) -> _Query:
+    def _buildExtractionRangeRoute(self, queryParamaters:_QueryParameters) -> str:
         rela = None
-        if queryParamaters.extractionRangeSelectionConfig.relativeInterval is not None:
-            rela = self.__getRelativeInterval(queryParamaters.extractionRangeSelectionConfig.relativeInterval)
+        if queryParamaters.extractionRangeConfig.relativeInterval is not None:
+            rela = self.__getRelativeInterval(queryParamaters.extractionRangeConfig.relativeInterval)
         
         switcher = {
-            ExtractionRangeType.DateRange: f"{self.__toUrlParam(queryParamaters.extractionRangeSelectionConfig.dateStart, queryParamaters.extractionRangeSelectionConfig.dateEnd)}",
-            ExtractionRangeType.Period: f"{queryParamaters.extractionRangeSelectionConfig.period}",
-            ExtractionRangeType.PeriodRange: f"{queryParamaters.extractionRangeSelectionConfig.periodFrom}/{queryParamaters.extractionRangeSelectionConfig.periodTo}",
+            ExtractionRangeType.DateRange: f"{self.__toUrlParam(queryParamaters.extractionRangeConfig.dateStart, queryParamaters.extractionRangeConfig.dateEnd)}",
+            ExtractionRangeType.Period: f"{queryParamaters.extractionRangeConfig.period}",
+            ExtractionRangeType.PeriodRange: f"{queryParamaters.extractionRangeConfig.periodFrom}/{queryParamaters.extractionRangeConfig.periodTo}",
             ExtractionRangeType.RelativeInterval: f"{rela}"
         }
+        assert queryParamaters.extractionRangeType is not None
         subPath = switcher.get(queryParamaters.extractionRangeType, "ExtractionRangeType")
-        if subPath == "ExtractionRangeType" or subPath is None :
+        if subPath == "ExtractionRangeType" or subPath is None:
             raise Exception("Not supported RangeType")
         return subPath
     def _exec(self, urls) -> list:
@@ -130,7 +130,7 @@ class _Query:
     async def _execAsync(self, urls) -> list:
             with self._client as c:
                 res = await asyncio.gather(*[self._requestExecutor.exec(c.exec, 'GET', i, None) for i in urls])
-                return list(itertools.chain(res))
+                return list(itertools.chain(*res))
     def __toUrlParam(self, start, end):
         return f"{start}/{end}"
     def _validateQuery(self):
@@ -154,7 +154,6 @@ class _Query:
         if subPath == "RelativeInterval" :
             raise Exception("Not supported RelativeInterval")
         return subPath
-
 
 def get_event_loop():
     """

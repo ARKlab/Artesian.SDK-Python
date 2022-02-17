@@ -19,7 +19,7 @@ class QueryService:
     """
     __queryRoute = "query" 
     __queryVersion = "v1.0"
-    def __init__(self, artesianConfig: ArtesianConfig):
+    def __init__(self, artesianConfig: ArtesianConfig) -> None:
         """ 
             Inits QueryService
         

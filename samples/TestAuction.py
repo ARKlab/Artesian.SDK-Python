@@ -25,7 +25,6 @@ testP=testR.inRelativePeriod("P0Y0M-10D") \
     .execute()
 print(testP[1])
 
-
 #Split - Daily
 testSplit = qs.createAuction() \
     .forMarketData([100181943,100181945,100181946,100181947,100181949,100181950,100181951,100181952,100181954,100181955,100181956,

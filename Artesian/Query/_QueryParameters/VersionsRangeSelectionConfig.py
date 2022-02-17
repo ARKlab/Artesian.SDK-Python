@@ -9,16 +9,16 @@ class VersionsRangeSelectionConfig:
             periodTo: period end for the version range selection configuration.
     """
             
-    def __init__(self):
+    def __init__(self, dateStart: str=None, dateEnd: str=None, period: str=None, periodFrom: str=None, periodTo: str=None) -> None:
         """ Inits for the Versions Range Selection Configuration. """
         
-        self.dateStart = None
+        self.dateStart = dateStart
         """ Start date for the versions range selection configuration. (ISO format)"""
-        self.dateEnd = None
+        self.dateEnd = dateEnd
         """ End date for the versions range selection configuration. (ISO format)"""
-        self.period = None
+        self.period = period
         """ Period for the versions range selection configuration. (ISO format)"""
-        self.periodFrom = None
+        self.periodFrom = periodFrom
         """ Period Start for the versions range selection configuration. (ISO format)"""
-        self.periodTo = None
+        self.periodTo = periodTo
         """ Period End for the versions range selection configuration. (ISO format)"""

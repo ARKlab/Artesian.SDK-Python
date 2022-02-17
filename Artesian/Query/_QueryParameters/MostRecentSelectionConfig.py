@@ -8,7 +8,7 @@ class MostRecentSelectionConfig:
                periodFrom: period start for most recent selection.
                periodTo: period end for most recent selection.
     """
-    def __init__(self):
+    def __init__(self) -> None:
         """ Inits for the Most Recent Selection Configuration. """
         self.dateStart = None
         """ Start date for most recent selection. (ISO format)"""

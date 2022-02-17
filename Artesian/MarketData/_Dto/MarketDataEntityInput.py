@@ -1,6 +1,5 @@
-from dataclasses import dataclass, field
-from typing import Optional
-from .ArtesianTags import ArtesianTags
+from dataclasses import dataclass
+from typing import Dict, List, Optional
 from .._Enum import MarketDataType
 from .._Enum import AggregationRule
 from .._Enum import Granularity
@@ -30,10 +29,9 @@ class MarketDataEntityInput:
     type: MarketDataType
     originalTimezone: str
     aggregationRule: AggregationRule = AggregationRule.Undefined
-    # the default_factory is needed otherwise the 'jsons' package do not hook into custom deserialize when using default values. \_-_/
-    tags: Optional[ArtesianTags] = field(default_factory=lambda: None)
-    providerDescription: str = None
-    transformID: int = None
+    tags: Optional[Dict[str, List[str]]] = None
+    providerDescription: Optional[str] = None
+    transformID: Optional[int] = None
     marketDataId: int = 0
-    eTag: str = None
+    eTag: Optional[str] = None
     

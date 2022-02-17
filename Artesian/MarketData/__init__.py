@@ -1,9 +1,8 @@
 from .MarketDataService import MarketDataService
 from ._Enum.AggregationRule import AggregationRule
-from ._Enum.Granularity import Granularity
+from ..Granularity import Granularity
 from ._Enum.MarketDataType import MarketDataType
 from ._Dto import (
-    ArtesianTags,
     AuctionBids,AuctionBidValue,
     BidAskValue,
     CurveRangeEntity,
@@ -18,7 +17,6 @@ __all__=[
     AggregationRule.__name__,
     Granularity.__name__,
     MarketDataType.__name__,
-    ArtesianTags.__name__,
     AuctionBids.__name__,
     AuctionBidValue.__name__,
     BidAskValue.__name__,

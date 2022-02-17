@@ -1,3 +1,4 @@
+from typing import List
 from .ExtractionRangeConfig import ExtractionRangeConfig
 from .QueryParameters import _QueryParameters
 from .VersionSelectionConfig import VersionSelectionConfig
@@ -11,7 +12,7 @@ class VersionedQueryParameters(_QueryParameters):
 
         Attributes:
             ids: sets list of marketdata ID's to be queried
-            extractionRangeSelectionConfig: Sets the extraction range configuration.
+            extractionRangeConfig: Sets the extraction range configuration.
             extraxtionRangeType: Sets the extraction range type.
             timezone: specifies the timezone of extracted marketdata.
             filterId: filters marketdata ID to be queries.
@@ -19,25 +20,23 @@ class VersionedQueryParameters(_QueryParameters):
             transformId: sets time range.
             versionSelectionConfig: Sets the version selectuon configuration.
             versionSelectionType: Sets the version selection time.
-
     """
-
-    def __init__(self, ids: int, 
-                       extractionRangeSelectionConfig : ExtractionRangeConfig, 
-                       extractionRangeType: ExtractionRangeType, 
-                       timezone: str, 
-                       filterId: int, 
-                       granularity: Granularity, 
-                       transformId: int, 
-                       versionSelectionConfig: VersionSelectionConfig, 
-                       versionSelectionType: VersionSelectionType) -> _QueryParameters:
+    def __init__(self, ids: List[int] = None, 
+                       extractionRangeConfig : ExtractionRangeConfig = ExtractionRangeConfig(), 
+                       extractionRangeType: ExtractionRangeType = None, 
+                       timezone: str = None, 
+                       filterId: int = None, 
+                       granularity: Granularity = None, 
+                       transformId: str = None, 
+                       versionSelectionConfig: VersionSelectionConfig = VersionSelectionConfig(), 
+                       versionSelectionType: VersionSelectionType = None) -> None:
         """ 
             Inits ActualQueryParameters 
         
             Args:
 
                 ids: An int that ets list of marketdata ID's to be queried
-                extractionRangeSelectionConfig: Sets the extraction range configuration.
+                extractionRangeConfig: Sets the extraction range configuration.
                 extraxtionRangeType: Sets the extraction range type.
                 timezone: IANA Format. A string pecifies the timezone of extracted marketdata.
                 filterId: An int that filters marketdata ID to be queries.
@@ -46,13 +45,8 @@ class VersionedQueryParameters(_QueryParameters):
                 versionSelectionConfig: Sets the version selectuon configuration.
                 versionSelectionType: Sets the version selection time.
         """
-       
-        _QueryParameters.__init__(self, ids, extractionRangeSelectionConfig, extractionRangeType, timezone, filterId)
-        self.granularity = granularity
+        _QueryParameters.__init__(self, ids, extractionRangeConfig, extractionRangeType, timezone, filterId)
         self.transformId = transformId
-        self.fill = None
-        if(versionSelectionConfig is None):
-            self.versionSelectionConfig = VersionSelectionConfig()
-        else:
-            self.versionSelectionConfig = versionSelectionConfig
+        self.granularity = granularity
+        self.versionSelectionConfig = versionSelectionConfig or VersionSelectionConfig()
         self.versionSelectionType = versionSelectionType

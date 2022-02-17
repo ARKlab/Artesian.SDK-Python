@@ -1,8 +1,8 @@
 from enum import Enum
 class Status(Enum):
-    Acc = 1
-    Inc = 2
-    Rej = 3
-    Rep = 4
-    Rev = 5
-    Sub = 6
+    ACC = 1
+    INC = 2
+    REJ = 3
+    REP = 4
+    REV = 5
+    SUB = 6

@@ -1,14 +1,16 @@
 from __future__ import annotations
+from typing import List
+from urllib import parse
 from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
 from Artesian._ClientsExecutor.Client import _Client
 from .DefaultPartitionStrategy import DefaultPartitionStrategy
 from ._Query import _Query
+from Artesian.Query._QueryParameters.QueryParameters import _FillCustomMasStrategy, _FillCustomVersionedStrategy, _FillLatestStrategy, _NoFillStrategy, _NullFillStrategy
 from ._QueryParameters.VersionedQueryParameters import VersionedQueryParameters
 from ._QueryParameters.ExtractionRangeConfig import ExtractionRangeConfig
 from ._QueryParameters.VersionSelectionType import VersionSelectionType
 from .RelativeInterval import RelativeInterval
 from Artesian.MarketData import Granularity
-import urllib
 
 class VersionedQuery(_Query):
     __routePrefix = "vts"
@@ -17,11 +19,12 @@ class VersionedQuery(_Query):
                        partitionStrategy: DefaultPartitionStrategy) -> None:
         """ Inits _VersionedQuery """
 
-        queryParameters = VersionedQueryParameters(None,ExtractionRangeConfig(), None, None, None, None, None, None, None) 
+        queryParameters = VersionedQueryParameters(None,ExtractionRangeConfig(), None, None, None, None, None) 
         _Query.__init__(self, client, requestExecutor, queryParameters)
+        self._queryParameters = queryParameters
         self.__partition= partitionStrategy
 
-    def forMarketData(self, ids: int) -> VersionedQuery:
+    def forMarketData(self, ids: List[int]) -> VersionedQuery:
         """ Set the list of marketdata to be queried.
 
             Args:
@@ -67,7 +70,7 @@ class VersionedQuery(_Query):
         """
         super()._inAbsoluteDateRange(start, end)
         return self
-    def inRelativePeriodRange(self, pStart: str, pEnd: str =None) -> VersionedQuery:
+    def inRelativePeriodRange(self, pStart: str, pEnd: str) -> VersionedQuery:
         """ Gets the Versioned Query in a relative period range time window.
         
             Args:
@@ -228,7 +231,7 @@ class VersionedQuery(_Query):
             Returns: 
                 VersionedQuery.
         """
-        self._queryParameters.fill = _NullFillStategy()
+        self._queryParameters.fill = _NullFillStrategy()
         return self
     def withFillNone(self) -> VersionedQuery:
         """ Optional filler strategy for the extraction.
@@ -238,7 +241,7 @@ class VersionedQuery(_Query):
             Returns: 
                 VersionedQuery.
         """
-        self._queryParameters.fill = _NoFillStategy()
+        self._queryParameters.fill = _NoFillStrategy()
         return self
     def withFillLatestValue(self, period: str) -> VersionedQuery:
         """ Optional filler strategy for the extraction.
@@ -249,18 +252,18 @@ class VersionedQuery(_Query):
             Returns: 
                 VersionedQuery.
         """
-        self._queryParameters.fill = _FillLatestStategy(period)
+        self._queryParameters.fill = _FillLatestStrategy(period)
         return self
     def withFillCustomValue(self, val: float) -> VersionedQuery:
         """ Optional filler strategy for the extraction.
         
             Args:
-               val: float value to fill in case there are missing values. Ex.: withFillCustomValue(10)
+               val: float value to fill in case there are missing values. Ex.: .withFillCustomValue(10)
 
             Returns: 
                 VersionedQuery.
          """
-        self._queryParameters.fill = _FillCustomStategy(val)
+        self._queryParameters.fill = _FillCustomVersionedStrategy(val)
         return self
     def execute(self) -> list:
         """ 
@@ -270,14 +273,14 @@ class VersionedQuery(_Query):
                 list of VersionedQuery."""
         urls = self.__buildRequest()
         return super()._exec(urls)
-    def executeAsync(self) -> list:
+    async def executeAsync(self) -> list:
         """ 
             Execute Async Query.
         
             Returns:
                 list of VersionedQuery"""
         urls = self.__buildRequest()
-        return super()._execAsync(urls)
+        return await super()._execAsync(urls)
     def __buildRequest(self):
         self.__validateQuery()
         qps = self.__partition.PartitionVersioned([self._queryParameters])
@@ -287,10 +290,10 @@ class VersionedQuery(_Query):
             if not (qp.ids is None):
                 sep = ","
                 ids= sep.join(map(str,qp.ids))
-                enc = urllib.parse.quote_plus(ids)
+                enc = parse.quote_plus(ids)
                 url = url + "&id=" + enc
             if not (qp.filterId is None):
-                url = url + "&filterId=" + qp.filterId
+                url = url + '&filterId=' + 'qp.filterId'
             if not (qp.timezone is None):
                 url = url + "&tz=" + qp.timezone
             if not (qp.transformId is None):
@@ -314,6 +317,7 @@ class VersionedQuery(_Query):
             VersionSelectionType.MostRecent: f"MostRecent/" + self.__buildVersionRange(),
             VersionSelectionType.Version: f"Version/{self._queryParameters.versionSelectionConfig.version}"
         }
+        assert self._queryParameters.versionSelectionType is not None
         vr = switcher.get(self._queryParameters.versionSelectionType, "VType")
         if vr == "VType" :
             raise Exception("Not supported VersionType")
@@ -345,7 +349,6 @@ class VersionedQuery(_Query):
             raise Exception("Not supported Granularity")
         return vr
 
-
 class _NullFillStategy:    
     def getUrlParams(self):
         return "fillerK=Null"
@@ -360,8 +363,3 @@ class _FillLatestStategy:
     def getUrlParams(self):
         return f"fillerK=LatestValidValue&fillerP={self.period}"
 
-class _FillCustomStategy:
-    def __init__(self, val):
-        self.val = val
-    def getUrlParams(self):
-        return f"fillerK=CustomValue&fillerDV={self.val}"

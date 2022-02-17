@@ -22,7 +22,10 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             marketDataName = "MARKETDATA",
             originalGranularity=Granularity.Day,
             type=MarketDataType.ActualTimeSerie,
-            originalTimezone="CET"
+            originalTimezone="CET",
+            tags={
+                'PythonTag': ['PythonTagValue1', 'PythonTagValue2']
+            }
         )
         self.maxDiff = None
         self.__baseurl = 'https://baseurl.com/v2.1'
@@ -33,8 +36,24 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
         return super().setUp()
 
     async def test_registerMarketData(self):
+        expectedJson={
+            'MarketDataId': 0,
+            'ProviderName':"PROVIDER",
+            'MarketDataName':"MARKETDATA",
+            'OriginalGranularity':"Day",
+            'Type':"ActualTimeSerie",
+            'OriginalTimezone':"CET",
+            'Tags': [{
+                'Key': "PythonTag",
+                'Value': ["PythonTagValue1", "PythonTagValue2"]
+            }],
+            'AggregationRule':"Undefined"
+        }
+        
         with responses.RequestsMock() as rsps:
-            rsps.add('POST', self.__baseurl + '/marketdata/entity', json=self.__serializedOutput, status=200)
+            rsps.add('POST', self.__baseurl + '/marketdata/entity', 
+                match=[responses.matchers.json_params_matcher(expectedJson)],
+                json=self.__serializedOutput, status=200)
 
             output = await self.__service.registerMarketDataAsync(self.__sampleInput)
 
@@ -75,7 +94,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             rsps.add('GET', self.__baseurl + '/marketdata/entity/' + str(self.__id) + "/curves", 
                 match=[responses.matchers.query_param_matcher(params)], 
                 json=self.__curveRangeSerializedOutput, status = 200)            
-            output = await self.__service.readCurveRangeAsync(self.__id,params['page'],params['pageSize'])           
+            output = await self.__service.readCurveRangeAsync(self.__id, int(params['page']), int(params['pageSize']))       
             self.assertEqual(output, self.__curveRangeOutput)
 
     async def test_readCurveRangeProductAsync(self):
@@ -84,7 +103,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             rsps.add('GET', self.__baseurl + '/marketdata/entity/' + str(self.__id) + "/curves", 
                 match=[responses.matchers.query_param_matcher(params)], 
                 json=self.__curveRangeSerializedOutput, status = 200)           
-            output = await self.__service.readCurveRangeAsync(self.__id,params['page'],params['pageSize'],params['product'])         
+            output = await self.__service.readCurveRangeAsync(self.__id, int(params['page']), int(params['pageSize']), params['product'])     
             self.assertEqual(output, self.__curveRangeOutput)
     
     async def test_readCurveRangeVersionFromToAsync(self):
@@ -93,6 +112,6 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             rsps.add('GET', self.__baseurl + '/marketdata/entity/' + str(self.__id) + "/curves", 
                 match=[responses.matchers.query_param_matcher(params)], 
                 json=self.__curveRangeSerializedOutput, status = 200)         
-            output = await self.__service.readCurveRangeAsync(self.__id,params['page'],params['pageSize'], None, params['versionFrom'], params['versionTo'])        
+            output = await self.__service.readCurveRangeAsync(self.__id, int(params['page']), int(params['pageSize']), None, params['versionFrom'], params['versionTo'])        
             self.assertEqual(output, self.__curveRangeOutput)
     

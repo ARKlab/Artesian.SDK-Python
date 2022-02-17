@@ -4,10 +4,10 @@ import platform
 
 from .ArtesianJsonSerializer import artesianJsonSerialize, artesianJsonDeserialize
 from Artesian._package_info import __version__
-from Artesian.Exceptions import (ArtesianSdkServerException, ArtesianSdkValidationException, ArtesianSdkForbiddenException, ArtesianSdkOptimisticConcurrencyException)
+from Artesian.Exceptions import (ArtesianSdkException, ArtesianSdkRequestException, ArtesianSdkServerException, ArtesianSdkValidationException, ArtesianSdkForbiddenException, ArtesianSdkOptimisticConcurrencyException)
 
 class _Client:
-    def __init__(self, baseUrl, apiKey):
+    def __init__(self, baseUrl, apiKey) -> None:
         sdkVersion = __version__
 
         artesianAgentString = "'ArtesianSDK-Python:" + sdkVersion + "," + platform.system() + " " + platform.release() + ":"  + platform.version() + ",Python:" + platform.python_version()
@@ -19,22 +19,27 @@ class _Client:
         return self
     def __exit__(self, *args):
         self.__session.__exit__(args)
-    async def exec(self, method: str, url: str, obj: object = None, retcls: type = None, params:dict = None):
+    async def exec(self, method: str, url: str, obj: object = None, retcls: type = None, params:dict = None):        
         json = artesianJsonSerialize(obj)
-        r = requests.Request(method, self.__baseUrl + url, json=json, params=params)
+        url = self.__baseUrl + url
+        r = requests.Request(method, url, json=json, params=params)
         prep = self.__session.prepare_request(r)
-        res = self.__session.send(prep)
+        try:
+            res = self.__session.send(prep)
+        except Exception as e:
+            raise ArtesianSdkRequestException("Unexpected error while calling {}|{}".format(method,url)) from e
 
-        mimetype, _ = cgi.parse_header(res.headers['Content-Type'])
+        mimetype, _ = cgi.parse_header(res.headers.get('Content-Type', ''))
 
         if res.status_code >= 200 and res.status_code < 300:
             if mimetype == 'application/json':
-                return artesianJsonDeserialize(res.json(), retcls)
+                return artesianJsonDeserialize(res.json(), retcls) if retcls is not None else res.json()
             if mimetype.split('/')[0] == 'text':
                 return res.text
             return res.content
 
-        if res.status_code == 404:
+        # /upsertData is supposed to returns 204 thus None which would not be distingushable from 404 None
+        if res.status_code == 404 and retcls is not None:
             return None
         
         problemDetails = None
@@ -46,11 +51,11 @@ class _Client:
             errorText = res.text
         
         if res.status_code == 400: # BadRequest
-            raise ArtesianSdkValidationException(method, self.__baseUrl + url, res.status_code, problemDetails, errorText)        
+            raise ArtesianSdkValidationException(method, url, res.status_code, problemDetails, errorText)        
         if res.status_code in [409, 412]: # Conflict, PreconditionFailed
-            raise ArtesianSdkOptimisticConcurrencyException(method, self.__baseUrl + url, res.status_code, problemDetails, errorText)
+            raise ArtesianSdkOptimisticConcurrencyException(method, url, res.status_code, problemDetails, errorText)
         if res.status_code in [401, 403]: # Unauthenticated, Forbidden
-            raise ArtesianSdkForbiddenException(method, self.__baseUrl + url, res.status_code, problemDetails, errorText)
+            raise ArtesianSdkForbiddenException(method, url, res.status_code, problemDetails, errorText)
         
         # if we reached here it means that is a 500 or another unknown error
-        raise ArtesianSdkServerException(method, self.__baseUrl + url, res.status_code, problemDetails, errorText)
+        raise ArtesianSdkServerException(method, url, res.status_code, problemDetails, errorText)

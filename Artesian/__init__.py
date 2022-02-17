@@ -5,6 +5,7 @@ from ._package_info import __version__
 from . import Query
 from . import MarketData
 from . import GMEPublicOffers
+from .Granularity import Granularity
 
 __all__=[
     ArtesianConfig.__name__,
@@ -17,5 +18,6 @@ __all__=[
     ArtesianSdkRemoteException.__name__,
     Query.__name__,
     MarketData.__name__,
-    GMEPublicOffers.__name__
+    GMEPublicOffers.__name__,
+    Granularity.__name__
 ]

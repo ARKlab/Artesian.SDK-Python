@@ -6,10 +6,9 @@ class VersionSelectionConfig:
             lastN: last N for version selection.
             version: for the selection
             versionRange: based on the version range selection configuration.
-    """
-            
-    def __init__(self):
+    """   
+    def __init__(self, lastN: int  =None, version: str  =None, versionsRange: str  =None) -> None:
         """ Inits for the Version Selection Configuration. """
-        self.lastN = None
-        self.version = None
+        self.lastN = lastN
+        self.version = version
         self.versionsRange = VersionsRangeSelectionConfig()

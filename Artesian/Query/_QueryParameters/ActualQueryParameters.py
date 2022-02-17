@@ -1,4 +1,4 @@
-
+from typing import List
 from .QueryParameters import _QueryParameters
 from .ExtractionRangeType import ExtractionRangeType
 from .ExtractionRangeConfig import ExtractionRangeConfig
@@ -10,36 +10,35 @@ class ActualQueryParameters(_QueryParameters):
 
             Attributes:
                 ids: sets list of marketdata ID's to be queried
-                extractionRangeSelectionConfig: Sets the extraction range configuration.
-                extraxtionRangeType: Sets the extraction range type.
+                extractionRangeConfig: Sets the extraction range configuration.
+                extractionRangeType: Sets the extraction range type.
                 timezone: specifies the timezone of extracted marketdata.
                 filterId: filters marketdata ID to be queries.
                 granularity: sets  the granularity to be queried.        
                 transformId: sets time range.
     """
 
-    def __init__(self, ids: int, 
-                       extractionRangeSelectionConfig: ExtractionRangeConfig, 
-                       extractionRangeType: ExtractionRangeType, 
-                       timezone: str, 
-                       filterId: int, 
-                       granularity: Granularity, 
-                       transformId: int) -> _QueryParameters: 
+    def __init__(self, ids:List[int] = None, 
+                       extractionRangeConfig: ExtractionRangeConfig = None, 
+                       extractionRangeType: ExtractionRangeType = None, 
+                       timezone: str = None, 
+                       filterId: int = None, 
+                       granularity: Granularity = None, 
+                       transformId: str = None) -> None: 
         """ 
             Inits ActualQueryParameters 
         
             Args:
 
                 ids: An int that sets list of marketdata ID's to be queried
-                extractionRangeSelectionConfig: Sets the extraction range configuration.
+                extractionRangeConfig: Sets the extraction range configuration.
                 extraxtionRangeType: Sets the extraction range type.
                 timezone: IANA Format. A string that specifies the timezone of extracted marketdata.
                 filterId: An int that filters marketdata ID to be queries.
                 granularity: An enum that sets  the granularity to be queried.        
-                transformId: An int that sets time range. 
+                transformId: The name of the Time Transform to use for extraction.
         """
-
-        _QueryParameters.__init__(self, ids, extractionRangeSelectionConfig, extractionRangeType, timezone, filterId)
+        _QueryParameters.__init__(self, ids, extractionRangeConfig, extractionRangeType, timezone, filterId)
         self.granularity = granularity
         self.transformId = transformId
-        self.fill = None
+        

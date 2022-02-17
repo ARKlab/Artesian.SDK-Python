@@ -1,5 +1,5 @@
 from .AggregationRule import AggregationRule
-from .Granularity import Granularity
+from ...Granularity import Granularity
 from .MarketDataType import MarketDataType
 
 __all__ = [

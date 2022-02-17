@@ -1,4 +1,5 @@
 import copy
+from typing import List
 from ._QueryParameters.ActualQueryParameters import ActualQueryParameters
 from ._QueryParameters.VersionedQueryParameters import VersionedQueryParameters
 from ._QueryParameters.AuctionQueryParameters import AuctionQueryParameters
@@ -11,7 +12,7 @@ class DefaultPartitionStrategy:
     maxNumberOfIds = 15
     """ Only 15 allowed."""
     
-    def PartitionActual(self, actualQueryParameters: list[ActualQueryParameters]) -> list[ActualQueryParameters]:
+    def PartitionActual(self, actualQueryParameters: List[ActualQueryParameters]) -> List[ActualQueryParameters]:
         """ 
             The partition strategy for the Actual Time Series Query.
 
@@ -22,7 +23,7 @@ class DefaultPartitionStrategy:
         """
         return self._tsPartitionStrategy(actualQueryParameters)
 
-    def PartitionAuction(self, auctionQueryParameters: list[AuctionQueryParameters]) -> list[AuctionQueryParameters]:
+    def PartitionAuction(self, auctionQueryParameters: List[AuctionQueryParameters]) -> List[AuctionQueryParameters]:
         """ 
             The partition strategy for the Auction Time Series Query.
 
@@ -33,7 +34,7 @@ class DefaultPartitionStrategy:
         """
         return self._tsPartitionStrategy(auctionQueryParameters)
 
-    def PartitionVersioned(self, versionedQueryParameters: list[VersionedQueryParameters]) -> list[VersionedQueryParameters]:
+    def PartitionVersioned(self, versionedQueryParameters: List[VersionedQueryParameters]) -> List[VersionedQueryParameters]:
         """ 
             The partition strategy for the Versioned Time Series Query.
 
@@ -45,7 +46,7 @@ class DefaultPartitionStrategy:
         return self._tsPartitionStrategy(versionedQueryParameters)
        
 
-    def PartitionMas(self, masQueryParameters: list[MasQueryParameters]) -> list[MasQueryParameters]:
+    def PartitionMas(self, masQueryParameters: List[MasQueryParameters]) -> List[MasQueryParameters]:
         """ 
             The partition strategy for the Market Assessment Query.
 
@@ -57,7 +58,7 @@ class DefaultPartitionStrategy:
         return self._tsPartitionStrategy(masQueryParameters)
 
 
-    def PartitionBidAsk(self, bidAskQueryParameters: list[BidAskQueryParameters]) -> list[BidAskQueryParameters]:
+    def PartitionBidAsk(self, bidAskQueryParameters: List[BidAskQueryParameters]) -> List[BidAskQueryParameters]:
         """ 
             The partition strategy for the Bid Ask Query.
 

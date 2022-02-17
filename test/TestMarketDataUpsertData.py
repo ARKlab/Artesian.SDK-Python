@@ -1,11 +1,11 @@
 from Artesian import ArtesianConfig
-import responses
-import unittest
-from datetime import date, datetime
 from Artesian._ClientsExecutor.ArtesianJsonSerializer import artesianJsonSerialize
 from Artesian.MarketData import MarketDataService,MarketDataIdentifier,UpsertData,MarketAssessmentValue,BidAskValue,AuctionBids,AuctionBidValue
+from datetime import datetime
+import responses
+import unittest
 
-import dateutil
+from dateutil import tz
 
 cfg = ArtesianConfig("https://baseurl.com","apikey")
 
@@ -26,10 +26,10 @@ class TestMarketDataServiceUpsertData(unittest.IsolatedAsyncioTestCase):
             },
             'Timezone': "CET",
             'Rows': [
-                { 'Key': '2020-01-01T00:00:00.000000', 'Value': 42.0 },
-                { 'Key': '2020-01-02T00:00:00.000000', 'Value': 43.0 }
+                { 'Key': '2020-01-01T01:00:00.000000', 'Value': 42.0 },
+                { 'Key': '2020-01-02T02:00:00.000000', 'Value': 43.0 }
             ],
-            'DeferCommandExecution': True,
+            'DeferCommandExecution': False,
             'DeferDataGeneration': True,
             'KeepNulls': False,
             'DownloadedAt': '2020-01-03T00:00:00.000000Z'
@@ -37,16 +37,16 @@ class TestMarketDataServiceUpsertData(unittest.IsolatedAsyncioTestCase):
         upsert = UpsertData(MarketDataIdentifier('PROVIDER', 'CURVENAME'), 'CET', 
             rows=
             {
-                datetime(2020,1,1): 42.0,
-                datetime(2020,1,2): 43.0,
+                datetime(2020,1,1,1): 42.0,
+                datetime(2020,1,2,2): 43.0,
             },
-            downloadedAt=datetime(2020,1,3).replace(tzinfo=dateutil.tz.UTC)
+            downloadedAt=datetime(2020,1,3).replace(tzinfo=tz.UTC)
             )
         ser = artesianJsonSerialize(upsert)
         self.assertEqual(ser, expectedJson)
         
         with responses.RequestsMock() as rsps:
-            rsps.add('POST', self.__baseurl + '/upsertdata', 
+            rsps.add('POST', self.__baseurl + '/marketdata/upsertdata', 
                 match=[responses.matchers.json_params_matcher(expectedJson)],
                 status=200)
 
@@ -60,30 +60,48 @@ class TestMarketDataServiceUpsertData(unittest.IsolatedAsyncioTestCase):
                 "Provider": "PROVIDER",
                 "Name": "CURVENAME"
             },
-            "MarketAssessment": {
-                "2020-01-01T00:00:00.000000": {
-                    "Feb-20": {
-                        "Open": 10.0,
-                        "Close": 11.0
-                    },
-                    "Mar-20": {
-                        "Open": 20.0,
-                        "Close": 21.0
-                    }
+            "MarketAssessment": [
+                {
+                    'Key':"2020-01-01T00:00:00.000000", 
+                    'Value': [
+                        {
+                            'Key': "Feb-20",
+                            'Value': {
+                                "Open": 10.0,
+                                "Close": 11.0
+                            }
+                        },
+                        {
+                            'Key': "Mar-20",
+                            'Value': {
+                                "Open": 20.0,
+                                "Close": 21.0
+                            }
+                        }
+                    ]
                 },
-                "2020-01-02T00:00:00.000000": {
-                    "Feb-20": {
-                        "Open": 11.0,
-                        "Close": 12.0
-                    },
-                    "Mar-20":{
-                        "Open": 21.0,
-                        "Close": 22.0
-                    }
+                {
+                    'Key':"2020-01-02T00:00:00.000000",
+                    'Value': [
+                        {
+                            'Key': "Feb-20",
+                            'Value': {
+                                "Open": 11.0,
+                                "Close": 12.0
+                            },
+                        },
+                        {
+                            'Key':"Mar-20",
+                            'Value': {
+                                "Open": 21.0,
+                                "Close": 22.0
+                            }
+                        }
+                    ]
                 }
-            },
+            ],
             "Timezone": "CET",
-            "DeferCommandExecution": True,
+            "DeferCommandExecution": False,
             "DeferDataGeneration": True,
             "KeepNulls": False,
             "DownloadedAt": "2020-01-03T00:00:00.000000Z"
@@ -102,7 +120,7 @@ class TestMarketDataServiceUpsertData(unittest.IsolatedAsyncioTestCase):
                     "Mar-20": MarketAssessmentValue(open=21.0, close=22.0)
                 }
             },
-            downloadedAt=datetime(2020,1,3).replace(tzinfo=dateutil.tz.UTC)
+            downloadedAt=datetime(2020,1,3).replace(tzinfo=tz.UTC)
             )
         ser = artesianJsonSerialize(upsert)
         self.assertEqual(ser, expectedJson)
@@ -117,35 +135,53 @@ class TestMarketDataServiceUpsertData(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(len(rsps.calls),1)
 
     async def test_upsertDateSerieBA(self):
-        expectedJson= {
-            "ID": {
+        expectedJson={
+            "ID":{
                 "Provider": "PROVIDER",
                 "Name": "CURVENAME"
             },
-            "BidAsk": {
-                "2020-01-01T00:00:00.000000":{
-                    "Feb-20": {
-                        "BestBidPrice": 15.0,
-                        "LastQuantity": 14.0
-                    },
-                    "Mar-20":{
-                        "BestBidPrice": 25.0,
-                        "LastQuantity": 24.0
-                    }
+            "BidAsk": [
+                {
+                    'Key':"2020-01-01T00:00:00.000000",
+                    'Value': [
+                        { 
+                            'Key':"Feb-20",
+                            'Value': {
+                                "BestBidPrice": 15.0,
+                                "LastQuantity": 14.0
+                            }
+                        },
+                        {
+                            'Key': "Mar-20",
+                            'Value': {
+                                "BestBidPrice": 25.0,
+                                "LastQuantity": 24.0
+                            }   
+                        }
+                    ]
                 },
-    	        "2020-01-02T00:00:00.000000":{
-                    "Feb-20": {
-                        "BestBidPrice": 15.0,
-                        "LastQuantity": 14.0
-                    },
-                    "Mar-20":{
-                        "BestBidPrice": 25.0,
-                        "LastQuantity": 24.0
-                    }
+    	        {
+                    'Key': "2020-01-02T00:00:00.000000",
+                    'Value': [
+                        {
+                            'Key': "Feb-20",
+                            'Value': {
+                            	"BestBidPrice": 15.0,
+                                "LastQuantity": 14.0
+                            },
+                        },
+                        {
+                            'Key':"Mar-20",
+                            'Value': {
+                                "BestBidPrice": 25.0,
+                                "LastQuantity": 24.0
+                            }
+                        }
+                    ]
                 }
-            },
+            ],
             "Timezone": "CET",
-            "DeferCommandExecution": True,
+            "DeferCommandExecution": False,
             "DeferDataGeneration": True,
             "KeepNulls": False,
             "DownloadedAt": "2020-01-03T00:00:00.000000Z"
@@ -164,7 +200,7 @@ class TestMarketDataServiceUpsertData(unittest.IsolatedAsyncioTestCase):
                 }        
 
             },
-            downloadedAt=datetime(2020,1,3).replace(tzinfo=dateutil.tz.UTC)
+            downloadedAt=datetime(2020,1,3).replace(tzinfo=tz.UTC)
             )
         ser = artesianJsonSerialize(upsert)
         self.assertEqual(ser, expectedJson)
@@ -184,27 +220,31 @@ class TestMarketDataServiceUpsertData(unittest.IsolatedAsyncioTestCase):
                 "Provider": "PROVIDER",
                 "Name": "CURVENAME"
             },
-            "AuctionRows": {
-                "2020-01-01T00:00:00.000000": {
+            "AuctionRows": [
+            {
+                'Key': "2020-01-01T00:00:00.000000",
+                'Value': {                        
                     'BidTimestamp':"2020-01-01T00:00:00.000000",
                     'Bid': [{
                         'Price': 11.0,
                         'Quantity': 12.0
-                    },{
+                    },
+                    {
                         'Price': 13.0,
                         'Quantity': 14.0
                     }],
-                    'Offer': [{
+                    'Offer':[{
                         'Price': 21.0,
                         'Quantity': 22.0
-                    },{
+                    },
+                    {
                         'Price': 23.0,
                         'Quantity': 24.0
-                    }]
+                    }]                    
                 }
-            },
+            }],            
             "Timezone": "CET",
-            "DeferCommandExecution": True,
+            "DeferCommandExecution": False,
             "DeferDataGeneration": True,
             "KeepNulls": False,
             "DownloadedAt": "2020-01-03T00:00:00.000000Z"
@@ -222,7 +262,7 @@ class TestMarketDataServiceUpsertData(unittest.IsolatedAsyncioTestCase):
                     ]
                 ) 
             },
-            downloadedAt=datetime(2020,1,3).replace(tzinfo=dateutil.tz.UTC)
+            downloadedAt=datetime(2020,1,3).replace(tzinfo=tz.UTC)
             )
         ser = artesianJsonSerialize(upsert)
         self.assertEqual(ser, expectedJson)

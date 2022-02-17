@@ -1,11 +1,10 @@
 from __future__ import annotations
+from urllib import parse
 from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
 from Artesian._ClientsExecutor.Client import _Client
 from Artesian.Query.DefaultPartitionStrategy import DefaultPartitionStrategy
 from Artesian.Query._Query import _Query
 from Artesian.Query._QueryParameters.AuctionQueryParameters import AuctionQueryParameters
-from Artesian.Query._QueryParameters.ExtractionRangeConfig import ExtractionRangeConfig
-import urllib
 from typing import List
 
 class AuctionQuery(_Query):
@@ -15,8 +14,9 @@ class AuctionQuery(_Query):
                        partitionStrategy: DefaultPartitionStrategy) -> None:
         """ Inits _AuctionQuery """
 
-        queryParameters = AuctionQueryParameters(None,ExtractionRangeConfig(), None, None, None) 
+        queryParameters = AuctionQueryParameters() 
         _Query.__init__(self, client, requestExecutor, queryParameters)
+        self._queryParameters = queryParameters
         self.__partition= partitionStrategy
 
     def forMarketData(self, ids: List[int]) -> AuctionQuery:
@@ -105,14 +105,14 @@ class AuctionQuery(_Query):
                 list of AuctionQuery."""
         urls = self.__buildRequest()
         return super()._exec(urls)
-    def executeAsync(self) -> list:
+    async def executeAsync(self) -> list:
         """ 
             Execute Async Query.
         
             Returns:
                 list of AuctionQuery."""
         urls = self.__buildRequest()
-        return super()._execAsync(urls)
+        return await super()._execAsync(urls)
     def __buildRequest(self):
         self.__validateQuery()
         qps = self.__partition.PartitionAuction([self._queryParameters])
@@ -122,7 +122,7 @@ class AuctionQuery(_Query):
             if not (qp.ids is None):
                 sep = ","
                 ids= sep.join(map(str,qp.ids))
-                enc = urllib.parse.quote_plus(ids)
+                enc = parse.quote_plus(ids)
                 url = url + "&id=" + enc
             if not (qp.filterId is None):
                 url = url + "&filterId=" + str(qp.filterId)

@@ -1,6 +1,6 @@
-
 from __future__ import annotations
-
+from Artesian.Query.MasQuery import _NullFillStategy
+from Artesian.Query._QueryParameters.QueryParameters import _FillCustomTimeserieStrategy, _FillLatestStrategy, _NoFillStrategy, _NullFillStrategy
 from .._ClientsExecutor.RequestExecutor import _RequestExecutor
 from .._ClientsExecutor.Client import _Client
 from .DefaultPartitionStrategy import DefaultPartitionStrategy
@@ -9,7 +9,7 @@ from .RelativeInterval import RelativeInterval
 from ._QueryParameters.ActualQueryParameters import ActualQueryParameters
 from ._QueryParameters.ExtractionRangeConfig import ExtractionRangeConfig
 from Artesian.MarketData import Granularity
-import urllib
+from urllib import parse
 from typing import List
 
 class ActualQuery(_Query):
@@ -18,9 +18,10 @@ class ActualQuery(_Query):
                        requestExecutor: _RequestExecutor, 
                        partitionStrategy: DefaultPartitionStrategy) -> None:
         """ Inits _ActualQuery """
-
-        queryParameters = ActualQueryParameters(None,ExtractionRangeConfig(), None, None, None, None, None) 
+        
+        queryParameters = ActualQueryParameters() 
         _Query.__init__(self, client, requestExecutor, queryParameters)
+        self._queryParameters = queryParameters
         self.__partition= partitionStrategy
 
     def forMarketData(self, ids: List[int]) -> ActualQuery:
@@ -146,7 +147,7 @@ class ActualQuery(_Query):
             Returns: 
                 ActualQuery.
         """
-        self._queryParameters.fill = _NullFillStategy()
+        self._queryParameters.fill = _NullFillStrategy()
         return self
     def withFillNone(self) -> ActualQuery:
         """ 
@@ -157,7 +158,7 @@ class ActualQuery(_Query):
             Returns: 
                 ActualQuery.
         """
-        self._queryParameters.fill = _NoFillStategy()
+        self._queryParameters.fill = _NoFillStrategy()
         return self
     def withFillLatestValue(self, period: str) -> ActualQuery:
         """ 
@@ -169,7 +170,7 @@ class ActualQuery(_Query):
             Returns: 
                 ActualQuery.
         """
-        self._queryParameters.fill = _FillLatestStategy(period)
+        self._queryParameters.fill = _FillLatestStrategy(period)
         return self
     def withFillCustomValue(self, value:float) -> ActualQuery:
         """ 
@@ -181,7 +182,7 @@ class ActualQuery(_Query):
             Returns: 
                 ActualQuery.
         """
-        self._queryParameters.fill = _FillCustomStategy(value)
+        self._queryParameters.fill = _FillCustomTimeserieStrategy(value)
         return self
     def execute(self) -> list:
         """ 
@@ -191,14 +192,14 @@ class ActualQuery(_Query):
                 list of ActualQuery."""
         urls = self.__buildRequest()
         return super()._exec(urls)
-    def executeAsync(self) -> list:
+    async def executeAsync(self) -> list:
         """ 
             Execute Async Query.
             
             Returns:
                 list of ActualQuery."""
         urls = self.__buildRequest()
-        return super()._execAsync(urls)
+        return await super()._execAsync(urls)
     def __buildRequest(self):
         self.__validateQuery()
         qps = self.__partition.PartitionActual([self._queryParameters])
@@ -208,7 +209,7 @@ class ActualQuery(_Query):
             if not (qp.ids is None):
                 sep = ","
                 ids= sep.join(map(str,qp.ids))
-                enc = urllib.parse.quote_plus(ids)
+                enc = parse.quote_plus(ids)
                 url = url + "&id=" + enc
             if not (qp.filterId is None):
                 url = url + "&filterId=" + str(qp.filterId)
@@ -241,23 +242,3 @@ class ActualQuery(_Query):
         if vr == "VGran" :
             raise Exception("Not supported Granularity")
         return vr
-
-class _NullFillStategy:
-    def getUrlParams(self):
-        return "fillerK=Null"
-
-class _NoFillStategy:
-    def getUrlParams(self):
-        return "fillerK=NoFill"
-
-class _FillLatestStategy:  
-    def __init__(self, period):
-        self.period = period
-    def getUrlParams(self):
-        return f"fillerK=LatestValidValue&fillerP={self.period}"
-
-class _FillCustomStategy:
-    def __init__(self, val):
-        self.val = val
-    def getUrlParams(self):
-        return f"fillerK=CustomValue&fillerDV={self.val}"        

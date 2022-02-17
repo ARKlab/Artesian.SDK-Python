@@ -1,15 +1,13 @@
 from __future__ import annotations
+from urllib import parse
+from Artesian.Query._QueryParameters.QueryParameters import _FillCustomBidAskStrategy, _FillLatestStrategy, _NoFillStrategy, _NullFillStrategy
 from ._Query import _Query
 from ._QueryParameters.BidAskQueryParameters import BidAskQueryParameters
-from ._QueryParameters.ExtractionRangeConfig import ExtractionRangeConfig
 from .DefaultPartitionStrategy import DefaultPartitionStrategy
 from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
 from Artesian._ClientsExecutor.Client import _Client
 from .RelativeInterval import RelativeInterval
-
 from typing import List
-
-import urllib
 
 class BidAskQuery(_Query):
     __routePrefix = "ba"
@@ -18,8 +16,9 @@ class BidAskQuery(_Query):
                        partitionStrategy: DefaultPartitionStrategy) -> None:
         """ Inits _BidAskQuery """
 
-        queryParameters = BidAskQueryParameters(None,ExtractionRangeConfig(), None, None, None, None) 
+        queryParameters = BidAskQueryParameters() 
         _Query.__init__(self, client, requestExecutor, queryParameters)
+        self._queryParameters = queryParameters
         self.__partition= partitionStrategy
 
     def forMarketData(self, ids: List[int]) -> BidAskQuery:
@@ -112,7 +111,7 @@ class BidAskQuery(_Query):
         """
         super()._inRelativeInterval(relativeInterval)
         return self
-    def forProducts(self, products: list[str]) -> BidAskQuery:
+    def forProducts(self, products: List[str]) -> BidAskQuery:
         """ 
             Gets the Products tor the BidAsk Query in a time window.
         
@@ -133,7 +132,7 @@ class BidAskQuery(_Query):
             Results:
               BidAskQuery.
         """
-        self._queryParameters.fill = _NullFillStategy()
+        self._queryParameters.fill = _NullFillStrategy()
         return self
     def withFillNone(self) -> BidAskQuery:
         """ 
@@ -144,7 +143,7 @@ class BidAskQuery(_Query):
             Results:
                 BidAskQuery.
         """
-        self._queryParameters.fill = _NoFillStategy()
+        self._queryParameters.fill = _NoFillStrategy()
         return self
     def withFillLatestValue(self, period: str) -> BidAskQuery:
         """ 
@@ -156,7 +155,7 @@ class BidAskQuery(_Query):
             Results:
                 BidAskQuery.
         """
-        self._queryParameters.fill = _FillLatestStategy(period)
+        self._queryParameters.fill = _FillLatestStrategy(period)
         return self
     def withFillCustomValue(self, **val: float) -> BidAskQuery:
         """ 
@@ -173,7 +172,7 @@ class BidAskQuery(_Query):
                      lastPrice = 5,
                      lastQuantity = 6)
          """
-        self._queryParameters.fill = _FillCustomStategy(val)
+        self._queryParameters.fill = _FillCustomBidAskStrategy(val)
         return self
     def execute(self) -> list:
         """ 
@@ -190,7 +189,7 @@ class BidAskQuery(_Query):
             Returns: 
                 list of BidAskQuery."""
         urls = self.__buildRequest()
-        return super()._execAsync(urls)
+        return await super()._execAsync(urls)
     def __buildRequest(self):
         self.__validateQuery()
         qps = self.__partition.PartitionBidAsk([self._queryParameters])
@@ -200,13 +199,13 @@ class BidAskQuery(_Query):
             if not (qp.ids is None):
                 sep = ","
                 ids= sep.join(map(str,qp.ids))
-                enc = urllib.parse.quote_plus(ids)
+                enc = parse.quote_plus(ids)
                 url = url + "&id=" + enc
             if not (qp.filterId is None):
                 url = url + "&filterId=" + str(qp.filterId)
             if not (qp.products is None):
                 sep = ","
-                prod= enc = urllib.parse.quote_plus(sep.join(qp.products))
+                prod= enc = parse.quote_plus(sep.join(qp.products))
                 url = url + "&p=" + prod
             if not (qp.fill is None):
                 url = url + "&" + qp.fill.getUrlParams()
@@ -217,37 +216,3 @@ class BidAskQuery(_Query):
         if (self._queryParameters.products is None):
                 raise Exception("Products must be provided for extraction. Use .ForProducts() argument takes a string or string array of products")
 
-
-class _NullFillStategy:
-    def getUrlParams(self):
-        return "fillerK=Null"
-
-class _NoFillStategy:
-    def getUrlParams(self):
-        return "fillerK=NoFill"
-
-class _FillLatestStategy:
-    
-    def __init__(self, period):
-        self.period = period
-    def getUrlParams(self):
-        return f"fillerK=LatestValidValue&fillerP={self.period}"
-
-class _FillCustomStategy:
-    def __init__(self, val):
-        self.val = val
-    def getUrlParams(self):
-        def toQueryParams(vals):
-            filtered = filter(lambda x:x[1], vals)
-            stringVals = map(lambda x:[x[0], str(x[1])], filtered)
-            joinedEqual = map(lambda x:"=".join(x), stringVals)
-            return "&".join(joinedEqual)
-        return toQueryParams([
-            ["fillerK", "CustomValue"],
-            ["fillerDVbbp", self.val.get("bestBidPrice")],
-            ["fillerDVbap", self.val.get("bestAskPrice")],
-            ["fillerDVbbq", self.val.get("bestBidQuantity")],
-            ["fillerDVbaq", self.val.get("bestAskQuantity")],
-            ["fillerDVlp", self.val.get("lastPrice")],
-            ["fillerDVlq", self.val.get("lastQuantity")],
-        ])

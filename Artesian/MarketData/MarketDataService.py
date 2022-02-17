@@ -1,3 +1,4 @@
+import typing
 from .._ClientsExecutor.RequestExecutor import _RequestExecutor
 from .._ClientsExecutor.Client import _Client
 from .._Configuration.ArtesianConfig import ArtesianConfig
@@ -10,11 +11,9 @@ import asyncio
 
 class MarketDataService:
     """ 
-        A MarketData Entity represents a data curve enriched by its metadata.
-        Each entity is composed of some fundamental parameters:
+        Class for the MarketData Service.
 
     """
-
     __version = "v2.1"
     def __init__(self, artesianConfig: ArtesianConfig) -> None:
         """ 
@@ -50,10 +49,9 @@ class MarketDataService:
         """
 
         url = "/marketdata/entity/" + str(id) + "/curves"
-        params ={
-                  'page':page,
-                  'pageSize':pageSize            
-                }
+        params = {} #needed to avoid typing to detect dict[str,int] ...
+        params['page']=page
+        params['pageSize']=pageSize
         if(versionFrom is not None):            
             params['versionFrom'] = versionFrom
         if(versionTo is not None):
@@ -62,7 +60,7 @@ class MarketDataService:
             params['product'] = product       
         with self.__client as c:
             res = await asyncio.gather(*[self.__executor.exec(c.exec, 'GET', url, retcls=PagedResultCurveRangeEntity, params=params)])
-            return res[0]
+            return typing.cast(PagedResultCurveRangeEntity,res[0])
 
     def readCurveRange(self, id: int, page: int, pageSize: int, 
         product: str=None, versionFrom: str=None, versionTo: str=None) -> PagedResultCurveRangeEntity:
@@ -96,7 +94,7 @@ class MarketDataService:
         url = "/marketdata/entity/" + str(id) 
         with self.__client as c:
             res = await asyncio.gather(*[self.__executor.exec(c.exec, 'GET', url, None, retcls=MarketDataEntityOutput)])
-            return res[0]
+            return typing.cast(MarketDataEntityOutput,res[0])
 
     def readMarketDataRegistryById(self, id: int) -> MarketDataEntityOutput :  
         """
@@ -123,9 +121,9 @@ class MarketDataService:
         url = "/marketdata/entity/" + str(id) 
         with self.__client as c:
             res = await asyncio.gather(*[self.__executor.exec(c.exec, 'PUT', url, entity, MarketDataEntityOutput)])
-            return res[0]
+            return typing.cast(MarketDataEntityOutput,res[0])
 
-    def updateMarketData(self, id: int):
+    def updateMarketData(self, id: int, entity: MarketDataEntityInput):
         """ 
             Saves the given MarketData Entity
 
@@ -135,7 +133,7 @@ class MarketDataService:
             Returns:
                 MarketData Entity Output.
         """
-        return _get_event_loop().run_until_complete(self.updateMarketDataAsync(id))
+        return _get_event_loop().run_until_complete(self.updateMarketDataAsync(id, entity))
 
     async def deleteMarketDataAsync(self, id: int) -> None :
         """ 
@@ -149,8 +147,8 @@ class MarketDataService:
         """
         url = "/marketdata/entity/" + str(id) 
         with self.__client as c:
-            res = await asyncio.gather(*[self.__executor.exec(c.exec, 'DELETE', url, None)])
-            return res[0]
+            await asyncio.gather(*[self.__executor.exec(c.exec, 'DELETE', url, None)])
+            return None
 
     def deleteMarketData(self, id: int) -> None :
         """ 
@@ -179,7 +177,7 @@ class MarketDataService:
         params = {"provider": provider , "curveName":curveName}
         with self.__client as c:
             res = await asyncio.gather(*[self.__executor.exec(c.exec, 'GET', url, None, retcls=MarketDataEntityOutput, params = params)])
-            return res[0]
+            return typing.cast(MarketDataEntityOutput,res[0])
 
     def readMarketDataRegistryByName(self, provider: str, curveName: str) -> MarketDataEntityOutput:
         """
@@ -207,7 +205,7 @@ class MarketDataService:
         url = "/marketdata/entity"
         with self.__client as c:
             res = await asyncio.gather(*[self.__executor.exec(c.exec, 'POST', url, entity, MarketDataEntityOutput)])
-            return res[0]
+            return typing.cast(MarketDataEntityOutput,res[0])
 
     def registerMarketData(self, entity: MarketDataEntityInput) -> MarketDataEntityOutput:
         """
@@ -219,13 +217,13 @@ class MarketDataService:
             Returns:
                 MarketData Entity Output.
         """
-        return _get_event_loop().run_until_complete(self.registerMarketDataAsync(id))
+        return _get_event_loop().run_until_complete(self.registerMarketDataAsync(entity))
 
     async def upsertDataAsync(self, data:UpsertData) -> None:
-        url = "/upsertdata"
+        url = "/marketdata/upsertdata"
         with self.__client as c:
-            res = await asyncio.gather(*[self.__executor.exec(c.exec, 'POST', url, data)])
-            return res[0]
+            await asyncio.gather(*[self.__executor.exec(c.exec, 'POST', url, data)])
+            return None
     
     def upsertData(self, data:UpsertData) -> None:
         return _get_event_loop().run_until_complete(self.upsertDataAsync(data))

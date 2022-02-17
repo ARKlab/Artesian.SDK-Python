@@ -1,3 +1,5 @@
+from typing import Optional
+from Artesian.Query.RelativeInterval import RelativeInterval
 
 class ExtractionRangeConfig:
      """ This class sets up the Extraction Range Configuration. 
@@ -10,17 +12,17 @@ class ExtractionRangeConfig:
                periodTo: period end range for extraction.
                relativeInterval: relative interval range for extraction.
      """
-     def __init__(self):
+     def __init__(self) -> None:
         """ Init for the Extraction Range Configuration. """
-        self.dateStart:str = None
+        self.dateStart:Optional[str] = None
         """ Start date for the Date Range for extraction. (ISO format) """
-        self.dateEnd:str = None
+        self.dateEnd:Optional[str] = None
         """ End date for Date Renge for extraction. (ISO format)"""
-        self.period:str = None
+        self.period:Optional[str] = None
         """ Period range for extraction. (ISO format)"""
-        self.periodFrom:str = None
+        self.periodFrom:Optional[str] = None
         """ Period start range for extraction. (ISO format)"""
-        self.periodTo:str = None
+        self.periodTo:Optional[str] = None
         """ Period end range for extraction. (ISO format)"""
-        self.relativeInterval:str = None
+        self.relativeInterval:Optional[RelativeInterval] = None
         """ Relative Interval range for extraction."""

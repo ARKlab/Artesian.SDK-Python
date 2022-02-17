@@ -19,7 +19,6 @@ class ArtesianSdkException(Exception):
     def message(self):
         return self._message
 
-        
 class ArtesianSdkRemoteException(ArtesianSdkException):
     """
         Artesian generic remote exception.
@@ -141,3 +140,5 @@ class ArtesianSdkServerException(ArtesianSdkRemoteException):
         """
         ArtesianSdkRemoteException.__init__(self, method, url, statusCode, problemDetails, errorText)
 
+class ArtesianSdkRequestException(ArtesianSdkException):
+    pass
