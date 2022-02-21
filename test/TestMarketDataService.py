@@ -4,7 +4,7 @@ import unittest
 from Artesian._ClientsExecutor.ArtesianJsonSerializer import artesianJsonSerialize
 from Artesian.MarketData import *
 
-cfg = ArtesianConfig("https://baseurl.com","apikey")
+cfg = ArtesianConfig("https://baseurl.com","APIKey")
 
 class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
     def setUp(self) -> None:

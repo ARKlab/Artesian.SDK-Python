@@ -1,6 +1,6 @@
 from Artesian import *
 
-cfg = ArtesianConfig("baseaddr","apikey")
+cfg = ArtesianConfig("https://arkive.artesian.cloud/{tenantName}/","APIKey")
 
 qs = Query.QueryService(cfg)
 

@@ -16,7 +16,7 @@ The Artesian.SDK instance can be configured using API-Key authentication
 ```Python
 from Artesian import ArtesianConfig
 
-cfg = ArtesianConfig("https://fake-artesian-env/", "{api-key}")
+cfg = ArtesianConfig("https://arkive.artesian.cloud/{tenantName}/", "{api-key}")
 ```
 
 ## BREAKING CHANGES: Upgrade v2->v3
@@ -42,7 +42,7 @@ Were was used:
 ```Python
 from Artesian import *
 
-cfg = ArtesianConfig("https://fake-artesian-env/", "{api-key}")
+cfg = ArtesianConfig("https://arkive.artesian.cloud/{tenantName}/", "{api-key}")
 qs = QueryService(cfg)
 ```
 now you have to:
@@ -50,7 +50,7 @@ now you have to:
 from Artesian import ArtesianConfig
 from Artesian.Query import QueryService
 
-cfg = ArtesianConfig("https://fake-artesian-env/", "{api-key}")
+cfg = ArtesianConfig("https://arkive.artesian.cloud/{tenantName}/", "{api-key}")
 qs = QueryService(cfg)
 ```
 

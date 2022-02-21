@@ -7,7 +7,7 @@ import unittest
 
 from dateutil import tz
 
-cfg = ArtesianConfig("https://baseurl.com","apikey")
+cfg = ArtesianConfig("https://baseurl.com","APIKey")
 
 
 class TestMarketDataServiceUpsertData(unittest.IsolatedAsyncioTestCase):

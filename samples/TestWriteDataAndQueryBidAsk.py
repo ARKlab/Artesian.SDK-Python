@@ -5,7 +5,7 @@ from dateutil import tz
 from Artesian import MarketData
 from Artesian.Granularity import Granularity
 
-cfg = Artesian.ArtesianConfig("https://test-arkive-proxy-abijnkebhgdtw.azurewebsites.net/ArkTest","QW0ZtiVdVI0KRubnqpvGFcLMwWORdhGCIVwzext8iUBuVK6fjYhhsJWRq0NziKCxvMQKuwfgJtA1lxtw0VAC9LFNB8EojACDPf6hJVyzFFT0NoEnFFuL-5oKOr7_vuIH")
+cfg = Artesian.ArtesianConfig("https://arkive.artesian.cloud/{tenantName}/","APIKey")
 mkdservice = Artesian.MarketData.MarketDataService(cfg)
 
 bidAsk = Artesian.MarketData.MarketDataEntityInput(

@@ -1,7 +1,7 @@
 from Artesian import *
 from Artesian.MarketData import MarketDataService
 
-cfg = ArtesianConfig("baseaddr","apikey")
+cfg = ArtesianConfig("https://arkive.artesian.cloud/{tenantName}/","APIKey")
 
 qs = MarketDataService(cfg)
 
