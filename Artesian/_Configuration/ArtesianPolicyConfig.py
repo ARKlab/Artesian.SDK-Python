@@ -11,8 +11,7 @@ class ArtesianPolicyConfig:
      """
 
 
-    def __init__(self, maxRetry: int=None, retryWaitTime: int=None,  maxParallelism: int=None) -> None:
-        #Cambiato con =None
+    def __init__(self, maxRetry: int=None, retryWaitTime: int = None,  maxParallelism: int = None) -> None:
         """
              Inits Artesian Policy Config with optional overrides.
              

@@ -4,7 +4,7 @@ from Artesian import Query
 from Artesian.Granularity import Granularity
 from Artesian.MarketData._Enum.MarketDataType import MarketDataType
 
-cfg = Artesian.ArtesianConfig("https://arkive.artesian.cloud/{tenantName}/","APIKey")
+cfg = Artesian.ArtesianConfig("https://arkive.artesian.cloud/tenantName/","APIKey")
 mkdservice = Artesian.MarketData.MarketDataService(cfg)
 
 actual = Artesian.MarketData.MarketDataEntityInput(

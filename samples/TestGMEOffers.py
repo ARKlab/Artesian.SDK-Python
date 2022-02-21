@@ -1,7 +1,7 @@
 from Artesian import *
 from Artesian.GMEPublicOffers import *
 
-cfg = ArtesianConfig("https://arkive.artesian.cloud/{tenantName}/","APIKey")
+cfg = ArtesianConfig("https://arkive.artesian.cloud/tenantName/","APIKey")
 
 qs = GMEPublicOfferService(cfg)
 

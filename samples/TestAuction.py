@@ -1,7 +1,7 @@
 from Artesian import ArtesianConfig
 from Artesian.Query import QueryService
 
-cfg = ArtesianConfig("https://arkive.artesian.cloud/{tenantName}/","APIKey")
+cfg = ArtesianConfig("https://arkive.artesian.cloud/tenantName/","APIKey")
 
 qs = QueryService(cfg)
 

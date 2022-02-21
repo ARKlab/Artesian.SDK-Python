@@ -1,7 +1,7 @@
 from Artesian.Query import QueryService,RelativeInterval
 from Artesian import Granularity,ArtesianConfig
 
-cfg = ArtesianConfig("https://arkive.artesian.cloud/{tenantName}/","APIKey")
+cfg = ArtesianConfig("https://arkive.artesian.cloud/tenantName/","APIKey")
 
 qs = QueryService(cfg)
 

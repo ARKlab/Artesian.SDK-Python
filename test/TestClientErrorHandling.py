@@ -6,7 +6,7 @@ import responses
 class TestClientErrorHandling(unittest.IsolatedAsyncioTestCase):
 
     def setUp(self):
-        self._client = _Client("https://baseurl.com","APIKey")
+        self._client = _Client("https://baseurl.com/","APIKey")
 
     #@responses.activate cannot be used with responses<0.19 with 'async' methods
     async def test_on404returnNone(self):

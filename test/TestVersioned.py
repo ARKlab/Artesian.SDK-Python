@@ -4,7 +4,7 @@ from Artesian.MarketData import Granularity
 import helpers
 import unittest
 
-cfg = ArtesianConfig("https://arkive.artesian.cloud/{tenantName}/","APIKey")
+cfg = ArtesianConfig("https://arkive.artesian.cloud/tenantName/","APIKey")
 
 qs = QueryService(cfg)
 
