@@ -7,7 +7,7 @@ import unittest
 
 from dateutil import tz
 
-cfg = ArtesianConfig("https://baseurl.com/","APIKey")
+cfg = ArtesianConfig("https://baseurl.com","APIKey")
 
 
 class TestMarketDataServiceUpsertData(unittest.IsolatedAsyncioTestCase):
@@ -125,8 +125,9 @@ class TestMarketDataServiceUpsertData(unittest.IsolatedAsyncioTestCase):
         ser = artesianJsonSerialize(upsert)
         self.assertEqual(ser, expectedJson)
 
+
         with responses.RequestsMock() as rsps:
-            rsps.add('POST', self.__baseurl + '/upsertdata', 
+            rsps.add('POST', self.__baseurl + '/marketdata/upsertdata', 
                 match=[responses.matchers.json_params_matcher(expectedJson)],
                 status=200)
         
@@ -206,7 +207,7 @@ class TestMarketDataServiceUpsertData(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(ser, expectedJson)
 
         with responses.RequestsMock() as rsps:
-            rsps.add('POST', self.__baseurl + '/upsertdata', 
+            rsps.add('POST', self.__baseurl + '/marketdata/upsertdata', 
                 match=[responses.matchers.json_params_matcher(expectedJson)],
                 status=200)
 
@@ -268,7 +269,7 @@ class TestMarketDataServiceUpsertData(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(ser, expectedJson)
 
         with responses.RequestsMock() as rsps:
-            rsps.add('POST', self.__baseurl + '/upsertdata', 
+            rsps.add('POST', self.__baseurl + '/marketdata/upsertdata', 
                 match=[responses.matchers.json_params_matcher(expectedJson)],
                 status=200)
 

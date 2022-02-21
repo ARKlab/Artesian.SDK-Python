@@ -39,7 +39,7 @@ class _Client:
             return res.content
 
         # /upsertData is supposed to returns 204 thus None which would not be distingushable from 404 None
-        if res.status_code == 404 and retcls is not None:
+        if res.status_code == 404 and retcls is None:
             return None
         
         problemDetails = None
