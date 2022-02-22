@@ -9,11 +9,11 @@ def __artesianDatetimeSerializer(
     **kwargs) -> str:
     
   if (obj.tzinfo is None):
-    ret = obj.strftime("%Y-%m-%dT%H:%M:%S.%f")
+    ret = obj.strftime("%04Y-%m-%dT%H:%M:%S.%f")
     return ret
   offset = obj.utcoffset()
   if (offset is not None and offset.total_seconds() == 0):
-    ret = obj.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+    ret = obj.strftime("%04Y-%m-%dT%H:%M:%S.%fZ")
     return ret
   ret = obj.isoformat(timespec='seconds')
   return ret
