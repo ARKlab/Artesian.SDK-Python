@@ -1,5 +1,8 @@
 
 
+from typing import Optional
+
+
 class ArtesianSdkException(Exception):
     """
         Base class for all `Artesian` errors.
@@ -65,11 +68,11 @@ class ArtesianSdkRemoteException(ArtesianSdkException):
         return self._statusCode
 
     @property
-    def problemDetails(self) -> dict:
+    def problemDetails(self) -> Optional[dict]:
         return self._problemDetails        
 
     @property
-    def errorText(self) -> str:
+    def errorText(self) -> Optional[str]:
         return self._errorText       
     
 class ArtesianSdkValidationException(ArtesianSdkRemoteException):

@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 import datetime
-from dateutil import tz
 from typing import Optional
 from .MarketDataEntityInput import MarketDataEntityInput
 
@@ -27,9 +26,9 @@ class MarketDataEntityOutput(MarketDataEntityInput):
             dataRangeEnd: end date of range for this curve
             created: the time the market data has been created
     """
-    lastUpdated: datetime.datetime = datetime.datetime.min.replace(tzinfo=tz.UTC)
+    lastUpdated: Optional[datetime.datetime] = None
     dataLastWritedAt: Optional[datetime.datetime] = None
     dataRangeStart: Optional[datetime.date] = None
     dataRangeEnd: Optional[datetime.date] = None
-    created: datetime.datetime = datetime.datetime.min.replace(tzinfo=tz.UTC)
+    created: Optional[datetime.datetime] = None
     #tranform: missing due to handling class hierarchies deserializations

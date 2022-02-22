@@ -1,3 +1,4 @@
+from ast import Dict
 from Artesian import ArtesianSdkValidationException,ArtesianSdkOptimisticConcurrencyException,ArtesianSdkForbiddenException,ArtesianSdkServerException
 from Artesian._ClientsExecutor.Client import _Client
 import unittest
@@ -14,9 +15,20 @@ class TestClientErrorHandling(unittest.IsolatedAsyncioTestCase):
             rsps.add('GET', 'https://baseurl.com/404', body='', status=404)
 
             with self._client as c:
-                res = await c.exec('GET', "/404")
+                res = await c.exec('GET', "/404", retcls=Dict)
 
             self.assertIsNone(res, "Response should be None on 404")
+
+    async def test_on404throwsWhenNoRetCls(self):
+        with responses.RequestsMock() as rsps:
+            rsps.add('GET', 'https://baseurl.com/404', body='', status=404)
+
+            with self.assertRaises(ArtesianSdkServerException) as ex:
+                with self._client as c:
+                    res = await c.exec('GET', "/404", retcls=None)
+
+            self.assertEqual(ex.exception.statusCode, 404)
+            self.assertEqual(ex.exception.message, "Failed REST call to Artesian. GET https://baseurl.com/404 returned 404.")
 
     async def test_success(self):
         with responses.RequestsMock() as rsps:

@@ -39,7 +39,7 @@ class _Client:
             return res.content
 
         # /upsertData is supposed to returns 204 thus None which would not be distingushable from 404 None
-        if res.status_code == 404 and retcls is None:
+        if res.status_code == 404 and retcls is not None:
             return None
         
         problemDetails = None
@@ -48,7 +48,7 @@ class _Client:
         if mimetype == 'application/problem+json':
             problemDetails = res.json()
         if mimetype == 'application/json' or mimetype.split('/')[0] == 'text':
-            errorText = res.text
+            errorText = res.text if res.text != "" else None
         
         if res.status_code == 400: # BadRequest
             raise ArtesianSdkValidationException(method, url, res.status_code, problemDetails, errorText)        
