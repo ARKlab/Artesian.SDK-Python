@@ -1,4 +1,5 @@
-from Artesian import *
+from ast import Dict
+from Artesian import ArtesianSdkValidationException,ArtesianSdkOptimisticConcurrencyException,ArtesianSdkForbiddenException,ArtesianSdkServerException
 from Artesian._ClientsExecutor.Client import _Client
 import unittest
 import responses
@@ -6,7 +7,7 @@ import responses
 class TestClientErrorHandling(unittest.IsolatedAsyncioTestCase):
 
     def setUp(self):
-        self._client = _Client("https://baseurl.com","apikey")
+        self._client = _Client("https://baseurl.com","APIKey")
 
     #@responses.activate cannot be used with responses<0.19 with 'async' methods
     async def test_on404returnNone(self):
@@ -14,9 +15,20 @@ class TestClientErrorHandling(unittest.IsolatedAsyncioTestCase):
             rsps.add('GET', 'https://baseurl.com/404', body='', status=404)
 
             with self._client as c:
-                res = await c.exec('GET', "/404")
+                res = await c.exec('GET', "/404", retcls=Dict)
 
             self.assertIsNone(res, "Response should be None on 404")
+
+    async def test_on404throwsWhenNoRetCls(self):
+        with responses.RequestsMock() as rsps:
+            rsps.add('GET', 'https://baseurl.com/404', body='', status=404)
+
+            with self.assertRaises(ArtesianSdkServerException) as ex:
+                with self._client as c:
+                    res = await c.exec('GET', "/404", retcls=None)
+
+            self.assertEqual(ex.exception.statusCode, 404)
+            self.assertEqual(ex.exception.message, "Failed REST call to Artesian. GET https://baseurl.com/404 returned 404.")
 
     async def test_success(self):
         with responses.RequestsMock() as rsps:
@@ -34,7 +46,7 @@ class TestClientErrorHandling(unittest.IsolatedAsyncioTestCase):
             (412, ArtesianSdkOptimisticConcurrencyException),
             (401, ArtesianSdkForbiddenException),
             (403, ArtesianSdkForbiddenException),
-            (500, ArtesianSdkRemoteException)
+            (500, ArtesianSdkServerException)
             ]
         for code, excls in cases:
             with self.subTest(str(code) + "=>" + excls.__name__):
@@ -49,7 +61,7 @@ class TestClientErrorHandling(unittest.IsolatedAsyncioTestCase):
                     self.assertEqual(ex.exception.statusCode, code)
                     self.assertIsNone(ex.exception.errorText)
                     self.assertEqual(ex.exception.problemDetails, problemDetails)
-                    self.assertEqual(ex.exception.message, "Failed REST call to Artesian. GET https://baseurl.com/{} returned {}. DETAILS".format(code,code))
+                    self.assertEqual(ex.exception.message, "Failed REST call to Artesian. GET https://baseurl.com/{} returned {}. DETAIL".format(code,code))
 
     
     async def test_problemDetailsWithoutDetails(self):
@@ -74,7 +86,7 @@ class TestClientErrorHandling(unittest.IsolatedAsyncioTestCase):
             (412, ArtesianSdkOptimisticConcurrencyException),
             (401, ArtesianSdkForbiddenException),
             (403, ArtesianSdkForbiddenException),
-            (500, ArtesianSdkRemoteException)
+            (500, ArtesianSdkServerException)
             ]
         for code, excls in cases:
             with self.subTest(str(code) + "=>" + excls.__name__):

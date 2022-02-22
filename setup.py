@@ -1,7 +1,6 @@
 import os
 import setuptools
 
-
 here = os.path.abspath(os.path.dirname(__file__))
 meta_info = {}
 with open(os.path.join(here, 'Artesian', '_package_info.py'), 'r') as f:
@@ -27,12 +26,14 @@ setuptools.setup(
         'six',
         'asyncio',
         'jsons>=1.6.1',
-        'dataclasses'
+        'dataclasses',
+        'python-dateutil',
+        #'typing-compat' # needed for get_args in 3.7 
     ],
     python_requires='>=3.8',
     extras_require={
         'test': [
-            'responses>=0.17'
+            'responses>=0.18'
             #ideal will be 0.19 WHEN published
         ]
     },

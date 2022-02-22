@@ -1,8 +1,9 @@
-from Artesian import *
+from Artesian import ArtesianConfig
+from Artesian.Query import QueryService
 import helpers
 import unittest
 
-cfg = ArtesianConfig("baseaddr","apikey")
+cfg = ArtesianConfig("https://arkive.artesian.cloud/tenantName/","APIKey")
 
 qs = QueryService(cfg)
 
@@ -55,7 +56,7 @@ class TestMas(unittest.TestCase):
                 high = 4,
                 low = 5,
                 volumePaid = 6,
-                volueGiven = 7,
+                volumeGiven = 7,
                 volume = 8
             ) \
             .execute()

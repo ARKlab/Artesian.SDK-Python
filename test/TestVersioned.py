@@ -1,8 +1,10 @@
-from Artesian import *
+from Artesian import ArtesianConfig
+from Artesian.Query import QueryService
+from Artesian.MarketData import Granularity
 import helpers
 import unittest
 
-cfg = ArtesianConfig("baseaddr","apikey")
+cfg = ArtesianConfig("https://arkive.artesian.cloud/tenantName/","APIKey")
 
 qs = QueryService(cfg)
 
@@ -10,11 +12,11 @@ class TestVersioned(unittest.TestCase):
     @helpers.TrackRequests
     def test_Null_Fill(self, requests):
         url = qs.createVersioned() \
-            .forFilterId("1003") \
+            .forFilterId(1003) \
             .forLastNVersions(1) \
             .inAbsoluteDateRange("2018-01-01","2018-01-02") \
             .inTimeZone("UTC") \
-            .inGranularity(Granularity.HOUR) \
+            .inGranularity(Granularity.Hour) \
             .withFillNull() \
             .execute()
             
@@ -23,11 +25,11 @@ class TestVersioned(unittest.TestCase):
     @helpers.TrackRequests
     def test_No_Fill(self, requests):
         url = qs.createVersioned() \
-            .forFilterId("1003") \
+            .forFilterId(1003) \
             .forLastNVersions(1) \
             .inAbsoluteDateRange("2018-01-01","2018-01-02") \
             .inTimeZone("UTC") \
-            .inGranularity(Granularity.HOUR) \
+            .inGranularity(Granularity.Hour) \
             .withFillNone() \
             .execute()
             
@@ -36,11 +38,11 @@ class TestVersioned(unittest.TestCase):
     @helpers.TrackRequests
     def test_Latest_Fill(self, requests):
         url = qs.createVersioned() \
-            .forFilterId("1003") \
+            .forFilterId(1003) \
             .forLastNVersions(1) \
             .inAbsoluteDateRange("2018-01-01","2018-01-02") \
             .inTimeZone("UTC") \
-            .inGranularity(Granularity.HOUR) \
+            .inGranularity(Granularity.Hour) \
             .withFillLatestValue("P5D") \
             .execute()
 
@@ -51,11 +53,11 @@ class TestVersioned(unittest.TestCase):
     @helpers.TrackRequests
     def test_Custom_Value_Fill(self, requests):
         url = qs.createVersioned() \
-            .forFilterId("1003") \
+            .forFilterId(1003) \
             .forLastNVersions(1) \
             .inAbsoluteDateRange("2018-01-01","2018-01-02") \
             .inTimeZone("UTC") \
-            .inGranularity(Granularity.HOUR) \
+            .inGranularity(Granularity.Hour) \
             .withFillCustomValue(10) \
             .execute()
 
@@ -69,7 +71,7 @@ class TestVersioned(unittest.TestCase):
             .forMarketData([100000001]) \
             .inAbsoluteDateRange("2018-01-01","2018-01-02") \
             .inTimeZone("UTC") \
-            .inGranularity(Granularity.HOUR) \
+            .inGranularity(Granularity.Hour) \
             .forMostRecent("2018-01-01","2018-01-02") \
             .withFillCustomValue(10) \
             .execute()
@@ -83,7 +85,7 @@ class TestVersioned(unittest.TestCase):
             .forMarketData([100000001]) \
             .inAbsoluteDateRange("2021-09-22","2021-09-23") \
             .inTimeZone("CET") \
-            .inGranularity(Granularity.DAY) \
+            .inGranularity(Granularity.Day) \
             .forMostRecent("2021-09-22T12:30:05","2021-09-23T00:00:00") \
             .withFillCustomValue(10) \
             .execute()
@@ -97,7 +99,7 @@ class TestVersioned(unittest.TestCase):
             .forMarketData([100000001]) \
             .inAbsoluteDateRange("2021-09-22","2021-09-23") \
             .inTimeZone("CET") \
-            .inGranularity(Granularity.DAY) \
+            .inGranularity(Granularity.Day) \
             .forMostRecent("2021-09-22T12:30:05","2021-09-23T00:00:00") \
             .withFillNull() \
             .execute()

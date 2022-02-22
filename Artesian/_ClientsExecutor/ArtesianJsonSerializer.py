@@ -1,46 +1,117 @@
+from collections import defaultdict
+from datetime import datetime
+from platform import system
+from dateutil import parser
 import jsons
-from Artesian._Services.Dto import ArtesianTags
-from typing import List
-from typish import instance_of
+from typing import Callable, Dict, Optional, get_args
 
-def __artesianTagsSerializer(
-        obj: ArtesianTags,
-        **kwargs) -> list:
-  return [{'Key': k, 'Value': v} for k,v in obj.items()]
+__commonFmt = "%Y-%m-%dT%H:%M:%S.%f"
+if system() == 'Linux':
+  __commonFmt = "%04Y-%m-%dT%H:%M:%S.%f"
 
-def __artesianTagsDeserializer(
-        obj: list,
-        cls: type,
-        **kwargs) -> ArtesianTags:
-  result = ArtesianTags({})
-  for item in obj:
-    if (not instance_of(item['Key'], str)):
-      raise ValueError("Key must be a 'str'. For example: 'commodity'") 
-    if (not instance_of(item['Value'], List[str])):
-      raise ValueError("Value must be a 'list[str]'. For example: ['gas','power']")
 
-    k = jsons.load(item['Key'], str, **{**kwargs, 'strict':True})
-    v = jsons.load(item['Value'], List[str], **{**kwargs, 'strict':True})
-    result[k]=v
+def __artesianDatetimeSerializer(
+    obj:datetime,
+    **kwargs) -> str:
+    
+  if (obj.tzinfo is None):
+    ret = obj.strftime(__commonFmt)
+    return ret
+  offset = obj.utcoffset()
+  if (offset is not None and offset.total_seconds() == 0):
+    ret = obj.strftime(__commonFmt + "Z")
+    return ret
+  ret = obj.isoformat(timespec='seconds')
+  return ret
+
+def __artesianDatetimeDeserializer(
+    obj:str,
+    *args,
+    **kwargs) -> datetime:
+  return parser.isoparse(obj)
+
+def __camelToPascal(k:str)->str:
+  return k[0].upper() + k[1:]
+
+def __pascalToCamel(k:str)->str:
+  return k[0].lower() + k[1:]
+
+def __is_valid_json_key(key: object) -> bool:
+    return issubclass(type(key), (str, int, float, bool)) or key is None
   
+def __artesianDictSerializer(
+    obj: dict,
+    *,
+    key_transformer: Optional[Callable[[str], str]] = None,
+    **kwargs) -> list:
+  result = []
+  for key in obj:
+    obj_ = obj[key]
+    key_ = key if __is_valid_json_key(key) else jsons.dump(key, 
+      key_transformer=None, 
+      **kwargs)
+    elem = jsons.dump(
+      obj_,
+      key_transformer=key_transformer,
+      **kwargs)
+    result.append({'Key': key_, 'Value': elem})
   return result
 
+def __artesianDictDeserializer(
+    obj: list,
+    cls: type,
+    *args,
+    **kwargs) -> object:
+  key, value = get_args(cls)
+  result:Dict[key,value] = {
+    jsons.load(item['Key'], key, *args, **kwargs):jsons.load(item['Value'], value, *args, **kwargs)
+    for item in obj
+  }
+  return result
+  
 __artesianJsonSerializer = jsons.JsonSerializable.fork()
-jsons.set_serializer(__artesianTagsSerializer, ArtesianTags, high_prio=True, fork_inst=__artesianJsonSerializer)
-jsons.set_deserializer(__artesianTagsDeserializer, ArtesianTags, high_prio=True, fork_inst=__artesianJsonSerializer)
+
+jsons.set_serializer(__artesianDictSerializer, Dict, high_prio=True, fork_inst=__artesianJsonSerializer)
+jsons.set_deserializer(__artesianDictDeserializer, Dict, high_prio=True, fork_inst=__artesianJsonSerializer)
+
+jsons.set_serializer(__artesianDatetimeSerializer, datetime, high_prio=True, fork_inst=__artesianJsonSerializer)
+jsons.set_deserializer(__artesianDatetimeDeserializer, datetime, high_prio=True, fork_inst=__artesianJsonSerializer)
 
 
 __artesianJsonKwArgs = {
   'strip_privates': True,
-  'strict': True,
+  'strip_nulls': True,
+  #'strict': True, disabled due to failure in untyped Dict (Tags)
   'use_enum_name': True,
   'fork_inst': __artesianJsonSerializer,
 }
 
-def artesianJsonSerialize(obj, cls: type = None, **kwargs):
-  kwargs_ = {**__artesianJsonKwArgs, **kwargs}
-  return jsons.dump(obj, cls, key_transformer=jsons.KEY_TRANSFORMER_PASCALCASE, **kwargs_)
+def artesianJsonSerialize(obj: object, cls: type = None, **kwargs) -> object:
+  """ 
+      Sets the Artesian Json Serializer.
 
-def artesianJsonDeserialize(obj, cls: type = None, **kwargs):
+      Args:
+        obj: string for the object for the serialization
+        cls: type for the serialization
+        kwargs: override the dump
+      
+      Returns:
+        JsonSerializer.
+  """
+  kwargs_ = {**__artesianJsonKwArgs, **kwargs}
+  return jsons.dump(obj, cls, key_transformer=__camelToPascal, **kwargs_)
+
+def artesianJsonDeserialize(obj: object, cls: type = None, **kwargs) -> object:
+  """ 
+      Sets the Artesian Json Deserializer.
+
+      Args:
+        obj: string for the object for the deserialization
+        cls: type for the deserialization
+        kwargs: override the load
+      
+      Returns:
+        JsonDeserializer.
+  """
   kwargs_ = {**__artesianJsonKwArgs, **kwargs, 'strict': False}
-  return jsons.load(obj, cls, key_transformer=jsons.KEY_TRANSFORMER_CAMELCASE, **kwargs_)
+  return jsons.load(obj, cls, key_transformer=__pascalToCamel, **kwargs_)
