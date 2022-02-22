@@ -35,6 +35,9 @@ setuptools.setup(
         'test': [
             'responses>=0.18'
             #ideal will be 0.19 WHEN published
+        ],
+        'release': [
+            'twine'
         ]
     },
     test_suite='tests',

@@ -1,5 +1,5 @@
 __title__ = 'artesian-sdk'
-__version__ = '3.0.0'
+__version__ = '3.0.0.dev0'
 __author__ = 'Ark S.r.l.'
 __author_email__ = 'arklab@ark-energy.eu'
 __description__ = 'Library provides read access to the Artesian API'
