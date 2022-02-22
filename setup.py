@@ -19,8 +19,8 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type='text/markdown',
     license=meta_info['__license__'],
-    packages=setuptools.find_packages(),
-    py_modules = ['artesian'], 
+    packages=setuptools.find_packages(include=["Artesian.*"], exclude=["test.*"]),
+    py_modules = ['Artesian'], 
     install_requires=[
         'requests',
         'six',
@@ -40,7 +40,7 @@ setuptools.setup(
             'twine'
         ]
     },
-    test_suite='tests',
+    test_suite='test',
     classifiers=[
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",        
