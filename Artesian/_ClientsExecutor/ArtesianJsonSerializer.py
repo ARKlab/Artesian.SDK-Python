@@ -1,19 +1,25 @@
 from collections import defaultdict
 from datetime import datetime
+from platform import system
 from dateutil import parser
 import jsons
 from typing import Callable, Dict, Optional, get_args
+
+__commonFmt = "%Y-%m-%dT%H:%M:%S.%f"
+if system() == 'Linux':
+  __commonFmt = "%04Y-%m-%dT%H:%M:%S.%f"
+
 
 def __artesianDatetimeSerializer(
     obj:datetime,
     **kwargs) -> str:
     
   if (obj.tzinfo is None):
-    ret = obj.strftime("%04Y-%m-%dT%H:%M:%S.%f")
+    ret = obj.strftime(__commonFmt)
     return ret
   offset = obj.utcoffset()
   if (offset is not None and offset.total_seconds() == 0):
-    ret = obj.strftime("%04Y-%m-%dT%H:%M:%S.%fZ")
+    ret = obj.strftime(__commonFmt + "Z")
     return ret
   ret = obj.isoformat(timespec='seconds')
   return ret
