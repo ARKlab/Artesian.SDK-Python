@@ -331,7 +331,7 @@ class VersionedQuery(_Query):
         elif (self._queryParameters.versionSelectionConfig.versionsRange.periodFrom is not None) and  (self._queryParameters.versionSelectionConfig.versionsRange.periodTo is not None):
             vr = f"{self._queryParameters.versionSelectionConfig.versionsRange.dateStart}/{self._queryParameters.versionSelectionConfig.versionsRange.dateEnd}"
         return vr
-    def __getGranularityPath(self,granularity: Granularity) -> str:
+    def __getGranularityPath(self,granularity) -> str:
         switcher = {
             Granularity.Day: "Day",
             Granularity.FifteenMinute: "FifteenMinute",
