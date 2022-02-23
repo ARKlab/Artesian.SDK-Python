@@ -345,6 +345,7 @@ class VersionedQuery(_Query):
             Granularity.Year: "Year",
         }
         vr = switcher.get(granularity, "VGran")
+        return vr
 class _NullFillStategy:    
     def getUrlParams(self):
         return "fillerK=Null"
