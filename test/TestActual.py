@@ -1,8 +1,10 @@
-from Artesian import *
+from Artesian import ArtesianConfig
+from Artesian.MarketData import Granularity
+from Artesian.Query import QueryService
 import helpers
 import unittest
 
-cfg = ArtesianConfig("baseaddr","apikey")
+cfg = ArtesianConfig("https://arkive.artesian.cloud/tenantName/","APIKey")
 
 qs = QueryService(cfg)
 
@@ -13,7 +15,7 @@ class TestActual(unittest.TestCase):
             .forFilterId(1003) \
             .inAbsoluteDateRange("2018-01-01","2018-01-02") \
             .inTimeZone("UTC") \
-            .inGranularity(Granularity.HOUR) \
+            .inGranularity(Granularity.Hour) \
             .withFillNull() \
             .execute()
             
@@ -25,7 +27,7 @@ class TestActual(unittest.TestCase):
             .forFilterId(1003) \
             .inAbsoluteDateRange("2018-01-01","2018-01-02") \
             .inTimeZone("UTC") \
-            .inGranularity(Granularity.HOUR) \
+            .inGranularity(Granularity.Hour) \
             .withFillNone() \
             .execute()
             
@@ -37,7 +39,7 @@ class TestActual(unittest.TestCase):
             .forFilterId(1003) \
             .inAbsoluteDateRange("2018-01-01","2018-01-02") \
             .inTimeZone("UTC") \
-            .inGranularity(Granularity.HOUR) \
+            .inGranularity(Granularity.Hour) \
             .withFillLatestValue("P5D") \
             .execute()
 
@@ -51,7 +53,7 @@ class TestActual(unittest.TestCase):
             .forFilterId(1003) \
             .inAbsoluteDateRange("2018-01-01","2018-01-02") \
             .inTimeZone("UTC") \
-            .inGranularity(Granularity.HOUR) \
+            .inGranularity(Granularity.Hour) \
             .withFillCustomValue(10) \
             .execute()
 

@@ -1,8 +1,9 @@
-from Artesian import *
+from Artesian import ArtesianConfig
+from Artesian.Query import QueryService
 import helpers
 import unittest
 
-cfg = ArtesianConfig("baseaddr","apikey")
+cfg = ArtesianConfig("https://arkive.artesian.cloud/tenantName/","APIKey")
 
 qs = QueryService(cfg)
 

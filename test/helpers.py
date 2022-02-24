@@ -1,8 +1,9 @@
-from unittest.mock import *
-import Artesian._Query.Query as Query
+
+from unittest.mock import patch
+import Artesian.Query._Query as _Query
 
 def TrackRequests(func):
-    @patch.object(Query._Query, '_exec')
+    @patch.object(_Query._Query, '_exec')
     def wrapper(self, mock):
         class Qs:
             def getQs(_self):
