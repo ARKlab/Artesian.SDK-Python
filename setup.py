@@ -37,7 +37,8 @@ setuptools.setup(
             #ideal will be 0.19 WHEN published
         ],
         'release': [
-            'twine'
+            'twine',
+            'wheel'
         ]
     },
     test_suite='test',
