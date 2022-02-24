@@ -6,8 +6,10 @@ from . import Query
 from . import MarketData
 from . import GMEPublicOffers
 from .Granularity import Granularity
+from ._package_info import __version__
 
 __all__=[
+    '__version__',
     ArtesianConfig.__name__,
     ArtesianPolicyConfig.__name__,
     Granularity.__name__,
