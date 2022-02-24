@@ -27,4 +27,4 @@ __all__=[
     MarketDataEntityOutput.__name__,
     MarketDataIdentifier.__name__,
     UpsertData.__name__
-]
+] # type: ignore

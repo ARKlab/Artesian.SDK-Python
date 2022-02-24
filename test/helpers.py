@@ -1,4 +1,5 @@
-from unittest.mock import *
+
+from unittest.mock import patch
 import Artesian.Query._Query as _Query
 
 def TrackRequests(func):

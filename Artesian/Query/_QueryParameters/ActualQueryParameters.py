@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from .QueryParameters import _QueryParameters
 from .ExtractionRangeType import ExtractionRangeType
 from .ExtractionRangeConfig import ExtractionRangeConfig
@@ -18,13 +18,13 @@ class ActualQueryParameters(_QueryParameters):
                 transformId: sets time range.
     """
 
-    def __init__(self, ids:List[int] = None, 
-                       extractionRangeConfig: ExtractionRangeConfig = None, 
-                       extractionRangeType: ExtractionRangeType = None, 
-                       timezone: str = None, 
-                       filterId: int = None, 
-                       granularity: Granularity = None, 
-                       transformId: str = None) -> None: 
+    def __init__(self, ids:Optional[List[int]] = None, 
+                       extractionRangeConfig: ExtractionRangeConfig = ExtractionRangeConfig(), 
+                       extractionRangeType: Optional[ExtractionRangeType] = None, 
+                       timezone: Optional[str] = None, 
+                       filterId: Optional[int] = None, 
+                       granularity: Optional[Granularity] = None, 
+                       transformId: Optional[str] = None) -> None: 
         """ 
             Inits ActualQueryParameters 
         

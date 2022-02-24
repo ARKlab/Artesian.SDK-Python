@@ -26,7 +26,7 @@ class ArtesianSdkRemoteException(ArtesianSdkException):
     """
         Artesian generic remote exception.
     """
-    def __init__(self, method: str, url: str, statusCode: int,  problemDetails: dict = None, errorText:str = None) -> None:
+    def __init__(self, method: str, url: str, statusCode: int,  problemDetails: Optional[dict] = None, errorText:Optional[str] = None) -> None:
         """
             Inits the Artesian Sdk Remote Exception.
 
@@ -79,7 +79,7 @@ class ArtesianSdkValidationException(ArtesianSdkRemoteException):
     """
         Artesian validation exception. Raised when the Artesian Service object fails.
     """
-    def __init__(self, method: str, url: str, statusCode: int,  problemDetails: dict = None, errorText:str = None) -> None:
+    def __init__(self, method: str, url: str, statusCode: int,  problemDetails: Optional[dict] = None, errorText:Optional[str] = None) -> None:
         """
             Inits the Artesian Sdk Validation Exception.
 
@@ -96,7 +96,7 @@ class ArtesianSdkOptimisticConcurrencyException(ArtesianSdkRemoteException):
     """
         Artesian optimistic concurrency exception.
     """
-    def __init__(self, method: str, url: str, statusCode: int,  problemDetails: dict = None, errorText:str = None) -> None:
+    def __init__(self, method: str, url: str, statusCode: int,  problemDetails: Optional[dict] = None, errorText:Optional[str] = None) -> None:
         """
             Inits the Artesian Sdk Optimistic Concurrency Exception.
 
@@ -113,7 +113,7 @@ class ArtesianSdkForbiddenException(ArtesianSdkRemoteException):
     """
         Artesian forbidden exception.
     """
-    def __init__(self, method: str, url: str, statusCode: int,  problemDetails: dict = None, errorText:str = None) -> None:
+    def __init__(self, method: str, url: str, statusCode: int,  problemDetails: Optional[dict] = None, errorText:Optional[str] = None) -> None:
         """
             Inits the Artesian Sdk Forbidden Exception.
 
@@ -130,7 +130,7 @@ class ArtesianSdkServerException(ArtesianSdkRemoteException):
     """
         Artesian Server exception (5xx).
     """
-    def __init__(self, method: str, url: str, statusCode: int,  problemDetails: dict = None, errorText:str = None) -> None:
+    def __init__(self, method: str, url: str, statusCode: int,  problemDetails: Optional[dict] = None, errorText:Optional[str] = None) -> None:
         """
             Inits the Artesian Sdk Server Exception.
 

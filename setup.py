@@ -19,7 +19,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type='text/markdown',
     license=meta_info['__license__'],
-    packages=setuptools.find_packages(include=["Artesian.*"], exclude=["test.*"]),
+    packages=setuptools.find_packages(exclude=["test", "test.*"]),
     py_modules = ['Artesian'], 
     install_requires=[
         'requests',

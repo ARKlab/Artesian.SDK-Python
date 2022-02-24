@@ -20,4 +20,4 @@ __all__=[
     Status.__name__,
     UnitType.__name__,
     Zone.__name__
-]
+] # type: ignore

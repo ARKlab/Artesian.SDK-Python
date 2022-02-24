@@ -11,7 +11,7 @@ class ArtesianPolicyConfig:
      """
 
 
-    def __init__(self, maxRetry: int=None, retryWaitTime: int = None,  maxParallelism: int = None) -> None:
+    def __init__(self, maxRetry: int=5, retryWaitTime: int = 200,  maxParallelism: int = 3) -> None:
         """
              Inits Artesian Policy Config with optional overrides.
              
@@ -23,14 +23,15 @@ class ArtesianPolicyConfig:
                  maxParallelism: the maximum parallelization of executions through the bulkhead. "(default:3)." 
         """
         if maxRetry is None:
-            self.maxRetry = 5
-            
+            self.maxRetry = 5            
         else:
             self.maxRetry = maxRetry
+            
         if retryWaitTime is None:
             self.retryWaitTime = 200
         else:
             self.retryWaitTime = retryWaitTime
+            
         if maxParallelism is None:
             self.maxParallelism = 3
         else:

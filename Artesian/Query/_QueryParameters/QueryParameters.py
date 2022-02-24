@@ -69,14 +69,14 @@ class _FillCustomMasStrategy(_FillStrategy):
         ])    
 class _QueryParameters: 
     def __init__(self, ids: Optional[List[int]], 
-                       extractionRangeConfig: ExtractionRangeConfig = None, 
-                       extractionRangeType: ExtractionRangeType = None, 
-                       timezone: str = None, 
-                       filterId: int = None,
-                       fill:_FillStrategy = None) -> None:
+                       extractionRangeConfig: ExtractionRangeConfig = ExtractionRangeConfig(), 
+                       extractionRangeType: Optional[ExtractionRangeType] = None, 
+                       timezone: Optional[str] = None, 
+                       filterId: Optional[int] = None,
+                       fill:Optional[_FillStrategy] = None) -> None:
                        
         self.ids = ids
-        self.extractionRangeConfig = extractionRangeConfig or ExtractionRangeConfig()
+        self.extractionRangeConfig = extractionRangeConfig
         self.extractionRangeType = extractionRangeType
         self.timezone = timezone
         self.filterId = filterId

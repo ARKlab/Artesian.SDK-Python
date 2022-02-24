@@ -1,5 +1,5 @@
-from Artesian._Configuration.ArtesianConfig import ArtesianConfig
-from Artesian._Configuration.ArtesianPolicyConfig import ArtesianPolicyConfig
+from Artesian.ArtesianConfig import ArtesianConfig
+from Artesian.ArtesianPolicyConfig import ArtesianPolicyConfig
 from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
 from Artesian._ClientsExecutor.Client import _Client
 
@@ -22,7 +22,7 @@ class GMEPublicOfferService:
                 Artesian Configuration.
         """
         self.__config = artesianConfig
-        self.__policy = ArtesianPolicyConfig(None, None, None)
+        self.__policy = ArtesianPolicyConfig()
         self.__queryBaseurl = self.__config.baseUrl + "/" + self.__offerstype + "/" + self.__version
         self.__executor = _RequestExecutor(self.__policy)
         self.__client = _Client(self.__queryBaseurl ,self.__config.apiKey)

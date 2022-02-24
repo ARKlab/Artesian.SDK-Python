@@ -1,3 +1,4 @@
+from typing import Optional
 from .VersionsRangeSelectionConfig import VersionsRangeSelectionConfig
 class VersionSelectionConfig:
     """ The class configures the Version Selection. 
@@ -7,7 +8,7 @@ class VersionSelectionConfig:
             version: for the selection
             versionRange: based on the version range selection configuration.
     """   
-    def __init__(self, lastN: int = None, version: str = None) -> None:
+    def __init__(self, lastN: Optional[int] = None, version:Optional[str] = None) -> None:
         """ Inits for the Version Selection Configuration. """
         self.lastN = lastN
         self.version = version

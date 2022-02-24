@@ -16,4 +16,4 @@ __all__ = [
     BidAskValue.__name__, 
     MarketAssessmentValue.__name__, 
     UpsertData.__name__
-]
+] # type: ignore
