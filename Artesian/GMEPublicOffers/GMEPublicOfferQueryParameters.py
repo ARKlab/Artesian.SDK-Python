@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from .ExtractionRangeConfig import ExtractionRangeConfig
 from ._Enum.BaType import BaType
 from ._Enum.GenerationType import GenerationType
@@ -28,19 +28,19 @@ class _GMEPublicOfferQueryParameters:
             baType: sets the BATypes to be queried.
     """
 
-    def __init__(self, page: int = None, 
-                       pageSize: int = None,
-                       extractionRangeConfig: ExtractionRangeConfig = None, 
-                       scope: List[Scope] = None, 
-                       status: Status = None, 
-                       unitType: List[UnitType] = None, 
-                       generationType: List[GenerationType] = None, 
-                       operator: List[str] = None, 
-                       unit: List[str] = None, 
-                       zone: List[Zone] = None, 
-                       market: List[Market] = None, 
-                       purpose: Purpose = None, 
-                       baType: List[BaType] = None)  -> None: 
+    def __init__(self, page: Optional[int] = None, 
+                       pageSize: Optional[int] = None,
+                       extractionRangeConfig: Optional[ExtractionRangeConfig] = None, 
+                       scope: Optional[List[Scope]] = None, 
+                       status: Optional[Status] = None, 
+                       unitType: Optional[List[UnitType]] = None, 
+                       generationType: Optional[List[GenerationType]] = None, 
+                       operator: Optional[List[str]] = None, 
+                       unit: Optional[List[str]] = None, 
+                       zone: Optional[List[Zone]] = None, 
+                       market: Optional[List[Market]] = None, 
+                       purpose: Optional[Purpose] = None, 
+                       baType: Optional[List[BaType]] = None)  -> None: 
         """ 
             Inits the GME Public Offer Query Parameters with optional overrides.
        

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from .ExtractionRangeConfig import ExtractionRangeConfig
 from .QueryParameters import _QueryParameters
 from .VersionSelectionConfig import VersionSelectionConfig
@@ -21,15 +21,15 @@ class VersionedQueryParameters(_QueryParameters):
             versionSelectionConfig: Sets the version selectuon configuration.
             versionSelectionType: Sets the version selection time.
     """
-    def __init__(self, ids: List[int] = None, 
+    def __init__(self, ids: Optional[List[int]] = None, 
                        extractionRangeConfig : ExtractionRangeConfig = ExtractionRangeConfig(), 
-                       extractionRangeType: ExtractionRangeType = None, 
-                       timezone: str = None, 
-                       filterId: int = None, 
-                       granularity: Granularity = None, 
-                       transformId: str = None, 
+                       extractionRangeType: Optional[ExtractionRangeType] = None, 
+                       timezone: Optional[str] = None, 
+                       filterId: Optional[int] = None, 
+                       granularity: Optional[Granularity] = None, 
+                       transformId: Optional[str] = None, 
                        versionSelectionConfig: VersionSelectionConfig = VersionSelectionConfig(), 
-                       versionSelectionType: VersionSelectionType = None) -> None:
+                       versionSelectionType: Optional[VersionSelectionType] = None) -> None:
         """ 
             Inits ActualQueryParameters 
         

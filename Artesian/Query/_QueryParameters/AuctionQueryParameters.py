@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from .ExtractionRangeConfig import ExtractionRangeConfig
 from .QueryParameters import _QueryParameters
 from .ExtractionRangeType import ExtractionRangeType
@@ -14,11 +14,11 @@ class AuctionQueryParameters(_QueryParameters):
             timezone: pecifies the timezone of extracted marketdata.
             filterId: filters marketdata ID to be queries.
     """
-    def __init__(self, ids: List[int] = None, 
+    def __init__(self, ids: Optional[List[int]] = None, 
                        extractionRangeConfig: ExtractionRangeConfig = ExtractionRangeConfig(), 
-                       extractionRangeType: ExtractionRangeType = None, 
-                       timezone: str = None, 
-                       filterId: int = None) -> None:
+                       extractionRangeType: Optional[ExtractionRangeType] = None, 
+                       timezone: Optional[str] = None, 
+                       filterId: Optional[int] = None) -> None:
         """ 
             Inits ActualQueryParameters 
         

@@ -6,8 +6,8 @@ from Artesian.Query.MasQuery import MasQuery
 from Artesian.Query.BidAskQuery import BidAskQuery
 from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
 from Artesian._ClientsExecutor.Client import _Client
-from Artesian._Configuration.ArtesianPolicyConfig import ArtesianPolicyConfig
-from Artesian._Configuration.ArtesianConfig import ArtesianConfig
+from Artesian.ArtesianPolicyConfig import ArtesianPolicyConfig
+from Artesian.ArtesianConfig import ArtesianConfig
 
 
 from Artesian.Query.DefaultPartitionStrategy import DefaultPartitionStrategy
@@ -27,7 +27,7 @@ class QueryService:
                 artesianConfiguration: The Artesian Configuration.
         """
         self.__config = artesianConfig
-        self.__policy = ArtesianPolicyConfig(None, None, None)
+        self.__policy = ArtesianPolicyConfig()
         self.__queryBaseurl = self.__config.baseUrl + "/" + self.__queryRoute + "/" + self.__queryVersion
         self.__partitionStrategy = DefaultPartitionStrategy()
         self.__executor = _RequestExecutor(self.__policy)

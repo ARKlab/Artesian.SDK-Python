@@ -67,13 +67,15 @@ now is
   .inGranularity(Granularity.Hour) \
 ```
 
-## QueryService
+# MarketData QueryService
 Using the ArtesianConfig `cfg` we create an instance of the QueryService which is used to create Actual, Versioned and Market Assessment time series queries
 
-### Actual Time Series
+## Actual Time Series Extraction
 ```Python
 from Artesian import Granularity
 from Artesian.Query import QueryService
+
+cfg = ArtesianConfig("https://arkive.artesian.cloud/{tenantName}/", "{api-key}")
 
 qs = QueryService(cfg)
 data = qs.createActual() \
@@ -83,8 +85,10 @@ data = qs.createActual() \
     .inGranularity(Granularity.Hour) \
     .execute()
 
+print(data)
+
 ```
-To construct an Actual Time Series the following must be provided.
+To construct an Actual Time Series Extraction the following must be provided.
 <table>
   <tr><th>Actual Query</th><th>Description</th></tr>
   <tr><td>Market Data ID</td><td>Provide a market data id or set of market data id's to query</td></tr>
@@ -94,7 +98,7 @@ To construct an Actual Time Series the following must be provided.
 
 [Go to Time Extraction window section](#artesian-sdk-extraction-windows)
 
-### Versioned Time Series
+## Versioned Time Series Extraction
 ```Python
 from Artesian import Granularity
 from Artesian.Query import QueryService
@@ -106,25 +110,42 @@ q = qs.createVersioned() \
     .inTimeZone("UTC") \
     .inGranularity(Granularity.Hour)
 
+print(q)
 
-q.forMuv().execute()
-q.forLastNVersions(2).execute()
-q.forLastOfDays("2019-03-12","2019-03-16").execute()
-q.forLastOfDays("P0Y0M-2D","P0Y0M2D").execute()
-q.forLastOfDays("P0Y0M-2D").execute()
-q.forLastOfMonths("2019-03-12","2019-03-16").execute()
-q.forLastOfMonths("P0Y-1M0D","P0Y1M0D").execute()
-q.forLastOfMonths("P0Y-1M0D").execute()
-q.forVersion("2019-03-12T14:30:00").execute()
-q.forMostRecent("2019-03-12","2019-03-16").execute()
-q.forMostRecent("2019-03-12T12:30:05","2019-03-16T18:42:30").execute()
-q.forMostRecent("P0Y0M-2D","P0Y0M2D").execute()
-q.forMostRecent("P0Y0M-2D").execute()
-q.forMostRecent("2019-03-12","2019-03-16").execute()
-q.forMostRecent("P0Y-1M0D","P0Y1M0D").execute()
-q.forMostRecent("P0Y-1M0D").execute() 
+ret = q.forMUV().execute()
+print(ret)
+ret = q.forLastNVersions(2).execute()
+print(ret)
+ret = q.forLastOfDays("2019-03-12","2019-03-16").execute()
+print(ret)
+ret = q.forLastOfDays("P0Y0M-2D","P0Y0M2D").execute()
+print(ret)
+ret = q.forLastOfDays("P0Y0M-2D").execute()
+print(ret)
+ret = q.forLastOfMonths("2019-03-12","2019-03-16").execute()
+print(ret)
+ret = q.forLastOfMonths("P0Y-1M0D","P0Y1M0D").execute()
+print(ret)
+ret = q.forLastOfMonths("P0Y-1M0D").execute()
+print(ret)
+ret = q.forVersion("2019-03-12T14:30:00").execute()
+print(ret)
+ret = q.forMostRecent("2019-03-12","2019-03-16").execute()
+print(ret)
+ret = q.forMostRecent("2019-03-12T12:30:05","2019-03-16T18:42:30").execute()
+print(ret)
+ret = q.forMostRecent("P0Y0M-2D","P0Y0M2D").execute()
+print(ret)
+ret = q.forMostRecent("P0Y0M-2D").execute()
+print(ret)
+ret = q.forMostRecent("2019-03-12","2019-03-16").execute()
+print(ret)
+ret = q.forMostRecent("P0Y-1M0D","P0Y1M0D").execute()
+print(ret)
+ret = q.forMostRecent("P0Y-1M0D").execute() 
+print(ret)
 ```
-To construct a Versioned Time Series the following must be provided.
+To construct a Versioned Time Series Extraction the following must be provided.
 <table>
   <tr><th>Versioned Query</th><th>Description</th></tr>
   <tr><td>Market Data ID</td><td>Provide a market data id or set of market data id's to query</td></tr>
@@ -135,18 +156,21 @@ To construct a Versioned Time Series the following must be provided.
 
 [Go to Time Extraction window section](#artesian-sdk-extraction-windows)
 
-### Market Assessment Time Series
+## Market Assessment Time Series Extraction
 ```Python
-from Artesian import *
+from Artesian import Granularity
+from Artesian.Query import QueryService
 
-qs = Query.QueryService(cfg)
+qs = QueryService(cfg)
 data = qs.createMarketAssessment() \
     .forMarketData([100000032,100000043]) \
     .forProducts(["D+1","Feb-18"]) \
     .inAbsoluteDateRange("2018-01-01","2018-01-02") \
     .execute()
+
+print(data)
 ```
-To construct a Market Assessment Time Series the following must be provided.
+To construct a Market Assessment Time Series Extraction the following must be provided.
 <table>
   <tr><th>Mas Query</th><th>Description</th></tr>
   <tr><td>Market Data ID</td><td>Provide a market data id or set of market data id's to query</td></tr>
@@ -156,9 +180,9 @@ To construct a Market Assessment Time Series the following must be provided.
 
 [Go to Time Extraction window section](#artesian-sdk-extraction-windows)
 
-### Bid Ask Time Series
+## Bid Ask Time Series Extraction
 ```Python
-from Artesian import *
+from Artesian import Granularity
 from Artesian.Query import QueryService
 
 qs = QueryService(cfg)
@@ -167,8 +191,10 @@ data = qs.createBidAsk() \
     .forProducts(["D+1","Feb-18"]) \
     .inAbsoluteDateRange("2018-01-01","2018-01-02") \
     .execute()
+
+print(data)
 ```
-To construct a Bid Ask Time Series the following must be provided.
+To construct a Bid Ask Time Series Extraction the following must be provided.
 <table>
   <tr><th>Mas Query</th><th>Description</th></tr>
   <tr><td>Market Data ID</td><td>Provide a market data id or set of market data id's to query</td></tr>
@@ -178,9 +204,9 @@ To construct a Bid Ask Time Series the following must be provided.
 
 [Go to Time Extraction window section](#artesian-sdk-extraction-windows)
 
-### Auction Time Series
+## Auction Time Series Extraction
 ```Python
-from Artesian import *
+from Artesian import Granularity
 from Artesian.Query import QueryService
 
 qs = QueryService(cfg)
@@ -190,8 +216,9 @@ data = qs.createAuction() \
     .inTimeZone("UTC") \
     .execute()
 
+print(data)
 ```
-To construct an Auction Time Series the following must be provided.
+To construct an Auction Time Series Extraction the following must be provided.
 <table>
   <tr><th>Auction Query</th><th>Description</th></tr>
   <tr><td>Market Data ID</td><td>Provide a market data id or set of market data id's to query</td></tr>
@@ -200,7 +227,9 @@ To construct an Auction Time Series the following must be provided.
 
 [Go to Time Extraction window section](#artesian-sdk-extraction-windows)
 
-## Artesian SDK Extraction Windows
+
+
+## Extraction Windows
 Extraction window types  for queries.
 
 Date Range
@@ -220,7 +249,9 @@ Period Range
  .inRelativePeriodRange("P-3D", "P10D")
 ```
 
-### Filler Strategy
+
+
+## Filler Strategy
 
 All extraction types (Actual,Versioned, Market Assessment and BidAsk) have an optional filler strategy.
 
@@ -288,34 +319,80 @@ Latest Value to propagate the latest value, not older than a certain threshold.
  .withFillLatestValue("P5D")
 ```
 
-## Jupyter
+# GME Public Offer
 
-Artesian SDK uses asyncio internally, this causes a conflict with Jupyter. You can work around this issue by add the following at the beginning of the notebook.
+Artesian support Query over GME Public Offers which comes in a custom and dedicated format.
 
-```python
+## Extract GME Public Offer
 
-!pip install nest_asyncio
+```Python
+from Artesian.GMEPublicOffers import GMEPublicOfferService, Market, Purpose, Status, Zone
 
-import nest_asyncio
-nest_asyncio.apply() 
+qs = GMEPublicOfferService(cfg)
 
+data = qs.createQuery() \
+    .forDate("2020-04-01") \
+    .forMarket([Market.MGP]) \
+    .forStatus(Status.ACC) \
+    .forPurpose(Purpose.BID) \
+    .forZone([Zone.NORD]) \
+    .withPagination(1,10) \
+    .execute()
 
+print(data)
+```
+To construct a GME Public Offer Extraction the following must be provided.
+<table>
+  <tr><th>GME Public Offer Query</th><th>Description</th></tr>
+  <tr><td>Time Extraction Window</td><td>An extraction time window for data to be queried</td></tr>
+  <tr><td>Market</td><td>Provide a market or set of markets to query</td></tr>
+   <tr><td>Status</td><td>Provide a status or set of statuses to query</td></tr>
+    <tr><td>Purpose</td><td>Provide a purpose or set of purposes to query</td></tr>
+     <tr><td>Zone</td><td>Provide a zone to query</td></tr>
+     
+</table>
+
+## Extraction Options
+
+Extraction options for GME Public Offer queries.
+
+### Generation Type
+```Python
+ .forGenerationType(GenerationType.GAS)
+```
+### Market
+```Python
+ .forMarket([Market.MGP])
+```
+### Purpose
+```Python
+ .forPurpose(Purpose.BID)
+```
+### Status
+```Python
+ .forStatus(Status.ACC)
+```
+### Scope
+```Python
+ .forScope(Scope.ACC)
+```
+### Zone
+```Python
+ .forZone([Zone.NORD])
 ```
 
-[Issue #3397 with workaround](https://github.com/jupyter/notebook/issues/3397#issuecomment-419386811)
-
-## Write Data in Artesian
-
+# Write Data in Artesian
 
 Using the MarketDataService is possible to register MarketData and write curves into it using the UpsertData method.
 
 Depending on the Type of the MarketData, the UpsertData should be composed as per example below.
 
-### Write Data in a ActualTimeSerie
+## Write Data in an Actual Time Series
 
 ```Python
 from Artesian import ArtesianConfig
 from Artesian import ArtesianConfig,Granularity,MarketData
+from datetime import datetime
 from dateutil import tz
 
 cfg = ArtesianConfg()
@@ -325,7 +402,7 @@ mkservice = MarketData.MarketDataService(cfg)
 mkdid = MarketData.MarketDataIdentifier('PROVIDER', 'CURVENAME')
 mkd = MarketData.MarketDataEntityInput(
       providerName = mkdid.provider,
-      marketDataName = mkdid.curveName,
+      marketDataName = mkdid.name,
       originalGranularity=Granularity.Day,
       type=MarketData.MarketDataType.ActualTimeSerie,
       originalTimezone="CET",
@@ -334,7 +411,7 @@ mkd = MarketData.MarketDataEntityInput(
       }
   )
 
-registered = mkservice.readMarketDataByName(mkdid.provider, mkdid.curveName)
+registered = mkservice.readMarketDataRegistryByName(mkdid.provider, mkdid.name)
 if (registered is None):
   registered = mkservice.registerMarketData(mkd)
 
@@ -351,11 +428,54 @@ mkservice.upsertData(data)
 
 ```
 
-### Write Data in a MarketAssessment
+## Write Data in a Versioned Time Series
 
 ```Python
 from Artesian import ArtesianConfig
 from Artesian import ArtesianConfig,Granularity,MarketData
+from datetime import datetime
+from dateutil import tz
+
+cfg = ArtesianConfg()
+
+mkservice = MarketData.MarketDataService(cfg)
+
+mkdid = MarketData.MarketDataIdentifier('PROVIDER', 'CURVENAME')
+mkd = MarketData.MarketDataEntityInput(
+      providerName = mkdid.provider,
+      marketDataName = mkdid.name,
+      originalGranularity=Granularity.Day,
+      type=MarketData.MarketDataType.VersionedTimeSerie,
+      originalTimezone="CET",
+      tags={
+        'TestSDKPython': ['PythonValue2']
+      }
+  )
+
+registered = mkservice.readMarketDataRegistryByName(mkdid.provider, mkdid.name)
+if (registered is None):
+  registered = mkservice.registerMarketData(mkd)
+
+data = MarketData.UpsertData(mkdid, 'CET', 
+  rows=
+  {
+      datetime(2020,1,1): 42.0,
+      datetime(2020,1,2): 43.0,
+  },
+  version= datetime(2020,1,3,12,0),
+  downloadedAt=datetime(2020,1,3).replace(tzinfo=tz.UTC)
+  )
+
+mkservice.upsertData(data)
+
+```
+
+## Write Data in a Market Assessment Time Series
+
+```Python
+from Artesian import ArtesianConfig
+from Artesian import ArtesianConfig,Granularity,MarketData
+from datetime import datetime
 from dateutil import tz
 
 cfg = ArtesianConfg()
@@ -364,7 +484,7 @@ mkservice = MarketData.MarketDataService(cfg)
 mkdid = MarketData.MarketDataIdentifier('PROVIDER', 'CURVENAME')
 mkd = MarketData.MarketDataEntityInput(
       providerName = mkdid.provider,
-      marketDataName = mkdid.curveName,
+      marketDataName = mkdid.name,
       originalGranularity=Granularity.Day,
       type=MarketData.MarketDataType.MarketAssessment,
       originalTimezone="CET",
@@ -372,6 +492,10 @@ mkd = MarketData.MarketDataEntityInput(
         'TestSDKPython': ['PythonValue2']
       }
   )
+
+registered = mkservice.readMarketDataRegistryByName(mkdid.provider, mkdid.name)
+if (registered is None):
+  registered = mkservice.registerMarketData(mkd)
 
 marketAssessment = MarketData.UpsertData(MarketData.MarketDataIdentifier('PROVIDER', 'CURVENAME'), 'CET', 
   marketAssessment=
@@ -394,11 +518,12 @@ mkservice.upsertData(marketAssessment)
 
 ```
 
-### Write Data in a BidAsk
+## Write Data in a Bid Ask Time Series
 
 ```Python
 from Artesian import ArtesianConfig
 from Artesian import ArtesianConfig,Granularity,MarketData
+from datetime import datetime
 from dateutil import tz
 
 cfg = ArtesianConfg()
@@ -407,7 +532,7 @@ mkservice = MarketData.MarketDataService(cfg)
 mkdid = MarketData.MarketDataIdentifier('PROVIDER', 'CURVENAME')
 mkd = MarketData.MarketDataEntityInput(
       providerName = mkdid.provider,
-      marketDataName = mkdid.curveName,
+      marketDataName = mkdid.name,
       originalGranularity=Granularity.Day,
       type=MarketData.MarketDataType.BidAsk,
       originalTimezone="CET",
@@ -415,6 +540,10 @@ mkd = MarketData.MarketDataEntityInput(
         'TestSDKPython': ['PythonValue2']
       }
   )
+
+registered = mkservice.readMarketDataRegistryByName(mkdid.provider, mkdid.name)
+if (registered is None):
+  registered = mkservice.registerMarketData(mkd)
 
 bidAsk = MarketData.UpsertData(MarketData.MarketDataIdentifier('PROVIDER', 'CURVENAME'), 'CET', 
   bidAsk={
@@ -436,11 +565,12 @@ bidAsk = MarketData.UpsertData(MarketData.MarketDataIdentifier('PROVIDER', 'CURV
 mkservice.upsertData(bidAsk)
 ```
 
-### Write Data in a Auction
+## Write Data in an Auction Time Series
 
 ```Python
 from Artesian import ArtesianConfig
 from Artesian import ArtesianConfig,Granularity,MarketData
+from datetime import datetime
 from dateutil import tz
 
 cfg = ArtesianConfg()
@@ -449,7 +579,7 @@ mkservice = MarketData.MarketDataService(cfg)
 mkdid = MarketData.MarketDataIdentifier('PROVIDER', 'CURVENAME')
 mkd = MarketData.MarketDataEntityInput(
       providerName = mkdid.provider,
-      marketDataName = mkdid.curveName,
+      marketDataName = mkdid.name,
       originalGranularity=Granularity.Day,
       type=MarketData.MarketDataType.Auction,
       originalTimezone="CET",
@@ -457,6 +587,10 @@ mkd = MarketData.MarketDataEntityInput(
         'TestSDKPython': ['PythonValue2']
       }
   )
+
+registered = mkservice.readMarketDataRegistryByName(mkdid.provider, mkdid.name)
+if (registered is None):
+  registered = mkservice.registerMarketData(mkd)
 
 auctionRows = MarketData.UpsertData(MarketData.MarketDataIdentifier('PROVIDER', 'CURVENAME'), 'CET', 
   auctionRows={
@@ -478,12 +612,9 @@ auctionRows = MarketData.UpsertData(MarketData.MarketDataIdentifier('PROVIDER', 
 
 
 ```
-## Delete Data in Artesian
+## Delete MarketData in Artesian
 
-
-Using the MarketDataService is possible to register MarketData and write curves into it using the UpsertData method.
-
-Depending on the Type of the MarketData, the UpsertData should be composed as per example below.
+Using the MarketDataService is possible to delete MarketData and its curves.
 
 ```Python
 
@@ -499,7 +630,8 @@ mkservice.deleteMarketData(100042422)
 
 ## Query written Versions or Products
 
-Using the ArtesianServiceConfig `cfg` we create an instance of the MarketDataService which is used to retrieve MarketData infos.
+Using MarketDataService is possible to query all the Versions and all the Products curves which has been written in a MarketData.
+
 
 ```Python
 from Artesian.MarketData import MarketDataService
@@ -514,6 +646,23 @@ page = 1
 pageSize = 100
 res = mds.readCurveRange(100042422, page, pageSize, versionFrom="2016-12-20" , versionTo="2019-03-12")
 ```
+
+
+# Jupyter Support
+
+Artesian SDK uses asyncio internally, this causes a conflict with Jupyter. You can work around this issue by add the following at the beginning of the notebook.
+
+```python
+
+!pip install nest_asyncio
+
+import nest_asyncio
+nest_asyncio.apply() 
+
+
+```
+
+[Issue #3397 with workaround](https://github.com/jupyter/notebook/issues/3397#issuecomment-419386811)
 
 
 ## Links

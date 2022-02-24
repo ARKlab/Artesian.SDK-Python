@@ -1,6 +1,9 @@
+from typing import Optional
+
+
 class VersionsRangeSelectionConfig:
     """ The class Configures the Version Range Selection.
-    
+
         Attributes:
             dateStart: start date for the version range selection configuration.
             dateEnd: end date for the version range selection configuration.
@@ -8,10 +11,15 @@ class VersionsRangeSelectionConfig:
             periodFrom: period start for the version range selection configuration.
             periodTo: period end for the version range selection configuration.
     """
-            
-    def __init__(self, dateStart: str=None, dateEnd: str=None, period: str=None, periodFrom: str=None, periodTo: str=None) -> None:
+
+    def __init__(self, 
+                 dateStart: Optional[str] = None, 
+                 dateEnd: Optional[str] = None, 
+                 period: Optional[str] = None, 
+                 periodFrom: Optional[str] = None, 
+                 periodTo: Optional[str] = None) -> None:
         """ Inits for the Versions Range Selection Configuration. """
-        
+
         self.dateStart = dateStart
         """ Start date for the versions range selection configuration. (ISO format)"""
         self.dateEnd = dateEnd

@@ -1,8 +1,8 @@
-import typing
+from typing import Optional, cast
 from .._ClientsExecutor.RequestExecutor import _RequestExecutor
 from .._ClientsExecutor.Client import _Client
-from .._Configuration.ArtesianConfig import ArtesianConfig
-from .._Configuration.ArtesianPolicyConfig import ArtesianPolicyConfig
+from ..ArtesianConfig import ArtesianConfig
+from ..ArtesianPolicyConfig import ArtesianPolicyConfig
 from ._Dto.PagedResult import PagedResultCurveRangeEntity
 from ._Dto.MarketDataEntityInput import MarketDataEntityInput
 from ._Dto.MarketDataEntityOutput import MarketDataEntityOutput
@@ -26,13 +26,13 @@ class MarketDataService:
 
         """
         self.__config = artesianConfig
-        self.__policy = ArtesianPolicyConfig(None, None, None)
+        self.__policy = ArtesianPolicyConfig()
         self.__serviceBaseurl = self.__config.baseUrl + "/" + self.__version
         self.__executor = _RequestExecutor(self.__policy)
         self.__client = _Client(self.__serviceBaseurl ,self.__config.apiKey)
 
     async def readCurveRangeAsync(self, id: int, page: int, pageSize: int, 
-        product: str=None, versionFrom: str=None, versionTo: str=None) -> PagedResultCurveRangeEntity:
+        product: Optional[str]=None, versionFrom: Optional[str]=None, versionTo: Optional[str]=None) -> PagedResultCurveRangeEntity:
         """
             Reads paged set of available versions of the marketdata by id.
 
@@ -60,10 +60,10 @@ class MarketDataService:
             params['product'] = product       
         with self.__client as c:
             res = await asyncio.gather(*[self.__executor.exec(c.exec, 'GET', url, retcls=PagedResultCurveRangeEntity, params=params)])
-            return typing.cast(PagedResultCurveRangeEntity,res[0])
+            return cast(PagedResultCurveRangeEntity,res[0])
 
     def readCurveRange(self, id: int, page: int, pageSize: int, 
-        product: str=None, versionFrom: str=None, versionTo: str=None) -> PagedResultCurveRangeEntity:
+        product: Optional[str]=None, versionFrom: Optional[str]=None, versionTo: Optional[str]=None) -> PagedResultCurveRangeEntity:
         """
             Reads paged set of available versions of the marketdata by id.
 
@@ -94,7 +94,7 @@ class MarketDataService:
         url = "/marketdata/entity/" + str(id) 
         with self.__client as c:
             res = await asyncio.gather(*[self.__executor.exec(c.exec, 'GET', url, None, retcls=MarketDataEntityOutput)])
-            return typing.cast(MarketDataEntityOutput,res[0])
+            return cast(MarketDataEntityOutput,res[0])
 
     def readMarketDataRegistryById(self, id: int) -> MarketDataEntityOutput :  
         """
@@ -121,7 +121,7 @@ class MarketDataService:
         url = "/marketdata/entity/" + str(id) 
         with self.__client as c:
             res = await asyncio.gather(*[self.__executor.exec(c.exec, 'PUT', url, entity, MarketDataEntityOutput)])
-            return typing.cast(MarketDataEntityOutput,res[0])
+            return cast(MarketDataEntityOutput,res[0])
 
     def updateMarketData(self, id: int, entity: MarketDataEntityInput):
         """ 
@@ -177,7 +177,7 @@ class MarketDataService:
         params = {"provider": provider , "curveName":curveName}
         with self.__client as c:
             res = await asyncio.gather(*[self.__executor.exec(c.exec, 'GET', url, None, retcls=MarketDataEntityOutput, params = params)])
-            return typing.cast(MarketDataEntityOutput,res[0])
+            return cast(MarketDataEntityOutput,res[0])
 
     def readMarketDataRegistryByName(self, provider: str, curveName: str) -> MarketDataEntityOutput:
         """
@@ -205,7 +205,7 @@ class MarketDataService:
         url = "/marketdata/entity"
         with self.__client as c:
             res = await asyncio.gather(*[self.__executor.exec(c.exec, 'POST', url, entity, MarketDataEntityOutput)])
-            return typing.cast(MarketDataEntityOutput,res[0])
+            return cast(MarketDataEntityOutput,res[0])
 
     def registerMarketData(self, entity: MarketDataEntityInput) -> MarketDataEntityOutput:
         """

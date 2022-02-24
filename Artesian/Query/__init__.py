@@ -14,4 +14,4 @@ __all__=[
     VersionedQuery.__name__,
     AuctionQuery.__name__,
     RelativeInterval.__name__
-]
+] # type: ignore

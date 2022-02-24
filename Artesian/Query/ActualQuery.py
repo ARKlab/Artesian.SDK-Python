@@ -1,4 +1,5 @@
 from __future__ import annotations
+from Artesian.Exceptions import ArtesianSdkException
 from Artesian.Query._QueryParameters.QueryParameters import _FillCustomTimeserieStrategy, _FillLatestStrategy, _NoFillStrategy, _NullFillStrategy
 from .._ClientsExecutor.RequestExecutor import _RequestExecutor
 from .._ClientsExecutor.Client import _Client
@@ -9,7 +10,7 @@ from ._QueryParameters.ActualQueryParameters import ActualQueryParameters
 from ._QueryParameters.ExtractionRangeConfig import ExtractionRangeConfig
 from Artesian.MarketData import Granularity
 from urllib import parse
-from typing import List
+from typing import List, Optional
 
 class ActualQuery(_Query):
     __routePrefix = "ts"
@@ -224,11 +225,11 @@ class ActualQuery(_Query):
         super()._validateQuery()
         if (self._queryParameters.granularity is None):
                 raise Exception("Extraction granularity must be provided. Use .InGranularity() argument takes a granularity type")
-    def __getGranularityPath(self,granularity):
+    def __getGranularityPath(self, granularity:Optional[Granularity]) -> str:
         switcher = {
             Granularity.Day: "Day",
             Granularity.FifteenMinute: "FifteenMinute",
-            Granularity.Hour: "Hour" ,
+            Granularity.Hour: "Hour",
             Granularity.Minute: "Minute",
             Granularity.Month: "Month",
             Granularity.Quarter: "Quarter",
@@ -237,7 +238,8 @@ class ActualQuery(_Query):
             Granularity.Week: "Week",
             Granularity.Year: "Year",
         }
+        if granularity is None:
+            raise ArtesianSdkException("Missing Granularity. Use .forGranularity() to set one.")
+        
         vr = switcher.get(granularity, "VGran")
-        if vr == "VGran" :
-            raise Exception("Not supported Granularity")
         return vr

@@ -86,7 +86,7 @@ __artesianJsonKwArgs = {
   'fork_inst': __artesianJsonSerializer,
 }
 
-def artesianJsonSerialize(obj: object, cls: type = None, **kwargs) -> object:
+def artesianJsonSerialize(obj: object, cls: Optional[type] = None, **kwargs) -> object:
   """ 
       Sets the Artesian Json Serializer.
 
@@ -101,7 +101,7 @@ def artesianJsonSerialize(obj: object, cls: type = None, **kwargs) -> object:
   kwargs_ = {**__artesianJsonKwArgs, **kwargs}
   return jsons.dump(obj, cls, key_transformer=__camelToPascal, **kwargs_)
 
-def artesianJsonDeserialize(obj: object, cls: type = None, **kwargs) -> object:
+def artesianJsonDeserialize(obj: object, cls: Optional[type] = None, **kwargs) -> object:
   """ 
       Sets the Artesian Json Deserializer.
 

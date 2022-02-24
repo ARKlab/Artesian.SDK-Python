@@ -1,4 +1,5 @@
 import cgi
+from typing import Optional
 import requests
 import platform
 
@@ -19,7 +20,7 @@ class _Client:
         return self
     def __exit__(self, *args):
         self.__session.__exit__(args)
-    async def exec(self, method: str, url: str, obj: object = None, retcls: type = None, params:dict = None):        
+    async def exec(self, method: str, url: str, obj: object = None, retcls: Optional[type] = None, params:Optional[dict] = None):        
         json = artesianJsonSerialize(obj)
         url = self.__baseUrl + url
         r = requests.Request(method, url, json=json, params=params)
@@ -46,7 +47,7 @@ class _Client:
         errorText = None
 
         if mimetype == 'application/problem+json':
-            problemDetails = res.json()
+            problemDetails = dict(res.json())
         if mimetype == 'application/json' or mimetype.split('/')[0] == 'text':
             errorText = res.text if res.text != "" else None
         

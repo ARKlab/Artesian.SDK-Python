@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 from .ExtractionRangeConfig import ExtractionRangeConfig
 from .QueryParameters import _QueryParameters
 from .ExtractionRangeType import ExtractionRangeType
@@ -15,12 +15,12 @@ class MasQueryParameters(_QueryParameters):
             filterId: filters marketdata ID to be queries.
             products: sets products to be queried.
     """
-    def __init__(self, ids: List[int] = None, 
+    def __init__(self, ids: Optional[List[int]] = None, 
                        extractionRangeConfig: ExtractionRangeConfig = ExtractionRangeConfig(), 
-                       extractionRangeType: ExtractionRangeType = None, 
-                       timezone: str = None, 
-                       filterId: int = None, 
-                       products: List[str] = None) -> None:
+                       extractionRangeType: Optional[ExtractionRangeType] = None, 
+                       timezone: Optional[str] = None, 
+                       filterId: Optional[int] = None, 
+                       products: Optional[List[str]] = None) -> None:
         """ 
             Inits ActualQueryParameters 
         
