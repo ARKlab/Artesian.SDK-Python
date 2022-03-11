@@ -26,7 +26,6 @@ setuptools.setup(
         'six',
         'asyncio',
         'jsons>=1.6.1',
-        'dataclasses',
         'python-dateutil',
         #'typing-compat' # needed for get_args in 3.7 
     ],
