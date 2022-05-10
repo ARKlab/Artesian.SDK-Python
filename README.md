@@ -326,7 +326,7 @@ Artesian support Query over GME Public Offers which comes in a custom and dedica
 ## Extract GME Public Offer
 
 ```Python
-from Artesian.GMEPublicOffers import GMEPublicOfferService, Market, Purpose, Status, Zone
+from Artesian.GMEPublicOffers import GMEPublicOfferService, Market, Purpose, Status, Zone, Scope, UnitType, GenerationType, BAType
 
 qs = GMEPublicOfferService(cfg)
 
@@ -356,13 +356,9 @@ To construct a GME Public Offer Extraction the following must be provided.
 
 Extraction options for GME Public Offer queries.
 
-### Generation Type
+### Date
 ```Python
- .forGenerationType(GenerationType.GAS)
-```
-### Market
-```Python
- .forMarket([Market.MGP])
+ .forDate("2020-04-01")
 ```
 ### Purpose
 ```Python
@@ -372,15 +368,42 @@ Extraction options for GME Public Offer queries.
 ```Python
  .forStatus(Status.ACC)
 ```
+### Operator
+```Python
+ .forOperator(["Operator_1", "Operator_2"])
+```
+### Unit
+```Python
+ .forUnit(["UP_1", "UP_2"])
+```
+### Market
+```Python
+ .forMarket([Market.MGP])
+```
 ### Scope
 ```Python
- .forScope(Scope.ACC)
+ .forScope([Scope.ACC, Scope.RS])
+```
+### BAType
+```Python
+ .forBAType([BAType.NETT, BAType.NERV])
 ```
 ### Zone
 ```Python
  .forZone([Zone.NORD])
 ```
-
+### UnitType
+```Python
+ .forUnitType([UnitType.UCV, UnitType.UPV])
+```
+### Generation Type
+```Python
+ .forGenerationType(GenerationType.GAS)
+```
+### Pagination
+```Python
+ .withPagination(1,10)
+```
 # Write Data in Artesian
 
 Using the MarketDataService is possible to register MarketData and write curves into it using the UpsertData method.
@@ -391,7 +414,8 @@ Depending on the Type of the MarketData, the UpsertData should be composed as pe
 
 ```Python
 from Artesian import ArtesianConfig
-from Artesian import ArtesianConfig,Granularity,MarketData
+from Artesian.Query import QueryService
+from Artesian.MarketData import MarketDataService, AggregationRule, Granularity
 from datetime import datetime
 from dateutil import tz
 
@@ -406,6 +430,7 @@ mkd = MarketData.MarketDataEntityInput(
       originalGranularity=Granularity.Day,
       type=MarketData.MarketDataType.ActualTimeSerie,
       originalTimezone="CET",
+      aggregationRule=AggregationRule.AverageAndReplicate,
       tags={
         'TestSDKPython': ['PythonValue2']
       }
@@ -427,12 +452,49 @@ data = MarketData.UpsertData(mkdid, 'CET',
 mkservice.upsertData(data)
 
 ```
+In case we want to write an hourly (or lower) time series the timezone for the upsert data must be UTC:
 
+```Python
+mkservice = MarketData.MarketDataService(cfg)
+
+mkdid = MarketData.MarketDataIdentifier('PROVIDER', 'CURVENAME')
+mkd = MarketData.MarketDataEntityInput(
+      providerName = mkdid.provider,
+      marketDataName = mkdid.name,
+      originalGranularity=Granularity.Hour,
+      type=MarketData.MarketDataType.ActualTimeSerie,
+      originalTimezone="CET",
+      aggregationRule=AggregationRule.AverageAndReplicate,
+      tags={
+        'TestSDKPython': ['PythonValue2']
+      }
+  )
+
+registered = mkservice.readMarketDataRegistryByName(mkdid.provider, mkdid.name)
+if (registered is None):
+  registered = mkservice.registerMarketData(mkd)
+
+data = MarketData.UpsertData(mkdid, 'UTC', 
+  rows=
+  {
+      datetime(2020,1,1,5,0,0): 42.0,
+      datetime(2020,1,2,6,0,0): 43.0,
+      datetime(2020,1,2,7,0,0): 44.0,
+      datetime(2020,1,2,8,0,0): 45.0,
+      datetime(2020,1,2,9,0,0): 46.0,
+  },
+  downloadedAt=datetime(2020,1,3).replace(tzinfo=tz.UTC)
+  )
+
+mkservice.upsertData(data)
+
+```
 ## Write Data in a Versioned Time Series
 
 ```Python
 from Artesian import ArtesianConfig
-from Artesian import ArtesianConfig,Granularity,MarketData
+from Artesian.Query import QueryService
+from Artesian.MarketData import MarketDataService, AggregationRule, Granularity
 from datetime import datetime
 from dateutil import tz
 
@@ -447,6 +509,7 @@ mkd = MarketData.MarketDataEntityInput(
       originalGranularity=Granularity.Day,
       type=MarketData.MarketDataType.VersionedTimeSerie,
       originalTimezone="CET",
+      aggregationRule=AggregationRule.AverageAndReplicate,
       tags={
         'TestSDKPython': ['PythonValue2']
       }
