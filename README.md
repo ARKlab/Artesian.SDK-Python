@@ -319,6 +319,12 @@ Latest Value to propagate the latest value, not older than a certain threshold.
  .withFillLatestValue("P5D")
 ```
 
+Latest Value to propagate the latest value, not older than a certain threshold even if there's no value at the end.
+
+```python
+ .withFillLatestValue("P5D", "True")
+```
+
 # GME Public Offer
 
 Artesian support Query over GME Public Offers which comes in a custom and dedicated format.

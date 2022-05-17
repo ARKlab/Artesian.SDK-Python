@@ -49,6 +49,23 @@ class TestVersioned(unittest.TestCase):
         query = requests.getQs()
         self.assertEqual(query["fillerK"],"LatestValidValue")
         self.assertEqual(query["fillerP"],"P5D")
+        self.assertEqual(query["fillerC"],"False")
+    
+    @helpers.TrackRequests
+    def test_Latest_Fill_Continue(self, requests):
+        url = qs.createVersioned() \
+            .forFilterId(1003) \
+            .forLastNVersions(1) \
+            .inAbsoluteDateRange("2018-01-01","2018-01-02") \
+            .inTimeZone("UTC") \
+            .inGranularity(Granularity.Hour) \
+            .withFillLatestValue("P5D", True) \
+            .execute()
+
+        query = requests.getQs()
+        self.assertEqual(query["fillerK"],"LatestValidValue")
+        self.assertEqual(query["fillerP"],"P5D")
+        self.assertEqual(query["fillerC"],"True")
     
     @helpers.TrackRequests
     def test_Custom_Value_Fill(self, requests):
