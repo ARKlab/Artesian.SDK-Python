@@ -263,16 +263,18 @@ class VersionedQuery(_Query):
         self._queryParameters.fill = _NoFillStrategy()
         return self
 
-    def withFillLatestValue(self, period: str) -> VersionedQuery:
+    def withFillLatestValue(self, period: str, continueToEnd: bool = False) -> VersionedQuery:
         """ Optional filler strategy for the extraction.
 
             Args:
                 period: string of the last period value to fill in case there are missing values. Ex.:   withFillLatestValue("P5D") 
+                continueToEnd: true means the fill extends to the end of the period even if there's no value at the end of the period
+                               false means the fill is only extended to the next valid value
 
             Returns: 
                 VersionedQuery.
         """
-        self._queryParameters.fill = _FillLatestStrategy(period)
+        self._queryParameters.fill = _FillLatestStrategy(period, continueToEnd)
         return self
 
     def withFillCustomValue(self, val: float) -> VersionedQuery:

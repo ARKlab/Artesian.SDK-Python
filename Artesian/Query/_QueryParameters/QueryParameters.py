@@ -16,10 +16,11 @@ class _NoFillStrategy(_FillStrategy):
         return "fillerK=NoFill"
 
 class _FillLatestStrategy(_FillStrategy):  
-    def __init__(self, period):
+    def __init__(self, period, continueToEnd):
         self.period = period
+        self.continueToEnd = continueToEnd
     def getUrlParams(self):
-        return f"fillerK=LatestValidValue&fillerP={self.period}"
+        return f"fillerK=LatestValidValue&fillerP={self.period}&fillerC={self.continueToEnd}"
 
 class _FillCustomTimeserieStrategy(_FillStrategy):
     def __init__(self, val):

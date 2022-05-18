@@ -313,10 +313,20 @@ Custom Value for Versioned extraction type.
 .withFillCustomValue(123)
 ```
 
-Latest Value to propagate the latest value, not older than a certain threshold.
+Latest Value to propagate the latest value, not older than a certain threshold only if there is a value at the end of the period.
 
 ```python
  .withFillLatestValue("P5D")
+```
+
+```python
+ .withFillLatestValue("P5D", "False")
+```
+
+Latest Value to propagate the latest value, not older than a certain threshold even if there's no value at the end.
+
+```python
+ .withFillLatestValue("P5D", "True")
 ```
 
 # GME Public Offer
