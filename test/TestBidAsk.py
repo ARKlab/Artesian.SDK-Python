@@ -42,6 +42,21 @@ class TestBidAsk(unittest.TestCase):
         query = requests.getQs()
         self.assertEqual(query["fillerK"],"LatestValidValue")
         self.assertEqual(query["fillerP"],"P5D")
+        self.assertEqual(query["fillerC"],"False")
+    
+    @helpers.TrackRequests
+    def test_Latest_Fill_Continue(self, requests):
+        url = qs.createBidAsk() \
+            .forMarketData([100000001]) \
+            .forProducts(["M+1", "M+2"]) \
+            .inAbsoluteDateRange("2018-01-01","2018-01-02") \
+            .withFillLatestValue("P5D", "True") \
+            .execute()
+
+        query = requests.getQs()
+        self.assertEqual(query["fillerK"],"LatestValidValue")
+        self.assertEqual(query["fillerP"],"P5D")
+        self.assertEqual(query["fillerC"],"True")
     
     @helpers.TrackRequests
     def test_Custom_Value_Fill(self, requests):
