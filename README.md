@@ -72,8 +72,8 @@ Using the ArtesianConfig `cfg` we create an instance of the QueryService which i
 
 ## Actual Time Series Extraction
 ```Python
-from Artesian import Granularity
-from Artesian.Query import QueryService
+from Artesian import ArtesianConfig, Granularity
+from Artesian.Query import QueryService, RelativeInterval
 
 cfg = ArtesianConfig("https://arkive.artesian.cloud/{tenantName}/", "{api-key}")
 
@@ -100,8 +100,8 @@ To construct an Actual Time Series Extraction the following must be provided.
 
 ## Versioned Time Series Extraction
 ```Python
-from Artesian import Granularity
-from Artesian.Query import QueryService
+from Artesian import ArtesianConfig, Granularity
+from Artesian.Query import QueryService, RelativeInterval
 
 qs = QueryService(cfg)
 q = qs.createVersioned() \
@@ -158,8 +158,8 @@ To construct a Versioned Time Series Extraction the following must be provided.
 
 ## Market Assessment Time Series Extraction
 ```Python
-from Artesian import Granularity
-from Artesian.Query import QueryService
+from Artesian import ArtesianConfig
+from Artesian.Query import QueryService, RelativeInterval
 
 qs = QueryService(cfg)
 data = qs.createMarketAssessment() \
@@ -182,8 +182,8 @@ To construct a Market Assessment Time Series Extraction the following must be pr
 
 ## Bid Ask Time Series Extraction
 ```Python
-from Artesian import Granularity
-from Artesian.Query import QueryService
+from Artesian import ArtesianConfig
+from Artesian.Query import QueryService, RelativeInterval
 
 qs = QueryService(cfg)
 data = qs.createBidAsk() \
@@ -206,8 +206,8 @@ To construct a Bid Ask Time Series Extraction the following must be provided.
 
 ## Auction Time Series Extraction
 ```Python
-from Artesian import Granularity
-from Artesian.Query import QueryService
+from Artesian import ArtesianConfig
+from Artesian.Query import QueryService, RelativeInterval
 
 qs = QueryService(cfg)
 data = qs.createAuction() \
@@ -346,7 +346,7 @@ data = qs.createQuery() \
     .forStatus(Status.ACC) \
     .forPurpose(Purpose.BID) \
     .forZone([Zone.NORD]) \
-    .withPagination(1,10) \
+    .withPagination(1,100) \
     .execute()
 
 print(data)
@@ -423,9 +423,8 @@ Depending on the Type of the MarketData, the UpsertData should be composed as pe
 ## Write Data in an Actual Time Series
 
 ```Python
-from Artesian import ArtesianConfig
-from Artesian.Query import QueryService
-from Artesian.MarketData import MarketDataService, AggregationRule, Granularity
+from Artesian import ArtesianConfig, Granularity, MarketData
+from Artesian.MarketData import AggregationRule
 from datetime import datetime
 from dateutil import tz
 
@@ -433,7 +432,7 @@ cfg = ArtesianConfg()
 
 mkservice = MarketData.MarketDataService(cfg)
 
-mkdid = MarketData.MarketDataIdentifier('PROVIDER', 'CURVENAME')
+mkdid = MarketData.MarketDataIdentifier('PROVIDER', 'MARKETDATANAME')
 mkd = MarketData.MarketDataEntityInput(
       providerName = mkdid.provider,
       marketDataName = mkdid.name,
@@ -467,7 +466,7 @@ In case we want to write an hourly (or lower) time series the timezone for the u
 ```Python
 mkservice = MarketData.MarketDataService(cfg)
 
-mkdid = MarketData.MarketDataIdentifier('PROVIDER', 'CURVENAME')
+mkdid = MarketData.MarketDataIdentifier('PROVIDER', 'MARKETDATANAME')
 mkd = MarketData.MarketDataEntityInput(
       providerName = mkdid.provider,
       marketDataName = mkdid.name,
@@ -502,9 +501,8 @@ mkservice.upsertData(data)
 ## Write Data in a Versioned Time Series
 
 ```Python
-from Artesian import ArtesianConfig
-from Artesian.Query import QueryService
-from Artesian.MarketData import MarketDataService, AggregationRule, Granularity
+from Artesian import ArtesianConfig, Granularity, MarketData
+from Artesian.MarketData import AggregationRule
 from datetime import datetime
 from dateutil import tz
 
@@ -512,7 +510,7 @@ cfg = ArtesianConfg()
 
 mkservice = MarketData.MarketDataService(cfg)
 
-mkdid = MarketData.MarketDataIdentifier('PROVIDER', 'CURVENAME')
+mkdid = MarketData.MarketDataIdentifier('PROVIDER', 'MARKETDATANAME')
 mkd = MarketData.MarketDataEntityInput(
       providerName = mkdid.provider,
       marketDataName = mkdid.name,
@@ -546,15 +544,14 @@ mkservice.upsertData(data)
 ## Write Data in a Market Assessment Time Series
 
 ```Python
-from Artesian import ArtesianConfig
-from Artesian import ArtesianConfig,Granularity,MarketData
+from Artesian import ArtesianConfig, Granularity, MarketData
 from datetime import datetime
 from dateutil import tz
 
 cfg = ArtesianConfg()
 mkservice = MarketData.MarketDataService(cfg)
 
-mkdid = MarketData.MarketDataIdentifier('PROVIDER', 'CURVENAME')
+mkdid = MarketData.MarketDataIdentifier('PROVIDER', 'MARKETDATANAME')
 mkd = MarketData.MarketDataEntityInput(
       providerName = mkdid.provider,
       marketDataName = mkdid.name,
@@ -570,7 +567,7 @@ registered = mkservice.readMarketDataRegistryByName(mkdid.provider, mkdid.name)
 if (registered is None):
   registered = mkservice.registerMarketData(mkd)
 
-marketAssessment = MarketData.UpsertData(MarketData.MarketDataIdentifier('PROVIDER', 'CURVENAME'), 'CET', 
+marketAssessment = MarketData.UpsertData(MarketData.MarketDataIdentifier('PROVIDER', 'MARKETDATANAME'), 'CET', 
   marketAssessment=
   {
       datetime(2020,1,1):
@@ -594,7 +591,6 @@ mkservice.upsertData(marketAssessment)
 ## Write Data in a Bid Ask Time Series
 
 ```Python
-from Artesian import ArtesianConfig
 from Artesian import ArtesianConfig,Granularity,MarketData
 from datetime import datetime
 from dateutil import tz
@@ -602,7 +598,7 @@ from dateutil import tz
 cfg = ArtesianConfg()
 mkservice = MarketData.MarketDataService(cfg)
 
-mkdid = MarketData.MarketDataIdentifier('PROVIDER', 'CURVENAME')
+mkdid = MarketData.MarketDataIdentifier('PROVIDER', 'MARKETDATANAME')
 mkd = MarketData.MarketDataEntityInput(
       providerName = mkdid.provider,
       marketDataName = mkdid.name,
@@ -618,7 +614,7 @@ registered = mkservice.readMarketDataRegistryByName(mkdid.provider, mkdid.name)
 if (registered is None):
   registered = mkservice.registerMarketData(mkd)
 
-bidAsk = MarketData.UpsertData(MarketData.MarketDataIdentifier('PROVIDER', 'CURVENAME'), 'CET', 
+bidAsk = MarketData.UpsertData(MarketData.MarketDataIdentifier('PROVIDER', 'MARKETDATANAME'), 'CET', 
   bidAsk={
       datetime(2020,1,1):
       {
@@ -641,7 +637,6 @@ mkservice.upsertData(bidAsk)
 ## Write Data in an Auction Time Series
 
 ```Python
-from Artesian import ArtesianConfig
 from Artesian import ArtesianConfig,Granularity,MarketData
 from datetime import datetime
 from dateutil import tz
@@ -649,7 +644,7 @@ from dateutil import tz
 cfg = ArtesianConfg()
 mkservice = MarketData.MarketDataService(cfg)
 
-mkdid = MarketData.MarketDataIdentifier('PROVIDER', 'CURVENAME')
+mkdid = MarketData.MarketDataIdentifier('PROVIDER', 'MARKETDATANAME')
 mkd = MarketData.MarketDataEntityInput(
       providerName = mkdid.provider,
       marketDataName = mkdid.name,
@@ -665,7 +660,7 @@ registered = mkservice.readMarketDataRegistryByName(mkdid.provider, mkdid.name)
 if (registered is None):
   registered = mkservice.registerMarketData(mkd)
 
-auctionRows = MarketData.UpsertData(MarketData.MarketDataIdentifier('PROVIDER', 'CURVENAME'), 'CET', 
+auctionRows = MarketData.UpsertData(MarketData.MarketDataIdentifier('PROVIDER', 'MARKETDATANAME'), 'CET', 
   auctionRows={
       datetime(2020,1,1): MarketData.AuctionBids(datetime(2020,1,1), 
           bid=[
