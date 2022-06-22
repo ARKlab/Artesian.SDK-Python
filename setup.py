@@ -24,7 +24,6 @@ setuptools.setup(
     install_requires=[
         'requests',
         'six',
-        'asyncio',
         'jsons>=1.6.1',
         'python-dateutil',
         #'typing-compat' # needed for get_args in 3.7 
