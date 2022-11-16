@@ -14,8 +14,8 @@ class CurveRangeEntity:
             version: the version date for Versioned
             lastUpdated: Last Update for this curve
             created: Creation date for this curve
-            dataRangeStart: start date of range for this curve
-            dataRangeEnd: end date of range for this curve
+            rangeStart: start date of range for this curve
+            rangeEnd: end date of range for this curve
     """
 
     marketDataId: int = 0
@@ -23,8 +23,8 @@ class CurveRangeEntity:
     version:Optional[str] = None
     lastUpdated: datetime.datetime = datetime.datetime.min.replace(tzinfo=tz.UTC)
     created: datetime.datetime = datetime.datetime.min.replace(tzinfo=tz.UTC)
-    dataRangeStart: Optional[datetime.date] = None
-    dataRangeEnd: Optional[datetime.date] = None
+    rangeStart: Optional[datetime.date] = None
+    rangeEnd: Optional[datetime.date] = None
 
 
     
