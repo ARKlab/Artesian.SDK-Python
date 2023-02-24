@@ -26,6 +26,7 @@ class VersionedQuery(_Query):
         _Query.__init__(self, client, requestExecutor, queryParameters)
         self._queryParameters = queryParameters
         self.__partition = partitionStrategy
+        
 
     def forMarketData(self, ids: List[int]) -> VersionedQuery:
         """ Set the list of marketdata to be queried.
@@ -138,12 +139,13 @@ class VersionedQuery(_Query):
         self._queryParameters.granularity = granularity
         return self
 
-    def forMUV(self) -> VersionedQuery:
+    def forMUV(self, versionLimit: Optional[str] = None) -> VersionedQuery:
         """ Gets the timeseries of the most updated version of each timepoint of a versioned timeseries.
 
             Returns: 
                 VersionedQuery.
         """
+        self._queryParameters.versionLimit = versionLimit
         self._queryParameters.versionSelectionType = VersionSelectionType.MUV
         return self
 
@@ -326,6 +328,8 @@ class VersionedQuery(_Query):
                 url = url + "&tr=" + qp.transformId
             if not (qp.fill is None):
                 url = url + "&" + qp.fill.getUrlParams()
+            if not (qp.versionLimit is None):
+                url = url + "&versionLimit=" + qp.versionLimit
             urls.append(url)
         return urls
 
