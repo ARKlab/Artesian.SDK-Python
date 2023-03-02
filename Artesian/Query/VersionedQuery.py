@@ -142,6 +142,9 @@ class VersionedQuery(_Query):
     def forMUV(self, versionLimit: Optional[str] = None) -> VersionedQuery:
         """ Gets the timeseries of the most updated version of each timepoint of a versioned timeseries.
 
+            Args:
+                versionLimit: int from which the most updated version should be taken Ex.: versionLimit("2021-03-12T14:30:00")
+
             Returns: 
                 VersionedQuery.
         """
