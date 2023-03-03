@@ -143,7 +143,7 @@ class VersionedQuery(_Query):
         """ Gets the timeseries of the most updated version of each timepoint of a versioned timeseries.
 
             Args:
-                versionLimit: int from which the most updated version should be taken Ex.: versionLimit("2021-03-12T14:30:00")
+                versionLimit: string specifying a datetime from which the most updated version should be taken, i.e. MUV as of (versionLimit). Ex.: versionLimit("2021-03-12T14:30:00") 
 
             Returns: 
                 VersionedQuery.
@@ -214,7 +214,7 @@ class VersionedQuery(_Query):
         """ Gets the specified version of a versioned timeseries.
 
             Args:
-                version: int of a specific version. Ex.: forVersion("2021-03-12T14:30:00")
+                version: string of a specific version. Ex.: forVersion("2021-03-12T14:30:00")
 
             Returns: 
                 VersionedQuery.

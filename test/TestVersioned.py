@@ -108,9 +108,7 @@ class TestVersioned(unittest.TestCase):
             .execute()
 
         path = requests.getPath()
-        self.assertEqual(path[5],"M")
-        self.assertEqual(path[6],"u")
-        self.assertEqual(path[7],"v")
+        self.assertEqual(path[0:len(path)],"/vts/Muv/Day/2021-09-22/2021-09-23")
 
     @helpers.TrackRequests
     def test_ForMUVVerionLimit(self, requests):
@@ -119,12 +117,12 @@ class TestVersioned(unittest.TestCase):
             .inAbsoluteDateRange("2021-09-22","2021-09-23") \
             .inTimeZone("CET") \
             .inGranularity(Granularity.Day) \
-            .forMUV("2021-09-22T10:00") \
+            .forMUV("2021-09-22T10:00:00") \
             .withFillCustomValue(10) \
             .execute()
 
         query = requests.getQs()
-        self.assertEqual(query["versionLimit"],"2021-09-22T10:00")
+        self.assertEqual(query["versionLimit"],"2021-09-22T10:00:00")
 
     @helpers.TrackRequests
     def test_ForMostRecentDateTime(self, requests):
