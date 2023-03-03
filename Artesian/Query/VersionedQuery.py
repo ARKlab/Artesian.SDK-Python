@@ -214,7 +214,7 @@ class VersionedQuery(_Query):
         """ Gets the specified version of a versioned timeseries.
 
             Args:
-                version: int of a specific version. Ex.: forVersion("2021-03-12T14:30:00")
+                version: string of a specific version. Ex.: forVersion("2021-03-12T14:30:00")
 
             Returns: 
                 VersionedQuery.
