@@ -121,8 +121,10 @@ class TestVersioned(unittest.TestCase):
             .withFillCustomValue(10) \
             .execute()
 
+        path = requests.getPath()
         query = requests.getQs()
         self.assertEqual(query["versionLimit"],"2021-09-22T10:00:00")
+        self.assertEqual(path[0:len(path)], "/vts/Muv/Day/2021-09-22/2021-09-23")
 
     @helpers.TrackRequests
     def test_ForMostRecentDateTime(self, requests):
