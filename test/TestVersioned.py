@@ -97,6 +97,36 @@ class TestVersioned(unittest.TestCase):
         self.assertEqual(query["fillerDV"],"10")
 
     @helpers.TrackRequests
+    def test_ForMUVDateTime(self, requests):
+        url = qs.createVersioned() \
+            .forMarketData([100000001]) \
+            .inAbsoluteDateRange("2021-09-22","2021-09-23") \
+            .inTimeZone("CET") \
+            .inGranularity(Granularity.Day) \
+            .forMUV() \
+            .withFillCustomValue(10) \
+            .execute()
+
+        path = requests.getPath()
+        self.assertEqual(path,"/vts/Muv/Day/2021-09-22/2021-09-23")
+
+    @helpers.TrackRequests
+    def test_ForMUVVerionLimit(self, requests):
+        url = qs.createVersioned() \
+            .forMarketData([100000001]) \
+            .inAbsoluteDateRange("2021-09-22","2021-09-23") \
+            .inTimeZone("CET") \
+            .inGranularity(Granularity.Day) \
+            .forMUV("2021-09-22T10:00:00") \
+            .withFillCustomValue(10) \
+            .execute()
+
+        path = requests.getPath()
+        query = requests.getQs()
+        self.assertEqual(query["versionLimit"],"2021-09-22T10:00:00")
+        self.assertEqual(path, "/vts/Muv/Day/2021-09-22/2021-09-23")
+
+    @helpers.TrackRequests
     def test_ForMostRecentDateTime(self, requests):
         url = qs.createVersioned() \
             .forMarketData([100000001]) \
