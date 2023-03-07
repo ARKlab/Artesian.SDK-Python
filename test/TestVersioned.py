@@ -108,7 +108,7 @@ class TestVersioned(unittest.TestCase):
             .execute()
 
         path = requests.getPath()
-        self.assertEqual(path[0:len(path)],"/vts/Muv/Day/2021-09-22/2021-09-23")
+        self.assertEqual(path,"/vts/Muv/Day/2021-09-22/2021-09-23")
 
     @helpers.TrackRequests
     def test_ForMUVVerionLimit(self, requests):
@@ -124,7 +124,7 @@ class TestVersioned(unittest.TestCase):
         path = requests.getPath()
         query = requests.getQs()
         self.assertEqual(query["versionLimit"],"2021-09-22T10:00:00")
-        self.assertEqual(path[0:len(path)], "/vts/Muv/Day/2021-09-22/2021-09-23")
+        self.assertEqual(path, "/vts/Muv/Day/2021-09-22/2021-09-23")
 
     @helpers.TrackRequests
     def test_ForMostRecentDateTime(self, requests):
