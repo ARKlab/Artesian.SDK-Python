@@ -29,7 +29,9 @@ class VersionedQueryParameters(_QueryParameters):
                        granularity: Optional[Granularity] = None, 
                        transformId: Optional[str] = None, 
                        versionSelectionConfig: VersionSelectionConfig = VersionSelectionConfig(), 
-                       versionSelectionType: Optional[VersionSelectionType] = None) -> None:
+                       versionSelectionType: Optional[VersionSelectionType] = None, 
+                       versionLimit : Optional[str] = None) -> None:
+
         """ 
             Inits ActualQueryParameters 
         
@@ -50,3 +52,4 @@ class VersionedQueryParameters(_QueryParameters):
         self.granularity = granularity
         self.versionSelectionConfig = versionSelectionConfig or VersionSelectionConfig()
         self.versionSelectionType = versionSelectionType
+        self.versionLimit = versionLimit
