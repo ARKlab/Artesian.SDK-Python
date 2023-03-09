@@ -1,0 +1,13 @@
+[flake8]
+max-line-length = 88
+extend-ignore = 
+    E203,
+    E722
+extend-exclude =
+    .env,
+    venv,
+    .venv,
+    build,
+    dist,
+    tests,
+    samples
