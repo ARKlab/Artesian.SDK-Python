@@ -402,9 +402,10 @@ class GMEPublicOfferQuery:
             Zone.SARD: "SARD",
             Zone.SICI: "SICI",
             Zone.SLOV: "SLOV",
-            Zone.SUD: "SUD",
+            Zone.SUD:  "SUD",
             Zone.SVIZ: "SVIZ",
             Zone.CALA: "CALA",
+            Zone.MONT: "MONT"
         }
         vr = switcher.get(zone, "DefZone")
         if vr == "DefZone":
