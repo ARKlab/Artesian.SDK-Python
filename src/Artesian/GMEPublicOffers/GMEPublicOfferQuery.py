@@ -227,10 +227,10 @@ class GMEPublicOfferQuery:
 
         url = (
             f"/{self.__routePrefix}/{self._buildExtractionRangeRoute(qp)}"
-            + f"/{self.__getPurpose(qp.purpose)}/{self.__getStatus(qp.status)}?_=1&"
+            + f"/{self.__getPurpose(qp.purpose)}/{self.__getStatus(qp.status)}?_=1"
         )
         if not (qp.page is None):
-            url = url + "page=" + str(qp.page)
+            url = url + "&page=" + str(qp.page)
         if not (qp.pageSize is None):
             url = url + "&pageSize=" + str(qp.pageSize)
         if not (qp.scope is None):
@@ -402,10 +402,10 @@ class GMEPublicOfferQuery:
             Zone.SARD: "SARD",
             Zone.SICI: "SICI",
             Zone.SLOV: "SLOV",
-            Zone.SUD:  "SUD",
+            Zone.SUD: "SUD",
             Zone.SVIZ: "SVIZ",
             Zone.CALA: "CALA",
-            Zone.MONT: "MONT"
+            Zone.MONT: "MONT",
         }
         vr = switcher.get(zone, "DefZone")
         if vr == "DefZone":

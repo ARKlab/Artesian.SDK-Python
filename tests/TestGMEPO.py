@@ -4,7 +4,7 @@ from Artesian.GMEPublicOffers import (
     Market,
     Purpose,
     Status,
-    Zone
+    Zone,
 )
 from . import helpers
 import unittest
@@ -34,7 +34,7 @@ class TestGMEPO(unittest.TestCase):
         url = (
             qs.createQuery()
             .forDate("2020-04-01")
-            .forMarket([Market.MGP,Market.MI1])
+            .forMarket([Market.MGP, Market.MI1])
             .forStatus(Status.ACC)
             .forPurpose(Purpose.BID)
             .execute()
@@ -79,7 +79,7 @@ class TestGMEPO(unittest.TestCase):
             .forZone([Zone.NORD, Zone.SUD])
             .forStatus(Status.ACC)
             .forPurpose(Purpose.BID)
-            .withPagination(1,100)
+            .withPagination(1, 100)
             .execute()
         )
 
