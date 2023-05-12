@@ -27,8 +27,8 @@ class GMEPublicOfferQuery:
 
         queryParameters = _GMEPublicOfferQueryParameters()
         self._queryParameters = queryParameters
-        self.__client = client
-        self.__executor = requestExecutor
+        self._client = client
+        self._executor = requestExecutor
 
     def withPagination(
         self: GMEPublicOfferQuery, pagenumber: int, pagesize: int
@@ -227,7 +227,7 @@ class GMEPublicOfferQuery:
 
         url = (
             f"/{self.__routePrefix}/{self._buildExtractionRangeRoute(qp)}"
-            + f"/{self.__getPurpose(qp.purpose)}/{self.__getStatus(qp.status)}?"
+            + f"/{self.__getPurpose(qp.purpose)}/{self.__getStatus(qp.status)}?_=1&"
         )
         if not (qp.page is None):
             url = url + "page=" + str(qp.page)
