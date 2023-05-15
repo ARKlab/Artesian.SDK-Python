@@ -8,6 +8,7 @@ from Artesian.GMEPublicOffers import (
 )
 from . import helpers
 import unittest
+from urllib.parse import unquote
 
 cfg = ArtesianConfig("https://arkive.artesian.cloud/tenantName/", "APIKey")
 
@@ -26,7 +27,7 @@ class TestGMEPO(unittest.TestCase):
             .execute()
         )
 
-        query = requests.getPOQs()
+        query = requests.getQs()
         self.assertEqual(query["market"], "MGP")
 
     @helpers.TrackGMEPORequests
@@ -40,7 +41,7 @@ class TestGMEPO(unittest.TestCase):
             .execute()
         )
 
-        query = requests.getPOQs()
+        query = requests.getQs()
         self.assertEqual(query["market"], "MGP,MI1")
 
     @helpers.TrackGMEPORequests
@@ -54,7 +55,7 @@ class TestGMEPO(unittest.TestCase):
             .execute()
         )
 
-        query = requests.getPOQs()
+        query = requests.getQs()
         self.assertEqual(query["zone"], "NORD")
 
     @helpers.TrackGMEPORequests
@@ -68,7 +69,7 @@ class TestGMEPO(unittest.TestCase):
             .execute()
         )
 
-        query = requests.getPOQs()
+        query = requests.getQs()
         self.assertEqual(query["zone"], "NORD,SUD")
 
     @helpers.TrackGMEPORequests
@@ -83,6 +84,6 @@ class TestGMEPO(unittest.TestCase):
             .execute()
         )
 
-        query = requests.getPOQs()
+        query = requests.getQs()
         self.assertEqual(query["page"], "1")
         self.assertEqual(query["pageSize"], "100")
