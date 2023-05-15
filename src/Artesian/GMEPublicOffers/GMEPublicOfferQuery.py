@@ -15,6 +15,7 @@ from ._Enum.UnitType import UnitType
 from ._Enum.Zone import Zone
 import asyncio
 from urllib import parse
+import itertools
 
 
 class GMEPublicOfferQuery:
@@ -27,8 +28,8 @@ class GMEPublicOfferQuery:
 
         queryParameters = _GMEPublicOfferQueryParameters()
         self._queryParameters = queryParameters
-        self.__client = client
-        self.__executor = requestExecutor
+        self._client = client
+        self._executor = requestExecutor
 
     def withPagination(
         self: GMEPublicOfferQuery, pagenumber: int, pagesize: int
@@ -208,8 +209,8 @@ class GMEPublicOfferQuery:
         Returns:
             list of GMEPublicOffers.
         """
-        url = self.__buildRequest()
-        return self._exec(url)
+        urls = self.__buildRequest()
+        return self._exec(urls)
 
     async def executeAsync(self: GMEPublicOfferQuery) -> Any:
         """
@@ -218,19 +219,23 @@ class GMEPublicOfferQuery:
         Returns:
             Enumerable of TimeSerieRow Actual.
         """
-        url = self.__buildRequest()
-        return await self._execAsync(url)
+        urls = self.__buildRequest()
+        return await self._execAsync(urls)
 
     def __buildRequest(self: GMEPublicOfferQuery) -> str:
         self._validateQuery()
         qp = self._queryParameters
+        urls = []
 
-        url = (
-            f"/{self.__routePrefix}/{self._buildExtractionRangeRoute(qp)}"
-            + f"/{self.__getPurpose(qp.purpose)}/{self.__getStatus(qp.status)}?"
+        url = "/{0}/{1}/{2}/{3}?_=1".format(
+            self.__routePrefix,
+            self._buildExtractionRangeRoute(qp),
+            self.__getPurpose(qp.purpose),
+            self.__getStatus(qp.status),
         )
+
         if not (qp.page is None):
-            url = url + "page=" + str(qp.page)
+            url = url + "&page=" + str(qp.page)
         if not (qp.pageSize is None):
             url = url + "&pageSize=" + str(qp.pageSize)
         if not (qp.scope is None):
@@ -276,7 +281,9 @@ class GMEPublicOfferQuery:
             enc = parse.quote_plus(baType)
             url = url + "&baType=" + enc
 
-        return url
+        urls.append(url)
+
+        return urls
 
     def __getScope(self: GMEPublicOfferQuery, scope: Scope) -> str:
         switcher = {
@@ -402,10 +409,10 @@ class GMEPublicOfferQuery:
             Zone.SARD: "SARD",
             Zone.SICI: "SICI",
             Zone.SLOV: "SLOV",
-            Zone.SUD:  "SUD",
+            Zone.SUD: "SUD",
             Zone.SVIZ: "SVIZ",
             Zone.CALA: "CALA",
-            Zone.MONT: "MONT"
+            Zone.MONT: "MONT",
         }
         vr = switcher.get(zone, "DefZone")
         if vr == "DefZone":
@@ -426,17 +433,17 @@ class GMEPublicOfferQuery:
         subPath = f"{parse.quote_plus(purpose)}"
         return subPath
 
-    def _exec(self: GMEPublicOfferQuery, url: str) -> Any:
+    def _exec(self: GMEPublicOfferQuery, urls: List[str]) -> list:
         loop = get_event_loop()
-        rr = loop.run_until_complete(self._execAsync(url))
+        rr = loop.run_until_complete(self._execAsync(urls))
         return rr
 
-    async def _execAsync(self: GMEPublicOfferQuery, url: str) -> Any:
-        with self.__client as c:
+    async def _execAsync(self: GMEPublicOfferQuery, urls: List[str]) -> list:
+        with self._client as c:
             res = await asyncio.gather(
-                *[self.__executor.exec(c.exec, "GET", url, None)]
+                *[self._requestExecutor.exec(c.exec, "GET", i, None) for i in urls]
             )
-            return res[0]
+            return list(itertools.chain(*res))
 
     def __toUrlParam(self: GMEPublicOfferQuery, date: str) -> str:
         return f"{date}"

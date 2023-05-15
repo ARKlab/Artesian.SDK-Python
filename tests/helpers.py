@@ -3,7 +3,8 @@ from ast import Dict
 from typing import Any, Callable
 from unittest.mock import Mock, patch
 import Artesian.Query._Query as _Query
-from urllib.parse import urlparse
+import Artesian.GMEPublicOffers as _GMEPO
+from urllib.parse import urlparse, unquote
 
 
 class Qs:
@@ -14,7 +15,7 @@ class Qs:
         return dict(
             map(
                 lambda x: x.split("="),
-                self._mock.call_args.args[0][0].split("?")[1].split("&"),
+                unquote(self._mock.call_args.args[0][0]).split("?")[1].split("&"),
             )
         )
 
@@ -24,6 +25,14 @@ class Qs:
 
 def TrackRequests(func: Callable) -> Callable[[Any, Qs], None]:
     @patch.object(_Query._Query, "_exec")
+    def wrapper(self: Any, mock: Mock) -> None:
+        func(self, Qs(mock))
+
+    return wrapper
+
+
+def TrackGMEPORequests(func: Callable) -> Callable[[Any, Qs], None]:
+    @patch.object(_GMEPO.GMEPublicOfferQuery, "_exec")
     def wrapper(self: Any, mock: Mock) -> None:
         func(self, Qs(mock))
 
