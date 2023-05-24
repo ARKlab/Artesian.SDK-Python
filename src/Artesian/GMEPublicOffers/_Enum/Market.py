@@ -20,5 +20,5 @@ class Market(Enum):
     MB4 = 33
     MB5 = 34
     MB6 = 35
-    MBh = 36    
+    MBh = 36
     MRR = 50
