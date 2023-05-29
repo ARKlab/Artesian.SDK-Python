@@ -2,23 +2,23 @@ from enum import Enum
 
 
 class Market(Enum):
-    MB = 1
-    MB2 = 2
-    MB3 = 3
-    MB4 = 4
-    MB5 = 5
-    MB6 = 6
-    MGP = 7
-    MI1 = 8
-    MI2 = 9
-    MI3 = 10
-    MI4 = 11
-    MI5 = 12
-    MI6 = 13
-    MI7 = 14
-    MSD = 15
-    MRR = 16
-    MIA1 = 17
-    MIA2 = 18
-    MIA3 = 19
-    MBh = 20
+    MGP = 0
+    MI1 = 1
+    MI2 = 2
+    MI3 = 3
+    MI4 = 4
+    MI5 = 5
+    MI6 = 6
+    MI7 = 7
+    MIA1 = 8
+    MIA2 = 9
+    MIA3 = 10
+    MSD = 20
+    MB = 30
+    MB2 = 31
+    MB3 = 32
+    MB4 = 33
+    MB5 = 34
+    MB6 = 35
+    MBh = 36
+    MRR = 50
