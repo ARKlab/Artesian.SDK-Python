@@ -340,6 +340,12 @@ class GMEPublicOfferQuery:
             Market.MB4: "MB4",
             Market.MB5: "MB5",
             Market.MB6: "MB6",
+            Market.MBh: "MBh",
+            Market.MRR: "MRR",
+            Market.MIXBID: "MIXBID",
+            Market.MIA1: "MIA1",
+            Market.MIA2: "MIA2",
+            Market.MIA3: "MIA3",
         }
         vr = switcher.get(market, "DefMarket")
         if vr == "DefMarket":

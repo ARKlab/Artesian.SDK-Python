@@ -35,14 +35,14 @@ class TestGMEPO(unittest.TestCase):
         url = (
             qs.createQuery()
             .forDate("2020-04-01")
-            .forMarket([Market.MGP, Market.MI1])
+            .forMarket([Market.MGP, Market.MI1, Market.MIA2, Market.MIXBID])
             .forStatus(Status.ACC)
             .forPurpose(Purpose.BID)
             .execute()
         )
 
         query = requests.getQs()
-        self.assertEqual(query["market"], "MGP,MI1")
+        self.assertEqual(query["market"], "MGP,MI1,MIA2,MIXBID")
 
     @helpers.TrackGMEPORequests
     def test_Zone(self, requests):

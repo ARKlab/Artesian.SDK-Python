@@ -22,3 +22,4 @@ class Market(Enum):
     MB6 = 35
     MBh = 36
     MRR = 50
+    MIXBID = 70
