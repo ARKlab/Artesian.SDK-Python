@@ -16,7 +16,7 @@ class GMEPublicOfferService:
     """
 
     __offerstype = "gmepublicoffer"
-    __version = "v1.0"
+    __version = "v2.0"
 
     def __init__(self: GMEPublicOfferService, artesianConfig: ArtesianConfig) -> None:
         """

@@ -28,8 +28,8 @@ class GMEPublicOfferQuery:
 
         queryParameters = _GMEPublicOfferQueryParameters()
         self._queryParameters = queryParameters
-        self._client = client
-        self._executor = requestExecutor
+        self.__client = client
+        self.__executor = requestExecutor
 
     def withPagination(
         self: GMEPublicOfferQuery, pagenumber: int, pagesize: int
@@ -445,9 +445,9 @@ class GMEPublicOfferQuery:
         return rr
 
     async def _execAsync(self: GMEPublicOfferQuery, urls: List[str]) -> list:
-        with self._client as c:
+        with self.__client as c:
             res = await asyncio.gather(
-                *[self._requestExecutor.exec(c.exec, "GET", i, None) for i in urls]
+                *[self.__executor.exec(c.exec, "GET", i, None) for i in urls]
             )
             return list(itertools.chain(*res))
 
