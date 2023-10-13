@@ -8,3 +8,5 @@ class Status(Enum):
     REP = 4
     REV = 5
     SUB = 6
+    COM = 7
+    PCOM = 8

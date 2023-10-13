@@ -367,6 +367,8 @@ class GMEPublicOfferQuery:
             Status.REP: "REP",
             Status.REV: "REV",
             Status.SUB: "SUB",
+            Status.COM: "COM",
+            Status.PCOM: "PCOM",
         }
         vr = switcher.get(status, "DefStatus")
         if vr == "DefStatus":
