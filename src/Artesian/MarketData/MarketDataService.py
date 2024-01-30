@@ -118,7 +118,7 @@ class MarketDataService:
         self: MarketDataService,
         page: int,
         pageSize: int,
-        searchText: str,
+        searchText: str = None,
         filters: Dict[str, Optional[str]] = None,
         sorts: Optional[str] = None,
         doNotLoadAdditionalInfo: bool = False,
@@ -139,11 +139,12 @@ class MarketDataService:
         """
         filtersList = Optional[str]
 
-        for key, valueList in filters.items():
-            for value in valueList:
-                filtersList.append(key + ":" + value)
+        if filters is not None:
+            for key, valueList in filters.items():
+                for value in valueList:
+                    filtersList.append(key + ":" + value)
 
-        url = "/marketdata/searchfacet/"
+        url = "/marketdata/searchfacet"
         params = {}  # needed to avoid typing to detect dict[str,int] ...
         params["page"] = page
         params["pageSize"] = pageSize

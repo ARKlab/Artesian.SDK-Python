@@ -35,20 +35,20 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
         self.__curveRangeSerializedOutput = artesianJsonSerialize(
             self.__curveRangeOutput
         )
-        # self.__artesianSearchResults = ArtesianSearchResults(
-        #     results=[self.__sampleOutput],
-        #     facets=[
-        #         ArtesianMetadataFacet(
-        #             facetName="TestFacet",
-        #             facetType=0,
-        #             values=[ArtesianMetadataFacetCount(value="TestValue", count=1)],
-        #         )
-        #     ],
-        #     countResults=1,
-        # )
-        # self.__artesianSearchResultsSerializedOutput = artesianJsonSerialize(
-        #     self.__artesianSearchResults
-        # )
+        self.__artesianSearchResults = ArtesianSearchResults(
+            results=[self.__sampleOutput],
+            facets=[
+                ArtesianMetadataFacet(
+                    facetName="TestFacet",
+                    facetType=0,
+                    values=[ArtesianMetadataFacetCount(value="TestValue", count=1)],
+                )
+            ],
+            countResults=1,
+        )
+        self.__artesianSearchResultsSerializedOutput = artesianJsonSerialize(
+            self.__artesianSearchResults
+        )
 
         return super().setUp()
 
@@ -186,27 +186,26 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             )
             self.assertEqual(output, self.__curveRangeOutput)
 
-    # async def test_readSearchFacetAsync(self):
-    #     with responses.RequestsMock() as rsps:
-    #         params = {
-    #             "page": "1",
-    #             "pageSize": "2",
-    #             "searchText": "",
-    #             "doNotLoadAdditionalInfo": True,
-    #         }
-    #         rsps.add(
-    #             "GET",
-    #             self.__baseurl + "/marketdata/searchfacet",
-    #             match=[responses.matchers.query_param_matcher(params)],
-    #             json=self.__artesianSearchResultsSerializedOutput,
-    #             status=200,
-    #         )
-    #         output = await self.__service.readSearchCurveFacetAsync(
-    #             int(params["page"]),
-    #             int(params["pageSize"]),
-    #             str(params["searchText"]),
-    #             None,
-    #             None,
-    #             bool(params["doNotLoadAdditionalInfo"]),
-    #         )
-    #         self.assertEqual(output, self.__artesianSearchResults)
+    async def test_readSearchFacetAsync(self):
+        with responses.RequestsMock() as rsps:
+            params = {
+                "page": "1",
+                "pageSize": "2",
+                "doNotLoadAdditionalInfo": True,
+            }
+            rsps.add(
+                "GET",
+                self.__baseurl + "/marketdata/searchfacet",
+                match=[responses.matchers.query_param_matcher(params)],
+                json=self.__artesianSearchResultsSerializedOutput,
+                status=200,
+            )
+            output = await self.__service.readSearchCurveFacetAsync(
+                int(params["page"]),
+                int(params["pageSize"]),
+                None,
+                None,
+                None,
+                bool(params["doNotLoadAdditionalInfo"]),
+            )
+            self.assertEqual(output, self.__artesianSearchResults)

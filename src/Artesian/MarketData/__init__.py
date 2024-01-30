@@ -15,6 +15,8 @@ from ._Dto import (
     UpsertData,
     PagedResultCurveRangeEntity,
     ArtesianSearchResults,
+    ArtesianMetadataFacet,
+    ArtesianMetadataFacetCount,
 )
 
 __all__ = [
@@ -33,4 +35,6 @@ __all__ = [
     MarketDataIdentifier.__name__,
     UpsertData.__name__,
     ArtesianSearchResults.__name__,
+    ArtesianMetadataFacet.__name__,
+    ArtesianMetadataFacetCount.__name__,
 ]  # type: ignore
