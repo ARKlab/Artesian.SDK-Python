@@ -1,7 +1,20 @@
 from dataclasses import dataclass
-import datetime
 from typing import Optional
-from .MarketDataEntityOutput import MarketDataEntityOutput
+from .._Enum import ArtesianMetadataFacetType
+
+
+@dataclass
+class ArtesianMetadataFacetCount:
+    """
+    Class for the ArtesianMetadataFacetCount Entity.
+
+    Attributes:
+        value: the value of the ArtesianMetadataFacet
+        count: the count of ArtesianMetadataFacet
+    """
+
+    value: str
+    count: int = 0
 
 
 @dataclass
@@ -18,20 +31,3 @@ class ArtesianMetadataFacet:
     facetName: str = None
     facetType: ArtesianMetadataFacetType = None
     values: Optional[ArtesianMetadataFacetCount] = None
-
-
-@dataclass
-class ArtesianMetadataFacetCount:
-    """
-    Class for the ArtesianMetadataFacetCount Entity.
-
-    Attributes:
-        value: the value of the ArtesianMetadataFacet
-        count: the count of ArtesianMetadataFacet
-    """
-    value: str
-    count: int = 0
-
-class ArtesianMetadataFacetType(Enum):
-    Property = 0
-    Tag = 1

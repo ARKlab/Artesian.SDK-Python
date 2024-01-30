@@ -2,6 +2,7 @@ from .MarketDataService import MarketDataService
 from ._Enum.AggregationRule import AggregationRule
 from ..Granularity import Granularity
 from ._Enum.MarketDataType import MarketDataType
+
 from ._Dto import (
     AuctionBids,
     AuctionBidValue,

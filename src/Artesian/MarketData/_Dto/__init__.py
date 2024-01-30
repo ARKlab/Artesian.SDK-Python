@@ -10,7 +10,6 @@ from .UpsertData import (
     BidAskValue,
     MarketAssessmentValue,
     UpsertData,
-    ArtesianSearchResults,
 )
 
 __all__ = [
