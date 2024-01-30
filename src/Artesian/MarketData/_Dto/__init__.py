@@ -2,6 +2,7 @@ from .MarketDataEntityInput import MarketDataEntityInput
 from .MarketDataEntityOutput import MarketDataEntityOutput
 from .CurveRangeEntity import CurveRangeEntity
 from .PagedResult import PagedResultCurveRangeEntity
+from .ArtesianSearchResults import ArtesianSearchResults
 from .MarketDataIdentifier import MarketDataIdentifier
 from .UpsertData import (
     AuctionBidValue,
@@ -9,6 +10,7 @@ from .UpsertData import (
     BidAskValue,
     MarketAssessmentValue,
     UpsertData,
+    ArtesianSearchResults,
 )
 
 __all__ = [
@@ -22,4 +24,5 @@ __all__ = [
     BidAskValue.__name__,
     MarketAssessmentValue.__name__,
     UpsertData.__name__,
+    ArtesianSearchResults.__name__,
 ]  # type: ignore

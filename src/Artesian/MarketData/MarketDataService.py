@@ -5,6 +5,7 @@ from .._ClientsExecutor.Client import _Client
 from ..ArtesianConfig import ArtesianConfig
 from ..ArtesianPolicyConfig import ArtesianPolicyConfig
 from ._Dto.PagedResult import PagedResultCurveRangeEntity
+from ._Dto.ArtesianSearchResults import ArtesianSearchResults
 from ._Dto.MarketDataEntityInput import MarketDataEntityInput
 from ._Dto.MarketDataEntityOutput import MarketDataEntityOutput
 from ._Dto.UpsertData import UpsertData
@@ -83,6 +84,60 @@ class MarketDataService:
                 ]
             )
             return cast(PagedResultCurveRangeEntity, res[0])
+
+    async def readSearchCurveFacetAsync(
+        self: MarketDataService,
+        page: int,
+        pageSize: int,
+        searchText: str,
+        filters: Dict[str, Optional[str]] = None,
+        sorts: Optional[str] = None,
+        doNotLoadAdditionalInfo: bool,
+    ) -> ArtesianSearchResults:
+        """
+        Search the MarketData collection with faceted results.
+
+        Args:
+            searchText: SearchText parameter.
+            page: int of the page number (1-based).
+            pageSize: int of the pagesize.
+            filters: ArtesianSearchFilter containing the search params.
+            sorts: Sorts list.
+            doNotLoadAdditionalInfo: Skip loading up-to-date curve range and transform.
+
+        Returns:
+            Paged result of CurveRange entity (Async).
+        """
+        filtersList = Optional[str]
+
+        for key, valueList in statesAndCapitals.items():
+            for value in valueList
+                filtersList.append(key":"value)
+
+        url = "/marketdata/searchfacet/"
+        params = {}  # needed to avoid typing to detect dict[str,int] ...
+        params["page"] = page
+        params["pageSize"] = pageSize
+        params["searchText"] = searchText
+        if filters is not None:
+            params["filters"] = filtersList
+        if sorts is not None:
+            params["sorts"] = sorts
+        params["doNotLoadAdditionalInfo"] = doNotLoadAdditionalInfo
+
+        with self.__client as c:
+            res = await asyncio.gather(
+                *[
+                    self.__executor.exec(
+                        c.exec,
+                        "GET",
+                        url,
+                        retcls=ArtesianSearchResults,
+                        params=params,
+                    )
+                ]
+            )
+            return cast(ArtesianSearchResults, res[0])
 
     def readCurveRange(
         self: MarketDataService,
