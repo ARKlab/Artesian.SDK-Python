@@ -119,7 +119,7 @@ class MarketDataService:
         page: int,
         pageSize: int,
         searchText: str = None,
-        filters: Dict[str, Optional[List[str]]] = None,
+        filters: Optional[Dict[str, List[str]]] = None,
         sorts: Optional[List[str]] = None,
         doNotLoadAdditionalInfo: bool = False,
     ) -> ArtesianSearchResults:
@@ -135,14 +135,14 @@ class MarketDataService:
             doNotLoadAdditionalInfo: Skip loading up-to-date curve range and transform.
 
         Returns:
-            Paged result of CurveRange entity (Async).
+            ArtesianSearchResults entity (Async).
         """
-        filtersList = Optional[List[str]]
+        filtersList = []
 
         if filters is not None:
-            for key, valueList in filters.items():
-                for value in valueList:
-                    filtersList.append(key + ":" + value)
+            for key in filters:
+                for value in key["Value"]:
+                    filtersList.append(key["Key"] + ":" + value)
 
         url = "/marketdata/searchfacet"
         params = {}  # needed to avoid typing to detect dict[str,int] ...
@@ -174,7 +174,7 @@ class MarketDataService:
         page: int,
         pageSize: int,
         searchText: str,
-        filters: Dict[str, Optional[List[str]]] = None,
+        filters: Optional[Dict[str, List[str]]] = None,
         sorts: Optional[List[str]] = None,
         doNotLoadAdditionalInfo: bool = False,
     ) -> ArtesianSearchResults:
@@ -190,7 +190,7 @@ class MarketDataService:
             doNotLoadAdditionalInfo: Skip loading up-to-date curve range and transform.
 
         Returns:
-            Paged result of CurveRange entity.
+            ArtesianSearchResults entity.
         """
         return _get_event_loop().run_until_complete(
             self.readSearchCurveFacetAsync(

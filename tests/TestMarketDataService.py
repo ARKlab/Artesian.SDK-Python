@@ -189,26 +189,39 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             )
             self.assertEqual(output, self.__curveRangeOutput)
 
-    async def test_readSearchFacetAsync(self):
+    async def test_searchFacetAsync(self):
         with responses.RequestsMock() as rsps:
             params = {
                 "page": "1",
                 "pageSize": "2",
+                "searchText": "arktest +curve",
+                "filters": [
+                    {"Key": "Market", "Value": ["Italy", "France"]}
+                ],
+                "sorts": ["FacetName", "FacetType"],
+                "doNotLoadAdditionalInfo": True,
+            }
+            paramsToMatch = {                
+                "page": "1",
+                "pageSize": "2",
+                "searchText": "arktest +curve",
+                "filters": ["Market:Italy", "Market:France"],
+                "sorts": ["FacetName", "FacetType"],
                 "doNotLoadAdditionalInfo": True,
             }
             rsps.add(
                 "GET",
                 self.__baseurl + "/marketdata/searchfacet",
-                match=[responses.matchers.query_param_matcher(params)],
+                match=[responses.matchers.query_param_matcher(paramsToMatch)],
                 json=self.__artesianSearchResultsSerializedOutput,
                 status=200,
             )
             output = await self.__service.searchFacetAsync(
                 int(params["page"]),
                 int(params["pageSize"]),
-                None,
-                None,
-                None,
+                str(params["searchText"]),
+                params["filters"],
+                params["sorts"],
                 bool(params["doNotLoadAdditionalInfo"]),
             )
             self.assertEqual(output, self.__artesianSearchResults)
