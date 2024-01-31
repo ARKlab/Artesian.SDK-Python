@@ -41,7 +41,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             )
         self.__artesianMetadataFacet = ArtesianMetadataFacet(
                     facetName="TestFacet",
-                    facetType=0,
+                    facetType=ArtesianMetadataFacetType.Tag,
                     values=[self.__artesianMetadataFacetCount],
                 )
         self.__artesianSearchResults = ArtesianSearchResults(
