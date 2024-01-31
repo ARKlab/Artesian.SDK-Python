@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional
+from typing import List, Optional
 from .MarketDataEntityOutput import MarketDataEntityOutput
 from .ArtesianMetadataFacet import ArtesianMetadataFacet
 
@@ -15,6 +15,6 @@ class ArtesianSearchResults:
         countResults: the count of result
     """
 
-    results: Optional[MarketDataEntityOutput] = None
-    facets: Optional[ArtesianMetadataFacet] = None
+    results: Optional[List[MarketDataEntityOutput]] = None
+    facets: Optional[List[ArtesianMetadataFacet]] = None
     countResults: int = 0

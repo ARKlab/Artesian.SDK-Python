@@ -35,15 +35,18 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
         self.__curveRangeSerializedOutput = artesianJsonSerialize(
             self.__curveRangeOutput
         )
-        self.__artesianSearchResults = ArtesianSearchResults(
-            results=[self.__sampleOutput],
-            facets=[
-                ArtesianMetadataFacet(
+        self.__artesianMetadataFacetCount = ArtesianMetadataFacetCount(
+            value="TestValue",
+            count=1
+            )
+        self.__artesianMetadataFacet = ArtesianMetadataFacet(
                     facetName="TestFacet",
                     facetType=0,
-                    values=[ArtesianMetadataFacetCount(value="TestValue", count=1)],
+                    values=[self.__artesianMetadataFacetCount],
                 )
-            ],
+        self.__artesianSearchResults = ArtesianSearchResults(
+            results=[self.__sampleOutput],
+            facets=[self.__artesianMetadataFacet],
             countResults=1,
         )
         self.__artesianSearchResultsSerializedOutput = artesianJsonSerialize(

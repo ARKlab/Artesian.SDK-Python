@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Optional, cast, Dict
+from typing import List, Optional, cast, Dict
 from .._ClientsExecutor.RequestExecutor import _RequestExecutor
 from .._ClientsExecutor.Client import _Client
 from ..ArtesianConfig import ArtesianConfig
@@ -119,8 +119,8 @@ class MarketDataService:
         page: int,
         pageSize: int,
         searchText: str = None,
-        filters: Dict[str, Optional[str]] = None,
-        sorts: Optional[str] = None,
+        filters: Dict[str, Optional[List[str]]] = None,
+        sorts: Optional[List[str]] = None,
         doNotLoadAdditionalInfo: bool = False,
     ) -> ArtesianSearchResults:
         """
@@ -137,7 +137,7 @@ class MarketDataService:
         Returns:
             Paged result of CurveRange entity (Async).
         """
-        filtersList = Optional[str]
+        filtersList = Optional[List[str]]
 
         if filters is not None:
             for key, valueList in filters.items():
@@ -174,8 +174,8 @@ class MarketDataService:
         page: int,
         pageSize: int,
         searchText: str,
-        filters: Dict[str, Optional[str]] = None,
-        sorts: Optional[str] = None,
+        filters: Dict[str, Optional[List[str]]] = None,
+        sorts: Optional[List[str]] = None,
         doNotLoadAdditionalInfo: bool = False,
     ) -> ArtesianSearchResults:
         """
