@@ -114,7 +114,7 @@ class MarketDataService:
             )
         )
 
-    async def readSearchCurveFacetAsync(
+    async def searchFacetAsync(
         self: MarketDataService,
         page: int,
         pageSize: int,
@@ -169,7 +169,7 @@ class MarketDataService:
             )
             return cast(ArtesianSearchResults, res[0])
 
-    def readSearchCurveFacet(
+    def searchFacet(
         self: MarketDataService,
         page: int,
         pageSize: int,

@@ -203,7 +203,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
                 json=self.__artesianSearchResultsSerializedOutput,
                 status=200,
             )
-            output = await self.__service.readSearchCurveFacetAsync(
+            output = await self.__service.searchFacetAsync(
                 int(params["page"]),
                 int(params["pageSize"]),
                 None,
