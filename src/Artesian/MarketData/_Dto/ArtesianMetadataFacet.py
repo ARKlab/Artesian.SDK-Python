@@ -13,7 +13,7 @@ class ArtesianMetadataFacetCount:
         count: the count of ArtesianMetadataFacet
     """
 
-    value: str
+    value: Optional[str] = None
     count: int = 0
 
 
@@ -28,6 +28,6 @@ class ArtesianMetadataFacet:
         values: list of ArtesianMetadataFacetCount
     """
 
-    facetName: str = None
+    facetName: Optional[str] = None
     facetType: ArtesianMetadataFacetType = None
     values: Optional[List[ArtesianMetadataFacetCount]] = None

@@ -137,9 +137,10 @@ class MarketDataService:
         Returns:
             ArtesianSearchResults entity (Async).
         """
-        filtersList = []
+        filtersList = None
 
         if filters is not None:
+            filtersList = []
             for key in filters:
                 for value in key["Value"]:
                     filtersList.append(key["Key"] + ":" + value)
@@ -173,7 +174,7 @@ class MarketDataService:
         self: MarketDataService,
         page: int,
         pageSize: int,
-        searchText: str,
+        searchText: Optional[str] = None,
         filters: Optional[Dict[str, List[str]]] = None,
         sorts: Optional[List[str]] = None,
         doNotLoadAdditionalInfo: bool = False,
@@ -193,7 +194,7 @@ class MarketDataService:
             ArtesianSearchResults entity.
         """
         return _get_event_loop().run_until_complete(
-            self.readSearchCurveFacetAsync(
+            self.searchFacetAsync(
                 page, pageSize, searchText, filters, sorts, doNotLoadAdditionalInfo
             )
         )
