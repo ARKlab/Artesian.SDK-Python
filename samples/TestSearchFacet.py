@@ -10,5 +10,18 @@ res = (
         ], sorts=["MarketDataId asc"], doNotLoadAdditionalInfo=False)
 )
 
-print(res)
+print(res.results)
+
+res1 = (
+    mkdservice.searchFacet(1, 1, "Riconsegnato_")
+)
+
+print(res1.results)
+
+res2 = (
+    mkdservice.searchFacet(1, 1, "Riconsegnato_", doNotLoadAdditionalInfo=True)
+)
+
+print(res2.results)
+
 print("Test completed")
