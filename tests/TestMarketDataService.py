@@ -195,9 +195,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
                 "page": "1",
                 "pageSize": "2",
                 "searchText": "arktest +curve",
-                "filters": [
-                    {"Key": "Market", "Value": ["Italy", "France"]}
-                ],
+                "filters": {"Market": ["Italy", "France"]},
                 "sorts": ["FacetName", "FacetType"],
                 "doNotLoadAdditionalInfo": True,
             }

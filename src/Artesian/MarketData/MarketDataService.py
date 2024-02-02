@@ -141,9 +141,9 @@ class MarketDataService:
 
         if filters is not None:
             filtersList = []
-            for key in filters:
-                for value in key["Value"]:
-                    filtersList.append(key["Key"] + ":" + value)
+            for key, values in filters.items():
+                for value in values:
+                    filtersList.append(key + ":" + value)
 
         url = "/marketdata/searchfacet"
         params = {}  # needed to avoid typing to detect dict[str,int] ...

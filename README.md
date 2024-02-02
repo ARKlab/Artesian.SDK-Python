@@ -797,9 +797,7 @@ To list MarketData curves
 page = 1
 pageSize = 100
 searchText = "Riconsegnato_"
-filters = [
-            {"Key": "ProviderName", "Value": ["SNAM", "France"]}
-          ]
+filters = {"ProviderName": ["SNAM", "France"]}
 sorts=["MarketDataId asc"]
 doNotLoadAdditionalInfo=True
 res = mds.searchFacet(page, pageSize, searchText, filters, sorts, doNotLoadAdditionalInfo)
