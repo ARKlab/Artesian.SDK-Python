@@ -52,6 +52,7 @@ def __artesianDictSerializer(
         result.append({"Key": key_, "Value": elem})
     return result
 
+
 def __artesianDictDeserializer(
     obj: list, cls: type, *args: Any, **kwargs: Any
 ) -> object:
