@@ -52,22 +52,6 @@ def __artesianDictSerializer(
         result.append({"Key": key_, "Value": elem})
     return result
 
-
-def __artesianListDeserializer(
-    obj: list, cls: type, *args: Any, **kwargs: Any
-) -> object:
-    valueList = []
-
-    for item in obj:
-        for value in item["Value"]:
-            valueList.append(value)
-        result = {jsons.load(item["Key"], str, *args, **kwargs): jsons.load(
-            valueList, list, *args, **kwargs
-        )}
-
-    return result
-
-
 def __artesianDictDeserializer(
     obj: list, cls: type, *args: Any, **kwargs: Any
 ) -> object:
@@ -88,10 +72,6 @@ jsons.set_serializer(
 )
 jsons.set_deserializer(
     __artesianDictDeserializer, Dict, high_prio=True, fork_inst=__artesianJsonSerializer
-)
-jsons.set_deserializer(
-    __artesianListDeserializer, list, high_prio=True,
-    fork_inst=__artesianJsonSerializer
 )
 
 jsons.set_serializer(

@@ -16,6 +16,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             originalGranularity=Granularity.Day,
             type=MarketDataType.ActualTimeSerie,
             originalTimezone="CET",
+            tags={"PythonTag": ["PythonTagValue1", "PythonTagValue2"]}
         )
         self.__serializedOutput = artesianJsonSerialize(self.__sampleOutput)
         self.__sampleInput = MarketDataEntityInput(
@@ -207,6 +208,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
                 "sorts": ["FacetName", "FacetType"],
                 "doNotLoadAdditionalInfo": True,
             }
+
             rsps.add(
                 "GET",
                 self.__baseurl + "/marketdata/searchfacet",
