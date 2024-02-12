@@ -16,6 +16,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             originalGranularity=Granularity.Day,
             type=MarketDataType.ActualTimeSerie,
             originalTimezone="CET",
+            tags={"PythonTag": ["PythonTagValue1", "PythonTagValue2"]}
         )
         self.__serializedOutput = artesianJsonSerialize(self.__sampleOutput)
         self.__sampleInput = MarketDataEntityInput(
@@ -34,6 +35,23 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
         )
         self.__curveRangeSerializedOutput = artesianJsonSerialize(
             self.__curveRangeOutput
+        )
+        self.__artesianMetadataFacetCount = ArtesianMetadataFacetCount(
+            value="TestValue",
+            count=1
+            )
+        self.__artesianMetadataFacet = ArtesianMetadataFacet(
+                    facetName="TestFacet",
+                    facetType=ArtesianMetadataFacetType.Tag,
+                    values=[self.__artesianMetadataFacetCount],
+                )
+        self.__artesianSearchResults = ArtesianSearchResults(
+            results=[self.__sampleOutput],
+            facets=[self.__artesianMetadataFacet],
+            countResults=1,
+        )
+        self.__artesianSearchResultsSerializedOutput = artesianJsonSerialize(
+            self.__artesianSearchResults
         )
 
         return super().setUp()
@@ -171,3 +189,39 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
                 params["versionTo"],
             )
             self.assertEqual(output, self.__curveRangeOutput)
+
+    async def test_searchFacetAsync(self):
+        with responses.RequestsMock() as rsps:
+            params = {
+                "page": "1",
+                "pageSize": "2",
+                "searchText": "arktest +curve",
+                "filters": {"Market": ["Italy", "France"]},
+                "sorts": ["FacetName", "FacetType"],
+                "doNotLoadAdditionalInfo": True,
+            }
+            paramsToMatch = {                
+                "page": "1",
+                "pageSize": "2",
+                "searchText": "arktest +curve",
+                "filters": ["Market:Italy", "Market:France"],
+                "sorts": ["FacetName", "FacetType"],
+                "doNotLoadAdditionalInfo": True,
+            }
+
+            rsps.add(
+                "GET",
+                self.__baseurl + "/marketdata/searchfacet",
+                match=[responses.matchers.query_param_matcher(paramsToMatch)],
+                json=self.__artesianSearchResultsSerializedOutput,
+                status=200,
+            )
+            output = await self.__service.searchFacetAsync(
+                int(params["page"]),
+                int(params["pageSize"]),
+                str(params["searchText"]),
+                params["filters"],
+                params["sorts"],
+                bool(params["doNotLoadAdditionalInfo"]),
+            )
+            self.assertEqual(output, self.__artesianSearchResults)

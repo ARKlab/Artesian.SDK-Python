@@ -780,6 +780,29 @@ pageSize = 100
 res = mds.readCurveRange(100042422, page, pageSize, versionFrom="2016-12-20" , versionTo="2019-03-12")
 ```
 
+### Search the MarketData collection with faceted results
+
+Using MarketDataService is possible to query and search the MarketData collection with faceted results. Supports paging, filtering and free text.
+
+```Python
+from Artesian.MarketData import MarketDataService
+
+mds = MarketDataService(cfg)
+
+```
+
+To list MarketData curves
+
+```Python
+page = 1
+pageSize = 100
+searchText = "Riconsegnato_"
+filters = {"ProviderName": ["SNAM", "France"]}
+sorts=["MarketDataId asc"]
+doNotLoadAdditionalInfo=True
+res = mds.searchFacet(page, pageSize, searchText, filters, sorts, doNotLoadAdditionalInfo)
+```
+
 ## Jupyter Support
 
 Artesian SDK uses asyncio internally, this causes a conflict with Jupyter. You can work around this issue by add the following at the beginning of the notebook.

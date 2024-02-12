@@ -2,6 +2,8 @@ from .MarketDataService import MarketDataService
 from ._Enum.AggregationRule import AggregationRule
 from ..Granularity import Granularity
 from ._Enum.MarketDataType import MarketDataType
+from ._Enum.ArtesianMetadataFacetType import ArtesianMetadataFacetType
+
 from ._Dto import (
     AuctionBids,
     AuctionBidValue,
@@ -13,6 +15,9 @@ from ._Dto import (
     MarketDataIdentifier,
     UpsertData,
     PagedResultCurveRangeEntity,
+    ArtesianSearchResults,
+    ArtesianMetadataFacet,
+    ArtesianMetadataFacetCount,
 )
 
 __all__ = [
@@ -30,4 +35,8 @@ __all__ = [
     MarketDataEntityOutput.__name__,
     MarketDataIdentifier.__name__,
     UpsertData.__name__,
+    ArtesianSearchResults.__name__,
+    ArtesianMetadataFacet.__name__,
+    ArtesianMetadataFacetCount.__name__,
+    ArtesianMetadataFacetType.__name__,
 ]  # type: ignore
