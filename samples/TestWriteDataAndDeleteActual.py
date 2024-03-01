@@ -49,8 +49,8 @@ print(res)
 deleteData = Artesian.MarketData.DeleteData(
     ID=Artesian.MarketData.MarketDataIdentifier(registered.providerName, registered.marketDataName),
     timezone="CET",
-    #rangeStart=datetime(2020, 1, 1, 6),
-    #rangeEnd=datetime(2020, 1, 1, 18),
+    rangeStart=datetime(2020, 1, 1, 6),
+    rangeEnd=datetime(2020, 1, 1, 18),
 )
 
 mkdservice.deleteData(deleteData)
