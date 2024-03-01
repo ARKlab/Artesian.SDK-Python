@@ -365,6 +365,48 @@ Latest Value to propagate the latest value, not older than a certain threshold e
  .withFillLatestValue("P5D", "True")
 ```
 
+### Query written Versions or Products
+
+Using MarketDataService is possible to query all the Versions and all the Products curves which has been written in a MarketData.
+
+```Python
+from Artesian.MarketData import MarketDataService
+
+mds = MarketDataService(cfg)
+
+```
+
+To list MarketData curves
+
+```Python
+page = 1
+pageSize = 100
+res = mds.readCurveRange(100042422, page, pageSize, versionFrom="2016-12-20" , versionTo="2019-03-12")
+```
+
+### Search the MarketData collection with faceted results
+
+Using MarketDataService is possible to query and search the MarketData collection with faceted results. Supports paging, filtering and free text.
+
+```Python
+from Artesian.MarketData import MarketDataService
+
+mds = MarketDataService(cfg)
+
+```
+
+To list MarketData curves
+
+```Python
+page = 1
+pageSize = 100
+searchText = "Riconsegnato_"
+filters = {"ProviderName": ["SNAM", "France"]}
+sorts=["MarketDataId asc"]
+doNotLoadAdditionalInfo=True
+res = mds.searchFacet(page, pageSize, searchText, filters, sorts, doNotLoadAdditionalInfo)
+```
+
 ## GME Public Offer
 
 Artesian support Query over GME Public Offers which comes in a custom and dedicated format.
@@ -880,48 +922,6 @@ deleteData = MarketData.DeleteData(
 )
 
 mkdservice.deleteData(deleteData)
-```
-
-### Query written Versions or Products
-
-Using MarketDataService is possible to query all the Versions and all the Products curves which has been written in a MarketData.
-
-```Python
-from Artesian.MarketData import MarketDataService
-
-mds = MarketDataService(cfg)
-
-```
-
-To list MarketData curves
-
-```Python
-page = 1
-pageSize = 100
-res = mds.readCurveRange(100042422, page, pageSize, versionFrom="2016-12-20" , versionTo="2019-03-12")
-```
-
-### Search the MarketData collection with faceted results
-
-Using MarketDataService is possible to query and search the MarketData collection with faceted results. Supports paging, filtering and free text.
-
-```Python
-from Artesian.MarketData import MarketDataService
-
-mds = MarketDataService(cfg)
-
-```
-
-To list MarketData curves
-
-```Python
-page = 1
-pageSize = 100
-searchText = "Riconsegnato_"
-filters = {"ProviderName": ["SNAM", "France"]}
-sorts=["MarketDataId asc"]
-doNotLoadAdditionalInfo=True
-res = mds.searchFacet(page, pageSize, searchText, filters, sorts, doNotLoadAdditionalInfo)
 ```
 
 ## Jupyter Support
