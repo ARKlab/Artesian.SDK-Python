@@ -1,4 +1,5 @@
 from Artesian import ArtesianConfig
+from Artesian.MarketData._Dto.UpsertData import BidAskValue
 from Artesian._ClientsExecutor.ArtesianJsonSerializer import artesianJsonSerialize
 from Artesian.MarketData import (
     MarketDataService,
@@ -8,6 +9,8 @@ from Artesian.MarketData import (
 from datetime import datetime
 import responses
 import unittest
+
+from dateutil import tz
 
 cfg = ArtesianConfig("https://baseurl.com", "APIKey")
 
@@ -82,7 +85,40 @@ class TestMarketDataServiceDeleteData(unittest.IsolatedAsyncioTestCase):
 
             self.assertEqual(len(rsps.calls), 1)
 
-    # async def test_upsertDateSerieBA(self):
+    async def test_deleteVersionedSerie(self):
+        expectedJson = {
+            "ID": {"Provider": "PROVIDER", "Name": "CURVENAME"},
+            "Timezone": "CET",
+            "Version": "2020-01-01T01:00:00.000000",
+            "RangeStart": "2020-01-01T01:00:00.000000",
+            "RangeEnd": "2020-01-03T01:00:00.000000",
+            "DeferCommandExecution": False,
+            "DeferDataGeneration": True,
+        }
+        delete = DeleteData(
+            MarketDataIdentifier("PROVIDER", "CURVENAME"),
+            "CET",
+            rangeStart=datetime(2020, 1, 1, 1),
+            rangeEnd=datetime(2020, 1, 3, 1),
+            version=datetime(2020, 1, 1, 1)
+        )
+        ser = artesianJsonSerialize(delete)
+        self.assertEqual(ser, expectedJson)
+
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                "POST",
+                self.__baseurl + "/marketdata/deletedata",
+                match=[responses.matchers.json_params_matcher(expectedJson)],
+                status=200,
+            )
+
+            await self.__service.deleteDataAsync(delete)
+
+            self.assertEqual(len(rsps.calls), 1)
+
+
+    # async def test_deleteDateSerieBA(self):
     #     expectedJson = {
     #         "ID": {"Provider": "PROVIDER", "Name": "CURVENAME"},
     #         "BidAsk": [
@@ -119,33 +155,35 @@ class TestMarketDataServiceDeleteData(unittest.IsolatedAsyncioTestCase):
     #         "KeepNulls": False,
     #         "DownloadedAt": "2020-01-03T00:00:00.000000Z",
     #     }
-    #     upsert = UpsertData(
+    #     delete = DeleteData(
     #         MarketDataIdentifier("PROVIDER", "CURVENAME"),
     #         "CET",
-    #         bidAsk={
-    #             datetime(2020, 1, 1): {
-    #                 "Feb-20": BidAskValue(bestBidPrice=15.0, lastQuantity=14.0),
-    #                 "Mar-20": BidAskValue(bestBidPrice=25.0, lastQuantity=24.0),
-    #             },
-    #             datetime(2020, 1, 2): {
-    #                 "Feb-20": BidAskValue(bestBidPrice=15.0, lastQuantity=14.0),
-    #                 "Mar-20": BidAskValue(bestBidPrice=25.0, lastQuantity=24.0),
-    #             },
-    #         },
-    #         downloadedAt=datetime(2020, 1, 3).replace(tzinfo=tz.UTC),
+    #         product=
+    #         [ "Feb-20","Mar-20"
+    #             # { "Key": "2020-01-01T00:00:00.000000", "Value" : [ 
+    #             #     { "Key": "Feb-20", "Value": { "BestBidPrice": 15.0, "LastQuantity": 14.0 } },
+    #             #     { "key": "Mar-20", "Value": { "BestBidPrice": 25.0, "LastQuantity": 24.0 } } ] 
+    #             # },
+    #             # { "Key": "2020-01-02T00:00:00.000000", "Value": [ 
+    #             #     { "Key": "Feb-20", "Value": { "BestBidPrice": 15.0, "LastQuantity": 14.0 } },
+    #             #     { "Key": "Mar-20", "Value": { "BestBidPrice": 25.0, "LastQuantity": 24.0 } } ] 
+    #             # }
+    #         ],
+    #         rangeStart=datetime(2020, 1, 1, 0),
+    #         rangeEnd=datetime(2020, 1, 2, 1),
     #     )
-    #     ser = artesianJsonSerialize(upsert)
+    #     ser = artesianJsonSerialize(delete)
     #     self.assertEqual(ser, expectedJson)
 
     #     with responses.RequestsMock() as rsps:
     #         rsps.add(
     #             "POST",
-    #             self.__baseurl + "/marketdata/upsertdata",
+    #             self.__baseurl + "/marketdata/deletedata",
     #             match=[responses.matchers.json_params_matcher(expectedJson)],
     #             status=200,
     #         )
 
-    #         await self.__service.upsertDataAsync(upsert)
+    #         await self.__service.deleteDataAsync(delete)
 
     #         self.assertEqual(len(rsps.calls), 1)
 
