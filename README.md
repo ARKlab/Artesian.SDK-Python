@@ -562,29 +562,6 @@ mkservice.upsertData(data)
 
 ```
 
-### Delete Data in an Actual Time Series
-
-```Python
-from Artesian import ArtesianConfig, Granularity, MarketData
-from Artesian.MarketData import AggregationRule
-from datetime import datetime
-from dateutil import tz
-
-cfg = ArtesianConfg()
-
-mkservice = MarketData.MarketDataService(cfg)
-
-mkdid = MarketData.MarketDataIdentifier('PROVIDER', 'MARKETDATANAME')
-deleteData = MarketData.DeleteData(
-    ID=mkdid,
-    timezone='CET',
-    rangeStart=datetime(2020, 1, 1, 6),
-    rangeEnd=datetime(2020, 1, 1, 18),
-)
-
-mkdservice.deleteData(deleteData)
-```
-
 ### Write Data in a Versioned Time Series
 
 ```Python
@@ -626,30 +603,6 @@ data = MarketData.UpsertData(mkdid, 'CET',
 
 mkservice.upsertData(data)
 
-```
-
-### Delete Data in an Versioned Time Series
-
-```Python
-from Artesian import ArtesianConfig, Granularity, MarketData
-from Artesian.MarketData import AggregationRule
-from datetime import datetime
-from dateutil import tz
-
-cfg = ArtesianConfg()
-
-mkservice = MarketData.MarketDataService(cfg)
-
-mkdid = MarketData.MarketDataIdentifier('PROVIDER', 'MARKETDATANAME')
-deleteData = MarketData.DeleteData(
-    ID=mkdid,
-    timezone='CET',
-    rangeStart=datetime(2020, 1, 1, 0),
-    rangeEnd=datetime(2020, 1, 7, 0),
-    version=datetime(2020, 1, 1, 0)
-)
-
-mkdservice.deleteData(deleteData)
 ```
 
 ### Write Data in a Market Assessment Time Series
@@ -699,28 +652,6 @@ mkservice.upsertData(marketAssessment)
 
 ```
 
-### Delte Data in a Market Assessment Time Series
-
-```Python
-from Artesian import ArtesianConfig, Granularity, MarketData
-from datetime import datetime
-from dateutil import tz
-
-cfg = ArtesianConfg()
-mkservice = MarketData.MarketDataService(cfg)
-
-mkdid = MarketData.MarketDataIdentifier('PROVIDER', 'MARKETDATANAME')
-deleteData = MarketData.DeleteData(
-    ID= mkdid,
-    timezone='CET',
-    rangeStart=datetime(2020, 1, 1, 0),
-    rangeEnd=datetime(2020, 1, 3, 0),
-    product=["Feb-20"]
-)
-
-mkdservice.deleteData(deleteData)
-```
-
 ### Write Data in a Bid Ask Time Series
 
 ```Python
@@ -765,28 +696,6 @@ bidAsk = MarketData.UpsertData(MarketData.MarketDataIdentifier('PROVIDER', 'MARK
   )
 
 mkservice.upsertData(bidAsk)
-```
-
-### Delte Data in a Bid Ask Time Series
-
-```Python
-from Artesian import ArtesianConfig, Granularity, MarketData
-from datetime import datetime
-from dateutil import tz
-
-cfg = ArtesianConfg()
-mkservice = MarketData.MarketDataService(cfg)
-
-mkdid = MarketData.MarketDataIdentifier('PROVIDER', 'MARKETDATANAME')
-deleteData = MarketData.DeleteData(
-    ID= mkdid,
-    timezone='CET',
-    rangeStart=datetime(2020, 1, 1, 0),
-    rangeEnd=datetime(2020, 1, 3, 0),
-    product=["Feb-20"]
-)
-
-mkdservice.deleteData(deleteData)
 ```
 
 ### Write Data in an Auction Time Series
@@ -836,7 +745,30 @@ auctionRows = MarketData.UpsertData(MarketData.MarketDataIdentifier('PROVIDER', 
 
 ```
 
-### Delete Data in an Auction Time Series
+
+## Delete Data in Artesian
+
+Using the MarketDataService is possible to delete MarketData and its curves.
+
+### Delete MarketData in Artesian
+
+Using the MarketDataService is possible to delete MarketData and its curves.
+
+```Python
+
+from Artesian import ArtesianConfig
+from Artesian.MarketData import MarketDataService
+
+cfg = ArtesianConfg()
+mkservice = MarketDataService(cfg)
+
+mkservice.deleteMarketData(100042422)
+
+```
+
+Depending on the Type of the MarketData, the DeletData should be composed as per example below.
+
+### Delete Data in an Actual Time Series
 
 ```Python
 from Artesian import ArtesianConfig, Granularity, MarketData
@@ -859,20 +791,95 @@ deleteData = MarketData.DeleteData(
 mkdservice.deleteData(deleteData)
 ```
 
-### Delete MarketData in Artesian
-
-Using the MarketDataService is possible to delete MarketData and its curves.
+### Delete Data in an Versioned Time Series
 
 ```Python
-
-from Artesian import ArtesianConfig
-from Artesian.MarketData import MarketDataService
+from Artesian import ArtesianConfig, Granularity, MarketData
+from Artesian.MarketData import AggregationRule
+from datetime import datetime
+from dateutil import tz
 
 cfg = ArtesianConfg()
-mkservice = MarketDataService(cfg)
 
-mkservice.deleteMarketData(100042422)
+mkservice = MarketData.MarketDataService(cfg)
 
+mkdid = MarketData.MarketDataIdentifier('PROVIDER', 'MARKETDATANAME')
+deleteData = MarketData.DeleteData(
+    ID=mkdid,
+    timezone='CET',
+    rangeStart=datetime(2020, 1, 1, 0),
+    rangeEnd=datetime(2020, 1, 7, 0),
+    version=datetime(2020, 1, 1, 0)
+)
+
+mkdservice.deleteData(deleteData)
+```
+
+### Delte Data in a Market Assessment Time Series
+
+```Python
+from Artesian import ArtesianConfig, Granularity, MarketData
+from datetime import datetime
+from dateutil import tz
+
+cfg = ArtesianConfg()
+mkservice = MarketData.MarketDataService(cfg)
+
+mkdid = MarketData.MarketDataIdentifier('PROVIDER', 'MARKETDATANAME')
+deleteData = MarketData.DeleteData(
+    ID= mkdid,
+    timezone='CET',
+    rangeStart=datetime(2020, 1, 1, 0),
+    rangeEnd=datetime(2020, 1, 3, 0),
+    product=["Feb-20"]
+)
+
+mkdservice.deleteData(deleteData)
+```
+
+### Delte Data in a Bid Ask Time Series
+
+```Python
+from Artesian import ArtesianConfig, Granularity, MarketData
+from datetime import datetime
+from dateutil import tz
+
+cfg = ArtesianConfg()
+mkservice = MarketData.MarketDataService(cfg)
+
+mkdid = MarketData.MarketDataIdentifier('PROVIDER', 'MARKETDATANAME')
+deleteData = MarketData.DeleteData(
+    ID= mkdid,
+    timezone='CET',
+    rangeStart=datetime(2020, 1, 1, 0),
+    rangeEnd=datetime(2020, 1, 3, 0),
+    product=["Feb-20"]
+)
+
+mkdservice.deleteData(deleteData)
+```
+
+### Delete Data in an Auction Time Series
+
+```Python
+from Artesian import ArtesianConfig, Granularity, MarketData
+from Artesian.MarketData import AggregationRule
+from datetime import datetime
+from dateutil import tz
+
+cfg = ArtesianConfg()
+
+mkservice = MarketData.MarketDataService(cfg)
+
+mkdid = MarketData.MarketDataIdentifier('PROVIDER', 'MARKETDATANAME')
+deleteData = MarketData.DeleteData(
+    ID=mkdid,
+    timezone='CET',
+    rangeStart=datetime(2020, 1, 1, 6),
+    rangeEnd=datetime(2020, 1, 1, 18),
+)
+
+mkdservice.deleteData(deleteData)
 ```
 
 ### Query written Versions or Products
