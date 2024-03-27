@@ -43,7 +43,7 @@ class TestGMEPO(unittest.TestCase):
             .execute()
         )
 
-        query = requests.getPOQs()
+        query = requests.getQs()
         self.assertEqual(query["market"], "MGP")
 
     @helpers.TrackGMEPORequests
@@ -57,7 +57,7 @@ class TestGMEPO(unittest.TestCase):
             .execute()
         )
 
-        query = requests.getPOQs()
+        query = requests.getQs()
         self.assertEqual(query["market"], "MGP,MI1,MIA2,MIXBID")
 
     @helpers.TrackGMEPORequests
@@ -71,7 +71,7 @@ class TestGMEPO(unittest.TestCase):
             .execute()
         )
 
-        query = requests.getPOQs()
+        query = requests.getQs()
         self.assertEqual(query["zone"], "NORD")
 
     @helpers.TrackGMEPORequests
@@ -85,7 +85,7 @@ class TestGMEPO(unittest.TestCase):
             .execute()
         )
 
-        query = requests.getPOQs()
+        query = requests.getQs()
         self.assertEqual(query["zone"], "NORD,SUD")
 
     @helpers.TrackGMEPORequests
@@ -100,7 +100,7 @@ class TestGMEPO(unittest.TestCase):
             .execute()
         )
 
-        query = requests.getPOQs()
+        query = requests.getQs()
         self.assertEqual(query["page"], "1")
         self.assertEqual(query["pageSize"], "100")
 

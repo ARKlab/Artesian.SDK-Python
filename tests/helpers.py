@@ -15,20 +15,29 @@ class Qs:
         return dict(
             map(
                 lambda x: x.split("="),
-                unquote(self._mock.call_args.args[0][0]).split("?")[1].split("&"),
-            )
-        )
-
-    def getPOQs(self: Qs) -> Dict[str, str]:
-        return dict(
-            map(
-                lambda x: x.split("="),
-                unquote(self._mock.call_args.args[0]).split("?")[1].split("&"),
+                unquote(urlparse(self._mock.call_args.args[0][0]).query).split("&"),
             )
         )
 
     def getPath(self: Qs) -> str:
         return urlparse(self._mock.call_args.args[0][0]).path
+
+
+class QsPO:
+
+    def __init__(self: QsPO, mock: Mock) -> None:
+        self._mock = mock
+
+    def getQs(self: QsPO) -> Dict[str, str]:
+        return dict(
+            map(
+                lambda x: x.split("="),
+                unquote(urlparse(self._mock.call_args.args[0]).query).split("&"),
+            )
+        )
+
+    def getPath(self: Qs) -> str:
+        return urlparse(self._mock.call_args.args[0]).path
 
 
 def TrackRequests(func: Callable) -> Callable[[Any, Qs], None]:
@@ -42,6 +51,6 @@ def TrackRequests(func: Callable) -> Callable[[Any, Qs], None]:
 def TrackGMEPORequests(func: Callable) -> Callable[[Any, Qs], None]:
     @patch.object(_GMEPO.GMEPublicOfferQuery, "_exec")
     def wrapper(self: Any, mock: Mock) -> None:
-        func(self, Qs(mock))
+        func(self, QsPO(mock))
 
     return wrapper
