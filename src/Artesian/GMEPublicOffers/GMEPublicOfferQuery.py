@@ -15,7 +15,6 @@ from ._Enum.UnitType import UnitType
 from ._Enum.Zone import Zone
 import asyncio
 from urllib import parse
-import itertools
 
 
 class GMEPublicOfferQuery:
@@ -209,8 +208,8 @@ class GMEPublicOfferQuery:
         Returns:
             list of GMEPublicOffers.
         """
-        urls = self.__buildRequest()
-        return self._exec(urls)
+        url = self.__buildRequest()
+        return self._exec(url)
 
     async def executeAsync(self: GMEPublicOfferQuery) -> Any:
         """
@@ -219,13 +218,12 @@ class GMEPublicOfferQuery:
         Returns:
             Enumerable of TimeSerieRow Actual.
         """
-        urls = self.__buildRequest()
-        return await self._execAsync(urls)
+        url = self.__buildRequest()
+        return await self._execAsync(url)
 
     def __buildRequest(self: GMEPublicOfferQuery) -> str:
         self._validateQuery()
         qp = self._queryParameters
-        urls = []
 
         url = "/{0}/{1}/{2}/{3}?_=1".format(
             self.__routePrefix,
@@ -281,9 +279,7 @@ class GMEPublicOfferQuery:
             enc = parse.quote_plus(baType)
             url = url + "&baType=" + enc
 
-        urls.append(url)
-
-        return urls
+        return url
 
     def __getScope(self: GMEPublicOfferQuery, scope: Scope) -> str:
         switcher = {
@@ -441,17 +437,17 @@ class GMEPublicOfferQuery:
         subPath = f"{parse.quote_plus(purpose)}"
         return subPath
 
-    def _exec(self: GMEPublicOfferQuery, urls: List[str]) -> list:
+    def _exec(self: GMEPublicOfferQuery, url: str) -> Any:
         loop = get_event_loop()
-        rr = loop.run_until_complete(self._execAsync(urls))
+        rr = loop.run_until_complete(self._execAsync(url))
         return rr
 
-    async def _execAsync(self: GMEPublicOfferQuery, urls: List[str]) -> list:
+    async def _execAsync(self: GMEPublicOfferQuery, url: str) -> Any:
         with self.__client as c:
             res = await asyncio.gather(
-                *[self.__executor.exec(c.exec, "GET", i, None) for i in urls]
+                *[self.__executor.exec(c.exec, "GET", url, None)]
             )
-            return list(itertools.chain(*res))
+            return res[0]
 
     def __toUrlParam(self: GMEPublicOfferQuery, date: str) -> str:
         return f"{date}"
