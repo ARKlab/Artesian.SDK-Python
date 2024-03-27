@@ -451,7 +451,7 @@ class GMEPublicOfferQuery:
             res = await asyncio.gather(
                 *[self.__executor.exec(c.exec, "GET", i, None) for i in urls]
             )
-            return list(itertools.chain(*res))
+            return res[0]
 
     def __toUrlParam(self: GMEPublicOfferQuery, date: str) -> str:
         return f"{date}"
