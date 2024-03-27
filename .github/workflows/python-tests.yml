@@ -36,6 +36,12 @@ jobs:
       run: |
         flake8 .
 
+    - uses: jordemort/action-pyright@v1
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }} # You need this
+        reporter: github-check # Change reporter.
+        lib: true
+
     - name: Test Pytest
       run: |
         pytest --junitxml=junit/test-results-${{ matrix.python-version }}.xml

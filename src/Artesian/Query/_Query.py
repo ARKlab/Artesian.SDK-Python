@@ -172,7 +172,7 @@ class _Query:
             )
             return list(itertools.chain(*res))
 
-    def __toUrlParam(self: _Query, start: str, end: str) -> str:
+    def __toUrlParam(self: _Query, start: str | None, end: str | None) -> str:
         return f"{start}/{end}"
 
     def _validateQuery(self: _Query) -> None:

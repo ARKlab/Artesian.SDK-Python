@@ -1,12 +1,16 @@
 from __future__ import annotations
 import copy
-from typing import List
+from typing import List, TypeVar
+
+from ._QueryParameters.QueryParameters import _QueryParameters
 from ._QueryParameters.ActualQueryParameters import ActualQueryParameters
 from ._QueryParameters.VersionedQueryParameters import VersionedQueryParameters
 from ._QueryParameters.AuctionQueryParameters import AuctionQueryParameters
 from ._QueryParameters.MasQueryParameters import MasQueryParameters
 from ._QueryParameters.BidAskQueryParameters import BidAskQueryParameters
 
+
+T = TypeVar('T', bound=_QueryParameters)
 
 class DefaultPartitionStrategy:
     """Class for the default strategy to partition Query Parameters."""
@@ -89,9 +93,9 @@ class DefaultPartitionStrategy:
         return self._tsPartitionStrategy(bidAskQueryParameters)
 
     def _tsPartitionStrategy(
-        self: DefaultPartitionStrategy, Parameters: List[MasQueryParameters]
-    ) -> List[MasQueryParameters]:
-        res: List[MasQueryParameters] = []
+        self: DefaultPartitionStrategy, Parameters: List[T]
+    ) -> List[T]:
+        res: List[T] = []
         for param in Parameters:
             if param.ids is None:
                 res.append(param)

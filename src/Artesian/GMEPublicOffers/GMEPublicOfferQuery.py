@@ -222,7 +222,7 @@ class GMEPublicOfferQuery:
         urls = self.__buildRequest()
         return await self._execAsync(urls)
 
-    def __buildRequest(self: GMEPublicOfferQuery) -> str:
+    def __buildRequest(self: GMEPublicOfferQuery) -> List[str]:
         self._validateQuery()
         qp = self._queryParameters
         urls = []
@@ -352,14 +352,20 @@ class GMEPublicOfferQuery:
             raise Exception("Not supported Market")
         return vr
 
-    def __getPurpose(self: GMEPublicOfferQuery, purpose: Purpose) -> str:
+    def __getPurpose(self: GMEPublicOfferQuery, purpose: Purpose | None) -> str:
+        if purpose is None:
+            raise Exception("Not supported Purpose")
+            
         switcher = {Purpose.BID: "BID", Purpose.OFF: "OFF"}
         vr = switcher.get(purpose, "Defpurp")
         if vr == "Defpurp":
             raise Exception("Not supported Purpose")
         return vr
 
-    def __getStatus(self: GMEPublicOfferQuery, status: Status) -> str:
+    def __getStatus(self: GMEPublicOfferQuery, status: Status | None) -> str:
+        if status is None:
+            raise Exception("Not supported Status")
+
         switcher = {
             Status.ACC: "ACC",
             Status.INC: "INC",
@@ -433,14 +439,6 @@ class GMEPublicOfferQuery:
         subPath = f"{self.__toUrlParam(queryParamaters.extractionRangeConfig.date)}"
         return subPath
 
-    def _buildExtractionStatus(self: GMEPublicOfferQuery, status: Status) -> str:
-        subPath = f"{parse.quote_plus(status)}"
-        return subPath
-
-    def _buildExtractionPurpose(self: GMEPublicOfferQuery, purpose: Purpose) -> str:
-        subPath = f"{parse.quote_plus(purpose)}"
-        return subPath
-
     def _exec(self: GMEPublicOfferQuery, urls: List[str]) -> list:
         loop = get_event_loop()
         rr = loop.run_until_complete(self._execAsync(urls))
@@ -453,7 +451,7 @@ class GMEPublicOfferQuery:
             )
             return list(itertools.chain(*res))
 
-    def __toUrlParam(self: GMEPublicOfferQuery, date: str) -> str:
+    def __toUrlParam(self: GMEPublicOfferQuery, date: str | None) -> str:
         return f"{date}"
 
     def _validateQuery(self: GMEPublicOfferQuery) -> None:

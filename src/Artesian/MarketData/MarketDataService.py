@@ -118,7 +118,7 @@ class MarketDataService:
         self: MarketDataService,
         page: int,
         pageSize: int,
-        searchText: str = None,
+        searchText: str | None = None,
         filters: Optional[Dict[str, List[str]]] = None,
         sorts: Optional[List[str]] = None,
         doNotLoadAdditionalInfo: bool = False,

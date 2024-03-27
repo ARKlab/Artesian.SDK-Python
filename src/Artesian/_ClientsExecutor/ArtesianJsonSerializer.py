@@ -57,7 +57,7 @@ def __artesianDictDeserializer(
     obj: list, cls: type, *args: Any, **kwargs: Any
 ) -> object:
     key, value = get_args(cls)
-    result: Dict[key, value] = {
+    result: Dict[key, value] = {  # type: ignore
         jsons.load(item["Key"], key, *args, **kwargs): jsons.load(
             item["Value"], value, *args, **kwargs
         )
