@@ -19,6 +19,14 @@ class Qs:
             )
         )
 
+    def getPOQs(self: Qs) -> Dict[str, str]:
+        return dict(
+            map(
+                lambda x: x.split("="),
+                unquote(self._mock.call_args.args[0]).split("?")[1].split("&"),
+            )
+        )
+
     def getPath(self: Qs) -> str:
         return urlparse(self._mock.call_args.args[0][0]).path
 
