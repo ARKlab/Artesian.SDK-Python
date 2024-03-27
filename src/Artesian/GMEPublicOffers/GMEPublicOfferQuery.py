@@ -221,7 +221,7 @@ class GMEPublicOfferQuery:
         url = self.__buildRequest()
         return await self._execAsync(url)
 
-    def __buildRequest(self: GMEPublicOfferQuery) -> List[str]:
+    def __buildRequest(self: GMEPublicOfferQuery) -> str:
         self._validateQuery()
         qp = self._queryParameters
 
