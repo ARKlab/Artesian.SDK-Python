@@ -15,7 +15,6 @@ from ._Enum.UnitType import UnitType
 from ._Enum.Zone import Zone
 import asyncio
 from urllib import parse
-import itertools
 
 
 class GMEPublicOfferQuery:
