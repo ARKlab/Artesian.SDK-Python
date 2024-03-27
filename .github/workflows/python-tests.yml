@@ -39,7 +39,8 @@ jobs:
     - uses: jordemort/action-pyright@v1
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
-        reporter: github-check 
+        reporter: github-check
+        lib: 
 
     - name: Test Pytest
       run: |
