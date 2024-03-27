@@ -40,7 +40,7 @@ class _FillCustomTimeserieStrategy(_FillStrategy):
         return f"fillerK=CustomValue&fillerDV={self.val}"
 
 
-def toQueryParams(vals: List[List[str]]) -> str:
+def toQueryParams(vals: List[List[str | float | int | None]]) -> str:
     filtered = filter(lambda x: x[1], vals)
     stringVals = map(lambda x: [x[0], str(x[1])], filtered)
     joinedEqual = map(lambda x: "=".join(x), stringVals)

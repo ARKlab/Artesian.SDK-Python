@@ -125,7 +125,7 @@ class ArtesianSdkOptimisticConcurrencyException(ArtesianSdkRemoteException):
     """
 
     def __init__(
-        self: ArtesianSdkValidationException,
+        self: ArtesianSdkOptimisticConcurrencyException,
         method: str,
         url: str,
         statusCode: int,

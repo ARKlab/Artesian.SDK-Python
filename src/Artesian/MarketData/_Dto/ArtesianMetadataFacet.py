@@ -29,5 +29,5 @@ class ArtesianMetadataFacet:
     """
 
     facetName: Optional[str] = None
-    facetType: ArtesianMetadataFacetType = None
+    facetType: Optional[ArtesianMetadataFacetType] = None
     values: Optional[List[ArtesianMetadataFacetCount]] = None
