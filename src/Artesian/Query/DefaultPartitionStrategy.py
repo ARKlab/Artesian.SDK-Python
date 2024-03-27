@@ -10,7 +10,8 @@ from ._QueryParameters.MasQueryParameters import MasQueryParameters
 from ._QueryParameters.BidAskQueryParameters import BidAskQueryParameters
 
 
-T = TypeVar('T', bound=_QueryParameters)
+T = TypeVar("T", bound=_QueryParameters)
+
 
 class DefaultPartitionStrategy:
     """Class for the default strategy to partition Query Parameters."""

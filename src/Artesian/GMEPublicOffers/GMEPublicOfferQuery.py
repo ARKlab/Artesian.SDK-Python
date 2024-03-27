@@ -355,7 +355,6 @@ class GMEPublicOfferQuery:
     def __getPurpose(self: GMEPublicOfferQuery, purpose: Purpose | None) -> str:
         if purpose is None:
             raise Exception("Not supported Purpose")
-            
         switcher = {Purpose.BID: "BID", Purpose.OFF: "OFF"}
         vr = switcher.get(purpose, "Defpurp")
         if vr == "Defpurp":
