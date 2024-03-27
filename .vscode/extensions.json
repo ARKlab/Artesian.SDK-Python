@@ -1,0 +1,10 @@
+{
+    "recommendations": [
+        "ms-python.flake8",
+        "github.vscode-github-actions",
+        "ms-python.vscode-pylance",
+        "ms-python.python",
+        "ms-python.debugpy",
+        "ms-python.black-formatter"
+    ]
+}

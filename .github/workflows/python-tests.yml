@@ -38,9 +38,8 @@ jobs:
 
     - uses: jordemort/action-pyright@v1
       with:
-        github_token: ${{ secrets.GITHUB_TOKEN }} # You need this
-        reporter: github-check # Change reporter.
-        lib: true
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        reporter: github-check 
 
     - name: Test Pytest
       run: |
