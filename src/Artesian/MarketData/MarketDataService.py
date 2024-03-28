@@ -1,5 +1,7 @@
 from __future__ import annotations
 from typing import List, Optional, cast, Dict
+
+from Artesian.MarketData._Dto import DeleteData
 from .._ClientsExecutor.RequestExecutor import _RequestExecutor
 from .._ClientsExecutor.Client import _Client
 from ..ArtesianConfig import ArtesianConfig
@@ -398,6 +400,15 @@ class MarketDataService:
 
     def upsertData(self: MarketDataService, data: UpsertData) -> None:
         return _get_event_loop().run_until_complete(self.upsertDataAsync(data))
+
+    async def deleteDataAsync(self: MarketDataService, data: DeleteData) -> None:
+        url = "/marketdata/deletedata"
+        with self.__client as c:
+            await asyncio.gather(*[self.__executor.exec(c.exec, "POST", url, data)])
+            return None
+
+    def deleteData(self: MarketDataService, data: DeleteData) -> None:
+        return _get_event_loop().run_until_complete(self.deleteDataAsync(data))
 
 
 def _get_event_loop() -> asyncio.AbstractEventLoop:
