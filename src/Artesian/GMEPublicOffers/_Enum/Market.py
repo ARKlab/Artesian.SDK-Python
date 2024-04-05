@@ -23,3 +23,4 @@ class Market(Enum):
     MBh = 36
     MRR = 50
     MIXBID = 70
+    AFRR = 100
