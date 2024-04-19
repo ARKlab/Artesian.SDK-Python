@@ -9,6 +9,8 @@ from Artesian.GMEPublicOffers import (
 from . import helpers
 import unittest
 from urllib.parse import unquote
+from Artesian._ClientsExecutor.ArtesianJsonSerializer import artesianJsonSerialize
+import responses
 
 cfg = ArtesianConfig("https://arkive.artesian.cloud/tenantName/", "APIKey")
 
@@ -16,6 +18,20 @@ qs = GMEPublicOfferService(cfg)
 
 
 class TestGMEPO(unittest.TestCase):
+
+    def setUp(self) -> None:
+        self.__baseurl = "https://arkive.artesian.cloud/tenantName//"
+        self.__sampleOutput = dict(
+            Page=1,
+            PageSize=10,
+            Count=0,
+            IsCountPartial=False,
+            Data=[[]],
+        )
+        self.__serializedOutput = artesianJsonSerialize(self.__sampleOutput)
+
+        return super().setUp()
+
     @helpers.TrackGMEPORequests
     def test_Market(self, requests):
         url = (
@@ -87,3 +103,24 @@ class TestGMEPO(unittest.TestCase):
         query = requests.getQs()
         self.assertEqual(query["page"], "1")
         self.assertEqual(query["pageSize"], "100")
+
+    def test_checkreturnedPayload(self):
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                "GET",
+                self.__baseurl
+                + "gmepublicoffer/v2.0/extract/2024-01-21/BID/ACC?_=1&page=1&pageSize=10",
+                json=self.__sampleOutput,
+                status=200,
+            )
+
+            output = (
+                qs.createQuery()
+                .forDate("2024-01-21")
+                .forStatus(Status.ACC)
+                .forPurpose(Purpose.BID)
+                .withPagination(1, 10)
+                .execute()
+            )
+
+        self.assertEqual(output, self.__sampleOutput)
