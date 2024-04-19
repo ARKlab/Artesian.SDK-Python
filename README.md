@@ -365,6 +365,48 @@ Latest Value to propagate the latest value, not older than a certain threshold e
  .withFillLatestValue("P5D", "True")
 ```
 
+### Query written Versions or Products
+
+Using MarketDataService is possible to query all the Versions and all the Products curves which has been written in a MarketData.
+
+```Python
+from Artesian.MarketData import MarketDataService
+
+mds = MarketDataService(cfg)
+
+```
+
+To list MarketData curves
+
+```Python
+page = 1
+pageSize = 100
+res = mds.readCurveRange(100042422, page, pageSize, versionFrom="2016-12-20" , versionTo="2019-03-12")
+```
+
+### Search the MarketData collection with faceted results
+
+Using MarketDataService is possible to query and search the MarketData collection with faceted results. Supports paging, filtering and free text.
+
+```Python
+from Artesian.MarketData import MarketDataService
+
+mds = MarketDataService(cfg)
+
+```
+
+To list MarketData curves
+
+```Python
+page = 1
+pageSize = 100
+searchText = "Riconsegnato_"
+filters = {"ProviderName": ["SNAM", "France"]}
+sorts=["MarketDataId asc"]
+doNotLoadAdditionalInfo=True
+res = mds.searchFacet(page, pageSize, searchText, filters, sorts, doNotLoadAdditionalInfo)
+```
+
 ## GME Public Offer
 
 Artesian support Query over GME Public Offers which comes in a custom and dedicated format.
@@ -745,6 +787,11 @@ auctionRows = MarketData.UpsertData(MarketData.MarketDataIdentifier('PROVIDER', 
 
 ```
 
+
+## Delete Data in Artesian
+
+Using the MarketDataService is possible to delete MarketData and its curves.
+
 ### Delete MarketData in Artesian
 
 Using the MarketDataService is possible to delete MarketData and its curves.
@@ -761,46 +808,120 @@ mkservice.deleteMarketData(100042422)
 
 ```
 
-### Query written Versions or Products
+Depending on the Type of the MarketData, the DeletData should be composed as per example below.
 
-Using MarketDataService is possible to query all the Versions and all the Products curves which has been written in a MarketData.
+### Delete Data in an Actual Time Series
 
 ```Python
-from Artesian.MarketData import MarketDataService
+from Artesian import ArtesianConfig, Granularity, MarketData
+from Artesian.MarketData import AggregationRule
+from datetime import datetime
+from dateutil import tz
 
-mds = MarketDataService(cfg)
+cfg = ArtesianConfg()
 
+mkservice = MarketData.MarketDataService(cfg)
+
+mkdid = MarketData.MarketDataIdentifier('PROVIDER', 'MARKETDATANAME')
+deleteData = MarketData.DeleteData(
+    ID=mkdid,
+    timezone='CET',
+    rangeStart=datetime(2020, 1, 1, 6),
+    rangeEnd=datetime(2020, 1, 1, 18),
+)
+
+mkdservice.deleteData(deleteData)
 ```
 
-To list MarketData curves
+### Delete Data in an Versioned Time Series
 
 ```Python
-page = 1
-pageSize = 100
-res = mds.readCurveRange(100042422, page, pageSize, versionFrom="2016-12-20" , versionTo="2019-03-12")
+from Artesian import ArtesianConfig, Granularity, MarketData
+from Artesian.MarketData import AggregationRule
+from datetime import datetime
+from dateutil import tz
+
+cfg = ArtesianConfg()
+
+mkservice = MarketData.MarketDataService(cfg)
+
+mkdid = MarketData.MarketDataIdentifier('PROVIDER', 'MARKETDATANAME')
+deleteData = MarketData.DeleteData(
+    ID=mkdid,
+    timezone='CET',
+    rangeStart=datetime(2020, 1, 1, 0),
+    rangeEnd=datetime(2020, 1, 7, 0),
+    version=datetime(2020, 1, 1, 0)
+)
+
+mkdservice.deleteData(deleteData)
 ```
 
-### Search the MarketData collection with faceted results
-
-Using MarketDataService is possible to query and search the MarketData collection with faceted results. Supports paging, filtering and free text.
+### Delte Data in a Market Assessment Time Series
 
 ```Python
-from Artesian.MarketData import MarketDataService
+from Artesian import ArtesianConfig, Granularity, MarketData
+from datetime import datetime
+from dateutil import tz
 
-mds = MarketDataService(cfg)
+cfg = ArtesianConfg()
+mkservice = MarketData.MarketDataService(cfg)
 
+mkdid = MarketData.MarketDataIdentifier('PROVIDER', 'MARKETDATANAME')
+deleteData = MarketData.DeleteData(
+    ID= mkdid,
+    timezone='CET',
+    rangeStart=datetime(2020, 1, 1, 0),
+    rangeEnd=datetime(2020, 1, 3, 0),
+    product=["Feb-20"]
+)
+
+mkdservice.deleteData(deleteData)
 ```
 
-To list MarketData curves
+### Delte Data in a Bid Ask Time Series
 
 ```Python
-page = 1
-pageSize = 100
-searchText = "Riconsegnato_"
-filters = {"ProviderName": ["SNAM", "France"]}
-sorts=["MarketDataId asc"]
-doNotLoadAdditionalInfo=True
-res = mds.searchFacet(page, pageSize, searchText, filters, sorts, doNotLoadAdditionalInfo)
+from Artesian import ArtesianConfig, Granularity, MarketData
+from datetime import datetime
+from dateutil import tz
+
+cfg = ArtesianConfg()
+mkservice = MarketData.MarketDataService(cfg)
+
+mkdid = MarketData.MarketDataIdentifier('PROVIDER', 'MARKETDATANAME')
+deleteData = MarketData.DeleteData(
+    ID= mkdid,
+    timezone='CET',
+    rangeStart=datetime(2020, 1, 1, 0),
+    rangeEnd=datetime(2020, 1, 3, 0),
+    product=["Feb-20"]
+)
+
+mkdservice.deleteData(deleteData)
+```
+
+### Delete Data in an Auction Time Series
+
+```Python
+from Artesian import ArtesianConfig, Granularity, MarketData
+from Artesian.MarketData import AggregationRule
+from datetime import datetime
+from dateutil import tz
+
+cfg = ArtesianConfg()
+
+mkservice = MarketData.MarketDataService(cfg)
+
+mkdid = MarketData.MarketDataIdentifier('PROVIDER', 'MARKETDATANAME')
+deleteData = MarketData.DeleteData(
+    ID=mkdid,
+    timezone='CET',
+    rangeStart=datetime(2020, 1, 1, 6),
+    rangeEnd=datetime(2020, 1, 1, 18),
+)
+
+mkdservice.deleteData(deleteData)
 ```
 
 ## Jupyter Support

@@ -12,6 +12,7 @@ from .UpsertData import (
     MarketAssessmentValue,
     UpsertData,
 )
+from .DeleteData import DeleteData
 
 __all__ = [
     MarketDataEntityOutput.__name__,
@@ -24,6 +25,7 @@ __all__ = [
     BidAskValue.__name__,
     MarketAssessmentValue.__name__,
     UpsertData.__name__,
+    DeleteData.__name__,
     ArtesianSearchResults.__name__,
     ArtesianMetadataFacet.__name__,
     ArtesianMetadataFacetCount.__name__,
