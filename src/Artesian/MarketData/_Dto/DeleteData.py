@@ -14,7 +14,7 @@ class DeleteData:
         rangeStart: LocalDateTime start of the range to be deleted
         rangeEnd: LocalDateTime end of the range to be deleted
         timezone: Timezone of the delete range. For DateSerie must be
-                  the OriginalTimezone of the Serie. In case null or empty 
+                  the OriginalTimezone of the Serie. In case null or empty
                   the default is CET for TimeSerie and OriginalTimezone for DateSerie
         product: The list of Product. Only *,
                  is special character for 'delete all products in the range'
