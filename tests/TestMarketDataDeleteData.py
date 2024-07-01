@@ -34,7 +34,7 @@ class TestMarketDataServiceDeleteData(unittest.IsolatedAsyncioTestCase):
         }
         delete = DeleteData(
             MarketDataIdentifier("PROVIDER", "CURVENAME"),
-            "CET",
+            timezone="CET",
             rangeStart=datetime(2020, 1, 1, 1),
             rangeEnd=datetime(2020, 1, 3, 1),
         )
@@ -65,7 +65,7 @@ class TestMarketDataServiceDeleteData(unittest.IsolatedAsyncioTestCase):
         }
         delete = DeleteData(
             MarketDataIdentifier("PROVIDER", "CURVENAME"),
-            "CET",
+            timezone="CET",
             product=["Jan-15"],
             rangeStart=datetime(2020, 1, 1, 1),
             rangeEnd=datetime(2020, 1, 3, 1),
@@ -97,7 +97,7 @@ class TestMarketDataServiceDeleteData(unittest.IsolatedAsyncioTestCase):
         }
         delete = DeleteData(
             MarketDataIdentifier("PROVIDER", "CURVENAME"),
-            "CET",
+            timezone="CET",
             rangeStart=datetime(2020, 1, 1, 1),
             rangeEnd=datetime(2020, 1, 3, 1),
             version=datetime(2020, 1, 1, 1)
