@@ -42,7 +42,6 @@ jobs:
           lib:
           level: warning
           filter_mode: file
-          permissions: pull-requests: write 
 
       - name: Test Pytest
         run: |
