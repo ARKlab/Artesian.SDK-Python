@@ -42,7 +42,7 @@ jobs:
           lib:
           level: warning
           filter_mode: file
-          reviewdog_flags: false
+          permissions: pull-requests: write 
 
       - name: Test Pytest
         run: |
