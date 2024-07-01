@@ -26,9 +26,9 @@ class DeleteData:
     """
 
     ID: MarketDataIdentifier
-    timezone: str
     rangeStart: datetime
     rangeEnd: datetime
+    timezone: str | None = None
     product: Optional[List[str]] = None
     version: Optional[datetime] = None
     deferCommandExecution: bool = False
