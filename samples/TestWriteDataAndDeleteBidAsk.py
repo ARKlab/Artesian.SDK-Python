@@ -56,7 +56,7 @@ res = (
 
 print(res)
 
-#Delete data between 2020-01-01 6am and 2020-01-01 6pm for product Feb-18
+# Delete data between 2020-01-01 6am and 2020-01-01 6pm for product Feb-18
 deleteData = Artesian.MarketData.DeleteData(
     ID=Artesian.MarketData.MarketDataIdentifier(registered.providerName, registered.marketDataName),
     timezone="CET",
@@ -78,5 +78,26 @@ res = (
 
 print(res)
 
-#Delete the curve completely
+# Delete data between 2020-01-01 6am and 2020-01-01 6pm for product Feb-18 without Timezone
+deleteData = Artesian.MarketData.DeleteData(
+    ID=Artesian.MarketData.MarketDataIdentifier(registered.providerName, registered.marketDataName),
+    rangeStart=datetime(2020, 1, 1, 6),
+    rangeEnd=datetime(2020, 1, 1, 18),
+    product=["Feb-20"]
+)
+
+mkdservice.deleteData(deleteData)
+
+res = (
+    query.createBidAsk()
+    .forMarketData([registered.marketDataId])
+    .inAbsoluteDateRange("2020-01-01", "2020-01-31")
+    .forProducts(["Feb-20", "Mar-20"])
+    .inTimeZone("CET")
+    .execute()
+)
+
+print(res)
+
+# Delete the curve completely
 mkdservice.deleteMarketData(registered.marketDataId)
