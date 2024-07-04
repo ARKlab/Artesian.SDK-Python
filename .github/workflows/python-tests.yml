@@ -35,13 +35,14 @@ jobs:
         run: |
           flake8 .
 
-      - uses: jordemort/action-pyright@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          reporter: github-check
-          lib:
-          level: warning
-          filter_mode: file
+      # commented because it is failing under windows for reviewdog version missing
+      # - uses: jordemort/action-pyright@v1
+      #   with:
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
+      #     reporter: github-check
+      #     lib:
+      #     level: warning
+      #     filter_mode: file
 
       - name: Test Pytest
         run: |
