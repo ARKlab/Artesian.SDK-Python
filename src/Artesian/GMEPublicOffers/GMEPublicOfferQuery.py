@@ -262,7 +262,7 @@ class GMEPublicOfferQuery:
             sep = ","
             operator = sep.join(map(str, qp.operator))
             enc = parse.quote_plus(operator)
-            url = url + "&operator=" + enc
+            url = url + "&operators=" + enc
         if not (qp.zone is None):
             sep = ","
             zone = sep.join(map(lambda x: self.__getZone(x), qp.zone))
@@ -342,6 +342,8 @@ class GMEPublicOfferQuery:
             Market.MIA1: "MIA1",
             Market.MIA2: "MIA2",
             Market.MIA3: "MIA3",
+            Market.MRR: "MRR",
+            Market.AFRR: "AFRR",
         }
         vr = switcher.get(market, "DefMarket")
         if vr == "DefMarket":
