@@ -11,10 +11,11 @@ class DeleteData:
 
     Attributes:
         ID: the MarketDataIdentifier
-        timezone: the Timezone of the rows. Must be the OriginalTimezone
-                  when writing Dates or must be ""UTC"" when writing Times
         rangeStart: LocalDateTime start of the range to be deleted
         rangeEnd: LocalDateTime end of the range to be deleted
+        timezone: For DateSeries if provided must be equal to MarketData
+                  OriginalTimezone Default:MarketData OriginalTimezone.
+                  For TimeSeries Default:CET
         product: The list of Product. Only *,
                  is special character for 'delete all products in the range'
         version: the Version to operate on
@@ -25,9 +26,9 @@ class DeleteData:
     """
 
     ID: MarketDataIdentifier
-    timezone: str
     rangeStart: datetime
     rangeEnd: datetime
+    timezone: Optional[str] = None
     product: Optional[List[str]] = None
     version: Optional[datetime] = None
     deferCommandExecution: bool = False
