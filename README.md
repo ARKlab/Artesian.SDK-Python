@@ -787,7 +787,6 @@ auctionRows = MarketData.UpsertData(MarketData.MarketDataIdentifier('PROVIDER', 
 
 ```
 
-
 ## Delete Data in Artesian
 
 Using the MarketDataService is possible to delete MarketData and its curves.
@@ -808,7 +807,7 @@ mkservice.deleteMarketData(100042422)
 
 ```
 
-Depending on the Type of the MarketData, the DeletData should be composed as per example below.
+Depending on the Type of the MarketData, the DeletData should be composed as per example below. The timezone is optional: for DateSeries if provided must be equal to MarketData OriginalTimezone Default:MarketData OriginalTimezone. For TimeSeries Default:CET
 
 ### Delete Data in an Actual Time Series
 
