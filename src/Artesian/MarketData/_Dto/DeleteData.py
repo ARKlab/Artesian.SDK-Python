@@ -14,7 +14,7 @@ class DeleteData:
         rangeStart: LocalDateTime start of the range to be deleted
         rangeEnd: LocalDateTime end of the range to be deleted
         timezone: For DateSeries if provided must be equal to MarketData
-                  OrignalTimezone Default:MarketData OrignalTimezone.
+                  OriginalTimezone Default:MarketData OriginalTimezone.
                   For TimeSeries Default:CET
         product: The list of Product. Only *,
                  is special character for 'delete all products in the range'

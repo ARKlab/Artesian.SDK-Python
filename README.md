@@ -807,7 +807,7 @@ mkservice.deleteMarketData(100042422)
 
 ```
 
-Depending on the Type of the MarketData, the DeletData should be composed as per example below. The timezone is optional: for DateSeries if provided must be equal to MarketData OrignalTimezone Default:MarketData OrignalTimezone. For TimeSeries Default:CET
+Depending on the Type of the MarketData, the DeletData should be composed as per example below. The timezone is optional: for DateSeries if provided must be equal to MarketData OriginalTimezone Default:MarketData OriginalTimezone. For TimeSeries Default:CET
 
 ### Delete Data in an Actual Time Series
 
