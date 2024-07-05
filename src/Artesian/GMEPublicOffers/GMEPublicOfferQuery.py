@@ -115,19 +115,19 @@ class GMEPublicOfferQuery:
         self._queryParameters.unit = unit
         return self
 
-    def forOperator(
-        self: GMEPublicOfferQuery, operator: List[str]
+    def forOperators(
+        self: GMEPublicOfferQuery, operators: List[str]
     ) -> GMEPublicOfferQuery:
         """
         Set the operators to be queried.
 
         Args:
-            operator: string for the GME Public Offer operator to be queried.
+            operators: string for the GME Public Offer operators to be queried.
 
         Returns:
             GMEPublicOfferQuery.
         """
-        self._queryParameters.operator = operator
+        self._queryParameters.operators = operators
         return self
 
     def forZone(self: GMEPublicOfferQuery, zone: List[Zone]) -> GMEPublicOfferQuery:
@@ -258,10 +258,10 @@ class GMEPublicOfferQuery:
             )
             enc = parse.quote_plus(generationType)
             url = url + "&generationType=" + enc
-        if not (qp.operator is None):
+        if not (qp.operators is None):
             sep = ","
-            operator = sep.join(map(str, qp.operator))
-            enc = parse.quote_plus(operator)
+            operators = sep.join(map(str, qp.operators))
+            enc = parse.quote_plus(operators)
             url = url + "&operators=" + enc
         if not (qp.zone is None):
             sep = ","
