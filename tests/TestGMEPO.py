@@ -89,6 +89,20 @@ class TestGMEPO(unittest.TestCase):
         self.assertEqual(query["zone"], "NORD,SUD")
 
     @helpers.TrackGMEPORequests
+    def test_Operator(self, requests):
+        url = (
+            qs.createQuery()
+            .forDate("2020-04-01")
+            .forOperators(["Test"])
+            .forStatus(Status.ACC)
+            .forPurpose(Purpose.BID)
+            .execute()
+        )
+
+        query = requests.getQs()
+        self.assertEqual(query["operators"], "Test")
+
+    @helpers.TrackGMEPORequests
     def test_Pagination(self, requests):
         url = (
             qs.createQuery()

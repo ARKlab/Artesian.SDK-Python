@@ -20,7 +20,7 @@ class _GMEPublicOfferQueryParameters:
         status: sets the Status to be queried.
         unitType: sets the unit types to be queried.
         generationType: that sets the generation type to be queried.
-        operator: sets the operators to be queried.
+        operators: sets the operators to be queried.
         unit: sets the units to be queried.
         zone: sets the zones to be queried.
         market: sets the Market to be queried.
@@ -39,7 +39,7 @@ class _GMEPublicOfferQueryParameters:
         status: Optional[Status] = None,
         unitType: Optional[List[UnitType]] = None,
         generationType: Optional[List[GenerationType]] = None,
-        operator: Optional[List[str]] = None,
+        operators: Optional[List[str]] = None,
         unit: Optional[List[str]] = None,
         zone: Optional[List[Zone]] = None,
         market: Optional[List[Market]] = None,
@@ -57,7 +57,7 @@ class _GMEPublicOfferQueryParameters:
             status:An enum that sets the Status to be queried.
             unitType: An enum that sets the unit types to be queried.
             generationType: An enum that sets the generation type to be queried.
-            operator: A string that sets the operators to be queried.
+            operators: A string that sets the operators to be queried.
             unit: A string that sets the units to be queried.
             zone: An enum that sets the zones to be queried.
             market: An enum that sets the Market to be queried.
@@ -72,7 +72,7 @@ class _GMEPublicOfferQueryParameters:
         self.status = status
         self.unitType = unitType
         self.generationType = generationType
-        self.operator = operator
+        self.operators = operators
         self.unit = unit
         self.zone = zone
         self.market = market
