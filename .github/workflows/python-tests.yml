@@ -35,16 +35,32 @@ jobs:
         run: |
           flake8 .
 
-      # Execute jordemort/action-pyright only into Ubuntu and macOS.
-      # windows started to fail for reviewdog not found. issue opened
-      # https://github.com/jordemort/action-pyright/issues/51
-      - uses: jordemort/action-pyright@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          reporter: github-check
-          lib:
-          level: warning
-          filter_mode: file
+      # # Execute jordemort/action-pyright only into Ubuntu and macOS.
+      # # windows started to fail for reviewdog not found. issue opened
+      # # https://github.com/jordemort/action-pyright/issues/51
+      # - uses: jordemort/action-pyright@v1
+      #   with:
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
+      #     reporter: github-check
+      #     lib:
+      #     level: warning
+      #     filter_mode: file
+      - name: Install Pyright
+        run: |
+          npm install -g pyright
+
+      - name: Run Pyright
+        run: |
+          pyright
+
+      - name: Install reviewdog
+        run: |
+          curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh | sh -s -- -b ./ reviewdog
+
+      - name: Run reviewdog
+        run: |
+          ./reviewdog -f=pyright -name="pyright" -reporter=github-pr-check -level=warning -filter-mode=file < pyright-output.txt
+        if: runner.os == 'Windows'
 
       - name: Test Pytest
         run: |
