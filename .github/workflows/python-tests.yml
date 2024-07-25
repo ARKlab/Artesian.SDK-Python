@@ -31,35 +31,17 @@ jobs:
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
 
-      - name: Run flake8
+      - name: Install Reviewdog
         run: |
-          flake8 .
-
-      # Execute jordemort/action-pyright only into Ubuntu and macOS.
-      # windows started to fail for reviewdog not found. issue opened
-      # https://github.com/jordemort/action-pyright/issues/51
-      # - uses: jordemort/action-pyright@v1
-      #   with:
-      #     github_token: ${{ secrets.GITHUB_TOKEN }}
-      #     reporter: github-check
-      #     lib:
-      #     level: warning
-      #     filter_mode: file
-      - name: Install Pyright
-        run: npm install -g pyright
+          curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh | sh -s -- -b /usr/local/bin
 
       - name: Run Pyright
-        run: pyright > pyright-results.txt
+        run: |
+          npx pyright --outputjson > pyright-results.json
 
-      - name: Run Pyright with reviewdog
-        uses: jacopocinaark/action-pyright@main # Usa il tuo fork
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          reporter: github-check
-          lib:
-          level: warning
-          filter_mode: file
-          reviewdog_version: "v0.14.1" # Specifica la versione di reviewdog qui
+      - name: Run Reviewdog
+        run: |
+          reviewdog -f=rdjson -name="pyright" -reporter=github-pr-check -level=warning < pyright-results.json
 
       - name: Test Pytest
         run: |
