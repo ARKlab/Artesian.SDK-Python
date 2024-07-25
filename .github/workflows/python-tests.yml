@@ -59,7 +59,7 @@ jobs:
           lib:
           level: warning
           filter_mode: file
-          reviewdog_version: "v0.17.4" # Specifica la versione di reviewdog qui
+          reviewdog_version: "v0.16.0" # Specifica la versione di reviewdog qui
 
       - name: Test Pytest
         run: |
