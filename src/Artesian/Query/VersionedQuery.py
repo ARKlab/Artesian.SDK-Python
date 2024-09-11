@@ -376,7 +376,7 @@ class VersionedQuery(_Query):
                 enc = parse.quote_plus(ids)
                 url = url + "&id=" + enc
             if not (qp.filterId is None):
-                url = url + "&filterId=" + "qp.filterId"
+                url = url + "&filterId=" + str(qp.filterId)
             if not (qp.timezone is None):
                 url = url + "&tz=" + qp.timezone
             if not (qp.transformId is None):
