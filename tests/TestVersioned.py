@@ -60,6 +60,7 @@ class TestVersioned(unittest.TestCase):
         self.assertEqual(query["fillerK"], "LatestValidValue")
         self.assertEqual(query["fillerP"], "P5D")
         self.assertEqual(query["fillerC"], "False")
+        self.assertEqual(query["filterId"], "1003")
 
     @helpers.TrackRequests
     def test_Latest_Fill_Continue(self: TestVersioned, requests: Qs) -> None:
