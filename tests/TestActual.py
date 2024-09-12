@@ -37,6 +37,7 @@ class TestActual(unittest.TestCase):
         )
 
         self.assertEqual(requests.getQs()["fillerK"], "NoFill")
+        self.assertEqual(requests.getQs()["filterId"], "1003")
 
     @helpers.TrackRequests
     def test_Latest_Fill(self, requests):
