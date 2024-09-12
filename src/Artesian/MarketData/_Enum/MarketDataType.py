@@ -7,3 +7,4 @@ class MarketDataType(Enum):
     MarketAssessment = 2
     Auction = 3
     BidAsk = 4
+    DerivedTimeSerie = 5

@@ -3,6 +3,7 @@ from typing import Dict, List, Optional
 from .._Enum import MarketDataType
 from .._Enum import AggregationRule
 from .._Enum import Granularity
+from .DerivedCfgBase import DerivedCfgBase
 
 
 @dataclass
@@ -21,6 +22,7 @@ class MarketDataEntityInput:
         providerDescription: the provider description for the market data entity input
         transformID: the time transform ID for the market data entity input
         marketDataId: the market data ID for the market data entity input
+        derivedCfg: the derived configuration for the market data entity
         eTag: the market data Etag for the market data entity input
 
     """
@@ -35,4 +37,5 @@ class MarketDataEntityInput:
     providerDescription: Optional[str] = None
     transformID: Optional[int] = None
     marketDataId: int = 0
+    derivedCfg: Optional[DerivedCfgBase] = None
     eTag: Optional[str] = None

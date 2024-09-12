@@ -254,6 +254,34 @@ To construct an Auction Time Series Extraction the following must be provided.
 
 [Go to Time Extraction window section](#artesian-sdk-extraction-windows)
 
+### Derived Time Series Extraction
+
+```Python
+from Artesian import ArtesianConfig, Granularity
+from Artesian.Query import QueryService, RelativeInterval
+
+qs = QueryService(cfg)
+q = qs.createDerived() \
+    .forMarketData([100042422,100042283,100042285,100042281,100042287,100042291,100042289]) \
+    .inAbsoluteDateRange("2018-01-01","2018-01-02") \
+    .inTimeZone("UTC") \
+    .inGranularity(Granularity.Hour)
+
+print(q)
+
+ret = q.forDerived().execute()
+print(ret)
+```
+
+To construct a Derived Time Series Extraction the following must be provided.
+
+<table>
+  <tr><th>Derived Query</th><th>Description</th></tr>
+  <tr><td>Market Data ID</td><td>Provide a market data id or set of market data id's to query</td></tr>
+  <tr><td>Time Granularity</td><td>Specify the granularity type</td></tr>
+  <tr><td>Time Extraction Window</td><td>An extraction time window for data to be queried</td></tr>
+</table>
+
 ### Extraction Windows
 
 Extraction window types for queries.
@@ -644,6 +672,44 @@ data = MarketData.UpsertData(mkdid, 'CET',
   )
 
 mkservice.upsertData(data)
+
+```
+
+### Create Derived Time Series
+
+The derived curve is made from data derived from other curves.
+For the coalesce type the data is from the ordered market data ids in the configuration.
+
+```Python
+from Artesian import ArtesianConfig, Granularity, MarketData
+from Artesian.MarketData import AggregationRule
+from datetime import datetime
+from dateutil import tz
+
+cfg = ArtesianConfg()
+
+marketService = MarketData.MarketDataService(cfg)
+
+derivedCfgCoalesce = DerivedCfgCoalesce()
+derivedCfgCoalesce.orderedReferencedMarketDataIds = [100000001,100000002]
+
+marketDataId = MarketData.MarketDataIdentifier('PROVIDER', 'MARKETDATANAME')
+mkd = MarketData.MarketDataEntityInput(
+      providerName = marketDataId.provider,
+      marketDataName = marketDataId.name,
+      originalGranularity=Granularity.Day,
+      type=MarketData.MarketDataType.DerivedTimeSerie,
+      originalTimezone="CET",
+      aggregationRule=AggregationRule.AverageAndReplicate,
+      derivedCfg=derivedCfgCoalesce
+      tags={
+        'TestSDKPython': ['PythonValue2']
+      }
+  )
+
+registered = marketService.readMarketDataRegistryByName(marketDataId.provider, marketDataId.name)
+if (registered is None):
+  registered = marketService.registerMarketData(mkd)
 
 ```
 

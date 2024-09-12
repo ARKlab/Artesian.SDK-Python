@@ -1,4 +1,4 @@
-from Artesian import *
+from Artesian import ArtesianConfig
 from Artesian.MarketData import Granularity
 from Artesian.Query import QueryService
 
@@ -9,7 +9,7 @@ qs = QueryService(cfg)
 # AbsoluteRange - TimeZone - MultiIds - MUV
 test1 = (
     qs.createVersioned()
-    .forMarketData([100011126])
+    .forMarketData([100000026])
     .inAbsoluteDateRange("2018-01-01", "2018-01-02")
     .inTimeZone("UTC")
     .inGranularity(Granularity.Hour)

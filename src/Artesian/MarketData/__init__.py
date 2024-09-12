@@ -3,6 +3,7 @@ from ._Enum.AggregationRule import AggregationRule
 from ..Granularity import Granularity
 from ._Enum.MarketDataType import MarketDataType
 from ._Enum.ArtesianMetadataFacetType import ArtesianMetadataFacetType
+from ._Enum.DerivedAlgorithm import DerivedAlgorithm
 
 from ._Dto import (
     AuctionBids,
@@ -26,6 +27,7 @@ __all__ = [
     AggregationRule.__name__,
     Granularity.__name__,
     MarketDataType.__name__,
+    DerivedAlgorithm.__name__,
     AuctionBids.__name__,
     AuctionBidValue.__name__,
     BidAskValue.__name__,

@@ -3,6 +3,7 @@ from Artesian.Query.DefaultPartitionStrategy import DefaultPartitionStrategy
 from Artesian.Query.ActualQuery import ActualQuery
 from Artesian.Query.AuctionQuery import AuctionQuery
 from Artesian.Query.VersionedQuery import VersionedQuery
+from Artesian.Query.DerivedQuery import DerivedQuery
 from Artesian.Query.MasQuery import MasQuery
 from Artesian.Query.BidAskQuery import BidAskQuery
 from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
@@ -62,6 +63,15 @@ class QueryService:
             Versioned Time Serie VersionedQuery.
         """
         return VersionedQuery(self.__client, self.__executor, self.__partitionStrategy)
+
+    def createDerived(self: QueryService) -> DerivedQuery:
+        """
+        Create Derived Time Serie Query.
+
+        Returns:
+            Derived Time Serie DerivedQuery.
+        """
+        return DerivedQuery(self.__client, self.__executor, self.__partitionStrategy)
 
     def createMarketAssessment(self: QueryService) -> MasQuery:
         """
