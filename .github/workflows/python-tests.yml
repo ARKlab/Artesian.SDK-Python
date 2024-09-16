@@ -48,6 +48,7 @@ jobs:
       #     level: warning
       #     filter_mode: file
           
+          
     - uses: jordemort/action-pyright@v1
       with:
         github_token: ${{ secrets.GITHUB_TOKEN }}
