@@ -35,11 +35,7 @@ jobs:
         run: |
           flake8 .
 
-      # Execute jordemort/action-pyright only into Ubuntu and macOS.
-      # windows started to fail for reviewdog not found. issue opened
-      # https://github.com/jordemort/action-pyright/issues/51
       - name: Run Pyright
-        if: matrix.os != 'windows-latest'
         uses: jordemort/action-pyright@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
