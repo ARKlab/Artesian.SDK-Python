@@ -43,7 +43,8 @@ class MarketDataEntityOutput(MarketDataEntityInput):
         if self.derivedCfg is None:
             raise Exception(
                 "DerivedCfg cannot be added to a MarketData that has not"
-            )        
+            )
+
         if self.derivedCfg.derivedAlgorithm != derivedCfgUpdate.derivedAlgorithm:
             raise Exception(
                 "Derived Algorithm cannot be update"
