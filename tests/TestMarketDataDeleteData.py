@@ -1,11 +1,7 @@
 from Artesian import ArtesianConfig
 from Artesian.MarketData._Dto.UpsertData import BidAskValue
 from Artesian._ClientsExecutor.ArtesianJsonSerializer import artesianJsonSerialize
-from Artesian.MarketData import (
-    MarketDataService,
-    MarketDataIdentifier,
-    DeleteData
-)
+from Artesian.MarketData import MarketDataService, MarketDataIdentifier, DeleteData
 from datetime import datetime
 import responses
 import unittest
@@ -158,7 +154,7 @@ class TestMarketDataServiceDeleteData(unittest.IsolatedAsyncioTestCase):
             timezone="CET",
             rangeStart=datetime(2020, 1, 1, 1),
             rangeEnd=datetime(2020, 1, 3, 1),
-            version=datetime(2020, 1, 1, 1)
+            version=datetime(2020, 1, 1, 1),
         )
         ser = artesianJsonSerialize(delete)
         self.assertEqual(ser, expectedJson)
@@ -188,7 +184,7 @@ class TestMarketDataServiceDeleteData(unittest.IsolatedAsyncioTestCase):
             MarketDataIdentifier("PROVIDER", "CURVENAME"),
             rangeStart=datetime(2020, 1, 1, 1),
             rangeEnd=datetime(2020, 1, 3, 1),
-            version=datetime(2020, 1, 1, 1)
+            version=datetime(2020, 1, 1, 1),
         )
         ser = artesianJsonSerialize(delete)
         self.assertEqual(ser, expectedJson)

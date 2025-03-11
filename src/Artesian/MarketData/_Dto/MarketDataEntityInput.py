@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 from typing import Dict, List, Optional
+
+from Artesian.MarketData._Dto.DerivedCfg import DerivedCfg
 from .._Enum import MarketDataType
 from .._Enum import AggregationRule
 from .._Enum import Granularity
@@ -22,6 +24,7 @@ class MarketDataEntityInput:
         transformID: the time transform ID for the market data entity input
         marketDataId: the market data ID for the market data entity input
         eTag: the market data Etag for the market data entity input
+        derivedCfg: the derived configuration for the market data entity input
 
     """
 
@@ -30,6 +33,7 @@ class MarketDataEntityInput:
     originalGranularity: Granularity
     type: MarketDataType
     originalTimezone: str
+    derivedCfg: Optional[DerivedCfg] = None
     aggregationRule: AggregationRule = AggregationRule.Undefined
     tags: Optional[Dict[str, List[str]]] = None
     providerDescription: Optional[str] = None

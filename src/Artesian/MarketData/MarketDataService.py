@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import List, Optional, cast, Dict
 
 from Artesian.MarketData._Dto import DeleteData
+from Artesian.MarketData._Dto.DerivedCfg import DerivedCfg
 from .._ClientsExecutor.RequestExecutor import _RequestExecutor
 from .._ClientsExecutor.Client import _Client
 from ..ArtesianConfig import ArtesianConfig
@@ -390,6 +391,68 @@ class MarketDataService:
         """
         return _get_event_loop().run_until_complete(
             self.registerMarketDataAsync(entity)
+        )
+
+    async def updateDerivedConfigurationAsync(
+        self: MarketDataService,
+        marketDataId: int,
+        derivedCfg: DerivedCfg,
+        force: bool = False
+    ) -> MarketDataEntityOutput:
+        """
+        Update Derived Configuration for marketData with id supplied in MarketDataId
+
+        Args:
+            marketDataId: The Market Data Id to be updated
+            derivedCfg: The Deruved Configuration to be updated
+            force: Force the update of configuration also if another
+                   rebuild process is running (Default=false)
+
+        Returns:
+            MarketData Entity Output (Async).
+        """
+
+        marketDataOutput = await self.readMarketDataRegistryByIdAsync(marketDataId)
+
+        marketDataOutput._validateUpdateDerivedCfg(derivedCfgUpdate=derivedCfg)
+
+        url = "/marketdata/entity/" + str(marketDataId) + "/updateDerivedConfiguration"
+        params = {"force": force}
+        with self.__client as c:
+            res = await asyncio.gather(
+                *[
+                    self.__executor.exec(
+                        c.exec,
+                        "POST",
+                        url,
+                        derivedCfg,
+                        retcls=MarketDataEntityOutput,
+                        params=params,
+                    )
+                ]
+            )
+            return cast(MarketDataEntityOutput, res[0])
+
+    def updateDerivedConfiguration(
+        self: MarketDataService,
+        marketDataId: int,
+        derivedCfg: DerivedCfg,
+        force: bool = False
+    ) -> MarketDataEntityOutput:
+        """
+        Update Derived Configuration for marketData with id supplied in MarketDataId.
+
+        Args:
+            marketDataId: The Market Data Id to be updated
+            derivedCfg: The Deruved Configuration to be updated
+            force: Force the update of configuration also if another
+                   rebuild process is running (Default=false)
+
+        Returns:
+            MarketData Entity Output.
+        """
+        return _get_event_loop().run_until_complete(
+            self.updateDerivedConfigurationAsync(marketDataId, derivedCfg, force)
         )
 
     async def upsertDataAsync(self: MarketDataService, data: UpsertData) -> None:

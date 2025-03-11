@@ -13,6 +13,7 @@ from .UpsertData import (
     UpsertData,
 )
 from .DeleteData import DeleteData
+from .DerivedCfg import DerivedCfg
 
 __all__ = [
     MarketDataEntityOutput.__name__,
@@ -29,4 +30,5 @@ __all__ = [
     ArtesianSearchResults.__name__,
     ArtesianMetadataFacet.__name__,
     ArtesianMetadataFacetCount.__name__,
+    DerivedCfg.__name__,
 ]  # type: ignore

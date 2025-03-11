@@ -1,3 +1,4 @@
+from ._Enum.DerivedAlgorithm import DerivedAlgorithm
 from .MarketDataService import MarketDataService
 from ._Enum.AggregationRule import AggregationRule
 from ..Granularity import Granularity
@@ -19,6 +20,7 @@ from ._Dto import (
     ArtesianSearchResults,
     ArtesianMetadataFacet,
     ArtesianMetadataFacetCount,
+    DerivedCfg,
 )
 
 __all__ = [
@@ -41,4 +43,6 @@ __all__ = [
     ArtesianMetadataFacet.__name__,
     ArtesianMetadataFacetCount.__name__,
     ArtesianMetadataFacetType.__name__,
+    DerivedCfg.__name__,
+    DerivedAlgorithm.__name__,
 ]  # type: ignore
