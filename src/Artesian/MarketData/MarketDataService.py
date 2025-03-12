@@ -389,6 +389,9 @@ class MarketDataService:
         Returns:
             MarketData Entity Output.
         """
+        
+        entity._validateDerivedCfg()
+
         return _get_event_loop().run_until_complete(
             self.registerMarketDataAsync(entity)
         )
