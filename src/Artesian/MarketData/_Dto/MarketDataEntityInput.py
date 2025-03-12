@@ -50,14 +50,16 @@ class MarketDataEntityInput:
             and self.derivedCfg.orderedReferencedMarketDataIds is not None
         ):
             raise Exception(
-                "DerivedCfg with MUV algorithm cannot have orderedReferencedMarketDataIds"
+                "DerivedCfg with MUV algorithm cannot have "
+                "orderedReferencedMarketDataIds"
             )
-        
+
         if (
             self.derivedCfg is not None
             and self.derivedCfg.derivedAlgorithm is not DerivedAlgorithm.MUV
             and self.derivedCfg.orderedReferencedMarketDataIds is None
         ):
             raise Exception(
-                f"DerivedCfg with {self.derivedCfg.derivedAlgorithm} algorithm must have orderedReferencedMarketDataIds valorized or empty []"
+                f"DerivedCfg with {self.derivedCfg.derivedAlgorithm} algorithm "
+                "must have orderedReferencedMarketDataIds valorized or empty []"
             )
