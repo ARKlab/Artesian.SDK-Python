@@ -63,7 +63,7 @@ class MarketDataEntityInput:
                 f"DerivedCfg with {self.derivedCfg.derivedAlgorithm} algorithm "
                 "must have orderedReferencedMarketDataIds valorized or empty []"
             )
-            
+
         if (
             self.derivedCfg is not None
             and self.derivedCfg.derivedAlgorithm is not DerivedAlgorithm.MUV

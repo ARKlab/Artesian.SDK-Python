@@ -6,7 +6,8 @@ from Artesian.MarketData._Dto.DerivedCfg import DerivedCfg
 from Artesian.MarketData._Enum import DerivedAlgorithm
 from Artesian.MarketData._Enum.MarketDataType import MarketDataType
 import time
-cfg = Artesian.ArtesianConfig("https://test-arkive-proxy-abijnkebhgdtw.azurewebsites.net/ArkTest/", "iM1qNHsGXSzNsJ7WDX0u0ggr68oLabjPsT94KxNByb8463f98N9ibVce5RdZZqpfibg1TlFQ8uQGAXywhF2UkDsjmAVZS1v8WVu4NE_IILrTPLPU-4tIBYp_7tL_8wSv")
+
+cfg = Artesian.ArtesianConfig("https://arkive.artesian.cloud/tenantName/", "APIKey")
 mkdservice = Artesian.MarketData.MarketDataService(cfg)
 
 # curveOne
