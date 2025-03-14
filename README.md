@@ -546,7 +546,12 @@ mkd = MarketData.MarketDataEntityInput(
       aggregationRule=AggregationRule.AverageAndReplicate,
       tags={
         'TestSDKPython': ['PythonValue2']
-      }
+      },
+      derivedCfg=DerivedCfg(
+                version=1,
+                derivedAlgorithm=DerivedAlgorithm.Coalesce,
+                orderedReferencedMarketDataIds=[10000, 10001, 10002],
+            ),
   )
 
 registered = mkservice.readMarketDataRegistryByName(mkdid.provider, mkdid.name)
@@ -564,6 +569,23 @@ data = MarketData.UpsertData(mkdid, 'CET',
 
 mkservice.upsertData(data)
 
+```
+
+DerivedCfg can be of algorithm type: Coalesce, Sum, Muv.
+
+Updating the DerivedCfg can be performed with `updateDerivedConfiguration` on MarketDataService. A validation will be done on the existing DerivedCfg of the MarketData, that should be not null and with same type as the one used for the update.
+
+```csharp
+derivedCfgUpdate = DerivedCfg(
+    version=1,
+    derivedAlgorithm=DerivedAlgorithm.Coalesce,
+    orderedReferencedMarketDataIds=[10002, 10001, 10000],
+)
+
+marketDataUpdated = mkdservice.updateDerivedConfiguration(
+                        registeredDerived.marketDataId,
+                        derivedCfgUpdate,
+                        False)
 ```
 
 In case we want to write an hourly (or lower) time series the timezone for the upsert data must be UTC:

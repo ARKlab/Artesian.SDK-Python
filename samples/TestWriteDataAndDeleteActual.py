@@ -47,7 +47,9 @@ print(res)
 
 # Delete data between 2020-01-01 06:00 and 2020-01-01 18:00
 deleteData = Artesian.MarketData.DeleteData(
-    ID=Artesian.MarketData.MarketDataIdentifier(registered.providerName, registered.marketDataName),
+    ID=Artesian.MarketData.MarketDataIdentifier(
+        registered.providerName, registered.marketDataName
+    ),
     timezone="CET",
     rangeStart=datetime(2020, 1, 1, 6),
     rangeEnd=datetime(2020, 1, 1, 18),
@@ -69,7 +71,9 @@ print(res)
 
 # Delete data between 2020-01-01 06:00 and 2020-01-01 18:00 without Timezone
 deleteData = Artesian.MarketData.DeleteData(
-    ID=Artesian.MarketData.MarketDataIdentifier(registered.providerName, registered.marketDataName),
+    ID=Artesian.MarketData.MarketDataIdentifier(
+        registered.providerName, registered.marketDataName
+    ),
     rangeStart=datetime(2020, 1, 1, 6),
     rangeEnd=datetime(2020, 1, 1, 18),
 )

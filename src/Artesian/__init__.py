@@ -33,5 +33,5 @@ __all__ = [
     ArtesianSdkRemoteException.__name__,
     Query.__name__,
     MarketData.__name__,
-    GMEPublicOffers.__name__,
+    GMEPublicOffers.__name__
 ]  # type: ignore

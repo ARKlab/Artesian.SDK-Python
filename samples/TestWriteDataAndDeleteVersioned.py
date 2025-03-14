@@ -22,8 +22,10 @@ registered = mkdservice.readMarketDataRegistryByName(
 if registered is None:
     registered = mkdservice.registerMarketData(versioned)
 
-marketIdentifier = Artesian.MarketData.MarketDataIdentifier(versioned.providerName, versioned.marketDataName)
-testVersion=datetime(2020, 1, 1, 12)
+marketIdentifier = Artesian.MarketData.MarketDataIdentifier(
+    versioned.providerName, versioned.marketDataName
+)
+testVersion = datetime(2020, 1, 1, 12)
 
 data = Artesian.MarketData.UpsertData(
     marketIdentifier,
@@ -42,8 +44,8 @@ res = (
     .inAbsoluteDateRange("2020-01-01", "2020-01-02")
     .inTimeZone("CET")
     .inGranularity(Granularity.Hour)
-    #.forMUV()
-    #.forLastNVersions(2)
+    # .forMUV()
+    # .forLastNVersions(2)
     .forVersion("2020-01-01T12:00:00")
     .execute()
 )
@@ -52,11 +54,13 @@ print(res)
 
 # Delete data between 2020-01-01 06:00 and 2020-01-01 18:00
 deleteData = Artesian.MarketData.DeleteData(
-    ID=Artesian.MarketData.MarketDataIdentifier(registered.providerName, registered.marketDataName),
+    ID=Artesian.MarketData.MarketDataIdentifier(
+        registered.providerName, registered.marketDataName
+    ),
     timezone="CET",
     rangeStart=datetime(2020, 1, 1, 6),
     rangeEnd=datetime(2020, 1, 1, 18),
-    version=testVersion
+    version=testVersion,
 )
 
 mkdservice.deleteData(deleteData)
@@ -75,10 +79,12 @@ print(res)
 
 # Delete data between 2020-01-01 06:00 and 2020-01-01 18:00 without Timezone
 deleteData = Artesian.MarketData.DeleteData(
-    ID=Artesian.MarketData.MarketDataIdentifier(registered.providerName, registered.marketDataName),
+    ID=Artesian.MarketData.MarketDataIdentifier(
+        registered.providerName, registered.marketDataName
+    ),
     rangeStart=datetime(2020, 1, 1, 6),
     rangeEnd=datetime(2020, 1, 1, 18),
-    version=testVersion
+    version=testVersion,
 )
 
 mkdservice.deleteData(deleteData)

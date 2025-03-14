@@ -10,13 +10,22 @@ cfg = ArtesianConfig("https://baseurl.com", "APIKey")
 class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
     def setUp(self) -> None:
         self.__service = MarketDataService(cfg)
+        
+        curveIds = [1, 2]
+        derivedCfg = DerivedCfg(
+                        version=1,
+                        derivedAlgorithm=DerivedAlgorithm.Coalesce,
+                        orderedReferencedMarketDataIds=curveIds,
+                    )
+        
         self.__sampleOutput = MarketDataEntityOutput(
             providerName="PROVIDER",
             marketDataName="MARKETDATA",
             originalGranularity=Granularity.Day,
             type=MarketDataType.ActualTimeSerie,
             originalTimezone="CET",
-            tags={"PythonTag": ["PythonTagValue1", "PythonTagValue2"]}
+            tags={"PythonTag": ["PythonTagValue1", "PythonTagValue2"]},
+            derivedCfg=derivedCfg
         )
         self.__serializedOutput = artesianJsonSerialize(self.__sampleOutput)
         self.__sampleInput = MarketDataEntityInput(
@@ -26,6 +35,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             type=MarketDataType.ActualTimeSerie,
             originalTimezone="CET",
             tags={"PythonTag": ["PythonTagValue1", "PythonTagValue2"]},
+            derivedCfg=derivedCfg
         )
         self.maxDiff = None
         self.__baseurl = "https://baseurl.com/v2.1"
@@ -37,14 +47,13 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             self.__curveRangeOutput
         )
         self.__artesianMetadataFacetCount = ArtesianMetadataFacetCount(
-            value="TestValue",
-            count=1
-            )
+            value="TestValue", count=1
+        )
         self.__artesianMetadataFacet = ArtesianMetadataFacet(
-                    facetName="TestFacet",
-                    facetType=ArtesianMetadataFacetType.Tag,
-                    values=[self.__artesianMetadataFacetCount],
-                )
+            facetName="TestFacet",
+            facetType=ArtesianMetadataFacetType.Tag,
+            values=[self.__artesianMetadataFacetCount],
+        )
         self.__artesianSearchResults = ArtesianSearchResults(
             results=[self.__sampleOutput],
             facets=[self.__artesianMetadataFacet],
@@ -68,6 +77,12 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
                 {"Key": "PythonTag", "Value": ["PythonTagValue1", "PythonTagValue2"]}
             ],
             "AggregationRule": "Undefined",
+            "DerivedCfg":
+            {
+                "DerivedAlgorithm": "Coalesce",
+                "Version": 1,
+                "OrderedReferencedMarketDataIds": [1, 2]
+            }
         }
 
         with responses.RequestsMock() as rsps:
@@ -200,7 +215,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
                 "sorts": ["FacetName", "FacetType"],
                 "doNotLoadAdditionalInfo": True,
             }
-            paramsToMatch = {                
+            paramsToMatch = {
                 "page": "1",
                 "pageSize": "2",
                 "searchText": "arktest +curve",
