@@ -3,7 +3,7 @@ import Artesian
 from Artesian import Query
 from Artesian.Granularity import Granularity
 from Artesian.MarketData._Dto.DerivedCfg import DerivedCfg
-from Artesian.MarketData._Enum import DerivedAlgorithm
+from Artesian.MarketData._Enum.DerivedAlgorithm import DerivedAlgorithm
 from Artesian.MarketData._Enum.MarketDataType import MarketDataType
 import time
 
@@ -100,6 +100,12 @@ registeredDerived = mkdservice.readMarketDataRegistryByName(
 
 if registeredDerived is None:
     registeredDerived = mkdservice.registerMarketData(actualCurveDerived)
+
+# check that derivedCfg is as expected
+assert (
+    registeredDerived.derivedCfg is not None
+    and registeredDerived.derivedCfg.derivedAlgorithm == DerivedAlgorithm.Coalesce
+), "Derived Algorithm is not the expected (Coalesce)"
 
 marketIdentifierDerived = Artesian.MarketData.MarketDataIdentifier(
     actualCurveDerived.providerName, actualCurveDerived.marketDataName

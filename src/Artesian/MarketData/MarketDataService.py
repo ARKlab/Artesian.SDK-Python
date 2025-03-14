@@ -403,11 +403,12 @@ class MarketDataService:
         force: bool = False
     ) -> MarketDataEntityOutput:
         """
-        Update Derived Configuration for marketData with id supplied in MarketDataId
+        Update Derived Configuration for marketData with id supplied in MarketDataId.
+        The update will trigger a Rebuild
 
         Args:
             marketDataId: The Market Data Id to be updated
-            derivedCfg: The Deruved Configuration to be updated
+            derivedCfg: The Derived Configuration to be updated
             force: Force the update of configuration also if another
                    rebuild process is running (Default=false)
 
@@ -444,10 +445,11 @@ class MarketDataService:
     ) -> MarketDataEntityOutput:
         """
         Update Derived Configuration for marketData with id supplied in MarketDataId.
+        The update will trigger a Rebuild
 
         Args:
             marketDataId: The Market Data Id to be updated
-            derivedCfg: The Deruved Configuration to be updated
+            derivedCfg: The Derived Configuration to be updated
             force: Force the update of configuration also if another
                    rebuild process is running (Default=false)
 

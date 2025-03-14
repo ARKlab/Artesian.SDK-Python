@@ -66,10 +66,23 @@ class MarketDataEntityInput:
 
         if (
             self.derivedCfg is not None
-            and self.derivedCfg.derivedAlgorithm is not DerivedAlgorithm.MUV
+            and self.derivedCfg.derivedAlgorithm in {
+                DerivedAlgorithm.Coalesce,
+                DerivedAlgorithm.Sum
+                }
             and self.type is not MarketDataType.ActualTimeSerie
         ):
             raise Exception(
                 f"DerivedCfg with {self.derivedCfg.derivedAlgorithm} algorithm "
                 "must be set to MarketData of type Actual only."
+            )
+
+        if (
+            self.derivedCfg is not None
+            and self.derivedCfg.derivedAlgorithm is DerivedAlgorithm.MUV
+            and self.type is not MarketDataType.VersionedTimeSerie
+        ):
+            raise Exception(
+                f"DerivedCfg with {self.derivedCfg.derivedAlgorithm} algorithm "
+                "must be set to MarketData of type Versioned only."
             )
