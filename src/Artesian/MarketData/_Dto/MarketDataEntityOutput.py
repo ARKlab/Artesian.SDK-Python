@@ -2,7 +2,7 @@ from dataclasses import dataclass
 import datetime
 from typing import Optional
 
-from Artesian.MarketData._Dto.DerivedCfg import DerivedCfg
+from .DerivedCfg import DerivedCfg
 from .MarketDataEntityInput import MarketDataEntityInput
 
 

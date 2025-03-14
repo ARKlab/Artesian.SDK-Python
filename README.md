@@ -547,11 +547,11 @@ mkd = MarketData.MarketDataEntityInput(
       tags={
         'TestSDKPython': ['PythonValue2']
       },
-      DerivedCfg = new DerivedCfgCoalesce()
-      {
-          OrderedReferencedMarketDataIds = new int[]{ 10000, 10001, 10002}.ToArray(),
-          Version = 1,
-      }
+      derivedCfg=DerivedCfg(
+                version=1,
+                derivedAlgorithm=DerivedAlgorithm.Coalesce,
+                orderedReferencedMarketDataIds=[10000, 10001, 10002],
+            ),
   )
 
 registered = mkservice.readMarketDataRegistryByName(mkdid.provider, mkdid.name)
@@ -579,7 +579,7 @@ Updating the DerivedCfg can be performed with `updateDerivedConfiguration` on Ma
 derivedCfgUpdate = DerivedCfg(
     version=1,
     derivedAlgorithm=DerivedAlgorithm.Coalesce,
-    orderedReferencedMarketDataIds=curveIdsUpdate,
+    orderedReferencedMarketDataIds=[10002, 10001, 10000],
 )
 
 marketDataUpdated = mkdservice.updateDerivedConfiguration(

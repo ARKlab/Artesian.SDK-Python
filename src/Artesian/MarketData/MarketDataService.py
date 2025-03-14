@@ -2,7 +2,7 @@ from __future__ import annotations
 from typing import List, Optional, cast, Dict
 
 from Artesian.MarketData._Dto import DeleteData
-from Artesian.MarketData._Dto.DerivedCfg import DerivedCfg
+from ._Dto.DerivedCfg import DerivedCfg
 from .._ClientsExecutor.RequestExecutor import _RequestExecutor
 from .._ClientsExecutor.Client import _Client
 from ..ArtesianConfig import ArtesianConfig

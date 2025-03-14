@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import List, Optional
-from Artesian.MarketData._Enum import DerivedAlgorithm
+from .._Enum import DerivedAlgorithm
 
 
 @dataclass
