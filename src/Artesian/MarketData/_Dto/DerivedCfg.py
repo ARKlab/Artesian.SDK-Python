@@ -10,7 +10,7 @@ class DerivedCfg:
 
     Attributes:
         derivedAlgorithm: the derived configuration algorithm (MUV, Coalesce, Sum)
-        version: the derived configuration version 
+        version: the derived configuration version
         orderedReferencedMarketDataIds: the ordered reference MarketData Ids
         used in the computation
 
