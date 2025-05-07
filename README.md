@@ -568,8 +568,19 @@ data = MarketData.UpsertData(mkdid, 'CET',
   )
 
 mkservice.upsertData(data)
-
 ```
+
+Upsert has optional switches that can be applied
+```
+mkservice.upsertData(data, deferCommandExecution, deferDataGeneration, keepNulls, upsertMode)
+```
+The switch details are,
+
+deferCommandExecution (true/false) choose between syncronoys and asyncronous command execution
+deferDataGeneration (true/false) choose between syncronoys and asyncronous precomputed data generation
+keepNulls (true/false) if true then nulls are written in the curve replacing any data present for the instant
+upsertMode (Merge/Replace) for ActualTimeSeries the two modes are equivalent
+
 
 DerivedCfg can be of algorithm type: Coalesce, Sum, Muv.
 
@@ -669,6 +680,37 @@ mkservice.upsertData(data)
 
 ```
 
+Upsert has optional switches that can be applied
+```
+mkservice.upsertData(data, deferCommandExecution, deferDataGeneration, keepNulls, upsertMode)
+```
+The switch details are,
+
+deferCommandExecution (true/false) choose between syncronoys and asyncronous command execution
+deferDataGeneration (true/false) choose between syncronoys and asyncronous precomputed data generation
+keepNulls (true/false) if true then nulls are written in the curve replacing any data present for the instant
+upsertMode (Merge/Replace) for VersionedTimeSeries the merge writes in to the curve replacing existing data for an existing instant, replace writes the payload removing any previous data for the version
+
+| DATETIME | EXISTING | PAYLOAD | MERGE | REPALACE |
+|---|---|---|---|---|
+| VERSION NAME | 2025-01-01 | 2025-01-01 | 2025-01-01 | 2025-01-01 |
+| 2025-01-01 |        |        |        |        |
+| 2025-01-02 | 999.99 | 222.22 | 222.22 | 222.22 |
+| 2025-01-03 | 999.99 | 222.22 | 222.22 | 222.22 |
+| 2025-01-04 | 999.99 | 222.22 | 222.22 | 222.22 |
+| 2025-01-05 | 999.99 | 222.22 | 222.22 | 222.22 |
+| 2025-01-06 | 999.99 | 222.22 | 222.22 | 222.22 |
+| 2025-01-07 | 999.99 | 222.22 | 222.22 | 222.22 |
+| 2025-01-08 |        | 222.22 | 222.22 | 222.22 |
+| 2025-01-09 |        |        |        |        |
+| 2025-01-10 |        |        |        |        |
+| 2025-01-11 | 999.99 |        | 999.99 |        |
+| 2025-01-12 | 999.99 |        | 999.99 |        |
+| 2025-01-13 | 999.99 |        | 999.99 |        |
+| 2025-01-14 |        |        |        |        |
+| 2025-01-15 |        |        |        |        |
+
+
 ### Write Data in a Market Assessment Time Series
 
 ```Python
@@ -716,6 +758,18 @@ mkservice.upsertData(marketAssessment)
 
 ```
 
+Upsert has optional switches that can be applied
+```
+mkservice.upsertData(data, deferCommandExecution, deferDataGeneration, keepNulls, upsertMode)
+```
+The switch details are,
+
+deferCommandExecution (true/false) choose between syncronoys and asyncronous command execution
+deferDataGeneration (true/false) choose between syncronoys and asyncronous precomputed data generation
+keepNulls (true/false) if true then nulls are written in the curve replacing any data present for the instant
+upsertMode (Merge/Replace) for MarketAssessment merge adds the new products to the existing and overwrites existing with the new ones while replace replaces all the existing products with the new ones
+
+
 ### Write Data in a Bid Ask Time Series
 
 ```Python
@@ -762,6 +816,18 @@ bidAsk = MarketData.UpsertData(MarketData.MarketDataIdentifier('PROVIDER', 'MARK
 mkservice.upsertData(bidAsk)
 ```
 
+Upsert has optional switches that can be applied
+```
+mkservice.upsertData(data, deferCommandExecution, deferDataGeneration, keepNulls, upsertMode)
+```
+The switch details are,
+
+deferCommandExecution (true/false) choose between syncronoys and asyncronous command execution
+deferDataGeneration (true/false) choose between syncronoys and asyncronous precomputed data generation
+keepNulls (true/false) if true then nulls are written in the curve replacing any data present for the instant
+upsertMode (Merge/Replace) for BidAsk merge adds the new products to the existing and overwrites existing with the new ones while replace replaces all the existing products with the new ones
+
+
 ### Write Data in an Auction Time Series
 
 ```Python
@@ -806,8 +872,19 @@ auctionRows = MarketData.UpsertData(MarketData.MarketDataIdentifier('PROVIDER', 
 
   mkservice.upsertData(auctionRows)
 
-
 ```
+
+Upsert has optional switches that can be applied
+```
+mkservice.upsertData(data, deferCommandExecution, deferDataGeneration, keepNulls, upsertMode)
+```
+The switch details are,
+
+deferCommandExecution (true/false) choose between syncronoys and asyncronous command execution
+deferDataGeneration (true/false) choose between syncronoys and asyncronous precomputed data generation
+keepNulls (true/false) if true then nulls are written in the curve replacing any data present for the instant
+upsertMode (Merge/Replace) for Auction merge and replace are equivalent
+
 
 ## Delete Data in Artesian
 
