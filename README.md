@@ -576,10 +576,10 @@ mkservice.upsertData(data, deferCommandExecution, deferDataGeneration, keepNulls
 ```
 The switch details are,
 
-deferCommandExecution (true/false) choose between syncronoys and asyncronous command execution
-deferDataGeneration (true/false) choose between syncronoys and asyncronous precomputed data generation
-keepNulls (true/false) if true then nulls are written in the curve replacing any data present for the instant
-upsertMode (Merge/Replace) for ActualTimeSeries the two modes are equivalent
+deferCommandExecution (true/false) choose between syncronoys and asyncronous command execution, default is false.
+deferDataGeneration (true/false) choose between syncronoys and asyncronous precomputed data generation, default is true.
+keepNulls (true/false) if true then nulls are written in the curve replacing any data present for the instant, default is false.
+upsertMode (Merge/Replace) for ActualTimeSeries the two modes are equivalent, default is merge.
 
 
 DerivedCfg can be of algorithm type: Coalesce, Sum, Muv.
@@ -686,10 +686,10 @@ mkservice.upsertData(data, deferCommandExecution, deferDataGeneration, keepNulls
 ```
 The switch details are,
 
-deferCommandExecution (true/false) choose between syncronoys and asyncronous command execution
-deferDataGeneration (true/false) choose between syncronoys and asyncronous precomputed data generation
-keepNulls (true/false) if true then nulls are written in the curve replacing any data present for the instant
-upsertMode (Merge/Replace) for VersionedTimeSeries the merge writes in to the curve replacing existing data for an existing instant, replace writes the payload removing any previous data for the version
+deferCommandExecution (true/false) choose between syncronoys and asyncronous command execution, default is false.
+deferDataGeneration (true/false) choose between syncronoys and asyncronous precomputed data generation, default is true.
+keepNulls (true/false) if true then nulls are written in the curve replacing any data present for the instant, default is false.
+upsertMode (Merge/Replace) for VersionedTimeSeries the merge writes in to the curve replacing existing data for an existing instant, replace writes the payload removing any previous data for the version, default is merge.
 
 | DATETIME | EXISTING | PAYLOAD | MERGE | REPALACE |
 |---|---|---|---|---|
@@ -764,10 +764,10 @@ mkservice.upsertData(data, deferCommandExecution, deferDataGeneration, keepNulls
 ```
 The switch details are,
 
-deferCommandExecution (true/false) choose between syncronoys and asyncronous command execution
-deferDataGeneration (true/false) choose between syncronoys and asyncronous precomputed data generation
-keepNulls (true/false) if true then nulls are written in the curve replacing any data present for the instant
-upsertMode (Merge/Replace) for MarketAssessment merge adds the new products to the existing and overwrites existing with the new ones while replace replaces all the existing products with the new ones
+deferCommandExecution (true/false) choose between syncronoys and asyncronous command execution, default is false.
+deferDataGeneration (true/false) choose between syncronoys and asyncronous precomputed data generation, default is true.
+keepNulls (true/false) if true then nulls are written in the curve replacing any data present for the instant, default is false.
+upsertMode (Merge/Replace) for MarketAssessment merge adds the new products to the existing and overwrites existing with the new ones while replace replaces all the existing products with the new ones, default is to merge.
 
 
 ### Write Data in a Bid Ask Time Series
@@ -822,10 +822,10 @@ mkservice.upsertData(data, deferCommandExecution, deferDataGeneration, keepNulls
 ```
 The switch details are,
 
-deferCommandExecution (true/false) choose between syncronoys and asyncronous command execution
-deferDataGeneration (true/false) choose between syncronoys and asyncronous precomputed data generation
-keepNulls (true/false) if true then nulls are written in the curve replacing any data present for the instant
-upsertMode (Merge/Replace) for BidAsk merge adds the new products to the existing and overwrites existing with the new ones while replace replaces all the existing products with the new ones
+deferCommandExecution (true/false) choose between syncronoys and asyncronous command execution, default is false.
+deferDataGeneration (true/false) choose between syncronoys and asyncronous precomputed data generation, default is true.
+keepNulls (true/false) if true then nulls are written in the curve replacing any data present for the instant, default is false.
+upsertMode (Merge/Replace) for BidAsk merge adds the new products to the existing and overwrites existing with the new ones while replace replaces all the existing products with the new ones, default is merge.
 
 
 ### Write Data in an Auction Time Series
@@ -880,10 +880,10 @@ mkservice.upsertData(data, deferCommandExecution, deferDataGeneration, keepNulls
 ```
 The switch details are,
 
-deferCommandExecution (true/false) choose between syncronoys and asyncronous command execution
-deferDataGeneration (true/false) choose between syncronoys and asyncronous precomputed data generation
-keepNulls (true/false) if true then nulls are written in the curve replacing any data present for the instant
-upsertMode (Merge/Replace) for Auction merge and replace are equivalent
+deferCommandExecution (true/false) choose between syncronoys and asyncronous command execution, default is false.
+deferDataGeneration (true/false) choose between syncronoys and asyncronous precomputed data generation, default is true.
+keepNulls (true/false) if true then nulls are written in the curve replacing any data present for the instant, default is false.
+upsertMode (Merge/Replace) for Auction merge and replace are equivalent, default is to merge.
 
 
 ## Delete Data in Artesian
