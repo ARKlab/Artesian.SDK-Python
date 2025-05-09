@@ -120,4 +120,4 @@ class UpsertData:
     deferCommandExecution: bool = False
     deferDataGeneration: bool = True
     keepNulls: bool = False
-    upsertMode: Optional[UpsertMode] = None
+    upsertMode: UpsertMode = UpsertMode.Merge
