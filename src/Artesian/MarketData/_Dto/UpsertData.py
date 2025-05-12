@@ -106,7 +106,7 @@ class UpsertData:
         deferDataGeneration: flag to choose between synchronous
                              and asynchronous data generation (MUV)
         keepNulls: when false, nulls are discarded client side and not sent
-        upsertMode: Merge or Replace
+        upsertMode: Merge or Replace, when None/Merge then data is merged with existing data
     """
 
     ID: MarketDataIdentifier
