@@ -579,7 +579,7 @@ The switch details are,
 deferCommandExecution (true/false) choose between syncronoys and asyncronous command execution, default is false.
 deferDataGeneration (true/false) choose between syncronoys and asyncronous precomputed data generation, default is true.
 keepNulls (true/false) if true then nulls are written in the curve replacing any data present for the instant, default is false.
-upsertMode (Merge/Replace) for ActualTimeSeries the two modes are equivalent, default is merge.
+upsertMode (Merge/Replace) for ActualTimeSeries the two modes are equivalent. Leaving Null/None/Empty is equivalent to Merge.
 
 
 DerivedCfg can be of algorithm type: Coalesce, Sum, Muv.
@@ -689,7 +689,7 @@ The switch details are,
 deferCommandExecution (true/false) choose between syncronoys and asyncronous command execution, default is false.
 deferDataGeneration (true/false) choose between syncronoys and asyncronous precomputed data generation, default is true.
 keepNulls (true/false) if true then nulls are written in the curve replacing any data present for the instant, default is false.
-upsertMode (Merge/Replace) for VersionedTimeSeries the merge writes in to the curve replacing existing data for an existing instant, replace writes the payload removing any previous data for the version, default is merge.
+upsertMode (Merge/Replace) for VersionedTimeSeries the merge writes in to the curve replacing existing data for an existing instant, replace writes the payload removing any previous data for the version. Leaving Null/None/Empty is equivalent to Merge.
 
 | DATETIME | EXISTING | PAYLOAD | MERGE | REPALACE |
 |---|---|---|---|---|
@@ -767,7 +767,7 @@ The switch details are,
 deferCommandExecution (true/false) choose between syncronoys and asyncronous command execution, default is false.
 deferDataGeneration (true/false) choose between syncronoys and asyncronous precomputed data generation, default is true.
 keepNulls (true/false) if true then nulls are written in the curve replacing any data present for the instant, default is false.
-upsertMode (Merge/Replace) for MarketAssessment merge adds the new products to the existing and overwrites existing with the new ones while replace replaces all the existing products with the new ones, default is to merge.
+upsertMode (Merge/Replace) for MarketAssessment merge adds the new products to the existing and overwrites existing with the new ones while replace replaces all the existing products with the new ones. Leaving Null/None/Empty is equivalent to Merge.
 
 
 ### Write Data in a Bid Ask Time Series
@@ -825,7 +825,7 @@ The switch details are,
 deferCommandExecution (true/false) choose between syncronoys and asyncronous command execution, default is false.
 deferDataGeneration (true/false) choose between syncronoys and asyncronous precomputed data generation, default is true.
 keepNulls (true/false) if true then nulls are written in the curve replacing any data present for the instant, default is false.
-upsertMode (Merge/Replace) for BidAsk merge adds the new products to the existing and overwrites existing with the new ones while replace replaces all the existing products with the new ones, default is merge.
+upsertMode (Merge/Replace) for BidAsk merge adds the new products to the existing and overwrites existing with the new ones while replace replaces all the existing products with the new ones. Leaving Null/None/Empty is equivalent to Merge.
 
 
 ### Write Data in an Auction Time Series
@@ -883,7 +883,7 @@ The switch details are,
 deferCommandExecution (true/false) choose between syncronoys and asyncronous command execution, default is false.
 deferDataGeneration (true/false) choose between syncronoys and asyncronous precomputed data generation, default is true.
 keepNulls (true/false) if true then nulls are written in the curve replacing any data present for the instant, default is false.
-upsertMode (Merge/Replace) for Auction merge and replace are equivalent, default is to merge.
+upsertMode (Merge/Replace) for Auction merge and replace are equivalent. Leaving Null/None/Empty is equivalent to Merge.
 
 
 ## Delete Data in Artesian
