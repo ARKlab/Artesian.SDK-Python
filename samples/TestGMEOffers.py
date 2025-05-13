@@ -1,5 +1,11 @@
-from Artesian import *
-from Artesian.GMEPublicOffers import *
+from Artesian import ArtesianConfig
+from Artesian.GMEPublicOffers import (
+    GMEPublicOfferService,
+    Market,
+    Purpose,
+    Status,
+    Zone,
+)
 
 cfg = ArtesianConfig("https://arkive.artesian.cloud/tenantName/", "APIKey")
 
@@ -7,7 +13,7 @@ qs = GMEPublicOfferService(cfg)
 
 test1 = (
     qs.createQuery()
-    .forDate("2020-04-01")
+    .forDate("1999-01-01")
     .forMarket([Market.MGP])
     .forStatus(Status.ACC)
     .forPurpose(Purpose.BID)
@@ -17,3 +23,4 @@ test1 = (
 )
 
 res = test1
+print(res)
