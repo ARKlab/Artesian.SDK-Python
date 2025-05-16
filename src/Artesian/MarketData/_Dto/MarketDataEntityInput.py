@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import Dict, List, Optional
 
 from .DerivedCfg import DerivedCfg
+from .UnitOfMeasure import UnitOfMeasure
 from .._Enum.DerivedAlgorithm import DerivedAlgorithm
 from .._Enum import MarketDataType
 from .._Enum import AggregationRule
@@ -34,6 +35,7 @@ class MarketDataEntityInput:
     originalGranularity: Granularity
     type: MarketDataType
     originalTimezone: str
+    unitOfMeasure: UnitOfMeasure
     derivedCfg: Optional[DerivedCfg] = None
     aggregationRule: AggregationRule = AggregationRule.Undefined
     tags: Optional[Dict[str, List[str]]] = None

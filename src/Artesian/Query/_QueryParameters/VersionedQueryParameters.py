@@ -6,6 +6,7 @@ from .VersionSelectionConfig import VersionSelectionConfig
 from .ExtractionRangeType import ExtractionRangeType
 from .VersionSelectionType import VersionSelectionType
 from Artesian.MarketData import Granularity
+from Artesian.MarketData import AggregationRule
 
 
 class VersionedQueryParameters(_QueryParameters):
@@ -22,6 +23,8 @@ class VersionedQueryParameters(_QueryParameters):
         transformId: sets time range.
         versionSelectionConfig: Sets the version selectuon configuration.
         versionSelectionType: Sets the version selection time.
+        unitOfMeasure: The UnitOfMeasure to use for extraction.
+        aggregationRule: The AggregationRule to use for extraction.
     """
 
     def __init__(
@@ -36,9 +39,11 @@ class VersionedQueryParameters(_QueryParameters):
         versionSelectionConfig: VersionSelectionConfig = VersionSelectionConfig(),
         versionSelectionType: Optional[VersionSelectionType] = None,
         versionLimit: Optional[str] = None,
+        unitOfMeasure: Optional[str] = None,
+        aggregationRule: Optional[AggregationRule] = None
     ) -> None:
         """
-        Inits ActualQueryParameters
+        Inits VersionedQueryParameters
 
         Args:
 
@@ -51,6 +56,8 @@ class VersionedQueryParameters(_QueryParameters):
             transformId: An int that sets time range.
             versionSelectionConfig: Sets the version selectuon configuration.
             versionSelectionType: Sets the version selection time.
+            unitOfMeasure: The UnitOfMeasure to use for extraction.
+            aggregationRule: The AggregationRule to use for extraction.
         """
         _QueryParameters.__init__(
             self, ids, extractionRangeConfig, extractionRangeType, timezone, filterId
@@ -60,3 +67,5 @@ class VersionedQueryParameters(_QueryParameters):
         self.versionSelectionConfig = versionSelectionConfig or VersionSelectionConfig()
         self.versionSelectionType = versionSelectionType
         self.versionLimit = versionLimit
+        self.unitOfMeasure = unitOfMeasure
+        self.aggregationRule = aggregationRule

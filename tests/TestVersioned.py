@@ -2,6 +2,7 @@ from __future__ import annotations
 from Artesian import ArtesianConfig
 from Artesian.Query import QueryService
 from Artesian.MarketData import Granularity
+from Artesian.MarketData import AggregationRule
 from . import helpers
 import unittest
 
@@ -178,3 +179,37 @@ class TestVersioned(unittest.TestCase):
 
         query = requests.getQs()
         self.assertEqual(query["fillerK"], "Null")
+
+    @helpers.TrackRequests
+    def test_UnitOfMeasure(self, requests):
+        url = (
+            qs.createVersioned()
+            .forMarketData([100000001])
+            .inAbsoluteDateRange("2021-09-22", "2021-09-23")
+            .inTimeZone("CET")
+            .inGranularity(Granularity.Day)
+            .forMostRecent("2021-09-22T12:30:05", "2021-09-23T00:00:00")
+            .inUnitOfMeasure("kW")
+            .withFillNull()
+            .execute()
+        )
+
+        query = requests.getQs()
+        self.assertEqual(query["unitOfMeasure"], "kW")
+
+    @helpers.TrackRequests
+    def test_AggregationRule(self, requests):
+        url = (
+            qs.createVersioned()
+            .forMarketData([100000001])
+            .inAbsoluteDateRange("2021-09-22", "2021-09-23")
+            .inTimeZone("CET")
+            .inGranularity(Granularity.Day)
+            .forMostRecent("2021-09-22T12:30:05", "2021-09-23T00:00:00")
+            .withAggregationRule(AggregationRule.AverageAndReplicate)
+            .withFillNull()
+            .execute()
+        )
+
+        query = requests.getQs()
+        self.assertEqual(query["aggregationRule"], "AggregationRule.AverageAndReplicate")

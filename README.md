@@ -518,6 +518,18 @@ Extraction options for GME Public Offer queries.
  .withPagination(1,10)
 ```
 
+#### UnitOfMeasure (for Actual and Versioned Time Series)
+
+```Python
+ .inUnitOfMeasure(CommonUnitOfMeasure.kWh)
+```
+
+#### AggregationRule (for Actual and Versioned Time Series)
+
+```Python
+ .withAggregationRule(AggregationRule.SumAndDivide)
+```
+
 ## Write Data in Artesian
 
 Using the MarketDataService is possible to register MarketData and write curves into it using the UpsertData method.
@@ -944,6 +956,31 @@ deleteData = MarketData.DeleteData(
 
 mkdservice.deleteData(deleteData)
 ```
+
+### CheckConversion of UnitOfMeasures
+
+MarketData Service provides a method called CheckConversion, which allows you to check whether a list of input units of measure can be converted info a specified target unit of measure.
+
+```Python
+from Artesian import ArtesianConfig, MarketData
+from Artesian.MarketData import CommonUnitOfMeasure
+
+cfg = ArtesianConfg()
+
+mkservice = MarketData.MarketDataService(cfg)
+
+inputUnitOfMeasures = [CommonUnitOfMeasure.kW, CommonUnitOfMeasure.kWh, "EUR/MWh"]
+targetUnitOfMeasure = CommonUnitOfMeasure.MW
+
+checkConversionResult = mkservice.checkConversion(inputUnitOfMeasures , targetUnitOfMeasure)
+```
+
+Output:
+The method will return a CheckConversionResults object containing the results of the conversion check.
+
+TargetUnitOfMeasure = the unit of measure you're converting to.
+ConvertibleInputUnitOfMeasure = a list of input units that can be successfully converted to the target unit.
+NotConvertibleInputUnitOfMeasure = a list of input units that cannot be converted to the target unit.
 
 ## Jupyter Support
 

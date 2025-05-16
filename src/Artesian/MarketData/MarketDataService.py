@@ -11,6 +11,7 @@ from ._Dto.PagedResult import PagedResultCurveRangeEntity
 from ._Dto.ArtesianSearchResults import ArtesianSearchResults
 from ._Dto.MarketDataEntityInput import MarketDataEntityInput
 from ._Dto.MarketDataEntityOutput import MarketDataEntityOutput
+from ._Dto.CheckConversionResults import CheckConversionResults
 from ._Dto.UpsertData import UpsertData
 import asyncio
 
@@ -394,6 +395,61 @@ class MarketDataService:
 
         return _get_event_loop().run_until_complete(
             self.registerMarketDataAsync(entity)
+        )
+
+    async def checkConversionAsync(
+        self: MarketDataService,
+        inputUnitOfMeasures: List[str],
+        targetUnitOfMeasure: str
+    ) -> CheckConversionResults:
+        """
+        Check UnitOfMeasure conversion.
+
+        Args:
+            inputUnitOfMeasure: the list of the input UnitOfMeasure to be check for
+                                conversion
+            targetUnitOfMeasure: The target UnitOfMeasure
+
+        Returns:
+            CheckConversionResult Entity (Async).
+        """
+        url = "/uom/checkconversion"
+        params = {"inputUnitOfMeasures": inputUnitOfMeasures,
+                  "targetUnitOfMeasure": targetUnitOfMeasure}
+        with self.__client as c:
+            res = await asyncio.gather(
+                *[
+                    self.__executor.exec(
+                        c.exec,
+                        "GET",
+                        url,
+                        None,
+                        retcls=CheckConversionResults,
+                        params=params,
+                    )
+                ]
+            )
+            return cast(CheckConversionResults, res[0])
+
+    def checkConversion(
+        self: MarketDataService,
+        inputUnitOfMeasures: List[str],
+        targetUnitOfMeasure: str
+    ) -> CheckConversionResults:
+        """
+        Check UnitOfMeasure conversion.
+
+        Args:
+            inputUnitOfMeasure: the list of the input UnitOfMeasure to be check for
+                                conversion
+            targetUnitOfMeasure: The target UnitOfMeasure
+
+        Returns:
+            CheckConversionResult Entity.
+        """
+
+        return _get_event_loop().run_until_complete(
+            self.checkConversionAsync(inputUnitOfMeasures, targetUnitOfMeasure)
         )
 
     async def updateDerivedConfigurationAsync(
