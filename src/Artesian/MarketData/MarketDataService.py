@@ -406,7 +406,7 @@ class MarketDataService:
         Check UnitOfMeasure conversion.
 
         Args:
-            inputUnitOfMeasure: the list of the input UnitOfMeasure to be check for
+            inputUnitOfMeasures: the list of the input UnitOfMeasure to be check for
                                 conversion
             targetUnitOfMeasure: The target UnitOfMeasure
 
@@ -440,7 +440,7 @@ class MarketDataService:
         Check UnitOfMeasure conversion.
 
         Args:
-            inputUnitOfMeasure: the list of the input UnitOfMeasure to be check for
+            inputUnitOfMeasures: the list of the input UnitOfMeasure to be check for
                                 conversion
             targetUnitOfMeasure: The target UnitOfMeasure
 

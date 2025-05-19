@@ -1,4 +1,7 @@
+from dataclasses import dataclass
 
+
+@dataclass(frozen=True)
 class CommonUnitOfMeasure:
     kW = "kW"
     MW = "MW"

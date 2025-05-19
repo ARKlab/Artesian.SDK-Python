@@ -84,8 +84,8 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             "Type": "ActualTimeSerie",
             "OriginalTimezone": "CET",
             "UnitOfMeasure":
-            { 
-                "Value": CommonUnitOfMeasure.MW
+            {
+                "Value": "MW"
             },
             "Tags": [
                 {"Key": "PythonTag", "Value": ["PythonTagValue1", "PythonTagValue2"]}
