@@ -64,13 +64,13 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
         self.__artesianSearchResultsSerializedOutput = artesianJsonSerialize(
             self.__artesianSearchResults
         )
-        self.__checkConversionResults = CheckConversionResults(
+        self.__checkConversionResult = CheckConversionResult(
             targetUnitOfMeasure=CommonUnitOfMeasure.kW,
-            convertibleInputUnitOfMeasure=[ CommonUnitOfMeasure.MW, CommonUnitOfMeasure.MWh ],
-            notConvertibleInputUnitOfMeasure=[ CommonUnitOfMeasure.day ]
+            convertibleInputUnitsOfMeasure=[ CommonUnitOfMeasure.MW, CommonUnitOfMeasure.MWh ],
+            notConvertibleInputUnitsOfMeasure=[ CommonUnitOfMeasure.day ]
         )
-        self.__checkConversionResultsSerializedOutput = artesianJsonSerialize(
-            self.__checkConversionResults
+        self.__checkConversionResultSerializedOutput = artesianJsonSerialize(
+            self.__checkConversionResult
         )
 
         return super().setUp()
@@ -222,21 +222,21 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
     async def test_checkConversionAsync(self):
         with responses.RequestsMock() as rsps:
             params = {
-                "inputUnitOfMeasures": [CommonUnitOfMeasure.MW, CommonUnitOfMeasure.MWh, CommonUnitOfMeasure.day],
+                "inputUnitsOfMeasure": [CommonUnitOfMeasure.MW, CommonUnitOfMeasure.MWh, CommonUnitOfMeasure.day],
                 "targetUnitOfMeasure": CommonUnitOfMeasure.kW,
             }
             rsps.add(
                 "GET",
                 self.__baseurl + "/uom/checkconversion",
                 match=[responses.matchers.query_param_matcher(params)],
-                json=self.__checkConversionResultsSerializedOutput,
+                json=self.__checkConversionResultSerializedOutput,
                 status=200,
             )
             output = await self.__service.checkConversionAsync(
-                params["inputUnitOfMeasures"],
+                params["inputUnitsOfMeasure"],
                 params["targetUnitOfMeasure"],
             )
-            self.assertEqual(output, self.__checkConversionResults)
+            self.assertEqual(output, self.__checkConversionResult)
 
     async def test_searchFacetAsync(self):
         with responses.RequestsMock() as rsps:

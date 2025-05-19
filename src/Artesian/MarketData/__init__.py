@@ -22,7 +22,7 @@ from ._Dto import (
     ArtesianMetadataFacet,
     ArtesianMetadataFacetCount,
     DerivedCfg,
-    CheckConversionResults,
+    CheckConversionResult,
     UnitOfMeasure,
 )
 
@@ -47,7 +47,7 @@ __all__ = [
     ArtesianMetadataFacetCount.__name__,
     ArtesianMetadataFacetType.__name__,
     DerivedCfg.__name__,
-    CheckConversionResults.__name__,
+    CheckConversionResult.__name__,
     DerivedAlgorithm.__name__,
     CommonUnitOfMeasure.__name__,
     UnitOfMeasure.__name__,

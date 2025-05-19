@@ -1,6 +1,6 @@
 from .MarketDataEntityInput import MarketDataEntityInput
 from .MarketDataEntityOutput import MarketDataEntityOutput
-from .CheckConversionResults import CheckConversionResults
+from .CheckConversionResult import CheckConversionResult
 from .UnitOfMeasure import UnitOfMeasure
 from .CurveRangeEntity import CurveRangeEntity
 from .PagedResult import PagedResultCurveRangeEntity
@@ -33,6 +33,6 @@ __all__ = [
     ArtesianMetadataFacet.__name__,
     ArtesianMetadataFacetCount.__name__,
     DerivedCfg.__name__,
-    CheckConversionResults.__name__,
+    CheckConversionResult.__name__,
     UnitOfMeasure.__name__,
 ]  # type: ignore

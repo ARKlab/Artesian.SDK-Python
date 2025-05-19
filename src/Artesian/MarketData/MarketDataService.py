@@ -11,7 +11,7 @@ from ._Dto.PagedResult import PagedResultCurveRangeEntity
 from ._Dto.ArtesianSearchResults import ArtesianSearchResults
 from ._Dto.MarketDataEntityInput import MarketDataEntityInput
 from ._Dto.MarketDataEntityOutput import MarketDataEntityOutput
-from ._Dto.CheckConversionResults import CheckConversionResults
+from ._Dto.CheckConversionResult import CheckConversionResult
 from ._Dto.UpsertData import UpsertData
 import asyncio
 
@@ -399,14 +399,14 @@ class MarketDataService:
 
     async def checkConversionAsync(
         self: MarketDataService,
-        inputUnitOfMeasures: List[str],
+        inputUnitsOfMeasure: List[str],
         targetUnitOfMeasure: str
-    ) -> CheckConversionResults:
+    ) -> CheckConversionResult:
         """
         Check UnitOfMeasure conversion.
 
         Args:
-            inputUnitOfMeasures: the list of the input UnitOfMeasure to be check for
+            inputUnitsOfMeasure: the list of the input UnitOfMeasure to be check for
                                 conversion
             targetUnitOfMeasure: The target UnitOfMeasure
 
@@ -414,7 +414,7 @@ class MarketDataService:
             CheckConversionResult Entity (Async).
         """
         url = "/uom/checkconversion"
-        params = {"inputUnitOfMeasures": inputUnitOfMeasures,
+        params = {"inputUnitsOfMeasure": inputUnitsOfMeasure,
                   "targetUnitOfMeasure": targetUnitOfMeasure}
         with self.__client as c:
             res = await asyncio.gather(
@@ -424,23 +424,23 @@ class MarketDataService:
                         "GET",
                         url,
                         None,
-                        retcls=CheckConversionResults,
+                        retcls=CheckConversionResult,
                         params=params,
                     )
                 ]
             )
-            return cast(CheckConversionResults, res[0])
+            return cast(CheckConversionResult, res[0])
 
     def checkConversion(
         self: MarketDataService,
-        inputUnitOfMeasures: List[str],
+        inputUnitsOfMeasure: List[str],
         targetUnitOfMeasure: str
-    ) -> CheckConversionResults:
+    ) -> CheckConversionResult:
         """
         Check UnitOfMeasure conversion.
 
         Args:
-            inputUnitOfMeasures: the list of the input UnitOfMeasure to be check for
+            inputUnitsOfMeasure: the list of the input UnitOfMeasure to be check for
                                 conversion
             targetUnitOfMeasure: The target UnitOfMeasure
 
@@ -449,7 +449,7 @@ class MarketDataService:
         """
 
         return _get_event_loop().run_until_complete(
-            self.checkConversionAsync(inputUnitOfMeasures, targetUnitOfMeasure)
+            self.checkConversionAsync(inputUnitsOfMeasure, targetUnitOfMeasure)
         )
 
     async def updateDerivedConfigurationAsync(

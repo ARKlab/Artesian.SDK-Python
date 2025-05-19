@@ -969,18 +969,18 @@ cfg = ArtesianConfg()
 
 mkservice = MarketData.MarketDataService(cfg)
 
-inputUnitOfMeasures = [CommonUnitOfMeasure.kW, CommonUnitOfMeasure.kWh, "EUR/MWh"]
+inputUnitsOfMeasure = [CommonUnitOfMeasure.kW, CommonUnitOfMeasure.kWh, "EUR/MWh"]
 targetUnitOfMeasure = CommonUnitOfMeasure.MW
 
-checkConversionResult = mkservice.checkConversion(inputUnitOfMeasures , targetUnitOfMeasure)
+checkConversionResult = mkservice.checkConversion(inputUnitsOfMeasure , targetUnitOfMeasure)
 ```
 
 Output:
-The method will return a CheckConversionResults object containing the results of the conversion check.
+The method will return a CheckConversionResult object containing the results of the conversion check.
 
 TargetUnitOfMeasure = the unit of measure you're converting to.
-ConvertibleInputUnitOfMeasure = a list of input units that can be successfully converted to the target unit.
-NotConvertibleInputUnitOfMeasure = a list of input units that cannot be converted to the target unit.
+ConvertibleInputUnitsOfMeasure = a list of input units that can be successfully converted to the target unit.
+NotConvertibleInputUnitsOfMeasure = a list of input units that cannot be converted to the target unit.
 
 ## Jupyter Support
 

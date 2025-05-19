@@ -35,7 +35,7 @@ class MarketDataEntityInput:
     originalGranularity: Granularity
     type: MarketDataType
     originalTimezone: str
-    unitOfMeasure: UnitOfMeasure
+    unitOfMeasure: Optional[UnitOfMeasure] = None
     derivedCfg: Optional[DerivedCfg] = None
     aggregationRule: AggregationRule = AggregationRule.Undefined
     tags: Optional[Dict[str, List[str]]] = None
