@@ -442,6 +442,154 @@ To construct a GME Public Offer Extraction the following must be provided.
      
 </table>
 
+### Unit of Measure Conversion Functionality
+
+### Overview
+
+The unit of measure conversion functionality allows users to request a conversion of units for Market Data that was registered using a different unit. This feature is supported only for Actual and Versioned Time Series.
+Supported units are defined in the CommonUnitOfMeasure object and conform to ISO/IEC 80000 (i.e., `kW`, `MW`, `kWh`, `MWh`, `m`, `km`, `day`, `min`, `h`, `s`, `mo`, `yr`).
+
+Note: Duration-based units are interpreted with the following fixed assumptions:
+`1 day = 24 hours`
+`1 mo = 30 days`
+`1 yr = 365 days`
+
+Additional supported units include **currency codes** in 3-letter format as per ISO 4217:2015 (e.g., `EUR`, `USD`, `JPY`). These are not part of CommonUnitOfMeasure and must be specified as regular strings.
+Units of measure can also be **composite**, using the {a}/{b} syntax, where both {a} and {b} are either units from CommonUnitOfMeasure or ISO 4217 currency codes.
+
+### Conversion Logic
+
+Unit conversion is based on the assumption that each unit of measure can be decomposed into a **"BaseDimension"**, which represents a polynomial of base SI units (`m`, `s`, `kg`, etc.) and currencies (`EUR`, `USD`, etc.).
+A unit of measure is represented as a value in BaseDimension UnitOdMeasure.
+Example:
+10 `Wh` = 10 `kg·m²·s⁻³`
+Conversion is allowed when the BaseDimensions **match exactly**, i.e., the same set of base units raised to the same exponents.
+In Artesian, units that differ **only** in the **time dimension** are also potentially convertible, as the time dimension can be inferred from the data’s time interval.
+
+### Example: Power to Energy Conversion
+
+Converting `W` to `Wh`:
+• `W` → BaseDimension: `k·m²·s⁻³`
+• `Wh` → BaseDimension: `kg·m²·s⁻²`
+• `1 h = 3600 s`
+**Conversion Steps:**
+10 W = 10 kg·m²/s³
+1 h = 3600 s
+10 kg·m²/s³ × 3600 s = 36000 kg·m²/s² = 10 Wh
+
+### MarketData Registration with UnitOfMeasure
+
+The UnitOfMeasure is defined during registration:
+
+```Python
+mkd = MarketData.MarketDataEntityInput(
+      providerName = "TestProviderName",
+      marketDataName = "TestMarketDataName",
+      originalGranularity=Granularity.Day,
+      type=MarketData.MarketDataType.ActualTimeSerie,
+      originalTimezone="CET",
+      aggregationRule=AggregationRule.SumAndDivide,
+    UnitOfMeasure = CommonUnitOfMeasure.kW
+  )
+
+registered = mkservice.readMarketDataRegistryByName(mkdid.provider, mkdid.name)
+if (registered is None):
+  registered = mkservice.registerMarketData(mkd)
+```
+
+### UnitOfMeasure Conversion and Aggregation Rule Override
+
+In the QueryService, there are two supported methods related to unit of measure handling during extraction:
+
+1. UnitOfMeasure Conversion
+2. Aggregation Rule Override
+
+### UnitOfMeasure Conversion
+
+To convert a UnitOfMeasure during data extraction, use the `.inUnitOfMeasure()` method. This function converts the data from the unit defined at MarketData registration to the target unit you specify in the query.
+
+```Python
+qs = QueryService(cfg)
+data = qs.createActual() \
+    .forMarketData([100011484]) \
+    .inAbsoluteDateRange("2024-01-01","2024-01-02") \
+    .inTimeZone("UTC") \
+    .inGranularity(Granularity.Day) \
+    .inUnitOfMeasure(CommonUnitOfMeasure.MW) \
+    .execute()
+```
+
+By default, the aggregation rule used during extraction is the one defined at registration. However, you can override it if needed. The conversion is always applied before aggregation.
+
+### Aggregation Rule Override
+
+AggregationRule can be overrided using the `.withAggregationRule()` method in QueryService.
+
+```Python
+qs = QueryService(cfg)
+data = qs.createActual() \
+    .forMarketData([100011484]) \
+    .inAbsoluteDateRange("2024-01-01","2024-01-02") \
+    .inTimeZone("UTC") \
+    .inGranularity(Granularity.Day) \
+    .withAggregationRule(AggregationRule.AverageAndReplicate) \
+    .execute()
+```
+
+Sometimes, especially when converting from a **consumption unit** (e.g., `MWh`) to a **power unit** (e.g., `MW`), the registered aggregation rule (e.g., `SumAndDivide`) may not make sense for the new unit.
+
+If you **don’t override the aggregation rule**, the conversion may produce **invalid or misleading results**.
+
+### Example: Convert power (`MW`) to energy (`MWh`):
+
+```Python
+data = qs.createActual() \
+    .forMarketData([100011484]) \
+    .inAbsoluteDateRange("2024-01-01","2024-01-02") \
+    .inTimeZone("UTC") \
+    .inGranularity(Granularity.Day) \
+    .inUnitOfMeasure(CommonUnitOfMeasure.MWh) \
+    .withAggregationRule(AggregationRule.AverageAndReplicate) \
+    .execute()
+```
+
+### Composite Unit Example: `MWh/day`
+
+```Python
+data = qs.createActual() \
+    .forMarketData([100011484]) \
+    .inAbsoluteDateRange("2024-01-01","2024-01-02") \
+    .inTimeZone("UTC") \
+    .inGranularity(Granularity.Day) \
+    .inUnitOfMeasure(CommonUnitOfMeasure.MWh / CommonUnitOfMeasure.day) \
+    .withAggregationRule(AggregationRule.AverageAndReplicate) \
+    .execute()
+```
+
+### CheckConversion: Validate Unit Compatibility
+
+Use the `CheckConversion` method to verify whether a list of input units can be converted into a specifified target unit:
+
+```Python
+from Artesian import ArtesianConfig, MarketData
+from Artesian.MarketData import CommonUnitOfMeasure
+
+cfg = ArtesianConfg()
+
+mkservice = MarketData.MarketDataService(cfg)
+
+inputUnitsOfMeasure = [CommonUnitOfMeasure.kW, CommonUnitOfMeasure.kWh, "EUR/MWh"]
+targetUnitOfMeasure = CommonUnitOfMeasure.MW
+
+checkConversionResult = mkservice.checkConversion(inputUnitsOfMeasure , targetUnitOfMeasure)
+```
+
+**Returned Object: CheckConversionResult**
+
+1. TargetUnitOfMeasure: "`kW`"
+2. ConvertibleInputUnitsOfMeasure: [ "`MW`", "`kW/s`" ]
+3. NotConvertibleInputUnitsOfMeasure: [ "`s`" ]
+
 ### Extraction Options
 
 Extraction options for GME Public Offer queries.
@@ -956,31 +1104,6 @@ deleteData = MarketData.DeleteData(
 
 mkdservice.deleteData(deleteData)
 ```
-
-### CheckConversion of UnitOfMeasures
-
-MarketData Service provides a method called CheckConversion, which allows you to check whether a list of input units of measure can be converted info a specified target unit of measure.
-
-```Python
-from Artesian import ArtesianConfig, MarketData
-from Artesian.MarketData import CommonUnitOfMeasure
-
-cfg = ArtesianConfg()
-
-mkservice = MarketData.MarketDataService(cfg)
-
-inputUnitsOfMeasure = [CommonUnitOfMeasure.kW, CommonUnitOfMeasure.kWh, "EUR/MWh"]
-targetUnitOfMeasure = CommonUnitOfMeasure.MW
-
-checkConversionResult = mkservice.checkConversion(inputUnitsOfMeasure , targetUnitOfMeasure)
-```
-
-Output:
-The method will return a CheckConversionResult object containing the results of the conversion check.
-
-TargetUnitOfMeasure = the unit of measure you're converting to.
-ConvertibleInputUnitsOfMeasure = a list of input units that can be successfully converted to the target unit.
-NotConvertibleInputUnitsOfMeasure = a list of input units that cannot be converted to the target unit.
 
 ## Jupyter Support
 
