@@ -25,7 +25,8 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             type=MarketDataType.ActualTimeSerie,
             originalTimezone="CET",
             tags={"PythonTag": ["PythonTagValue1", "PythonTagValue2"]},
-            derivedCfg=derivedCfg
+            derivedCfg=derivedCfg,
+            unitOfMeasure=UnitOfMeasure(value=CommonUnitOfMeasure.MW)
         )
         self.__serializedOutput = artesianJsonSerialize(self.__sampleOutput)
         self.__sampleInput = MarketDataEntityInput(
@@ -35,7 +36,8 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             type=MarketDataType.ActualTimeSerie,
             originalTimezone="CET",
             tags={"PythonTag": ["PythonTagValue1", "PythonTagValue2"]},
-            derivedCfg=derivedCfg
+            derivedCfg=derivedCfg,
+            unitOfMeasure=UnitOfMeasure(value=CommonUnitOfMeasure.MW)
         )
         self.maxDiff = None
         self.__baseurl = "https://baseurl.com/v2.1"
@@ -62,6 +64,14 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
         self.__artesianSearchResultsSerializedOutput = artesianJsonSerialize(
             self.__artesianSearchResults
         )
+        self.__checkConversionResult = CheckConversionResult(
+            targetUnitOfMeasure=CommonUnitOfMeasure.kW,
+            convertibleInputUnitsOfMeasure=[ CommonUnitOfMeasure.MW, CommonUnitOfMeasure.MWh ],
+            notConvertibleInputUnitsOfMeasure=[ CommonUnitOfMeasure.day ]
+        )
+        self.__checkConversionResultSerializedOutput = artesianJsonSerialize(
+            self.__checkConversionResult
+        )
 
         return super().setUp()
 
@@ -73,6 +83,10 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             "OriginalGranularity": "Day",
             "Type": "ActualTimeSerie",
             "OriginalTimezone": "CET",
+            "UnitOfMeasure":
+            {
+                "Value": "MW"
+            },
             "Tags": [
                 {"Key": "PythonTag", "Value": ["PythonTagValue1", "PythonTagValue2"]}
             ],
@@ -204,6 +218,25 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
                 params["versionTo"],
             )
             self.assertEqual(output, self.__curveRangeOutput)
+
+    async def test_checkConversionAsync(self):
+        with responses.RequestsMock() as rsps:
+            params = {
+                "inputUnitsOfMeasure": [CommonUnitOfMeasure.MW, CommonUnitOfMeasure.MWh, CommonUnitOfMeasure.day],
+                "targetUnitOfMeasure": CommonUnitOfMeasure.kW,
+            }
+            rsps.add(
+                "GET",
+                self.__baseurl + "/uom/checkconversion",
+                match=[responses.matchers.query_param_matcher(params)],
+                json=self.__checkConversionResultSerializedOutput,
+                status=200,
+            )
+            output = await self.__service.checkConversionAsync(
+                params["inputUnitsOfMeasure"],
+                params["targetUnitOfMeasure"],
+            )
+            self.assertEqual(output, self.__checkConversionResult)
 
     async def test_searchFacetAsync(self):
         with responses.RequestsMock() as rsps:

@@ -1,5 +1,7 @@
 from .MarketDataEntityInput import MarketDataEntityInput
 from .MarketDataEntityOutput import MarketDataEntityOutput
+from .CheckConversionResult import CheckConversionResult
+from .UnitOfMeasure import UnitOfMeasure
 from .CurveRangeEntity import CurveRangeEntity
 from .PagedResult import PagedResultCurveRangeEntity
 from .ArtesianSearchResults import ArtesianSearchResults
@@ -31,4 +33,6 @@ __all__ = [
     ArtesianMetadataFacet.__name__,
     ArtesianMetadataFacetCount.__name__,
     DerivedCfg.__name__,
+    CheckConversionResult.__name__,
+    UnitOfMeasure.__name__,
 ]  # type: ignore

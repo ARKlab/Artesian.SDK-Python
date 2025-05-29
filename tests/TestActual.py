@@ -1,6 +1,8 @@
 from Artesian import ArtesianConfig
 from Artesian.MarketData import Granularity
+from Artesian.MarketData import CommonUnitOfMeasure
 from Artesian.Query import QueryService
+from Artesian.MarketData import AggregationRule
 from . import helpers
 import unittest
 
@@ -88,3 +90,35 @@ class TestActual(unittest.TestCase):
         query = requests.getQs()
         self.assertEqual(query["fillerK"], "CustomValue")
         self.assertEqual(query["fillerDV"], "10")
+
+    @helpers.TrackRequests
+    def test_UnitOfMeasure(self, requests):
+        url = (
+            qs.createActual()
+            .forFilterId(1003)
+            .inAbsoluteDateRange("2018-01-01", "2018-01-02")
+            .inTimeZone("UTC")
+            .inGranularity(Granularity.Hour)
+            .inUnitOfMeasure(CommonUnitOfMeasure.kW)
+            .withFillCustomValue(10)
+            .execute()
+        )
+
+        query = requests.getQs()
+        self.assertEqual(query["unitOfMeasure"], CommonUnitOfMeasure.kW)
+
+    @helpers.TrackRequests
+    def test_AggregationRule(self, requests):
+        url = (
+            qs.createActual()
+            .forFilterId(1003)
+            .inAbsoluteDateRange("2018-01-01", "2018-01-02")
+            .inTimeZone("UTC")
+            .inGranularity(Granularity.Hour)
+            .withAggregationRule(AggregationRule.AverageAndReplicate)
+            .withFillCustomValue(10)
+            .execute()
+        )
+
+        query = requests.getQs()
+        self.assertEqual(query["aggregationRule"], "AggregationRule.AverageAndReplicate")

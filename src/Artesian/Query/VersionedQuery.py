@@ -16,6 +16,7 @@ from ._QueryParameters.VersionedQueryParameters import VersionedQueryParameters
 from ._QueryParameters.VersionSelectionType import VersionSelectionType
 from .RelativeInterval import RelativeInterval
 from Artesian.MarketData import Granularity
+from Artesian.MarketData import AggregationRule
 
 
 class VersionedQuery(_Query):
@@ -341,6 +342,34 @@ class VersionedQuery(_Query):
         self._queryParameters.fill = _FillCustomTimeserieStrategy(val)
         return self
 
+    def inUnitOfMeasure(self: VersionedQuery, unitOfMeasure: str) -> VersionedQuery:
+        """
+        Gets the Actual Query in a specific unit of measure to be queried.
+
+        Args:
+            unitOfMeasure: str ex.: "MW", "MWh", "kW/day", "km"
+
+        Returns:
+            VersionedQuery.
+        """
+        self._queryParameters.unitOfMeasure = unitOfMeasure
+        return self
+
+    def withAggregationRule(self: VersionedQuery,
+                            aggregationRule: AggregationRule) -> VersionedQuery:
+        """
+        Optional AggregationRule for the extraction.
+
+        Args:
+            aggregationRule: enum AggregationRule ex.: "SumAndDivide",
+                                                       "AverageAndReplicate"
+
+        Returns:
+            VersionedQuery.
+        """
+        self._queryParameters.aggregationRule = aggregationRule
+        return self
+
     def execute(self: VersionedQuery) -> list:
         """
         Execute the Query.
@@ -385,6 +414,10 @@ class VersionedQuery(_Query):
                 url = url + "&" + qp.fill.getUrlParams()
             if not (qp.versionLimit is None):
                 url = url + "&versionLimit=" + qp.versionLimit
+            if not (qp.unitOfMeasure is None):
+                url = url + "&unitOfMeasure=" + qp.unitOfMeasure
+            if not (qp.aggregationRule is None):
+                url = url + "&aggregationRule=" + str(qp.aggregationRule)
             urls.append(url)
         return urls
 
