@@ -13,6 +13,7 @@ from ._Query import _Query
 from .RelativeInterval import RelativeInterval
 from ._QueryParameters.ActualQueryParameters import ActualQueryParameters
 from Artesian.MarketData import Granularity
+from Artesian.MarketData import AggregationRule
 from urllib import parse
 from typing import List, Optional
 
@@ -221,6 +222,34 @@ class ActualQuery(_Query):
         self._queryParameters.fill = _FillCustomTimeserieStrategy(value)
         return self
 
+    def inUnitOfMeasure(self: ActualQuery, unitOfMeasure: str) -> ActualQuery:
+        """
+        Gets the Actual Query in a specific unit of measure to be queried.
+
+        Args:
+            unitOfMeasure: str ex.: "MW", "MWh", "kW/day", "km"
+
+        Returns:
+            ActualQuery.
+        """
+        self._queryParameters.unitOfMeasure = unitOfMeasure
+        return self
+
+    def withAggregationRule(self: ActualQuery,
+                            aggregationRule: AggregationRule) -> ActualQuery:
+        """
+        Optional AggregationRule for the extraction.
+
+        Args:
+            aggregationRule: enum AggregationRule ex.: "SumAndDivide",
+                                                       "AverageAndReplicate"
+
+        Returns:
+            ActualQuery.
+        """
+        self._queryParameters.aggregationRule = aggregationRule
+        return self
+
     def execute(self: ActualQuery) -> list:
         """
         Execute the Query.
@@ -260,6 +289,10 @@ class ActualQuery(_Query):
                 url = url + "&tz=" + qp.timezone
             if not (qp.transformId is None):
                 url = url + "&tr=" + str(qp.transformId)
+            if not (qp.unitOfMeasure is None):
+                url = url + "&unitOfMeasure=" + qp.unitOfMeasure
+            if not (qp.aggregationRule is None):
+                url = url + "&aggregationRule=" + str(qp.aggregationRule)
             if not (qp.fill is None):
                 url = url + "&" + qp.fill.getUrlParams()
             urls.append(url)

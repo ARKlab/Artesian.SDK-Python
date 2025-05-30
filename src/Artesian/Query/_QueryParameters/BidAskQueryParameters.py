@@ -28,7 +28,7 @@ class BidAskQueryParameters(_QueryParameters):
         products: Optional[List[str]] = None,
     ) -> None:
         """
-        Inits ActualQueryParameters
+        Inits BidAskQueryParameters
 
         Args:
 

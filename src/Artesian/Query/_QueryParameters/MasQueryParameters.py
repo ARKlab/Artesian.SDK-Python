@@ -28,7 +28,7 @@ class MasQueryParameters(_QueryParameters):
         products: Optional[List[str]] = None,
     ) -> None:
         """
-        Inits ActualQueryParameters
+        Inits MasQueryParameters
 
         Args:
 

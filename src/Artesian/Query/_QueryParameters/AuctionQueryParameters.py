@@ -26,7 +26,7 @@ class AuctionQueryParameters(_QueryParameters):
         filterId: Optional[int] = None,
     ) -> None:
         """
-        Inits ActualQueryParameters
+        Inits AuctionQueryParameters
 
         Args:
 
