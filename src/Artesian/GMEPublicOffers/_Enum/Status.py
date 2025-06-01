@@ -10,3 +10,4 @@ class Status(Enum):
     SUB = 6
     COM = 7
     PCOM = 8
+    PREJ = 9
