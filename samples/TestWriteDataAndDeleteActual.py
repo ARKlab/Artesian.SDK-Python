@@ -3,31 +3,35 @@ import Artesian
 from Artesian import Query
 from Artesian.Granularity import Granularity
 from Artesian.MarketData._Enum.MarketDataType import MarketDataType
+from Artesian.MarketData._Enum.UpsertMode import UpsertMode
 
 cfg = Artesian.ArtesianConfig("https://arkive.artesian.cloud/tenantName/", "APIKey")
 mkdservice = Artesian.MarketData.MarketDataService(cfg)
 
-actual = Artesian.MarketData.MarketDataEntityInput(
+mktId = Artesian.MarketData.MarketDataIdentifier(
     "PythonSDK",
-    "TestActualWriteAndDelete",
+    "TestActualWriteAndDelete"
+)
+
+mktDataEntity = Artesian.MarketData.MarketDataEntityInput(
+    mktId.provider,
+    mktId.name,
     Granularity.Hour,
     MarketDataType.ActualTimeSerie,
     "CET",
     tags={"TestSDKPython": ["PythonValue2"]},
 )
 
-registered = mkdservice.readMarketDataRegistryByName(
-    actual.providerName, actual.marketDataName
-)
+registered = mkdservice.readMarketDataRegistryByName(mktId.provider, mktId.name)
+
 if registered is None:
-    registered = mkdservice.registerMarketData(actual)
+    registered = mkdservice.registerMarketData(mktDataEntity)
 
 data = Artesian.MarketData.UpsertData(
-    Artesian.MarketData.MarketDataIdentifier(
-        actual.providerName, actual.marketDataName
-    ),
+    mktId,
     "UTC",
     rows={datetime(2020, 1, 1, h): 42.0 + h / 24.0 for h in range(0, 23)},
+    upsertMode=UpsertMode.Merge
 )
 
 mkdservice.upsertData(data)
@@ -47,9 +51,7 @@ print(res)
 
 # Delete data between 2020-01-01 06:00 and 2020-01-01 18:00
 deleteData = Artesian.MarketData.DeleteData(
-    ID=Artesian.MarketData.MarketDataIdentifier(
-        registered.providerName, registered.marketDataName
-    ),
+    mktId,
     timezone="CET",
     rangeStart=datetime(2020, 1, 1, 6),
     rangeEnd=datetime(2020, 1, 1, 18),
@@ -71,9 +73,7 @@ print(res)
 
 # Delete data between 2020-01-01 06:00 and 2020-01-01 18:00 without Timezone
 deleteData = Artesian.MarketData.DeleteData(
-    ID=Artesian.MarketData.MarketDataIdentifier(
-        registered.providerName, registered.marketDataName
-    ),
+    mktId,
     rangeStart=datetime(2020, 1, 1, 6),
     rangeEnd=datetime(2020, 1, 1, 18),
 )

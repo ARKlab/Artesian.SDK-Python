@@ -2,7 +2,9 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Dict, List, Optional
 from dateutil import tz
+
 from Artesian.MarketData._Dto import MarketDataIdentifier
+from .._Enum import UpsertMode
 
 
 @dataclass
@@ -104,6 +106,7 @@ class UpsertData:
         deferDataGeneration: flag to choose between synchronous
                              and asynchronous data generation (MUV)
         keepNulls: when false, nulls are discarded client side and not sent
+        upsertMode: Merge or Replace, when None/Merge then data is merged with existing data
     """
 
     ID: MarketDataIdentifier
@@ -117,3 +120,4 @@ class UpsertData:
     deferCommandExecution: bool = False
     deferDataGeneration: bool = True
     keepNulls: bool = False
+    upsertMode: Optional[UpsertMode] = None

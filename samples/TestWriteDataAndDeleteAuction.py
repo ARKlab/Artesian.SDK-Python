@@ -4,13 +4,19 @@ from Artesian import Query
 from dateutil import tz
 from Artesian import MarketData
 from Artesian.Granularity import Granularity
+from Artesian.MarketData._Enum.UpsertMode import UpsertMode
 
 cfg = Artesian.ArtesianConfig("https://arkive.artesian.cloud/tenantName/", "APIKey")
 mkdservice = Artesian.MarketData.MarketDataService(cfg)
 
-auction = Artesian.MarketData.MarketDataEntityInput(
+mktId = Artesian.MarketData.MarketDataIdentifier(
     "PythonSDK",
-    "TestAuctionWriteAndDelete",
+    "TestAuctionWriteAndDelete"
+)
+
+mktDataEntity = Artesian.MarketData.MarketDataEntityInput(
+    mktId.provider,
+    mktId.name,
     Granularity.Hour,
     MarketData.MarketDataType.Auction,
     "CET",
@@ -18,10 +24,10 @@ auction = Artesian.MarketData.MarketDataEntityInput(
 )
 
 registered = mkdservice.readMarketDataRegistryByName(
-    auction.providerName, auction.marketDataName
+    mktId.provider, mktId.name
 )
 if registered is None:
-    registered = mkdservice.registerMarketData(auction)
+    registered = mkdservice.registerMarketData(mktDataEntity)
 
 auctionRowData = {
     datetime(2020, 1, 1, h): MarketData.AuctionBids(
@@ -39,12 +45,11 @@ auctionRowData = {
 }
 
 auctionRows = MarketData.UpsertData(
-    Artesian.MarketData.MarketDataIdentifier(
-        auction.providerName, auction.marketDataName
-    ),
+    mktId,
     "UTC",
     auctionRows=auctionRowData,
     downloadedAt=datetime(2020, 1, 3).replace(tzinfo=tz.UTC),
+    upsertMode=UpsertMode.Merge
 )
 
 mkdservice.upsertData(auctionRows)
@@ -63,9 +68,7 @@ print(res)
 
 # Delete data between 2020-01-01 06:00 and 2020-01-01 18:00
 deleteData = Artesian.MarketData.DeleteData(
-    ID=Artesian.MarketData.MarketDataIdentifier(
-        registered.providerName, registered.marketDataName
-    ),
+    ID=mktId,
     timezone="CET",
     rangeStart=datetime(2020, 1, 1, 6),
     rangeEnd=datetime(2020, 1, 1, 18),
@@ -85,9 +88,7 @@ print(res)
 
 # Delete data between 2020-01-01 06:00 and 2020-01-01 18:00 without Timezone
 deleteData = Artesian.MarketData.DeleteData(
-    ID=Artesian.MarketData.MarketDataIdentifier(
-        registered.providerName, registered.marketDataName
-    ),
+    ID=mktId,
     rangeStart=datetime(2020, 1, 1, 6),
     rangeEnd=datetime(2020, 1, 1, 18),
 )
