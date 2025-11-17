@@ -1,5 +1,5 @@
 from __future__ import annotations
-import cgi
+from email.message import Message
 from typing import Any, Optional
 import requests
 import platform
@@ -68,7 +68,10 @@ class _Client:
                 "Unexpected error while calling {}|{}".format(method, url)
             ) from e
 
-        mimetype, _ = cgi.parse_header(res.headers.get("Content-Type", ""))
+        msg = Message()
+        msg['content-type'] = res.headers.get("Content-Type", "")
+        mimetype = msg.get_content_type()  # es. "text/html"
+        _ = msg.get_params()
 
         if res.status_code >= 200 and res.status_code < 300:
             if mimetype == "application/json":
