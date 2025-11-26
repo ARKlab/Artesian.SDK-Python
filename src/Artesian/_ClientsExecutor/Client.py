@@ -68,6 +68,7 @@ class _Client:
                 "Unexpected error while calling {}|{}".format(method, url)
             ) from e
 
+        # Replaced the deprecated 'cgi' module (removed in Python 3.13) with 'email.message'.
         msg = Message()
         msg['content-type'] = res.headers.get("Content-Type", "")
         mimetype = msg.get_content_type()  # es. "text/html"
