@@ -411,53 +411,23 @@ res = mds.searchFacet(page, pageSize, searchText, filters, sorts, doNotLoadAddit
 
 Artesian support Query over GME Public Offers which comes in a custom and dedicated format.
 
-Note (performance):
-GME Public Offer data is partitioned by date, offerType, status, and market. Requesting very narrow subsets (for example a single status or offerType in several separate requests) does not improve performance and can cause the same file to be fetched multiple times.
-For this reason, the examples below:
-	•	Use a large page size so that all data for a given (date, market, filters) is typically returned in a single page.
-	•	Loop over markets explicitly to cover all required markets without redundant fetches.
-
 ### Extract GME Public Offer
 
 ```Python
 from Artesian.GMEPublicOffers import GMEPublicOfferService, Market, Purpose, Status, Zone, Scope, UnitType, GenerationType, BAType
 
-/* your Artesian configuration */;
+qs = GMEPublicOfferService(cfg)
 
-var _cfg = new ArtesianServiceConfig(
-new Uri("https://arkive.artesian.cloud/{TENANT_NAME}/"),
-your_API_Key);
-
-qs = GMEPublicOfferService(_cfg)
-
-# Large page size: goal is to get all data for the given filters in one page
-PAGE_SIZE = 250000
-
-# List of markets to cover. Extend as needed for your use case.
-markets = [
-    Market.MGP,
-    # Market.MSD,
-    # Market.MIT,
-]
-
-all_data = []
-
-for market in markets:
-
-data = (
-    qs.createQuery() \
+data = qs.createQuery() \
     .forDate("2020-04-01") \
     .forMarket([Market.MGP]) \
     .forStatus(Status.ACC) \
     .forPurpose(Purpose.BID) \
     .forZone([Zone.NORD]) \
-    .withPagination(1,PAGE_SIZE) \
+    .withPagination(1,100) \
     .execute()
-    )
-    print(f"Fetched {len(data)} offers for market {market}")
-    all_data.extend(data)
 
-print(f"Total offers fetched: {len(all_data)}")
+print(data)
 ```
 
 To construct a GME Public Offer Extraction the following must be provided.
