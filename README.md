@@ -412,7 +412,7 @@ res = mds.searchFacet(page, pageSize, searchText, filters, sorts, doNotLoadAddit
 Artesian support Query over GME Public Offers which comes in a custom and dedicated format.
 
 Note (performance):
-GME Public Offer data is partitioned by date, offerType, status, and market. Requesting very narrow subsets (for example a single status or offerType in several separate requests) does not improve performance and can cause the same dataset to be fetched multiple times.
+GME Public Offer data is partitioned by date, offerType, status, and market. Requesting very narrow subsets (for example a single status or offerType in several separate requests) does not improve performance and can cause the same file to be fetched multiple times.
 For this reason, the examples below:
 	•	Use a large page size so that all data for a given (date, market, filters) is typically returned in a single page.
 	•	Loop over markets explicitly to cover all required markets without redundant fetches.
