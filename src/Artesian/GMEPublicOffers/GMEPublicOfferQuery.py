@@ -384,6 +384,8 @@ class GMEPublicOfferQuery:
             UnitType.UC: "UC",
             UnitType.UPV: "UPV",
             UnitType.UCV: "UCV",
+            UnitType.UVZi: "UVZi",
+            UnitType.UVZp: "UVZp",
         }
         vr = switcher.get(unitType, "DefunitType")
         if vr == "DefunitType":
@@ -424,6 +426,11 @@ class GMEPublicOfferQuery:
             Zone.SVIZ: "SVIZ",
             Zone.CALA: "CALA",
             Zone.MONT: "MONT",
+            Zone.XGRE: "XGRE",
+            Zone.XSVI: "XSVI",
+            Zone.BSP: "BSP",
+            Zone.XAUS: "XAUS",
+            Zone.XFRA: "XFRA",
         }
         vr = switcher.get(zone, "DefZone")
         if vr == "DefZone":
