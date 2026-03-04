@@ -4,6 +4,7 @@ from Artesian.GMEPublicOffers import (
     Market,
     Purpose,
     Status,
+    UnitType,
     Zone,
 )
 from . import helpers
@@ -61,6 +62,20 @@ class TestGMEPO(unittest.TestCase):
         self.assertEqual(query["market"], "MGP,MI1,MIA2,MIXBID")
 
     @helpers.TrackGMEPORequests
+    def test_UnitTypes(self, requests):
+        url = (
+            qs.createQuery()
+            .forDate("2020-04-01")
+            .forUnitType([UnitType.UC, UnitType.UVZp])
+            .forStatus(Status.ACC)
+            .forPurpose(Purpose.BID)
+            .execute()
+        )
+
+        query = requests.getQs()
+        self.assertEqual(query["unitType"], "UC,UVZp")
+
+    @helpers.TrackGMEPORequests
     def test_Zone(self, requests):
         url = (
             qs.createQuery()
@@ -79,14 +94,14 @@ class TestGMEPO(unittest.TestCase):
         url = (
             qs.createQuery()
             .forDate("2020-04-01")
-            .forZone([Zone.NORD, Zone.SUD])
+            .forZone([Zone.NORD, Zone.SUD, Zone.XAUS])
             .forStatus(Status.ACC)
             .forPurpose(Purpose.BID)
             .execute()
         )
 
         query = requests.getQs()
-        self.assertEqual(query["zone"], "NORD,SUD")
+        self.assertEqual(query["zone"], "NORD,SUD,XAUS")
 
     @helpers.TrackGMEPORequests
     def test_Operator(self, requests):
