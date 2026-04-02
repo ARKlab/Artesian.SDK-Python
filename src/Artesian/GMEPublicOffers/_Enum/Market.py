@@ -24,3 +24,4 @@ class Market(Enum):
     MRR = 50
     MIXBID = 70
     AFRR = 100
+    AFRE = 200
