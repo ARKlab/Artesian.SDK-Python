@@ -1,7 +1,11 @@
 from Artesian import ArtesianConfig
 import responses
 import unittest
+from Artesian.MarketData._Dto.DerivedTransformQueryValidation import DerivedTransformQueryValidation
+from Artesian.MarketData._Dto.DerivedTransformQueryValidationResponse import DerivedTransformQueryValidationResponse
+from Artesian.MarketData._Dto.TimeSerieData import TimeSerieData
 from Artesian._ClientsExecutor.ArtesianJsonSerializer import artesianJsonSerialize
+from datetime import datetime
 from Artesian.MarketData import *
 
 cfg = ArtesianConfig("https://baseurl.com", "APIKey")
@@ -71,6 +75,19 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
         )
         self.__checkConversionResultSerializedOutput = artesianJsonSerialize(
             self.__checkConversionResult
+        )
+        self.__derivedTransformQueryValidationResponse = DerivedTransformQueryValidationResponse(
+            data=TimeSerieData(
+                    rows={
+                        datetime(2020, 1, 1, 1): 42.0,
+                        datetime(2020, 1, 2, 2): 43.0,
+                    },
+                    type=MarketDataType.ActualTimeSerie
+                ),
+            valid=True
+        )
+        self.__derivedTransformQueryValidationResponseSerializedOutput = artesianJsonSerialize(
+            self.__derivedTransformQueryValidationResponse
         )
 
         return super().setUp()
@@ -237,6 +254,43 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
                 params["targetUnitOfMeasure"],
             )
             self.assertEqual(output, self.__checkConversionResult)
+
+    async def test_derivedTransformQueryValidationAsync(self):
+        expectedJson = {
+            "Data": {
+                "Rows": [
+                    {"Key": "2020-01-01T01:00:00.000000", "Value": 42.0},
+                    {"Key": "2020-01-02T02:00:00.000000", "Value": 43.0},
+                ],
+                "Type": "ActualTimeSerie"
+            },
+            "Transform": "SELECT Time, (Value + 1) as Value FROM table_name",
+        }
+        derivedValidation = DerivedTransformQueryValidation(
+            data=TimeSerieData(
+                    rows={
+                        datetime(2020, 1, 1, 1): 42.0,
+                        datetime(2020, 1, 2, 2): 43.0,
+                    },
+                    type=MarketDataType.ActualTimeSerie
+                ),
+            transform="SELECT Time, (Value + 1) as Value FROM table_name"
+        )
+        ser = artesianJsonSerialize(derivedValidation)
+        self.assertEqual(ser, expectedJson)
+
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                "POST",
+                self.__baseurl + "/utils/derivedTransform/queryValidation",
+                match=[responses.matchers.json_params_matcher(expectedJson)],
+                json=self.__derivedTransformQueryValidationResponseSerializedOutput,
+                status=200,
+            )
+
+            output = await self.__service.derivedTransformQueryValidationAsync(derivedValidation)
+
+            self.assertEqual(output, self.__derivedTransformQueryValidationResponse)
 
     async def test_searchFacetAsync(self):
         with responses.RequestsMock() as rsps:
