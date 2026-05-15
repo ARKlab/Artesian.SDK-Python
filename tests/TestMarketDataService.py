@@ -264,7 +264,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
                 ],
                 "Type": "ActualTimeSerie"
             },
-            "Transform": "SELECT Time, (Value + 1) as Value FROM table_name",
+            "Transform": "SELECT Time, (Value + 1) as Value FROM $table",
         }
         derivedValidation = DerivedTransformQueryValidation(
             data=TimeSerieData(
@@ -274,7 +274,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
                     },
                     type=MarketDataType.ActualTimeSerie
                 ),
-            transform="SELECT Time, (Value + 1) as Value FROM table_name"
+            transform="SELECT Time, (Value + 1) as Value FROM $table"
         )
         ser = artesianJsonSerialize(derivedValidation)
         self.assertEqual(ser, expectedJson)

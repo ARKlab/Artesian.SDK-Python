@@ -729,7 +729,7 @@ request = DerivedTransformQueryValidation(
         ],
         type=MarketDataType.ActualTimeSerie,
     ),
-    transform="SELECT Time, (Value + 1) as Value FROM table_name"
+    transform="SELECT Time, (Value + 1) as Value FROM $table"
 )
 
 derivedTransformResponse = await mds.derivedTransformQueryValidationAsync(request)
@@ -742,7 +742,7 @@ derivedTransformResponse = await mds.derivedTransformQueryValidationAsync(reques
 | Time   | datetime |
 | Value  | double   |
 
-> `table_name` is a virtual table exposed by the query engine.
+> `$table` is a virtual table exposed by the query engine.
 
 **Returned Object: DerivedTransformQueryValidationResponse**
 
@@ -755,18 +755,18 @@ derivedTransformResponse = await mds.derivedTransformQueryValidationAsync(reques
 #### Query examples
 
 ```sql
-SELECT Time + INTERVAL 1 DAY AS Time, Value FROM table_name
+SELECT Time + INTERVAL 1 DAY AS Time, Value FROM $table
 
-SELECT Time, CASE WHEN EXTRACT(HOUR FROM (Time AT TIME ZONE 'UTC') AT TIME ZONE 'Europe/Rome') < 10 THEN Value + 1 ELSE Value END AS Value FROM table_name WHERE Time IS NOT NULL
+SELECT Time, CASE WHEN EXTRACT(HOUR FROM (Time AT TIME ZONE 'UTC') AT TIME ZONE 'Europe/Rome') < 10 THEN Value + 1 ELSE Value END AS Value FROM $table WHERE Time IS NOT NULL
 
-SELECT Time, Value FROM table_name WHERE Version IS NOT NULL AND ((EXTRACT(hour FROM Version) < 10 AND Time >= date_trunc('day', Version + interval '1 day')) OR (EXTRACT(hour FROM Version) >= 10 AND Time >= date_trunc('day', Version + interval '2 day')))
+SELECT Time, Value FROM $table WHERE Version IS NOT NULL AND ((EXTRACT(hour FROM Version) < 10 AND Time >= date_trunc('day', Version + interval '1 day')) OR (EXTRACT(hour FROM Version) >= 10 AND Time >= date_trunc('day', Version + interval '2 day')))
 ```
 
 #### SQL Dialect & Execution Model
 
 The query engine uses a DuckDB-compatible SQL dialect (PostgreSQL-like).
 
-Queries are executed against a virtual table named `table_name`, which represents the provided sample TimeSerieData.
+Queries are executed against a virtual table named `$table`, which represents the provided sample TimeSerieData.
 
 The engine supports common SQL features including:
 
