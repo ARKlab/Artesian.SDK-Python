@@ -847,7 +847,7 @@ DerivedCfg can be of algorithm type: Coalesce, Sum, Muv, Transform.
 
 Updating the DerivedCfg can be performed with `updateDerivedConfiguration` on MarketDataService. A validation will be done on the existing DerivedCfg of the MarketData, that should be not null and with same type as the one used for the update.
 
-```csharp
+```Python
 derivedCfgUpdate = DerivedCfg(
     version=1,
     derivedAlgorithm=DerivedAlgorithm.Coalesce,
@@ -859,6 +859,31 @@ marketDataUpdated = mkdservice.updateDerivedConfiguration(
                         derivedCfgUpdate,
                         False)
 ```
+
+For DerivedCfg Transform, `orderedReferencedMarketDataIds` contains a single source series (the series where the transform is applied), and `transform` contains the query to apply.
+
+```Python
+derivedCfgUpdate = DerivedCfg(
+    version=1,
+    derivedAlgorithm=DerivedAlgorithm.Transform,
+    orderedReferencedMarketDataIds=[10001],
+    transform="SELECT Time, (Value + 1) as Value FROM $table"
+)
+
+marketDataUpdated = mkdservice.updateDerivedConfiguration(
+                        registeredDerived.marketDataId,
+                        derivedCfgUpdate,
+                        False)
+```
+
+#### Available Columns
+
+| Column | Type     |
+| ------ | -------- |
+| Time   | datetime |
+| Value  | double   |
+
+> `$table` is a virtual table exposed by the query engine.
 
 In case we want to write an hourly (or lower) time series the timezone for the upsert data must be UTC:
 

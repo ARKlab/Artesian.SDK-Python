@@ -22,6 +22,13 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
                         orderedReferencedMarketDataIds=curveIds,
                     )
         
+        derivedCfgTransform = DerivedCfg(
+                        version=1,
+                        derivedAlgorithm=DerivedAlgorithm.Transform,
+                        orderedReferencedMarketDataIds=[1000],
+                        transform="SELECT Time, (Value + 1) as Value FROM $table",
+                    )
+        
         self.__sampleOutput = MarketDataEntityOutput(
             providerName="PROVIDER",
             marketDataName="MARKETDATA",
@@ -42,6 +49,23 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             tags={"PythonTag": ["PythonTagValue1", "PythonTagValue2"]},
             derivedCfg=derivedCfg,
             unitOfMeasure=UnitOfMeasure(value=CommonUnitOfMeasure.MW)
+        )
+        self.__sampleOutputTransform = MarketDataEntityOutput(
+            providerName="PROVIDER",
+            marketDataName="MARKETDATA",
+            originalGranularity=Granularity.Day,
+            type=MarketDataType.ActualTimeSerie,
+            originalTimezone="CET",
+            derivedCfg=derivedCfgTransform
+        )
+        self.__serializedOutputTransform = artesianJsonSerialize(self.__sampleOutputTransform)
+        self.__sampleInputTransform = MarketDataEntityInput(
+            providerName="PROVIDER",
+            marketDataName="MARKETDATA",
+            originalGranularity=Granularity.Day,
+            type=MarketDataType.ActualTimeSerie,
+            originalTimezone="CET",
+            derivedCfg=derivedCfgTransform
         )
         self.maxDiff = None
         self.__baseurl = "https://baseurl.com/v2.1"
@@ -128,6 +152,37 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             output = await self.__service.registerMarketDataAsync(self.__sampleInput)
 
             self.assertEqual(output, self.__sampleOutput)
+
+    async def test_registerMarketDataTransform(self):
+        expectedJson = {
+            "MarketDataId": 0,
+            "ProviderName": "PROVIDER",
+            "MarketDataName": "MARKETDATA",
+            "OriginalGranularity": "Day",
+            "Type": "ActualTimeSerie",
+            "OriginalTimezone": "CET",
+            "AggregationRule": "Undefined",
+            "DerivedCfg":
+            {
+                "DerivedAlgorithm": "Transform",
+                "Version": 1,
+                "OrderedReferencedMarketDataIds": [1000],
+                "Transform": "SELECT Time, (Value + 1) as Value FROM $table"
+            }
+        }
+
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                "POST",
+                self.__baseurl + "/marketdata/entity",
+                match=[responses.matchers.json_params_matcher(expectedJson)],
+                json=self.__serializedOutputTransform,
+                status=200,
+            )
+
+            output = await self.__service.registerMarketDataAsync(self.__sampleInputTransform)
+
+            self.assertEqual(output, self.__sampleOutputTransform)
 
     async def test_readMarketDataRegistryByNameAsync(self):
         with responses.RequestsMock() as rsps:
