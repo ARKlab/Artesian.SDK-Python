@@ -1,6 +1,5 @@
 from datetime import datetime
 import Artesian
-from Artesian import Query
 from Artesian.Granularity import Granularity
 from Artesian.MarketData._Dto.DerivedCfg import DerivedCfg
 from Artesian.MarketData._Enum.DerivedAlgorithm import DerivedAlgorithm
@@ -81,7 +80,7 @@ marketIdentifierDerived = Artesian.MarketData.MarketDataIdentifier(
 time.sleep(2)
 
 # get the derived curve and check values are in according to the configuration
-query = Query.QueryService(cfg)
+query = Artesian.Query.QueryService(cfg)
 
 res = (
     query.createActual()
