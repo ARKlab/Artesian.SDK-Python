@@ -115,3 +115,4 @@ class _Client:
         raise ArtesianSdkServerException(
             method, url, res.status_code, problemDetails, errorText
         )
+ 
