@@ -1,6 +1,5 @@
 from datetime import datetime
 import Artesian
-from Artesian.ArtesianConfig import ArtesianConfig
 from Artesian.MarketData._Dto.DerivedTransformQueryValidation import (
     DerivedTransformQueryValidation,
 )
