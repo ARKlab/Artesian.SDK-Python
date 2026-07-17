@@ -35,7 +35,7 @@ jobs:
         run: |
           flake8 .
 
-      - name: pyright
+      - name: Run Pyright
         uses: jordemort/action-pyright@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
