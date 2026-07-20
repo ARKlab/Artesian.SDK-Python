@@ -7,12 +7,18 @@ from .._ClientsExecutor.RequestExecutor import _RequestExecutor
 from .._ClientsExecutor.Client import _Client
 from ..ArtesianConfig import ArtesianConfig
 from ..ArtesianPolicyConfig import ArtesianPolicyConfig
-from ._Dto.PagedResult import PagedResultCurveRangeEntity
+from ._Dto.PagedResult import (
+    PagedResultCurveRangeEntity,
+    PagedResultDataQualityRuleDtoOutput,
+)
 from ._Dto.ArtesianSearchResults import ArtesianSearchResults
 from ._Dto.MarketDataEntityInput import MarketDataEntityInput
 from ._Dto.MarketDataEntityOutput import MarketDataEntityOutput
 from ._Dto.CheckConversionResult import CheckConversionResult
 from ._Dto.UpsertData import UpsertData
+from ._Dto.DataQualityRuleDtoInput import DataQualityRuleDtoInput
+from ._Dto.DataQualityRuleDtoOutput import DataQualityRuleDtoOutput
+from ._Enum.RuleType import RuleType
 import asyncio
 
 
@@ -395,6 +401,248 @@ class MarketDataService:
 
         return _get_event_loop().run_until_complete(
             self.registerMarketDataAsync(entity)
+        )
+
+    async def registerDataQualityRuleAsync(
+        self: MarketDataService, entity: DataQualityRuleDtoInput
+    ) -> DataQualityRuleDtoOutput:
+        """
+        Creates a new Data Quality Rule.
+
+        Args:
+            entity: rule definition including name, type and configuration.
+
+        Returns:
+            Created DataQualityRuleDtoOutput (Async).
+        """
+        url = "/dataquality/dqrule"
+        with self.__client as c:
+            res = await asyncio.gather(
+                *[
+                    self.__executor.exec(
+                        c.exec, "POST", url, entity, DataQualityRuleDtoOutput
+                    )
+                ]
+            )
+            return cast(DataQualityRuleDtoOutput, res[0])
+
+    def registerDataQualityRule(
+        self: MarketDataService, entity: DataQualityRuleDtoInput
+    ) -> DataQualityRuleDtoOutput:
+        """
+        Creates a new Data Quality Rule.
+
+        Args:
+            entity: rule definition including name, type and configuration.
+
+        Returns:
+            Created DataQualityRuleDtoOutput.
+        """
+        return _get_event_loop().run_until_complete(
+            self.registerDataQualityRuleAsync(entity)
+        )
+
+    async def readDataQualityRuleByIdAsync(
+        self: MarketDataService, id: int
+    ) -> DataQualityRuleDtoOutput:
+        """
+        Retrieves a Data Quality Rule by its id.
+
+        Args:
+            id: unique identifier of the rule.
+
+        Returns:
+            DataQualityRuleDtoOutput (Async).
+        """
+        url = "/dataquality/dqrule/" + str(id)
+        with self.__client as c:
+            res = await asyncio.gather(
+                *[
+                    self.__executor.exec(
+                        c.exec, "GET", url, None, retcls=DataQualityRuleDtoOutput
+                    )
+                ]
+            )
+            return cast(DataQualityRuleDtoOutput, res[0])
+
+    def readDataQualityRuleById(
+        self: MarketDataService, id: int
+    ) -> DataQualityRuleDtoOutput:
+        """
+        Retrieves a Data Quality Rule by its id.
+
+        Args:
+            id: unique identifier of the rule.
+
+        Returns:
+            DataQualityRuleDtoOutput.
+        """
+        return _get_event_loop().run_until_complete(
+            self.readDataQualityRuleByIdAsync(id)
+        )
+
+    async def readDataQualityRuleAsync(
+        self: MarketDataService,
+        page: int,
+        pageSize: int,
+        type: Optional[RuleType],
+        marketDataId: Optional[int] = None,
+        name: Optional[str] = None,
+        ruleIds: Optional[List[int]] = None,
+        sort: Optional[List[str]] = None,
+    ) -> PagedResultDataQualityRuleDtoOutput:
+        """
+        Retrieves a paginated list of Data Quality Rules.
+
+        Args:
+            page: page number (1-based).
+            pageSize: number of items per page.
+            type: optional filter by rule type.
+            marketDataId: optional filter for assigned MarketData id.
+            name: optional partial filter by rule name.
+            ruleIds: optional filter by specific rule ids.
+            sort: optional sort expressions.
+
+        Returns:
+            PagedResultDataQualityRuleDtoOutput (Async).
+        """
+        if page < 1:
+            raise ValueError("Page must to be greater than 0. Page:" + str(page))
+        if pageSize < 1:
+            raise ValueError(
+                "PageSize must to be greater than 0. Page Size:" + str(pageSize)
+            )
+
+        params = {}
+        params["page"] = page
+        params["pageSize"] = pageSize
+        params["type"] = type
+        params["marketDataId"] = marketDataId
+        params["name"] = name
+        params["ruleIds"] = [] if ruleIds is None else ruleIds
+        params["sort"] = [] if sort is None else sort
+
+        url = "/dataquality/dqrule"
+        with self.__client as c:
+            res = await asyncio.gather(
+                *[
+                    self.__executor.exec(
+                        c.exec,
+                        "GET",
+                        url,
+                        None,
+                        retcls=PagedResultDataQualityRuleDtoOutput,
+                        params=params,
+                    )
+                ]
+            )
+            return cast(PagedResultDataQualityRuleDtoOutput, res[0])
+
+    def readDataQualityRule(
+        self: MarketDataService,
+        page: int,
+        pageSize: int,
+        type: Optional[RuleType],
+        marketDataId: Optional[int] = None,
+        name: Optional[str] = None,
+        ruleIds: Optional[List[int]] = None,
+        sort: Optional[List[str]] = None,
+    ) -> PagedResultDataQualityRuleDtoOutput:
+        """
+        Retrieves a paginated list of Data Quality Rules.
+
+        Args:
+            page: page number (1-based).
+            pageSize: number of items per page.
+            type: optional filter by rule type.
+            marketDataId: optional filter for assigned MarketData id.
+            name: optional partial filter by rule name.
+            ruleIds: optional filter by specific rule ids.
+            sort: optional sort expressions.
+
+        Returns:
+            PagedResultDataQualityRuleDtoOutput.
+        """
+        return _get_event_loop().run_until_complete(
+            self.readDataQualityRuleAsync(
+                page,
+                pageSize,
+                type,
+                marketDataId,
+                name,
+                ruleIds,
+                sort,
+            )
+        )
+
+    async def updateDataQualityRuleAsync(
+        self: MarketDataService, id: int, entity: DataQualityRuleDtoInput
+    ) -> DataQualityRuleDtoOutput:
+        """
+        Updates an existing Data Quality Rule.
+
+        Args:
+            id: unique identifier of the rule to update.
+            entity: updated rule definition.
+
+        Returns:
+            Updated DataQualityRuleDtoOutput (Async).
+        """
+        url = "/dataquality/dqrule/" + str(id)
+        with self.__client as c:
+            res = await asyncio.gather(
+                *[
+                    self.__executor.exec(
+                        c.exec, "PUT", url, entity, DataQualityRuleDtoOutput
+                    )
+                ]
+            )
+            return cast(DataQualityRuleDtoOutput, res[0])
+
+    def updateDataQualityRule(
+        self: MarketDataService, id: int, entity: DataQualityRuleDtoInput
+    ) -> DataQualityRuleDtoOutput:
+        """
+        Updates an existing Data Quality Rule.
+
+        Args:
+            id: unique identifier of the rule to update.
+            entity: updated rule definition.
+
+        Returns:
+            Updated DataQualityRuleDtoOutput.
+        """
+        return _get_event_loop().run_until_complete(
+            self.updateDataQualityRuleAsync(id, entity)
+        )
+
+    async def deleteDataQualityRuleAsync(self: MarketDataService, id: int) -> None:
+        """
+        Deletes a Data Quality Rule by id.
+
+        Args:
+            id: unique identifier of the rule to delete.
+
+        Returns:
+            None (Async).
+        """
+        url = "/dataquality/dqrule/" + str(id)
+        with self.__client as c:
+            await asyncio.gather(*[self.__executor.exec(c.exec, "DELETE", url, None)])
+            return None
+
+    def deleteDataQualityRule(self: MarketDataService, id: int) -> None:
+        """
+        Deletes a Data Quality Rule by id.
+
+        Args:
+            id: unique identifier of the rule to delete.
+
+        Returns:
+            None.
+        """
+        return _get_event_loop().run_until_complete(
+            self.deleteDataQualityRuleAsync(id)
         )
 
     async def checkConversionAsync(

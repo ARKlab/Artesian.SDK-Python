@@ -3,6 +3,18 @@ import responses
 import unittest
 from Artesian._ClientsExecutor.ArtesianJsonSerializer import artesianJsonSerialize
 from Artesian.MarketData import *
+from Artesian.MarketData._Dto.ActualCompletenessAndFreshnessConfigDto import (
+    ActualCompletenessAndFreshnessConfigDto,
+)
+from Artesian.MarketData._Dto.CronScheduleDefinitionDto import CronScheduleDefinitionDto
+from Artesian.MarketData._Dto.DataQualityRuleConfigDto import DataQualityRuleConfigDto
+from Artesian.MarketData._Dto.DataQualityRuleDtoInput import DataQualityRuleDtoInput
+from Artesian.MarketData._Dto.DataQualityRuleDtoOutput import DataQualityRuleDtoOutput
+from Artesian.MarketData._Dto.PagedResult import PagedResultDataQualityRuleDtoOutput
+from Artesian.MarketData._Dto.RecordValidationConfigDto import RecordValidationConfigDto
+from Artesian.MarketData._Dto.ScheduleConfigDto import ScheduleConfigDto
+from Artesian.MarketData._Enum.MarketDataTypeV2 import MarketDataTypeV2
+from Artesian.MarketData._Enum.RuleType import RuleType
 
 cfg = ArtesianConfig("https://baseurl.com", "APIKey")
 
@@ -71,6 +83,53 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
         )
         self.__checkConversionResultSerializedOutput = artesianJsonSerialize(
             self.__checkConversionResult
+        )
+        self.__dataQualityRuleConfig = ActualCompletenessAndFreshnessConfigDto(
+            marketDataType=MarketDataTypeV2.ActualTimeSerie,
+            scheduleConfig=ScheduleConfigDto(
+                scheduleDefinition=CronScheduleDefinitionDto(
+                    cronExpression="0 0 * * *",
+                    timeZone="UTC",
+                ),
+                maxDelay="PT1H",
+            ),
+            recordValidationConfig=RecordValidationConfigDto(
+                recordRangeFrom="PT0S",
+                recordRangeTo="PT1H",
+            ),
+        )
+        self.__dataQualityRuleInput = DataQualityRuleDtoInput(
+            id=0,
+            name="TestRule",
+            type=RuleType.CompletenessAndFreshness,
+            configuration=self.__dataQualityRuleConfig,
+            version=0,
+        )
+        self.__dataQualityRuleInputSerialized = artesianJsonSerialize(
+            self.__dataQualityRuleInput
+        )
+        self.__dataQualityRuleOutput = DataQualityRuleDtoOutput(
+            id=1,
+            name="TestRule",
+            type=RuleType.CompletenessAndFreshness,
+            configuration=DataQualityRuleConfigDto(
+                type=RuleType.CompletenessAndFreshness
+            ),
+            version=1,
+            eTag="etag-1",
+        )
+        self.__dataQualityRuleOutputSerialized = artesianJsonSerialize(
+            self.__dataQualityRuleOutput
+        )
+        self.__pagedDataQualityRuleOutput = PagedResultDataQualityRuleDtoOutput(
+            1,
+            10,
+            1,
+            False,
+            [self.__dataQualityRuleOutput],
+        )
+        self.__pagedDataQualityRuleOutputSerialized = artesianJsonSerialize(
+            self.__pagedDataQualityRuleOutput
         )
 
         return super().setUp()
@@ -273,3 +332,101 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
                 bool(params["doNotLoadAdditionalInfo"]),
             )
             self.assertEqual(output, self.__artesianSearchResults)
+
+    async def test_registerDataQualityRuleAsync(self):
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                "POST",
+                self.__baseurl + "/dataquality/dqrule",
+                match=[
+                    responses.matchers.json_params_matcher(
+                        self.__dataQualityRuleInputSerialized
+                    )
+                ],
+                json=self.__dataQualityRuleOutputSerialized,
+                status=200,
+            )
+
+            output = await self.__service.registerDataQualityRuleAsync(
+                self.__dataQualityRuleInput
+            )
+
+            self.assertEqual(output, self.__dataQualityRuleOutput)
+
+    async def test_readDataQualityRuleByIdAsync(self):
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                "GET",
+                self.__baseurl + "/dataquality/dqrule/" + str(self.__id),
+                json=self.__dataQualityRuleOutputSerialized,
+                status=200,
+            )
+
+            output = await self.__service.readDataQualityRuleByIdAsync(self.__id)
+
+            self.assertEqual(output, self.__dataQualityRuleOutput)
+
+    async def test_readDataQualityRuleAsync(self):
+        with responses.RequestsMock() as rsps:
+            params = {
+                "marketDataId": "1",
+                "page": "1",
+                "pageSize": "10",
+                "type": "RuleType.CompletenessAndFreshness",
+            }
+            rsps.add(
+                "GET",
+                self.__baseurl + "/dataquality/dqrule",
+                match=[responses.matchers.query_param_matcher(params)],
+                json=self.__pagedDataQualityRuleOutputSerialized,
+                status=200,
+            )
+
+            output = await self.__service.readDataQualityRuleAsync(
+                1,
+                10,
+                RuleType.CompletenessAndFreshness,
+                1,
+                "",
+                [],
+                [],
+            )
+
+            self.assertEqual(output, self.__pagedDataQualityRuleOutput)
+
+    async def test_updateDataQualityRuleAsync(self):
+        with responses.RequestsMock() as rsps:
+            updateInput = DataQualityRuleDtoInput(
+                id=1,
+                name="TestRuleUpdate",
+                type=RuleType.CompletenessAndFreshness,
+                configuration=self.__dataQualityRuleConfig,
+                version=1,
+            )
+            rsps.add(
+                "PUT",
+                self.__baseurl + "/dataquality/dqrule/" + str(self.__id),
+                match=[responses.matchers.json_params_matcher(
+                    artesianJsonSerialize(updateInput)
+                )],
+                json=self.__dataQualityRuleOutputSerialized,
+                status=200,
+            )
+
+            output = await self.__service.updateDataQualityRuleAsync(
+                self.__id, updateInput
+            )
+
+            self.assertEqual(output, self.__dataQualityRuleOutput)
+
+    async def test_deleteDataQualityRuleAsync(self):
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                "DELETE",
+                self.__baseurl + "/dataquality/dqrule/" + str(self.__id),
+                status=204,
+            )
+
+            await self.__service.deleteDataQualityRuleAsync(self.__id)
+
+            self.assertEqual(len(rsps.calls), 1)
