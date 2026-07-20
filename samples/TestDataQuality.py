@@ -89,5 +89,5 @@ finally:
     if ruleCreated is not None:
         try:
             mkdservice.deleteDataQualityRule(ruleCreated.id)
-        except Exception:
-            pass
+        except Exception as ex:
+            print(f"Best-effort cleanup failed for rule id {ruleCreated.id}: {ex}")
