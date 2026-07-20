@@ -518,9 +518,12 @@ class MarketDataService:
         params["pageSize"] = pageSize
         params["type"] = type
         params["marketDataId"] = marketDataId
-        params["name"] = name
-        params["ruleIds"] = [] if ruleIds is None else ruleIds
-        params["sort"] = [] if sort is None else sort
+        if name:
+            params["name"] = name
+        if ruleIds:
+            params["ruleIds"] = ruleIds
+        if sort:
+            params["sort"] = sort
 
         url = "/dataquality/dqrule"
         with self.__client as c:
