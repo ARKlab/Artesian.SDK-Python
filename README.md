@@ -407,6 +407,297 @@ doNotLoadAdditionalInfo=True
 res = mds.searchFacet(page, pageSize, searchText, filters, sorts, doNotLoadAdditionalInfo)
 ```
 
+## Data Quality Rules
+
+Artesian supports Data Quality Rules to validate market data for completeness,
+freshness, and outlier detection. Rules are reusable configurations that can be
+assigned to one or more Market Data entities through rule assignments.
+
+The examples below use the synchronous `MarketDataService` methods for brevity.
+Async counterparts with the same name plus the `Async` suffix are also
+available.
+
+### Data Quality Rule Types
+
+Two types of rules are supported:
+
+<table>
+  <tr><th>Rule Type</th><th>Description</th></tr>
+  <tr><td>Completeness and Freshness</td><td>Validates that expected data records are present within the defined time window and arrive within an acceptable delay</td></tr>
+  <tr><td>Outlier Detection</td><td>Identifies anomalous data points using statistical models</td></tr>
+</table>
+
+### MarketDataService Configuration
+
+Create an instance of `MarketDataService` to manage Data Quality Rules:
+
+```Python
+from Artesian import ArtesianConfig
+from Artesian.MarketData import MarketDataService
+
+cfg = ArtesianConfig("https://arkive.artesian.cloud/{tenantName}/", "{api-key}")
+marketDataService = MarketDataService(cfg)
+```
+
+### Create a Data Quality Rule
+
+#### Completeness and Freshness Rule for Actual Time Series
+
+```Python
+from Artesian.MarketData._Dto.ActualCompletenessAndFreshnessConfigDto import (
+  ActualCompletenessAndFreshnessConfigDto,
+)
+from Artesian.MarketData._Dto.CronScheduleDefinitionDto import CronScheduleDefinitionDto
+from Artesian.MarketData._Dto.DataQualityRuleDtoInput import DataQualityRuleDtoInput
+from Artesian.MarketData._Dto.RecordValidationConfigDto import RecordValidationConfigDto
+from Artesian.MarketData._Dto.ScheduleConfigDto import ScheduleConfigDto
+from Artesian.MarketData._Enum.MarketDataTypeV2 import MarketDataTypeV2
+from Artesian.MarketData._Enum.RuleType import RuleType
+
+actualCompletenessRule = DataQualityRuleDtoInput(
+  name="Daily weather station completeness",
+  type=RuleType.CompletenessAndFreshness,
+  configuration=ActualCompletenessAndFreshnessConfigDto(
+    marketDataType=MarketDataTypeV2.ActualTimeSerie,
+    scheduleConfig=ScheduleConfigDto(
+      scheduleDefinition=CronScheduleDefinitionDto(
+        cronExpression="0 9 * * *",
+        timeZone="UTC",
+      ),
+      maxDelay="PT2H",
+    ),
+    recordValidationConfig=RecordValidationConfigDto(
+      recordRangeFrom="P-1D",
+      recordRangeTo="P0D",
+    ),
+  ),
+  version=0,
+)
+
+createdRule = marketDataService.registerDataQualityRule(actualCompletenessRule)
+print(f"Created rule with ID: {createdRule.id}")
+```
+
+#### Completeness and Freshness Rule for Versioned Time Series
+
+```Python
+from Artesian.MarketData._Dto.VersionedCompletenessAndFreshnessConfigDto import (
+  VersionedCompletenessAndFreshnessConfigDto,
+)
+from Artesian.MarketData._Enum.PeriodPrecision import PeriodPrecision
+
+versionedCompletenessRule = DataQualityRuleDtoInput(
+  name="Hourly forecast version check",
+  type=RuleType.CompletenessAndFreshness,
+  configuration=VersionedCompletenessAndFreshnessConfigDto(
+    marketDataType=MarketDataTypeV2.VersionedTimeSerie,
+    scheduleConfig=ScheduleConfigDto(
+      scheduleDefinition=CronScheduleDefinitionDto(
+        cronExpression="15 * * * *",
+        timeZone="UTC",
+      ),
+      maxDelay="PT30M",
+    ),
+    recordValidationConfig=RecordValidationConfigDto(
+      recordRangeFrom="P0D",
+      recordRangeTo="P7D",
+    ),
+    versionToleranceFrom="PT-1H",
+    versionToleranceTo="PT1H",
+    versionPrecision=PeriodPrecision.Hour,
+  ),
+  version=0,
+)
+
+createdVersionedRule = marketDataService.registerDataQualityRule(
+  versionedCompletenessRule
+)
+```
+
+#### Outlier Detection Rule
+
+```Python
+from Artesian.MarketData._Dto.OutlierAbsoluteBoundConfigDto import (
+  OutlierAbsoluteBoundConfigDto,
+)
+from Artesian.MarketData._Dto.OutlierConfigDto import OutlierConfigDto
+
+outlierRule = DataQualityRuleDtoInput(
+  name="Temperature outlier detection",
+  type=RuleType.Outlier,
+  configuration=OutlierConfigDto(
+    model=OutlierAbsoluteBoundConfigDto(
+      lowerBound=-10.0,
+      upperBound=45.0,
+    )
+  ),
+  version=0,
+)
+
+createdOutlierRule = marketDataService.registerDataQualityRule(outlierRule)
+```
+
+### Read Data Quality Rules
+
+#### Get a Single Rule by ID
+
+```Python
+rule = marketDataService.readDataQualityRuleById(123)
+print(f"Rule Name: {rule.name}, Type: {rule.type}")
+```
+
+#### Get All Rules with Pagination and Filters
+
+```Python
+rules = marketDataService.readDataQualityRule(
+  page=1,
+  pageSize=20,
+  type=RuleType.CompletenessAndFreshness,
+  name="weather",
+  sort=["Name asc"],
+)
+
+print(f"Total pages: {rules.count}")
+for rule in rules.data:
+  print(f"- {rule.name} (ID: {rule.id})")
+```
+
+### Update a Data Quality Rule
+
+```Python
+existingRule = marketDataService.readDataQualityRuleById(123)
+
+existingRule.name = "Updated rule name"
+if isinstance(
+  existingRule.configuration,
+  ActualCompletenessAndFreshnessConfigDto,
+):
+  existingRule.configuration.scheduleConfig.maxDelay = "PT3H"
+
+updatedRule = marketDataService.updateDataQualityRule(
+  id=existingRule.id,
+  entity=existingRule,
+)
+```
+
+### Delete a Data Quality Rule
+
+```Python
+marketDataService.deleteDataQualityRule(123)
+```
+
+### Data Quality Rule Assignments
+
+Once you have created Data Quality Rules, you can assign them to Market Data
+entities to start validating data.
+
+#### Create an Assignment
+
+```Python
+from Artesian.MarketData._Dto.MarketDataQualityRuleAssignmentDto import (
+  MarketDataQualityRuleAssignmentDtoInput,
+)
+
+assignment = MarketDataQualityRuleAssignmentDtoInput(
+  marketDataId=100000001,
+  dataQualityRuleId=123,
+)
+
+createdAssignment = marketDataService.registerDataQualityRuleAssignment(
+  entity=assignment,
+  initializationLookbackPeriod="P30D",
+)
+
+print(f"Assignment ID: {createdAssignment.id}")
+```
+
+#### Read Assignments
+
+Get a single assignment:
+
+```Python
+assignment = marketDataService.readDataQualityRuleAssignmentById(456)
+print(f"MarketData: {assignment.marketData.marketDataName if assignment.marketData else None}")
+print(f"Rule: {assignment.dataQualityRule.name if assignment.dataQualityRule else None}")
+```
+
+Get all assignments with filters:
+
+```Python
+assignments = marketDataService.readDataQualityRuleAssignment(
+  page=1,
+  pageSize=20,
+  marketDataId=100000001,
+  ruleId=123,
+  ruleName="weather",
+  sort=["Id desc"],
+)
+
+for assignment in assignments.data:
+  print(
+    f"Assignment {assignment.id}: "
+    f"MD {assignment.marketDataId} -> Rule {assignment.dataQualityRuleId}"
+  )
+```
+
+#### Update an Assignment
+
+Re-configure the lookback period to re-evaluate the data:
+
+```Python
+assignment = marketDataService.readDataQualityRuleAssignmentById(456)
+
+updatedAssignment = marketDataService.updateDataQualityRuleAssignment(
+  id=assignment.id,
+  initializationLookbackPeriod="P60D",
+  etag=assignment.eTag,
+)
+```
+
+#### Delete an Assignment
+
+```Python
+marketDataService.deleteDataQualityRuleAssignment(456)
+```
+
+#### Read Assignment Event Feed
+
+Retrieve raw events for a specific assignment (max 8-day lookback):
+
+```Python
+from datetime import datetime, timezone
+
+events = marketDataService.readDataQualityRuleAssignmentEventsFeed(
+  id=456,
+  afterTimestamp=datetime(2024, 1, 15, 0, 0, tzinfo=timezone.utc),
+)
+
+print(f"Retrieved {len(events)} events")
+for event in events:
+  print(f"Event at {event.timestamp}: {event.newStatus}")
+```
+
+### Data Quality Rule Status
+
+Rules and assignments expose aggregated check status through the
+`aggregatedStatus` property.
+
+<table>
+  <tr><th>Status</th><th>Description</th></tr>
+  <tr><td>OK</td><td>All checks passed</td></tr>
+  <tr><td>KO</td><td>One or more checks failed</td></tr>
+</table>
+
+Check the status after creating or reading rules:
+
+```Python
+from Artesian.MarketData._Enum.CheckAggregatedStatus import CheckAggregatedStatus
+
+rule = marketDataService.readDataQualityRuleById(123)
+if rule.aggregatedStatus == CheckAggregatedStatus.KO:
+  print(f"Rule {rule.name} has failing checks!")
+```
+
 ## GME Public Offer
 
 Artesian support Query over GME Public Offers which comes in a custom and dedicated format.
@@ -414,8 +705,8 @@ Artesian support Query over GME Public Offers which comes in a custom and dedica
 Note (performance):
 GME Public Offer data is partitioned by date, offerType, status, and market. Requesting very narrow subsets (for example a single status or offerType in several separate requests) does not improve performance and can cause the same data to be fetched multiple times.
 For this reason, the examples below:
-	•	Use a large page size so that all data for a given (date, market, filters) is typically returned in a single page.
-	•	Loop over markets explicitly to cover all required markets without redundant fetches.
+• Use a large page size so that all data for a given (date, market, filters) is typically returned in a single page.
+• Loop over markets explicitly to cover all required markets without redundant fetches.
 
 ### Extract GME Public Offer
 
@@ -761,16 +1052,17 @@ mkservice.upsertData(data)
 ```
 
 Upsert has optional switches that can be applied
+
 ```
 mkservice.upsertData(data, deferCommandExecution, deferDataGeneration, keepNulls, upsertMode)
 ```
+
 The switch details are,
 
 deferCommandExecution (true/false) choose between syncronoys and asyncronous command execution, default is false.
 deferDataGeneration (true/false) choose between syncronoys and asyncronous precomputed data generation, default is true.
 keepNulls (true/false) if true then nulls are written in the curve replacing any data present for the instant, default is false.
 upsertMode (Merge/Replace) for ActualTimeSeries the two modes are equivalent. Leaving Null/None/Empty is equivalent to Merge.
-
 
 DerivedCfg can be of algorithm type: Coalesce, Sum, Muv.
 
@@ -871,9 +1163,11 @@ mkservice.upsertData(data)
 ```
 
 Upsert has optional switches that can be applied
+
 ```
 mkservice.upsertData(data, deferCommandExecution, deferDataGeneration, keepNulls, upsertMode)
 ```
+
 The switch details are,
 
 deferCommandExecution (true/false) choose between syncronoys and asyncronous command execution, default is false.
@@ -881,25 +1175,24 @@ deferDataGeneration (true/false) choose between syncronoys and asyncronous preco
 keepNulls (true/false) if true then nulls are written in the curve replacing any data present for the instant, default is false.
 upsertMode (Merge/Replace) for VersionedTimeSeries the merge writes in to the curve replacing existing data for an existing instant, replace writes the payload removing any previous data for the version. Leaving Null/None/Empty is equivalent to Merge.
 
-| DATETIME | EXISTING | PAYLOAD | MERGE | REPALACE |
-|---|---|---|---|---|
+| DATETIME     | EXISTING   | PAYLOAD    | MERGE      | REPALACE   |
+| ------------ | ---------- | ---------- | ---------- | ---------- |
 | VERSION NAME | 2025-01-01 | 2025-01-01 | 2025-01-01 | 2025-01-01 |
-| 2025-01-01 |        |        |        |        |
-| 2025-01-02 | 999.99 | 222.22 | 222.22 | 222.22 |
-| 2025-01-03 | 999.99 | 222.22 | 222.22 | 222.22 |
-| 2025-01-04 | 999.99 | 222.22 | 222.22 | 222.22 |
-| 2025-01-05 | 999.99 | 222.22 | 222.22 | 222.22 |
-| 2025-01-06 | 999.99 | 222.22 | 222.22 | 222.22 |
-| 2025-01-07 | 999.99 | 222.22 | 222.22 | 222.22 |
-| 2025-01-08 |        | 222.22 | 222.22 | 222.22 |
-| 2025-01-09 |        |        |        |        |
-| 2025-01-10 |        |        |        |        |
-| 2025-01-11 | 999.99 |        | 999.99 |        |
-| 2025-01-12 | 999.99 |        | 999.99 |        |
-| 2025-01-13 | 999.99 |        | 999.99 |        |
-| 2025-01-14 |        |        |        |        |
-| 2025-01-15 |        |        |        |        |
-
+| 2025-01-01   |            |            |            |            |
+| 2025-01-02   | 999.99     | 222.22     | 222.22     | 222.22     |
+| 2025-01-03   | 999.99     | 222.22     | 222.22     | 222.22     |
+| 2025-01-04   | 999.99     | 222.22     | 222.22     | 222.22     |
+| 2025-01-05   | 999.99     | 222.22     | 222.22     | 222.22     |
+| 2025-01-06   | 999.99     | 222.22     | 222.22     | 222.22     |
+| 2025-01-07   | 999.99     | 222.22     | 222.22     | 222.22     |
+| 2025-01-08   |            | 222.22     | 222.22     | 222.22     |
+| 2025-01-09   |            |            |            |            |
+| 2025-01-10   |            |            |            |            |
+| 2025-01-11   | 999.99     |            | 999.99     |            |
+| 2025-01-12   | 999.99     |            | 999.99     |            |
+| 2025-01-13   | 999.99     |            | 999.99     |            |
+| 2025-01-14   |            |            |            |            |
+| 2025-01-15   |            |            |            |            |
 
 ### Write Data in a Market Assessment Time Series
 
@@ -949,16 +1242,17 @@ mkservice.upsertData(marketAssessment)
 ```
 
 Upsert has optional switches that can be applied
+
 ```
 mkservice.upsertData(data, deferCommandExecution, deferDataGeneration, keepNulls, upsertMode)
 ```
+
 The switch details are,
 
 deferCommandExecution (true/false) choose between syncronoys and asyncronous command execution, default is false.
 deferDataGeneration (true/false) choose between syncronoys and asyncronous precomputed data generation, default is true.
 keepNulls (true/false) if true then nulls are written in the curve replacing any data present for the instant, default is false.
 upsertMode (Merge/Replace) for MarketAssessment merge adds the new products to the existing and overwrites existing with the new ones while replace replaces all the existing products with the new ones. Leaving Null/None/Empty is equivalent to Merge.
-
 
 ### Write Data in a Bid Ask Time Series
 
@@ -1007,16 +1301,17 @@ mkservice.upsertData(bidAsk)
 ```
 
 Upsert has optional switches that can be applied
+
 ```
 mkservice.upsertData(data, deferCommandExecution, deferDataGeneration, keepNulls, upsertMode)
 ```
+
 The switch details are,
 
 deferCommandExecution (true/false) choose between syncronoys and asyncronous command execution, default is false.
 deferDataGeneration (true/false) choose between syncronoys and asyncronous precomputed data generation, default is true.
 keepNulls (true/false) if true then nulls are written in the curve replacing any data present for the instant, default is false.
 upsertMode (Merge/Replace) for BidAsk merge adds the new products to the existing and overwrites existing with the new ones while replace replaces all the existing products with the new ones. Leaving Null/None/Empty is equivalent to Merge.
-
 
 ### Write Data in an Auction Time Series
 
@@ -1065,16 +1360,17 @@ auctionRows = MarketData.UpsertData(MarketData.MarketDataIdentifier('PROVIDER', 
 ```
 
 Upsert has optional switches that can be applied
+
 ```
 mkservice.upsertData(data, deferCommandExecution, deferDataGeneration, keepNulls, upsertMode)
 ```
+
 The switch details are,
 
 deferCommandExecution (true/false) choose between syncronoys and asyncronous command execution, default is false.
 deferDataGeneration (true/false) choose between syncronoys and asyncronous precomputed data generation, default is true.
 keepNulls (true/false) if true then nulls are written in the curve replacing any data present for the instant, default is false.
 upsertMode (Merge/Replace) for Auction merge and replace are equivalent. Leaving Null/None/Empty is equivalent to Merge.
-
 
 ## Delete Data in Artesian
 

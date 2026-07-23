@@ -1,4 +1,5 @@
 from __future__ import annotations
+from datetime import datetime
 from typing import List, Optional, cast, Dict
 
 from Artesian.MarketData._Dto import DeleteData
@@ -10,6 +11,7 @@ from ..ArtesianPolicyConfig import ArtesianPolicyConfig
 from ._Dto.PagedResult import (
     PagedResultCurveRangeEntity,
     PagedResultDataQualityRuleDtoOutput,
+    PagedResultMarketDataQualityRuleAssignmentDtoOutput,
 )
 from ._Dto.ArtesianSearchResults import ArtesianSearchResults
 from ._Dto.MarketDataEntityInput import MarketDataEntityInput
@@ -18,6 +20,11 @@ from ._Dto.CheckConversionResult import CheckConversionResult
 from ._Dto.UpsertData import UpsertData
 from ._Dto.DataQualityRuleDtoInput import DataQualityRuleDtoInput
 from ._Dto.DataQualityRuleDtoOutput import DataQualityRuleDtoOutput
+from ._Dto.DqCheckChangeEventDto import DqCheckChangeEventDtoOutput
+from ._Dto.MarketDataQualityRuleAssignmentDto import (
+    MarketDataQualityRuleAssignmentDtoInput,
+    MarketDataQualityRuleAssignmentDtoOutput,
+)
 from ._Enum.RuleType import RuleType
 import asyncio
 
@@ -516,7 +523,8 @@ class MarketDataService:
         params = {}
         params["page"] = page
         params["pageSize"] = pageSize
-        params["type"] = type
+        if type is not None:
+            params["type"] = type.name
         params["marketDataId"] = marketDataId
         if name:
             params["name"] = name
@@ -646,6 +654,352 @@ class MarketDataService:
         """
         return _get_event_loop().run_until_complete(
             self.deleteDataQualityRuleAsync(id)
+        )
+
+    async def registerDataQualityRuleAssignmentAsync(
+        self: MarketDataService,
+        entity: MarketDataQualityRuleAssignmentDtoInput,
+        initializationLookbackPeriod: Optional[str] = None,
+    ) -> MarketDataQualityRuleAssignmentDtoOutput:
+        """
+        Creates a new assignment binding a Market Data entity to a Data Quality Rule.
+
+        Args:
+            entity: assignment definition including MarketDataId and DataQualityRuleId.
+            initializationLookbackPeriod: optional ISO 8601 period (e.g. "P30D")
+                defining how far back in time the rule should validate data on
+                initial assignment.
+
+        Returns:
+            Created MarketDataQualityRuleAssignmentDtoOutput (Async).
+        """
+        if entity is None:
+            raise ValueError("entity cannot be None")
+
+        url = "/dataquality/dqruleassignment"
+        params = {}
+        if initializationLookbackPeriod is not None:
+            params["initializationLookbackPeriod"] = initializationLookbackPeriod
+
+        with self.__client as c:
+            res = await asyncio.gather(
+                *[
+                    self.__executor.exec(
+                        c.exec,
+                        "POST",
+                        url,
+                        entity,
+                        retcls=MarketDataQualityRuleAssignmentDtoOutput,
+                        params=params,
+                    )
+                ]
+            )
+            return cast(MarketDataQualityRuleAssignmentDtoOutput, res[0])
+
+    def registerDataQualityRuleAssignment(
+        self: MarketDataService,
+        entity: MarketDataQualityRuleAssignmentDtoInput,
+        initializationLookbackPeriod: Optional[str] = None,
+    ) -> MarketDataQualityRuleAssignmentDtoOutput:
+        """
+        Creates a new assignment binding a Market Data entity to a Data Quality Rule.
+
+        Args:
+            entity: assignment definition including MarketDataId and DataQualityRuleId.
+            initializationLookbackPeriod: optional ISO 8601 period (e.g. "P30D")
+                defining how far back in time the rule should validate data on
+                initial assignment.
+
+        Returns:
+            Created MarketDataQualityRuleAssignmentDtoOutput.
+        """
+        return _get_event_loop().run_until_complete(
+            self.registerDataQualityRuleAssignmentAsync(
+                entity,
+                initializationLookbackPeriod,
+            )
+        )
+
+    async def readDataQualityRuleAssignmentByIdAsync(
+        self: MarketDataService, id: int
+    ) -> MarketDataQualityRuleAssignmentDtoOutput:
+        """
+        Retrieves a DQ rule assignment by its unique identifier.
+
+        Args:
+            id: unique identifier of the assignment.
+
+        Returns:
+            MarketDataQualityRuleAssignmentDtoOutput (Async).
+        """
+        url = "/dataquality/dqruleassignment/" + str(id)
+
+        with self.__client as c:
+            res = await asyncio.gather(
+                *[
+                    self.__executor.exec(
+                        c.exec,
+                        "GET",
+                        url,
+                        None,
+                        retcls=MarketDataQualityRuleAssignmentDtoOutput,
+                    )
+                ]
+            )
+            return cast(MarketDataQualityRuleAssignmentDtoOutput, res[0])
+
+    def readDataQualityRuleAssignmentById(
+        self: MarketDataService, id: int
+    ) -> MarketDataQualityRuleAssignmentDtoOutput:
+        """
+        Retrieves a DQ rule assignment by its unique identifier.
+
+        Args:
+            id: unique identifier of the assignment.
+
+        Returns:
+            MarketDataQualityRuleAssignmentDtoOutput.
+        """
+        return _get_event_loop().run_until_complete(
+            self.readDataQualityRuleAssignmentByIdAsync(id)
+        )
+
+    async def readDataQualityRuleAssignmentAsync(
+        self: MarketDataService,
+        page: int,
+        pageSize: int,
+        marketDataId: Optional[int] = None,
+        ruleId: Optional[int] = None,
+        ruleName: Optional[str] = None,
+        sort: Optional[List[str]] = None,
+    ) -> PagedResultMarketDataQualityRuleAssignmentDtoOutput:
+        """
+        Retrieves a paginated list of DQ rule assignments.
+
+        Args:
+            page: page number (1-based).
+            pageSize: number of items per page.
+            marketDataId: optional filter by Market Data id.
+            ruleId: optional filter by Data Quality Rule id.
+            ruleName: optional partial filter by rule name.
+            sort: optional sort expressions.
+
+        Returns:
+            PagedResultMarketDataQualityRuleAssignmentDtoOutput (Async).
+        """
+        if page < 1:
+            raise ValueError("Page must to be greater than 0. Page:" + str(page))
+        if pageSize < 1:
+            raise ValueError(
+                "PageSize must to be greater than 0. Page Size:" + str(pageSize)
+            )
+
+        params = {}
+        params["page"] = page
+        params["pageSize"] = pageSize
+        params["marketDataId"] = marketDataId
+        params["ruleId"] = ruleId
+        if ruleName:
+            params["ruleName"] = ruleName
+        if sort:
+            params["sort"] = sort
+
+        url = "/dataquality/dqruleassignment"
+        with self.__client as c:
+            res = await asyncio.gather(
+                *[
+                    self.__executor.exec(
+                        c.exec,
+                        "GET",
+                        url,
+                        None,
+                        retcls=PagedResultMarketDataQualityRuleAssignmentDtoOutput,
+                        params=params,
+                    )
+                ]
+            )
+            return cast(PagedResultMarketDataQualityRuleAssignmentDtoOutput, res[0])
+
+    def readDataQualityRuleAssignment(
+        self: MarketDataService,
+        page: int,
+        pageSize: int,
+        marketDataId: Optional[int] = None,
+        ruleId: Optional[int] = None,
+        ruleName: Optional[str] = None,
+        sort: Optional[List[str]] = None,
+    ) -> PagedResultMarketDataQualityRuleAssignmentDtoOutput:
+        """
+        Retrieves a paginated list of DQ rule assignments.
+
+        Args:
+            page: page number (1-based).
+            pageSize: number of items per page.
+            marketDataId: optional filter by Market Data id.
+            ruleId: optional filter by Data Quality Rule id.
+            ruleName: optional partial filter by rule name.
+            sort: optional sort expressions.
+
+        Returns:
+            PagedResultMarketDataQualityRuleAssignmentDtoOutput.
+        """
+        return _get_event_loop().run_until_complete(
+            self.readDataQualityRuleAssignmentAsync(
+                page,
+                pageSize,
+                marketDataId,
+                ruleId,
+                ruleName,
+                sort,
+            )
+        )
+
+    async def updateDataQualityRuleAssignmentAsync(
+        self: MarketDataService,
+        id: int,
+        initializationLookbackPeriod: str,
+        etag: str,
+    ) -> MarketDataQualityRuleAssignmentDtoOutput:
+        """
+        Updates an assignment lookback, triggering re-evaluation from new date.
+
+        Args:
+            id: unique identifier of the assignment to update.
+            initializationLookbackPeriod: ISO 8601 period (e.g. "P30D").
+            etag: current ETag for optimistic concurrency control.
+
+        Returns:
+            Updated MarketDataQualityRuleAssignmentDtoOutput (Async).
+        """
+        url = "/dataquality/dqruleassignment/" + str(id)
+        params = {
+            "initializationLookbackPeriod": initializationLookbackPeriod,
+            "etag": etag,
+        }
+
+        with self.__client as c:
+            res = await asyncio.gather(
+                *[
+                    self.__executor.exec(
+                        c.exec,
+                        "PUT",
+                        url,
+                        None,
+                        retcls=MarketDataQualityRuleAssignmentDtoOutput,
+                        params=params,
+                    )
+                ]
+            )
+            return cast(MarketDataQualityRuleAssignmentDtoOutput, res[0])
+
+    def updateDataQualityRuleAssignment(
+        self: MarketDataService,
+        id: int,
+        initializationLookbackPeriod: str,
+        etag: str,
+    ) -> MarketDataQualityRuleAssignmentDtoOutput:
+        """
+        Updates an assignment lookback, triggering re-evaluation from new date.
+
+        Args:
+            id: unique identifier of the assignment to update.
+            initializationLookbackPeriod: ISO 8601 period (e.g. "P30D").
+            etag: current ETag for optimistic concurrency control.
+
+        Returns:
+            Updated MarketDataQualityRuleAssignmentDtoOutput.
+        """
+        return _get_event_loop().run_until_complete(
+            self.updateDataQualityRuleAssignmentAsync(
+                id,
+                initializationLookbackPeriod,
+                etag,
+            )
+        )
+
+    async def deleteDataQualityRuleAssignmentAsync(
+        self: MarketDataService, id: int
+    ) -> None:
+        """
+        Deletes an assignment by id.
+
+        Args:
+            id: unique identifier of the assignment to delete.
+
+        Returns:
+            None (Async).
+        """
+        url = "/dataquality/dqruleassignment/" + str(id)
+        with self.__client as c:
+            await asyncio.gather(*[self.__executor.exec(c.exec, "DELETE", url, None)])
+            return None
+
+    def deleteDataQualityRuleAssignment(self: MarketDataService, id: int) -> None:
+        """
+        Deletes an assignment by id.
+
+        Args:
+            id: unique identifier of the assignment to delete.
+
+        Returns:
+            None.
+        """
+        return _get_event_loop().run_until_complete(
+            self.deleteDataQualityRuleAssignmentAsync(id)
+        )
+
+    async def readDataQualityRuleAssignmentEventsFeedAsync(
+        self: MarketDataService,
+        id: int,
+        afterTimestamp: Optional[datetime] = None,
+    ) -> List[DqCheckChangeEventDtoOutput]:
+        """
+        Retrieves the raw event feed for a specific rule assignment.
+
+        Args:
+            id: rule assignment identifier.
+            afterTimestamp: optional lower bound, returns events after instant.
+
+        Returns:
+            List of DqCheckChangeEventDtoOutput (Async).
+        """
+        url = "/dataquality/dqruleassignment/" + str(id) + "/events"
+        params = {}
+        if afterTimestamp is not None:
+            params["afterTimestamp"] = afterTimestamp
+
+        with self.__client as c:
+            res = await asyncio.gather(
+                *[
+                    self.__executor.exec(
+                        c.exec,
+                        "GET",
+                        url,
+                        None,
+                        retcls=List[DqCheckChangeEventDtoOutput],
+                        params=params,
+                    )
+                ]
+            )
+            return cast(List[DqCheckChangeEventDtoOutput], res[0])
+
+    def readDataQualityRuleAssignmentEventsFeed(
+        self: MarketDataService,
+        id: int,
+        afterTimestamp: Optional[datetime] = None,
+    ) -> List[DqCheckChangeEventDtoOutput]:
+        """
+        Retrieves the raw event feed for a specific rule assignment.
+
+        Args:
+            id: rule assignment identifier.
+            afterTimestamp: optional lower bound, returns events after instant.
+
+        Returns:
+            List of DqCheckChangeEventDtoOutput.
+        """
+        return _get_event_loop().run_until_complete(
+            self.readDataQualityRuleAssignmentEventsFeedAsync(id, afterTimestamp)
         )
 
     async def checkConversionAsync(

@@ -3,6 +3,9 @@ from typing import List
 
 from Artesian.MarketData._Dto.CurveRangeEntity import CurveRangeEntity
 from Artesian.MarketData._Dto.DataQualityRuleDtoOutput import DataQualityRuleDtoOutput
+from Artesian.MarketData._Dto.MarketDataQualityRuleAssignmentDto import (
+    MarketDataQualityRuleAssignmentDtoOutput,
+)
 
 # Has been tried extensively to use TypeVar and Generic for this purpose
 # jsons library fails with Generics thus we opted for the following
@@ -35,3 +38,8 @@ class PagedResultCurveRangeEntity(PagedResult):
 @dataclass
 class PagedResultDataQualityRuleDtoOutput(PagedResult):
     data: List[DataQualityRuleDtoOutput]
+
+
+@dataclass
+class PagedResultMarketDataQualityRuleAssignmentDtoOutput(PagedResult):
+    data: List[MarketDataQualityRuleAssignmentDtoOutput]

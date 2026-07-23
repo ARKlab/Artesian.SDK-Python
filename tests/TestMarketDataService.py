@@ -10,7 +10,14 @@ from Artesian.MarketData._Dto.CronScheduleDefinitionDto import CronScheduleDefin
 from Artesian.MarketData._Dto.DataQualityRuleConfigDto import DataQualityRuleConfigDto
 from Artesian.MarketData._Dto.DataQualityRuleDtoInput import DataQualityRuleDtoInput
 from Artesian.MarketData._Dto.DataQualityRuleDtoOutput import DataQualityRuleDtoOutput
-from Artesian.MarketData._Dto.PagedResult import PagedResultDataQualityRuleDtoOutput
+from Artesian.MarketData._Dto.MarketDataQualityRuleAssignmentDto import (
+    MarketDataQualityRuleAssignmentDtoInput,
+    MarketDataQualityRuleAssignmentDtoOutput,
+)
+from Artesian.MarketData._Dto.PagedResult import (
+    PagedResultDataQualityRuleDtoOutput,
+    PagedResultMarketDataQualityRuleAssignmentDtoOutput,
+)
 from Artesian.MarketData._Dto.RecordValidationConfigDto import RecordValidationConfigDto
 from Artesian.MarketData._Dto.ScheduleConfigDto import ScheduleConfigDto
 from Artesian.MarketData._Enum.MarketDataTypeV2 import MarketDataTypeV2
@@ -130,6 +137,37 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
         )
         self.__pagedDataQualityRuleOutputSerialized = artesianJsonSerialize(
             self.__pagedDataQualityRuleOutput
+        )
+        self.__dataQualityRuleAssignmentInput = MarketDataQualityRuleAssignmentDtoInput(
+            marketDataId=100,
+            dataQualityRuleId=1,
+        )
+        self.__dataQualityRuleAssignmentInputSerialized = artesianJsonSerialize(
+            self.__dataQualityRuleAssignmentInput
+        )
+        self.__dataQualityRuleAssignmentOutput = (
+            MarketDataQualityRuleAssignmentDtoOutput(
+                id=1,
+                marketDataId=100,
+                dataQualityRuleId=1,
+                eTag="test-etag",
+                version=1,
+            )
+        )
+        self.__dataQualityRuleAssignmentOutputSerialized = artesianJsonSerialize(
+            self.__dataQualityRuleAssignmentOutput
+        )
+        self.__pagedDataQualityRuleAssignmentOutput = (
+            PagedResultMarketDataQualityRuleAssignmentDtoOutput(
+                1,
+                10,
+                1,
+                False,
+                [self.__dataQualityRuleAssignmentOutput],
+            )
+        )
+        self.__pagedDataQualityRuleAssignmentOutputSerialized = artesianJsonSerialize(
+            self.__pagedDataQualityRuleAssignmentOutput
         )
 
         return super().setUp()
@@ -372,7 +410,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
                 "marketDataId": "1",
                 "page": "1",
                 "pageSize": "10",
-                "type": "RuleType.CompletenessAndFreshness",
+                "type": "CompletenessAndFreshness",
             }
             rsps.add(
                 "GET",
@@ -383,10 +421,10 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             )
 
             output = await self.__service.readDataQualityRuleAsync(
-                1,
-                10,
+                int(params["page"]),
+                int(params["pageSize"]),
                 RuleType.CompletenessAndFreshness,
-                1,
+                int(params["marketDataId"]),
                 "",
                 [],
                 [],
@@ -428,5 +466,107 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             )
 
             await self.__service.deleteDataQualityRuleAsync(self.__id)
+
+            self.assertEqual(len(rsps.calls), 1)
+
+    async def test_registerDataQualityRuleAssignmentAsync(self):
+        with responses.RequestsMock() as rsps:
+            params = {"initializationLookbackPeriod": "P30D"}
+            rsps.add(
+                "POST",
+                self.__baseurl + "/dataquality/dqruleassignment",
+                match=[
+                    responses.matchers.query_param_matcher(params),
+                    responses.matchers.json_params_matcher(
+                        self.__dataQualityRuleAssignmentInputSerialized
+                    ),
+                ],
+                json=self.__dataQualityRuleAssignmentOutputSerialized,
+                status=200,
+            )
+
+            output = await self.__service.registerDataQualityRuleAssignmentAsync(
+                self.__dataQualityRuleAssignmentInput,
+                "P30D",
+            )
+
+            self.assertEqual(output, self.__dataQualityRuleAssignmentOutput)
+
+    async def test_readDataQualityRuleAssignmentByIdAsync(self):
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                "GET",
+                self.__baseurl + "/dataquality/dqruleassignment/" + str(self.__id),
+                json=self.__dataQualityRuleAssignmentOutputSerialized,
+                status=200,
+            )
+
+            output = await self.__service.readDataQualityRuleAssignmentByIdAsync(
+                self.__id
+            )
+
+            self.assertEqual(output, self.__dataQualityRuleAssignmentOutput)
+
+    async def test_readDataQualityRuleAssignmentAsync(self):
+        with responses.RequestsMock() as rsps:
+            sort = ["Id asc"]
+            params = {
+                "page": "1",
+                "pageSize": "10",
+                "marketDataId": "100",
+                "ruleId": "1",
+                "ruleName": "TestRule",
+                "sort": "Id asc",
+            }
+            rsps.add(
+                "GET",
+                self.__baseurl + "/dataquality/dqruleassignment",
+                match=[responses.matchers.query_param_matcher(params)],
+                json=self.__pagedDataQualityRuleAssignmentOutputSerialized,
+                status=200,
+            )
+
+            output = await self.__service.readDataQualityRuleAssignmentAsync(
+                int(params["page"]),
+                int(params["pageSize"]),
+                int(params["marketDataId"]),
+                int(params["ruleId"]),
+                str(params["ruleName"]),
+                sort,
+            )
+
+            self.assertEqual(output, self.__pagedDataQualityRuleAssignmentOutput)
+
+    async def test_updateDataQualityRuleAssignmentAsync(self):
+        with responses.RequestsMock() as rsps:
+            params = {
+                "initializationLookbackPeriod": "P60D",
+                "etag": "test-etag",
+            }
+            rsps.add(
+                "PUT",
+                self.__baseurl + "/dataquality/dqruleassignment/" + str(self.__id),
+                match=[responses.matchers.query_param_matcher(params)],
+                json=self.__dataQualityRuleAssignmentOutputSerialized,
+                status=200,
+            )
+
+            output = await self.__service.updateDataQualityRuleAssignmentAsync(
+                self.__id,
+                "P60D",
+                "test-etag",
+            )
+
+            self.assertEqual(output, self.__dataQualityRuleAssignmentOutput)
+
+    async def test_deleteDataQualityRuleAssignmentAsync(self):
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                "DELETE",
+                self.__baseurl + "/dataquality/dqruleassignment/" + str(self.__id),
+                status=204,
+            )
+
+            await self.__service.deleteDataQualityRuleAssignmentAsync(self.__id)
 
             self.assertEqual(len(rsps.calls), 1)

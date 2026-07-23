@@ -6,6 +6,7 @@ from .CurveRangeEntity import CurveRangeEntity
 from .PagedResult import (
     PagedResultCurveRangeEntity,
     PagedResultDataQualityRuleDtoOutput,
+    PagedResultMarketDataQualityRuleAssignmentDtoOutput,
 )
 from .ArtesianSearchResults import ArtesianSearchResults
 from .ArtesianMetadataFacet import ArtesianMetadataFacet, ArtesianMetadataFacetCount
@@ -34,6 +35,12 @@ from .OutlierAbsoluteBoundConfigDto import OutlierAbsoluteBoundConfigDto
 from .OutlierRefCurveConfigDto import OutlierRefCurveConfigDto
 from .OutlierConfigDto import OutlierConfigDto
 from .RecordValidationConfigDto import RecordValidationConfigDto
+from .DataQualityStatusSummaryDto import DataQualityStatusSummaryDto
+from .DqCheckChangeEventDto import DqCheckChangeEventDtoOutput, LocalDateTimeRange
+from .MarketDataQualityRuleAssignmentDto import (
+    MarketDataQualityRuleAssignmentDtoInput,
+    MarketDataQualityRuleAssignmentDtoOutput,
+)
 
 __all__ = [
     MarketDataEntityOutput.__name__,
@@ -41,6 +48,7 @@ __all__ = [
     CurveRangeEntity.__name__,
     PagedResultCurveRangeEntity.__name__,
     PagedResultDataQualityRuleDtoOutput.__name__,
+    PagedResultMarketDataQualityRuleAssignmentDtoOutput.__name__,
     MarketDataIdentifier.__name__,
     AuctionBidValue.__name__,
     AuctionBids.__name__,
@@ -65,6 +73,11 @@ __all__ = [
     RecordValidationConfigDto.__name__,
     DataQualityRuleDtoInput.__name__,
     DataQualityRuleDtoOutput.__name__,
+    DataQualityStatusSummaryDto.__name__,
+    DqCheckChangeEventDtoOutput.__name__,
+    LocalDateTimeRange.__name__,
+    MarketDataQualityRuleAssignmentDtoInput.__name__,
+    MarketDataQualityRuleAssignmentDtoOutput.__name__,
     CheckConversionResult.__name__,
     UnitOfMeasure.__name__,
 ]  # type: ignore
