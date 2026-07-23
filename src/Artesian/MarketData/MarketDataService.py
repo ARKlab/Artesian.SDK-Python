@@ -514,11 +514,9 @@ class MarketDataService:
             PagedResultDataQualityRuleDtoOutput (Async).
         """
         if page < 1:
-            raise ValueError("Page must to be greater than 0. Page:" + str(page))
+            raise ValueError(f"page must be >= 1 (got {page})")
         if pageSize < 1:
-            raise ValueError(
-                "PageSize must to be greater than 0. Page Size:" + str(pageSize)
-            )
+            raise ValueError(f"pageSize must be >= 1 (got {pageSize})")
 
         params = {}
         params["page"] = page
@@ -966,8 +964,7 @@ class MarketDataService:
         url = "/dataquality/dqruleassignment/" + str(id) + "/events"
         params = {}
         if afterTimestamp is not None:
-            params["afterTimestamp"] = afterTimestamp
-
+            params["afterTimestamp"] = afterTimestamp.isoformat()
         with self.__client as c:
             res = await asyncio.gather(
                 *[
