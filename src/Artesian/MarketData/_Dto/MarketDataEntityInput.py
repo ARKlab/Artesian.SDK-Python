@@ -97,7 +97,7 @@ class MarketDataEntityInput:
         ):
             raise Exception(
                 f"DerivedCfg with {self.derivedCfg.derivedAlgorithm} algorithm "
-                "must have Transform valorized."
+                "must have transform set."
             )
 
         if (

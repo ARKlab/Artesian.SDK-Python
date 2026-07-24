@@ -18,12 +18,16 @@ class DerivedTransformQueryValidation:
                    Query examples
                    SELECT Time + INTERVAL 1 DAY AS Time, Value FROM $table
                    SELECT Time, CASE WHEN EXTRACT(HOUR FROM (Time AT TIME ZONE 'UTC') AT TIME ZONE 'Europe/Rome')
-                   &lt; 10 THEN Value + 1 ELSE Value END AS Value FROM $table WHERE Time IS NOT NULL
+                   < 10 THEN Value + 1 ELSE Value END AS Value FROM $table WHERE Time IS NOT NULL
                    SELECT Time, Value FROM $table WHERE Version IS NOT NULL AND((EXTRACT(hour FROM Version)
-                   &lt; 10 AND Time &gt;= date_trunc('day', Version + interval '1 day')) OR(EXTRACT(hour FROM Version)
+                   < 10 AND Time >= date_trunc('day', Version + interval '1 day')) OR(EXTRACT(hour FROM Version)
                    >= 10 AND Time >= date_trunc('day', Version + interval '2 day')))
 
     """
 
     data: TimeSerieData
     transform: Optional[str] = None
+
+    def __post_init__(self) -> None:
+        if self.transform is None:
+            raise ValueError("transform must be provided for query validation.")
