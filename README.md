@@ -732,7 +732,7 @@ request = DerivedTransformQueryValidation(
     transform="SELECT Time, (Value + 1) as Value FROM $table"
 )
 
-derivedTransformResponse = await mds.derivedTransformQueryValidationAsync(request)
+derivedTransformResponse = mds.derivedTransformQueryValidation(request)
 ```
 
 #### Available Columns
