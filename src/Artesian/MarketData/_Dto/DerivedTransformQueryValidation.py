@@ -28,6 +28,6 @@ class DerivedTransformQueryValidation:
     data: TimeSerieData
     transform: Optional[str] = None
 
-    def __post_init__(self) -> None:
+    def __post_init__(self: "DerivedTransformQueryValidation") -> None:
         if self.transform is None:
             raise ValueError("transform must be provided for query validation.")
