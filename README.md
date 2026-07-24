@@ -979,7 +979,7 @@ deferDataGeneration (true/false) choose between syncronoys and asyncronous preco
 keepNulls (true/false) if true then nulls are written in the curve replacing any data present for the instant, default is false.
 upsertMode (Merge/Replace) for VersionedTimeSeries the merge writes in to the curve replacing existing data for an existing instant, replace writes the payload removing any previous data for the version. Leaving Null/None/Empty is equivalent to Merge.
 
-| DATETIME     | EXISTING   | PAYLOAD    | MERGE      | REPALACE   |
+| DATETIME     | EXISTING   | PAYLOAD    | MERGE      | REPLACE    |
 | ------------ | ---------- | ---------- | ---------- | ---------- |
 | VERSION NAME | 2025-01-01 | 2025-01-01 | 2025-01-01 | 2025-01-01 |
 | 2025-01-01   |            |            |            |            |
