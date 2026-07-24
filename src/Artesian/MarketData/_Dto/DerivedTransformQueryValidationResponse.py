@@ -20,7 +20,7 @@ class DerivedTransformQueryValidationResponse:
     """
     Class Represents the response of a derived transform query validation.
     Attributes:
-        data: The time series data transfored by the query.
+        data: The time series data transformed by the query.
         error: The Error in case of invalid query validation.
         valid: The transformation is valid or invalid.
     """
