@@ -529,6 +529,7 @@ outlierRule = DataQualityRuleDtoInput(
     model=OutlierAbsoluteBoundConfigDto(
       lowerBound=-10.0,
       upperBound=45.0,
+      type=RuleType.Outlier
     )
   ),
   version=0,

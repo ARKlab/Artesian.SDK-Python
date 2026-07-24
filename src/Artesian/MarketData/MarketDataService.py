@@ -525,7 +525,8 @@ class MarketDataService:
         params["pageSize"] = pageSize
         if type is not None:
             params["type"] = type.name
-        params["marketDataId"] = marketDataId
+        if marketDataId is not None:
+            params["marketDataId"] = marketDataId
         if name:
             params["name"] = name
         if ruleIds:
