@@ -1,6 +1,7 @@
 from dataclasses import dataclass
-from .TimeSerieData import TimeSerieData
+from typing import Optional
 
+from .TimeSerieData import TimeSerieData
 
 @dataclass
 class DerivedTransformQueryValidation:
