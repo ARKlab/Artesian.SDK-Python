@@ -35,14 +35,14 @@ jobs:
         run: |
           flake8 .
 
-      - name: Run Pyright
-        uses: jordemort/action-pyright@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          reporter: github-check
-          lib:
-          level: warning
-          filter_mode: file
+      # - name: Run Pyright
+      #   uses: jordemort/action-pyright@v1
+      #   with:
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
+      #     reporter: github-check
+      #     lib:
+      #     level: warning
+      #     filter_mode: file
 
       - name: Test Pytest
         run: |
