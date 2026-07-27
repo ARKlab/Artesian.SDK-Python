@@ -49,7 +49,7 @@ jobs:
         uses: jordemort/action-pyright@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }} # You need this
-          reporter: github-check # Change reporter.
+          reporter: github-pr-review # Change reporter.
           lib:
           level: warning
           filter_mode: file
