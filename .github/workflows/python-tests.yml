@@ -49,8 +49,8 @@ jobs:
         uses: jordemort/action-pyright@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }} # You need this
-          reporter: github-pr-review # Change reporter.
-          lib:
+          reporter: github-check # Change reporter.
+          lib: false
           level: warning
           filter_mode: file
 
