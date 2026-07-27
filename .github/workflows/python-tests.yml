@@ -50,7 +50,6 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }} # You need this
           reporter: github-check # Change reporter.
-          lib: false
           level: warning
           filter_mode: file
 
