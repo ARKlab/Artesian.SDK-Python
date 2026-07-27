@@ -61,25 +61,6 @@ jobs:
         run: |
           flake8 .
 
-      # # - name: Run Pyright
-      # #   uses: jordemort/action-pyright@v1
-      # #   with:
-      # #     github_token: ${{ secrets.GITHUB_TOKEN }}
-      # #     reporter: github-check
-      # #     lib:
-      # #     level: warning
-      # #     filter_mode: file
-      # - name: pyright
-      #   #  runs-on: ubuntu-latest
-      #   # uses: actions/checkout@v2
-      #   uses: jordemort/action-pyright@v1
-      #   with:
-      #     github_token: ${{ secrets.GITHUB_TOKEN }} # You need this
-      #     reporter: github-check # Change reporter.
-      #     lib:
-      #     level: warning
-      #     filter_mode: file
-
       - name: Test Pytest
         run: |
           pytest --junitxml=junit/test-results-${{ matrix.python-version }}-${{ matrix.os }}.xml
