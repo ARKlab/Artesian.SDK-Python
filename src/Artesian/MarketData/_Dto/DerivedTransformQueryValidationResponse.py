@@ -8,7 +8,7 @@ class Error:
     """
     Class Represents an error in the derived transform query validation response.
     Attributes:
-        message: The Error message when the query validation is invalid
+        message: The Error message when the query validation is invalid.
 
     """
 
