@@ -45,12 +45,12 @@ jobs:
       #     filter_mode: file
       - name: pyright
         #  runs-on: ubuntu-latest
-        uses: actions/checkout@v2
+        # uses: actions/checkout@v2
         uses: jordemort/action-pyright@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }} # You need this
           reporter: github-check # Change reporter.
-          lib:
+          lib: true
           level: warning
           filter_mode: file
 
