@@ -1,1 +1,5 @@
-* @ARKlab/team-teapot418 @ARKlab/maintainers
+* @ARKlab/team-teapot418
+/.github/ @ARKlab/maintainers
+/LICENSE @ARKlab/maintainers
+/CODEOWNERS @ARKlab/maintainers
+/renovate.json @ARKlab/maintainers
