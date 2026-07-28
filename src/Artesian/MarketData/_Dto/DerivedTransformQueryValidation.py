@@ -3,6 +3,7 @@ from typing import Optional
 
 from .TimeSerieData import TimeSerieData
 
+
 @dataclass
 class DerivedTransformQueryValidation:
     """
