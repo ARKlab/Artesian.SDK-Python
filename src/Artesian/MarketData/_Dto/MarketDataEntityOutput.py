@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 import datetime
 from typing import Optional
+
+from .DerivedCfg import DerivedCfg
 from .MarketDataEntityInput import MarketDataEntityInput
 
 
@@ -34,3 +36,16 @@ class MarketDataEntityOutput(MarketDataEntityInput):
     dataRangeEnd: Optional[datetime.date] = None
     created: Optional[datetime.datetime] = None
     # tranform: missing due to handling class hierarchies deserializations
+
+    def _validateUpdateDerivedCfg(
+            self: "MarketDataEntityOutput",
+            derivedCfgUpdate: DerivedCfg) -> None:
+        if self.derivedCfg is None:
+            raise Exception(
+                "DerivedCfg cannot be added to a MarketData that has not"
+            )
+
+        if self.derivedCfg.derivedAlgorithm != derivedCfgUpdate.derivedAlgorithm:
+            raise Exception(
+                "Derived Algorithm cannot be update"
+            )

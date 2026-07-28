@@ -25,12 +25,13 @@ registered = mkdservice.readMarketDataRegistryByName(
 if registered is None:
     registered = mkdservice.registerMarketData(bidAsk)
 
-bidAskData={datetime(2020, 1, 1, h): 
-            {
-                "Feb-20": MarketData.BidAskValue(bestBidPrice=15.0, lastQuantity=14.0),
-                "Mar-20": MarketData.BidAskValue(bestBidPrice=25.0, lastQuantity=24.0),
-            } for h in range(0, 23)
-        }
+bidAskData = {
+    datetime(2020, 1, 1, h): {
+        "Feb-20": MarketData.BidAskValue(bestBidPrice=15.0, lastQuantity=14.0),
+        "Mar-20": MarketData.BidAskValue(bestBidPrice=25.0, lastQuantity=24.0),
+    }
+    for h in range(0, 23)
+}
 
 bidAsk = MarketData.UpsertData(
     Artesian.MarketData.MarketDataIdentifier(
@@ -58,11 +59,13 @@ print(res)
 
 # Delete data between 2020-01-01 6am and 2020-01-01 6pm for product Feb-18
 deleteData = Artesian.MarketData.DeleteData(
-    ID=Artesian.MarketData.MarketDataIdentifier(registered.providerName, registered.marketDataName),
+    ID=Artesian.MarketData.MarketDataIdentifier(
+        registered.providerName, registered.marketDataName
+    ),
     timezone="CET",
     rangeStart=datetime(2020, 1, 1, 6),
     rangeEnd=datetime(2020, 1, 1, 18),
-    product=["Feb-20"]
+    product=["Feb-20"],
 )
 
 mkdservice.deleteData(deleteData)
@@ -80,10 +83,12 @@ print(res)
 
 # Delete data between 2020-01-01 6am and 2020-01-01 6pm for product Feb-18 without Timezone
 deleteData = Artesian.MarketData.DeleteData(
-    ID=Artesian.MarketData.MarketDataIdentifier(registered.providerName, registered.marketDataName),
+    ID=Artesian.MarketData.MarketDataIdentifier(
+        registered.providerName, registered.marketDataName
+    ),
     rangeStart=datetime(2020, 1, 1, 6),
     rangeEnd=datetime(2020, 1, 1, 18),
-    product=["Feb-20"]
+    product=["Feb-20"],
 )
 
 mkdservice.deleteData(deleteData)

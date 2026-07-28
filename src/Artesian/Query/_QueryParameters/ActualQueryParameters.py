@@ -4,6 +4,7 @@ from .QueryParameters import _QueryParameters
 from .ExtractionRangeType import ExtractionRangeType
 from .ExtractionRangeConfig import ExtractionRangeConfig
 from Artesian.MarketData import Granularity
+from Artesian.MarketData import AggregationRule
 
 
 class ActualQueryParameters(_QueryParameters):
@@ -18,6 +19,8 @@ class ActualQueryParameters(_QueryParameters):
         filterId: filters marketdata ID to be queries.
         granularity: sets  the granularity to be queried.
         transformId: sets time range.
+        unitOfMeasure: The UnitOfMeasure to use for extraction.
+        aggregationRule: The AggregationRule to use for extraction.
     """
 
     def __init__(
@@ -29,6 +32,8 @@ class ActualQueryParameters(_QueryParameters):
         filterId: Optional[int] = None,
         granularity: Optional[Granularity] = None,
         transformId: Optional[str] = None,
+        unitOfMeasure: Optional[str] = None,
+        aggregationRule: Optional[AggregationRule] = None
     ) -> None:
         """
         Inits ActualQueryParameters
@@ -42,9 +47,13 @@ class ActualQueryParameters(_QueryParameters):
             filterId: An int that filters marketdata ID to be queries.
             granularity: An enum that sets  the granularity to be queried.
             transformId: The name of the Time Transform to use for extraction.
+            unitOfMeasure: The UnitOfMeasure to use for extraction.
+            aggregationRule: The AggregationRule to use for extraction.
         """
         _QueryParameters.__init__(
             self, ids, extractionRangeConfig, extractionRangeType, timezone, filterId
         )
         self.granularity = granularity
         self.transformId = transformId
+        self.unitOfMeasure = unitOfMeasure
+        self.aggregationRule = aggregationRule

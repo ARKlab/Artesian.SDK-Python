@@ -411,23 +411,53 @@ res = mds.searchFacet(page, pageSize, searchText, filters, sorts, doNotLoadAddit
 
 Artesian support Query over GME Public Offers which comes in a custom and dedicated format.
 
+Note (performance):
+GME Public Offer data is partitioned by date, offerType, status, and market. Requesting very narrow subsets (for example a single status or offerType in several separate requests) does not improve performance and can cause the same data to be fetched multiple times.
+For this reason, the examples below:
+	•	Use a large page size so that all data for a given (date, market, filters) is typically returned in a single page.
+	•	Loop over markets explicitly to cover all required markets without redundant fetches.
+
 ### Extract GME Public Offer
 
 ```Python
 from Artesian.GMEPublicOffers import GMEPublicOfferService, Market, Purpose, Status, Zone, Scope, UnitType, GenerationType, BAType
 
-qs = GMEPublicOfferService(cfg)
+/* your Artesian configuration */;
 
-data = qs.createQuery() \
+var _cfg = new ArtesianServiceConfig(
+new Uri("https://arkive.artesian.cloud/{TENANT_NAME}/"),
+your_API_Key);
+
+qs = GMEPublicOfferService(_cfg)
+
+# Large page size: goal is to get all data for the given filters in one page
+PAGE_SIZE = 250000
+
+# List of markets to cover. Extend as needed for your use case.
+markets = [
+    Market.MGP,
+    # Market.MSD,
+    # Market.MIT,
+]
+
+all_data = []
+
+for market in markets:
+
+data = (
+    qs.createQuery() \
     .forDate("2020-04-01") \
     .forMarket([Market.MGP]) \
     .forStatus(Status.ACC) \
     .forPurpose(Purpose.BID) \
     .forZone([Zone.NORD]) \
-    .withPagination(1,100) \
+    .withPagination(1,PAGE_SIZE) \
     .execute()
+    )
+    print(f"Fetched {len(data)} offers for market {market}")
+    all_data.extend(data)
 
-print(data)
+print(f"Total offers fetched: {len(all_data)}")
 ```
 
 To construct a GME Public Offer Extraction the following must be provided.
@@ -441,6 +471,154 @@ To construct a GME Public Offer Extraction the following must be provided.
      <tr><td>Zone</td><td>Provide a zone to query</td></tr>
      
 </table>
+
+### Unit of Measure Conversion Functionality
+
+### Overview
+
+The unit of measure conversion functionality allows users to request a conversion of units for Market Data that was registered using a different unit. This feature is supported only for Actual and Versioned Time Series.
+Supported units are defined in the CommonUnitOfMeasure object and conform to ISO/IEC 80000 (i.e., `kW`, `MW`, `kWh`, `MWh`, `m`, `km`, `day`, `min`, `h`, `s`, `mo`, `yr`).
+
+Note: Duration-based units are interpreted with the following fixed assumptions:
+`1 day = 24 hours`
+`1 mo = 30 days`
+`1 yr = 365 days`
+
+Additional supported units include **currency codes** in 3-letter format as per ISO 4217:2015 (e.g., `EUR`, `USD`, `JPY`). These are not part of CommonUnitOfMeasure and must be specified as regular strings.
+Units of measure can also be **composite**, using the {a}/{b} syntax, where both {a} and {b} are either units from CommonUnitOfMeasure or ISO 4217 currency codes.
+
+### Conversion Logic
+
+Unit conversion is based on the assumption that each unit of measure can be decomposed into a **"BaseDimension"**, which represents a polynomial of base SI units (`m`, `s`, `kg`, etc.) and currencies (`EUR`, `USD`, etc.).
+A unit of measure is represented as a value in BaseDimension UnitOdMeasure.
+Example:
+10 `Wh` = 10 `kg·m²·s⁻³`
+Conversion is allowed when the BaseDimensions **match exactly**, i.e., the same set of base units raised to the same exponents.
+In Artesian, units that differ **only** in the **time dimension** are also potentially convertible, as the time dimension can be inferred from the data’s time interval.
+
+### Example: Power to Energy Conversion
+
+Converting `W` to `Wh`:
+• `W` → BaseDimension: `k·m²·s⁻³`
+• `Wh` → BaseDimension: `kg·m²·s⁻²`
+• `1 h = 3600 s`
+**Conversion Steps:**
+10 W = 10 kg·m²/s³
+1 h = 3600 s
+10 kg·m²/s³ × 3600 s = 36000 kg·m²/s² = 10 Wh
+
+### MarketData Registration with UnitOfMeasure
+
+The UnitOfMeasure is defined during registration:
+
+```Python
+mkd = MarketData.MarketDataEntityInput(
+      providerName = "TestProviderName",
+      marketDataName = "TestMarketDataName",
+      originalGranularity=Granularity.Day,
+      type=MarketData.MarketDataType.ActualTimeSerie,
+      originalTimezone="CET",
+      aggregationRule=AggregationRule.SumAndDivide,
+    UnitOfMeasure = CommonUnitOfMeasure.kW
+  )
+
+registered = mkservice.readMarketDataRegistryByName(mkdid.provider, mkdid.name)
+if (registered is None):
+  registered = mkservice.registerMarketData(mkd)
+```
+
+### UnitOfMeasure Conversion and Aggregation Rule Override
+
+In the QueryService, there are two supported methods related to unit of measure handling during extraction:
+
+1. UnitOfMeasure Conversion
+2. Aggregation Rule Override
+
+### UnitOfMeasure Conversion
+
+To convert a UnitOfMeasure during data extraction, use the `.inUnitOfMeasure()` method. This function converts the data from the unit defined at MarketData registration to the target unit you specify in the query.
+
+```Python
+qs = QueryService(cfg)
+data = qs.createActual() \
+    .forMarketData([100011484]) \
+    .inAbsoluteDateRange("2024-01-01","2024-01-02") \
+    .inTimeZone("UTC") \
+    .inGranularity(Granularity.Day) \
+    .inUnitOfMeasure(CommonUnitOfMeasure.MW) \
+    .execute()
+```
+
+By default, the aggregation rule used during extraction is the one defined at registration. However, you can override it if needed. The conversion is always applied before aggregation.
+
+### Aggregation Rule Override
+
+AggregationRule can be overrided using the `.withAggregationRule()` method in QueryService.
+
+```Python
+qs = QueryService(cfg)
+data = qs.createActual() \
+    .forMarketData([100011484]) \
+    .inAbsoluteDateRange("2024-01-01","2024-01-02") \
+    .inTimeZone("UTC") \
+    .inGranularity(Granularity.Day) \
+    .withAggregationRule(AggregationRule.AverageAndReplicate) \
+    .execute()
+```
+
+Sometimes, especially when converting from a **consumption unit** (e.g., `MWh`) to a **power unit** (e.g., `MW`), the registered aggregation rule (e.g., `SumAndDivide`) may not make sense for the new unit.
+
+If you **don’t override the aggregation rule**, the conversion may produce **invalid or misleading results**.
+
+### Example: Convert power (`MW`) to energy (`MWh`):
+
+```Python
+data = qs.createActual() \
+    .forMarketData([100011484]) \
+    .inAbsoluteDateRange("2024-01-01","2024-01-02") \
+    .inTimeZone("UTC") \
+    .inGranularity(Granularity.Day) \
+    .inUnitOfMeasure(CommonUnitOfMeasure.MWh) \
+    .withAggregationRule(AggregationRule.AverageAndReplicate) \
+    .execute()
+```
+
+### Composite Unit Example: `MWh/day`
+
+```Python
+data = qs.createActual() \
+    .forMarketData([100011484]) \
+    .inAbsoluteDateRange("2024-01-01","2024-01-02") \
+    .inTimeZone("UTC") \
+    .inGranularity(Granularity.Day) \
+    .inUnitOfMeasure(CommonUnitOfMeasure.MWh / CommonUnitOfMeasure.day) \
+    .withAggregationRule(AggregationRule.AverageAndReplicate) \
+    .execute()
+```
+
+### CheckConversion: Validate Unit Compatibility
+
+Use the `CheckConversion` method to verify whether a list of input units can be converted into a specifified target unit:
+
+```Python
+from Artesian import ArtesianConfig, MarketData
+from Artesian.MarketData import CommonUnitOfMeasure
+
+cfg = ArtesianConfg()
+
+mkservice = MarketData.MarketDataService(cfg)
+
+inputUnitsOfMeasure = [CommonUnitOfMeasure.kW, CommonUnitOfMeasure.kWh, "EUR/MWh"]
+targetUnitOfMeasure = CommonUnitOfMeasure.MW
+
+checkConversionResult = mkservice.checkConversion(inputUnitsOfMeasure , targetUnitOfMeasure)
+```
+
+**Returned Object: CheckConversionResult**
+
+1. TargetUnitOfMeasure: "`kW`"
+2. ConvertibleInputUnitsOfMeasure: [ "`MW`", "`kW/s`" ]
+3. NotConvertibleInputUnitsOfMeasure: [ "`s`" ]
 
 ### Extraction Options
 
@@ -518,6 +696,18 @@ Extraction options for GME Public Offer queries.
  .withPagination(1,10)
 ```
 
+#### UnitOfMeasure (for Actual and Versioned Time Series)
+
+```Python
+ .inUnitOfMeasure(CommonUnitOfMeasure.kWh)
+```
+
+#### AggregationRule (for Actual and Versioned Time Series)
+
+```Python
+ .withAggregationRule(AggregationRule.SumAndDivide)
+```
+
 ## Write Data in Artesian
 
 Using the MarketDataService is possible to register MarketData and write curves into it using the UpsertData method.
@@ -546,7 +736,12 @@ mkd = MarketData.MarketDataEntityInput(
       aggregationRule=AggregationRule.AverageAndReplicate,
       tags={
         'TestSDKPython': ['PythonValue2']
-      }
+      },
+      derivedCfg=DerivedCfg(
+                version=1,
+                derivedAlgorithm=DerivedAlgorithm.Coalesce,
+                orderedReferencedMarketDataIds=[10000, 10001, 10002],
+            ),
   )
 
 registered = mkservice.readMarketDataRegistryByName(mkdid.provider, mkdid.name)
@@ -563,7 +758,35 @@ data = MarketData.UpsertData(mkdid, 'CET',
   )
 
 mkservice.upsertData(data)
+```
 
+Upsert has optional switches that can be applied
+```
+mkservice.upsertData(data, deferCommandExecution, deferDataGeneration, keepNulls, upsertMode)
+```
+The switch details are,
+
+deferCommandExecution (true/false) choose between syncronoys and asyncronous command execution, default is false.
+deferDataGeneration (true/false) choose between syncronoys and asyncronous precomputed data generation, default is true.
+keepNulls (true/false) if true then nulls are written in the curve replacing any data present for the instant, default is false.
+upsertMode (Merge/Replace) for ActualTimeSeries the two modes are equivalent. Leaving Null/None/Empty is equivalent to Merge.
+
+
+DerivedCfg can be of algorithm type: Coalesce, Sum, Muv.
+
+Updating the DerivedCfg can be performed with `updateDerivedConfiguration` on MarketDataService. A validation will be done on the existing DerivedCfg of the MarketData, that should be not null and with same type as the one used for the update.
+
+```csharp
+derivedCfgUpdate = DerivedCfg(
+    version=1,
+    derivedAlgorithm=DerivedAlgorithm.Coalesce,
+    orderedReferencedMarketDataIds=[10002, 10001, 10000],
+)
+
+marketDataUpdated = mkdservice.updateDerivedConfiguration(
+                        registeredDerived.marketDataId,
+                        derivedCfgUpdate,
+                        False)
 ```
 
 In case we want to write an hourly (or lower) time series the timezone for the upsert data must be UTC:
@@ -647,6 +870,37 @@ mkservice.upsertData(data)
 
 ```
 
+Upsert has optional switches that can be applied
+```
+mkservice.upsertData(data, deferCommandExecution, deferDataGeneration, keepNulls, upsertMode)
+```
+The switch details are,
+
+deferCommandExecution (true/false) choose between syncronoys and asyncronous command execution, default is false.
+deferDataGeneration (true/false) choose between syncronoys and asyncronous precomputed data generation, default is true.
+keepNulls (true/false) if true then nulls are written in the curve replacing any data present for the instant, default is false.
+upsertMode (Merge/Replace) for VersionedTimeSeries the merge writes in to the curve replacing existing data for an existing instant, replace writes the payload removing any previous data for the version. Leaving Null/None/Empty is equivalent to Merge.
+
+| DATETIME | EXISTING | PAYLOAD | MERGE | REPALACE |
+|---|---|---|---|---|
+| VERSION NAME | 2025-01-01 | 2025-01-01 | 2025-01-01 | 2025-01-01 |
+| 2025-01-01 |        |        |        |        |
+| 2025-01-02 | 999.99 | 222.22 | 222.22 | 222.22 |
+| 2025-01-03 | 999.99 | 222.22 | 222.22 | 222.22 |
+| 2025-01-04 | 999.99 | 222.22 | 222.22 | 222.22 |
+| 2025-01-05 | 999.99 | 222.22 | 222.22 | 222.22 |
+| 2025-01-06 | 999.99 | 222.22 | 222.22 | 222.22 |
+| 2025-01-07 | 999.99 | 222.22 | 222.22 | 222.22 |
+| 2025-01-08 |        | 222.22 | 222.22 | 222.22 |
+| 2025-01-09 |        |        |        |        |
+| 2025-01-10 |        |        |        |        |
+| 2025-01-11 | 999.99 |        | 999.99 |        |
+| 2025-01-12 | 999.99 |        | 999.99 |        |
+| 2025-01-13 | 999.99 |        | 999.99 |        |
+| 2025-01-14 |        |        |        |        |
+| 2025-01-15 |        |        |        |        |
+
+
 ### Write Data in a Market Assessment Time Series
 
 ```Python
@@ -694,6 +948,18 @@ mkservice.upsertData(marketAssessment)
 
 ```
 
+Upsert has optional switches that can be applied
+```
+mkservice.upsertData(data, deferCommandExecution, deferDataGeneration, keepNulls, upsertMode)
+```
+The switch details are,
+
+deferCommandExecution (true/false) choose between syncronoys and asyncronous command execution, default is false.
+deferDataGeneration (true/false) choose between syncronoys and asyncronous precomputed data generation, default is true.
+keepNulls (true/false) if true then nulls are written in the curve replacing any data present for the instant, default is false.
+upsertMode (Merge/Replace) for MarketAssessment merge adds the new products to the existing and overwrites existing with the new ones while replace replaces all the existing products with the new ones. Leaving Null/None/Empty is equivalent to Merge.
+
+
 ### Write Data in a Bid Ask Time Series
 
 ```Python
@@ -740,6 +1006,18 @@ bidAsk = MarketData.UpsertData(MarketData.MarketDataIdentifier('PROVIDER', 'MARK
 mkservice.upsertData(bidAsk)
 ```
 
+Upsert has optional switches that can be applied
+```
+mkservice.upsertData(data, deferCommandExecution, deferDataGeneration, keepNulls, upsertMode)
+```
+The switch details are,
+
+deferCommandExecution (true/false) choose between syncronoys and asyncronous command execution, default is false.
+deferDataGeneration (true/false) choose between syncronoys and asyncronous precomputed data generation, default is true.
+keepNulls (true/false) if true then nulls are written in the curve replacing any data present for the instant, default is false.
+upsertMode (Merge/Replace) for BidAsk merge adds the new products to the existing and overwrites existing with the new ones while replace replaces all the existing products with the new ones. Leaving Null/None/Empty is equivalent to Merge.
+
+
 ### Write Data in an Auction Time Series
 
 ```Python
@@ -784,8 +1062,19 @@ auctionRows = MarketData.UpsertData(MarketData.MarketDataIdentifier('PROVIDER', 
 
   mkservice.upsertData(auctionRows)
 
-
 ```
+
+Upsert has optional switches that can be applied
+```
+mkservice.upsertData(data, deferCommandExecution, deferDataGeneration, keepNulls, upsertMode)
+```
+The switch details are,
+
+deferCommandExecution (true/false) choose between syncronoys and asyncronous command execution, default is false.
+deferDataGeneration (true/false) choose between syncronoys and asyncronous precomputed data generation, default is true.
+keepNulls (true/false) if true then nulls are written in the curve replacing any data present for the instant, default is false.
+upsertMode (Merge/Replace) for Auction merge and replace are equivalent. Leaving Null/None/Empty is equivalent to Merge.
+
 
 ## Delete Data in Artesian
 

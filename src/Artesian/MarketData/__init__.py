@@ -1,8 +1,10 @@
+from ._Enum.DerivedAlgorithm import DerivedAlgorithm
 from .MarketDataService import MarketDataService
 from ._Enum.AggregationRule import AggregationRule
 from ..Granularity import Granularity
 from ._Enum.MarketDataType import MarketDataType
 from ._Enum.ArtesianMetadataFacetType import ArtesianMetadataFacetType
+from .CommonUnitOfMeasure import CommonUnitOfMeasure
 
 from ._Dto import (
     AuctionBids,
@@ -19,6 +21,9 @@ from ._Dto import (
     ArtesianSearchResults,
     ArtesianMetadataFacet,
     ArtesianMetadataFacetCount,
+    DerivedCfg,
+    CheckConversionResult,
+    UnitOfMeasure,
 )
 
 __all__ = [
@@ -41,4 +46,9 @@ __all__ = [
     ArtesianMetadataFacet.__name__,
     ArtesianMetadataFacetCount.__name__,
     ArtesianMetadataFacetType.__name__,
+    DerivedCfg.__name__,
+    CheckConversionResult.__name__,
+    DerivedAlgorithm.__name__,
+    CommonUnitOfMeasure.__name__,
+    UnitOfMeasure.__name__,
 ]  # type: ignore

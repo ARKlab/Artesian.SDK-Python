@@ -4,6 +4,7 @@ from dateutil import parser
 import jsons
 from typing import Any, Callable, Dict, Optional, get_args
 
+
 __commonFmt = "%Y-%m-%dT%H:%M:%S.%f"
 if system() == "Linux":
     __commonFmt = "%04Y-%m-%dT%H:%M:%S.%f"
@@ -63,6 +64,7 @@ def __artesianDictDeserializer(
         )
         for item in obj
     }
+
     return result
 
 
