@@ -1,6 +1,6 @@
 from __future__ import annotations
 from email.message import Message
-from typing import Any, Optional
+from typing import Any, Optional, cast
 import requests
 import platform
 
@@ -57,7 +57,7 @@ class _Client:
         retcls: Optional[type] = None,
         params: Optional[dict] = None,
     ) -> Any | None:
-        json = artesianJsonSerialize(obj)
+        json = cast(Any, artesianJsonSerialize(obj))
         url = self.__baseUrl + url
         r = requests.Request(method, url, json=json, params=params)
         prep = self.__session.prepare_request(r)
