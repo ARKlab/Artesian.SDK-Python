@@ -3,6 +3,8 @@ from datetime import datetime
 from typing import List, Optional, cast, Dict
 
 from Artesian.MarketData._Dto import DeleteData
+from Artesian.MarketData._Dto.DerivedTransformQueryValidation import DerivedTransformQueryValidation
+from Artesian.MarketData._Dto.DerivedTransformQueryValidationResponse import DerivedTransformQueryValidationResponse
 from ._Dto.DerivedCfg import DerivedCfg
 from .._ClientsExecutor.RequestExecutor import _RequestExecutor
 from .._ClientsExecutor.Client import _Client
@@ -1136,6 +1138,53 @@ class MarketDataService:
 
     def deleteData(self: MarketDataService, data: DeleteData) -> None:
         return _get_event_loop().run_until_complete(self.deleteDataAsync(data))
+
+    async def derivedTransformQueryValidationAsync(
+        self: MarketDataService,
+        request: DerivedTransformQueryValidation
+    ) -> DerivedTransformQueryValidationResponse:
+        """
+        Derived Transform Query Validation.
+
+        Args:
+            request: Request containing TimeSerieData and the Query to be applied to verify the derived transformation
+        Returns:
+            DerivedTransformQueryValidationResponse Entity (Async).
+        """
+        url = "/utils/derivedTransform/queryValidation"
+
+        with self.__client as c:
+            res = await asyncio.gather(
+                *[
+                    self.__executor.exec(
+                        c.exec,
+                        "POST",
+                        url,
+                        request,
+                        retcls=DerivedTransformQueryValidationResponse
+                    )
+                ]
+            )
+
+            return cast(DerivedTransformQueryValidationResponse, res[0])
+
+    def derivedTransformQueryValidation(
+        self: MarketDataService,
+        request: DerivedTransformQueryValidation
+    ) -> DerivedTransformQueryValidationResponse:
+        """
+        Derived Transform Query Validation.
+
+        Args:
+            request: Request containing TimeSerieData and the Query to be applied to verify the derived transformation
+
+        Returns:
+            DerivedTransformQueryValidationResponse Entity.
+        """
+
+        return _get_event_loop().run_until_complete(
+            self.derivedTransformQueryValidationAsync(request)
+        )
 
 
 def _get_event_loop() -> asyncio.AbstractEventLoop:

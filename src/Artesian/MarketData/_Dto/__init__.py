@@ -2,6 +2,7 @@ from .MarketDataEntityInput import MarketDataEntityInput
 from .MarketDataEntityOutput import MarketDataEntityOutput
 from .CheckConversionResult import CheckConversionResult
 from .UnitOfMeasure import UnitOfMeasure
+from .TimeSerieData import TimeSerieData
 from .CurveRangeEntity import CurveRangeEntity
 from .PagedResult import (
     PagedResultCurveRangeEntity,
@@ -80,4 +81,5 @@ __all__ = [
     MarketDataQualityRuleAssignmentDtoOutput.__name__,
     CheckConversionResult.__name__,
     UnitOfMeasure.__name__,
+    TimeSerieData.__name__,
 ]  # type: ignore
