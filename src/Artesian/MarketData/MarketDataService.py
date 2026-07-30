@@ -11,7 +11,7 @@ from .._ClientsExecutor.Client import _Client
 from ..ArtesianConfig import ArtesianConfig
 from ..ArtesianPolicyConfig import ArtesianPolicyConfig
 from ._Dto.PagedResult import (
-    PagedResultCurveRangeEntity,
+    PagedResultCurveRangeEntity, PagedResultCheckResultCheckSummaryDto,
     PagedResultDataQualityRuleDtoOutput,
     PagedResultMarketDataQualityRuleAssignmentDtoOutput,
 )
@@ -28,6 +28,10 @@ from ._Dto.MarketDataQualityRuleAssignmentDto import (
     MarketDataQualityRuleAssignmentDtoOutput,
 )
 from ._Enum.RuleType import RuleType
+from ._Dto.CheckResultExtract import CheckResultExtractVts, CheckResultExtractTs
+from ._Dto.MarketDataDqStatusSummaryDto import MarketDataDqStatusSummaryDto
+from ._Dto.DqRuleDqStatusSummaryDto import DqRuleDqStatusSummaryDto
+from ..CheckAggregatedStatus import CheckAggregatedStatus
 import asyncio
 
 
@@ -1186,6 +1190,436 @@ class MarketDataService:
 
         return _get_event_loop().run_until_complete(
             self.derivedTransformQueryValidationAsync(request)
+        )
+
+    async def getDataQualityCheckResultExtractVtsAsync(
+        self: MarketDataService,
+        version: str,
+        granularity: str,
+        start: str,
+        end: str,
+        timeZone: str,
+        assignmentIds: Optional[List[int]] = None,
+    ) -> List[CheckResultExtractVts]:
+        """
+        Extracts data quality check results for versioned time series (VTS).
+        Returns compact, abbreviated DTOs designed for high-volume extraction.
+
+        Args:
+            version: Version timestamp (ISO format).
+            granularity: Time granularity (Day, Hour, etc.).
+            start: Range start date (yyyy-MM-dd).
+            end: Range end date (yyyy-MM-dd), not inclusive.
+            timeZone: IANA timezone identifier (e.g., "UTC", "Europe/Rome").
+            assignmentIds: Optional filter by assignment IDs. If None or empty, returns results for all assignments.
+
+        Returns:
+            An enumerable of CheckResultExtractVts with Version populated (Async).
+        """
+        if not timeZone:
+            raise ValueError("timeZone cannot be None or empty")
+
+        url = (f"/dataquality/checkresult/extract/vts/Version/{version}"
+               f"/{granularity}/{start}/{end}")
+        params = {}
+        params["timeZone"] = timeZone
+        if assignmentIds is not None and len(assignmentIds) > 0:
+            params["assignmentIds"] = assignmentIds
+
+        with self.__client as c:
+            res = await asyncio.gather(
+                *[
+                    self.__executor.exec(
+                        c.exec,
+                        "GET",
+                        url,
+                        None,
+                        retcls=List[CheckResultExtractVts],
+                        params=params,
+                    )
+                ]
+            )
+            return cast(List[CheckResultExtractVts], res[0])
+
+    def getDataQualityCheckResultExtractVts(
+        self: MarketDataService,
+        version: str,
+        granularity: str,
+        start: str,
+        end: str,
+        timeZone: str,
+        assignmentIds: Optional[List[int]] = None,
+    ) -> List[CheckResultExtractVts]:
+        """
+        Extracts data quality check results for versioned time series (VTS).
+        Returns compact, abbreviated DTOs designed for high-volume extraction.
+
+        Args:
+            version: Version timestamp (ISO format).
+            granularity: Time granularity (Day, Hour, etc.).
+            start: Range start date (yyyy-MM-dd).
+            end: Range end date (yyyy-MM-dd), not inclusive.
+            timeZone: IANA timezone identifier (e.g., "UTC", "Europe/Rome").
+            assignmentIds: Optional filter by assignment IDs. If None or empty, returns results for all assignments.
+
+        Returns:
+            An enumerable of CheckResultExtractVts with Version populated.
+        """
+        return _get_event_loop().run_until_complete(
+            self.getDataQualityCheckResultExtractVtsAsync(version, granularity, start, end, timeZone, assignmentIds)
+        )
+
+    async def getDataQualityCheckResultExtractTsAsync(
+        self: MarketDataService,
+        granularity: str,
+        start: str,
+        end: str,
+        timeZone: str,
+        assignmentIds: Optional[List[int]] = None,
+    ) -> List[CheckResultExtractTs]:
+        """
+        Extracts data quality check results for (non-versioned) time series (TS).
+        Returns compact DTOs without version information.
+
+        Args:
+            granularity: Time granularity (Day, Hour, etc.).
+            start: Range start date (yyyy-MM-dd).
+            end: Range end date (yyyy-MM-dd), not inclusive.
+            timeZone: IANA timezone identifier (e.g., "UTC", "Europe/Rome").
+            assignmentIds: Optional filter by assignment IDs. If None or empty, returns results for all assignments.
+
+        Returns:
+            An enumerable of CheckResultExtractTs (Async).
+        """
+        if not timeZone:
+            raise ValueError("timeZone cannot be None or empty")
+
+        url = "/dataquality/checkresult/extract/ts/" + str(granularity) + "/" + str(start) + "/" + str(end)
+        params = {}
+        params["timeZone"] = timeZone
+        if assignmentIds is not None and len(assignmentIds) > 0:
+            params["assignmentIds"] = assignmentIds
+
+        with self.__client as c:
+            res = await asyncio.gather(
+                *[
+                    self.__executor.exec(
+                        c.exec,
+                        "GET",
+                        url,
+                        None,
+                        retcls=List[CheckResultExtractTs],
+                        params=params,
+                    )
+                ]
+            )
+            return cast(List[CheckResultExtractTs], res[0])
+
+    def getDataQualityCheckResultExtractTs(
+        self: MarketDataService,
+        granularity: str,
+        start: str,
+        end: str,
+        timeZone: str,
+        assignmentIds: Optional[List[int]] = None,
+    ) -> List[CheckResultExtractTs]:
+        """
+        Extracts data quality check results for (non-versioned) time series (TS).
+        Returns compact DTOs without version information.
+
+        Args:
+            granularity: Time granularity (Day, Hour, etc.).
+            start: Range start date (yyyy-MM-dd).
+            end: Range end date (yyyy-MM-dd), not inclusive.
+            timeZone: IANA timezone identifier (e.g., "UTC", "Europe/Rome").
+            assignmentIds: Optional filter by assignment IDs. If None or empty, returns results for all assignments.
+
+        Returns:
+            An enumerable of CheckResultExtractTs.
+        """
+        return _get_event_loop().run_until_complete(
+            self.getDataQualityCheckResultExtractTsAsync(granularity, start, end, timeZone, assignmentIds)
+        )
+
+    async def getDataQualityCheckResultCheckSummaryAsync(
+        self: MarketDataService,
+        page: int,
+        pageSize: int,
+        marketDataIds: Optional[List[int]] = None,
+        ruleIds: Optional[List[int]] = None,
+        assignmentIds: Optional[List[int]] = None,
+        dqStatus: Optional[CheckAggregatedStatus] = None,
+        from_date: Optional[str] = None,
+        to_date: Optional[str] = None,
+        versionFrom: Optional[str] = None,
+        versionTo: Optional[str] = None,
+        products: Optional[List[str]] = None,
+        skipEmptyRanges: bool = False,
+        sort: Optional[List[str]] = None,
+    ) -> PagedResultCheckResultCheckSummaryDto:
+        """
+        Retrieves a paged summary of data quality check results (CurveRange-like view per assignment).
+        Includes range metadata, product info, and assignment details.
+
+        Args:
+            page: Page number (1-based, default: 1).
+            pageSize: Items per page (default: 10).
+            marketDataIds: Optional filter by MarketData IDs.
+            ruleIds: Optional filter by Rule IDs.
+            assignmentIds: Optional filter by Assignment IDs.
+            dqStatus: Optional filter by aggregated DQ status (OK/KO).
+            from_date: Optional range start filter (ISO format).
+            to_date: Optional range end filter (ISO format).
+            versionFrom: Optional version range start (ISO format).
+            versionTo: Optional version range end (ISO format).
+            products: Optional filter by products.
+            skipEmptyRanges: When True, return only summaries with non-empty range data (default: False).
+            sort: Optional sort expressions (e.g., ["RuleName asc", "LastCheckTime desc"]).
+
+        Returns:
+            A paginated result containing CheckResultCheckSummaryDto items (Async).
+        """
+        if page < 1:
+            raise ValueError(f"Page must be greater than 0. Page: {page}")
+        if pageSize < 1:
+            raise ValueError(f"PageSize must be greater than 0. PageSize: {pageSize}")
+
+        url = "/dataquality/checkresult/checksummary"
+        params = {
+            "page": page,
+            "pageSize": pageSize,
+            "skipEmptyRanges": skipEmptyRanges,
+        }
+
+        if marketDataIds is not None and len(marketDataIds) > 0:
+            params["marketDataIds"] = marketDataIds
+        if ruleIds is not None and len(ruleIds) > 0:
+            params["ruleIds"] = ruleIds
+        if assignmentIds is not None and len(assignmentIds) > 0:
+            params["assignmentIds"] = assignmentIds
+        if dqStatus is not None:
+            params["dqStatus"] = dqStatus.value
+        if from_date is not None:
+            params["from"] = from_date
+        if to_date is not None:
+            params["to"] = to_date
+        if versionFrom is not None:
+            params["versionFrom"] = versionFrom
+        if versionTo is not None:
+            params["versionTo"] = versionTo
+        if products is not None and len(products) > 0:
+            params["products"] = products
+        if sort is not None and len(sort) > 0:
+            params["sort"] = sort
+
+        with self.__client as c:
+            res = await asyncio.gather(
+                *[
+                    self.__executor.exec(
+                        c.exec,
+                        "GET",
+                        url,
+                        None,
+                        retcls=PagedResultCheckResultCheckSummaryDto,
+                        params=params,
+                    )
+                ]
+            )
+            return cast(PagedResultCheckResultCheckSummaryDto, res[0])
+
+    def getDataQualityCheckResultCheckSummary(
+        self: MarketDataService,
+        page: int,
+        pageSize: int,
+        marketDataIds: Optional[List[int]] = None,
+        ruleIds: Optional[List[int]] = None,
+        assignmentIds: Optional[List[int]] = None,
+        dqStatus: Optional[CheckAggregatedStatus] = None,
+        from_date: Optional[str] = None,
+        to_date: Optional[str] = None,
+        versionFrom: Optional[str] = None,
+        versionTo: Optional[str] = None,
+        products: Optional[List[str]] = None,
+        skipEmptyRanges: bool = False,
+        sort: Optional[List[str]] = None,
+    ) -> PagedResultCheckResultCheckSummaryDto:
+        """
+        Retrieves a paged summary of data quality check results (CurveRange-like view per assignment).
+        Includes range metadata, product info, and assignment details.
+
+        Args:
+            page: Page number (1-based, default: 1).
+            pageSize: Items per page (default: 10).
+            marketDataIds: Optional filter by MarketData IDs.
+            ruleIds: Optional filter by Rule IDs.
+            assignmentIds: Optional filter by Assignment IDs.
+            dqStatus: Optional filter by aggregated DQ status (OK/KO).
+            from_date: Optional range start filter (ISO format).
+            to_date: Optional range end filter (ISO format).
+            versionFrom: Optional version range start (ISO format).
+            versionTo: Optional version range end (ISO format).
+            products: Optional filter by products.
+            skipEmptyRanges: When True, return only summaries with non-empty range data (default: False).
+            sort: Optional sort expressions (e.g., ["RuleName asc", "LastCheckTime desc"]).
+
+        Returns:
+            A paginated result containing CheckResultCheckSummaryDto items.
+        """
+        return _get_event_loop().run_until_complete(
+            self.getDataQualityCheckResultCheckSummaryAsync(
+                page, pageSize, marketDataIds, ruleIds, assignmentIds, dqStatus,
+                from_date, to_date, versionFrom, versionTo, products, skipEmptyRanges, sort
+            )
+        )
+
+    async def getMarketDataDqStatusSummaryAsync(
+        self: MarketDataService,
+        ruleId: Optional[int] = None,
+        marketDataIds: Optional[List[int]] = None,
+        dqStatus: Optional[CheckAggregatedStatus] = None,
+        limit: int = 10,
+    ) -> List[MarketDataDqStatusSummaryDto]:
+        """
+        Retrieves market data entities with their DQ status summary for a given rule.
+        Results are sorted by LastCheckTime descending.
+
+        Args:
+            ruleId: Optional Rule ID filter.
+            marketDataIds: Optional filter by MarketData IDs.
+            dqStatus: Optional aggregated DQ status filter (OK/KO). When KO, returns only Market Data
+            whose overall status is KO.
+            limit: Maximum number of results to return (1..1000, default: 10).
+
+        Returns:
+            An enumerable of MarketDataDqStatusSummaryDto items (Async).
+        """
+        if limit < 1 or limit > 1000:
+            raise ValueError(f"Limit must be between 1 and 1000. Limit: {limit}")
+
+        url = "/dataquality/checkresult/marketdata/dataqualitystatussummary"
+        params = {}
+        params["limit"] = limit
+
+        if ruleId is not None:
+            params["ruleId"] = ruleId
+        if marketDataIds is not None and len(marketDataIds) > 0:
+            params["marketDataIds"] = marketDataIds
+        if dqStatus is not None:
+            params["dqStatus"] = dqStatus.value
+
+        with self.__client as c:
+            res = await asyncio.gather(
+                *[
+                    self.__executor.exec(
+                        c.exec,
+                        "GET",
+                        url,
+                        None,
+                        retcls=List[MarketDataDqStatusSummaryDto],
+                        params=params,
+                    )
+                ]
+            )
+            return cast(List[MarketDataDqStatusSummaryDto], res[0])
+
+    def getMarketDataDqStatusSummary(
+        self: MarketDataService,
+        ruleId: Optional[int] = None,
+        marketDataIds: Optional[List[int]] = None,
+        dqStatus: Optional[CheckAggregatedStatus] = None,
+        limit: int = 10,
+    ) -> List[MarketDataDqStatusSummaryDto]:
+        """
+        Retrieves market data entities with their DQ status summary for a given rule.
+        Results are sorted by LastCheckTime descending.
+
+        Args:
+            ruleId: Optional Rule ID filter.
+            marketDataIds: Optional filter by MarketData IDs.
+            dqStatus: Optional aggregated DQ status filter (OK/KO). When KO, returns only Market Data
+            whose overall status is KO.
+            limit: Maximum number of results to return (1..1000, default: 10).
+
+        Returns:
+            An enumerable of MarketDataDqStatusSummaryDto items.
+        """
+        return _get_event_loop().run_until_complete(
+            self.getMarketDataDqStatusSummaryAsync(ruleId, marketDataIds, dqStatus, limit)
+        )
+
+    async def getDqRuleDqStatusSummaryAsync(
+        self: MarketDataService,
+        marketDataId: Optional[int] = None,
+        ruleIds: Optional[List[int]] = None,
+        dqStatus: Optional[CheckAggregatedStatus] = None,
+        limit: int = 10,
+    ) -> List[DqRuleDqStatusSummaryDto]:
+        """
+        Retrieves DQ rules with their status summary, optionally filtered by a specific market data entity.
+        Results are sorted by LastCheckTime descending.
+
+        Args:
+            marketDataId: Optional filter by a specific MarketData ID.
+            ruleIds: Optional filter by specific Rule IDs.
+            dqStatus: Optional aggregated DQ status filter (OK/KO). When KO, returns only rules whose
+            overall status is KO.
+            limit: Maximum number of results to return (1..1000, default: 10).
+
+        Returns:
+            An enumerable of DqRuleDqStatusSummaryDto items (Async).
+        """
+        if limit < 1 or limit > 1000:
+            raise ValueError(f"Limit must be between 1 and 1000. Limit: {limit}")
+
+        url = "/dataquality/checkresult/dqrule/dataqualitystatussummary"
+        params = {}
+        params["limit"] = limit
+
+        if marketDataId is not None:
+            params["marketDataId"] = marketDataId
+        if ruleIds is not None and len(ruleIds) > 0:
+            params["ruleIds"] = ruleIds
+        if dqStatus is not None:
+            params["dqStatus"] = dqStatus.value
+
+        with self.__client as c:
+            res = await asyncio.gather(
+                *[
+                    self.__executor.exec(
+                        c.exec,
+                        "GET",
+                        url,
+                        None,
+                        retcls=List[DqRuleDqStatusSummaryDto],
+                        params=params,
+                    )
+                ]
+            )
+            return cast(List[DqRuleDqStatusSummaryDto], res[0])
+
+    def getDqRuleDqStatusSummary(
+        self: MarketDataService,
+        marketDataId: Optional[int] = None,
+        ruleIds: Optional[List[int]] = None,
+        dqStatus: Optional[CheckAggregatedStatus] = None,
+        limit: int = 10,
+    ) -> List[DqRuleDqStatusSummaryDto]:
+        """
+        Retrieves DQ rules with their status summary, optionally filtered by a specific market data entity.
+        Results are sorted by LastCheckTime descending.
+
+        Args:
+            marketDataId: Optional filter by a specific MarketData ID.
+            ruleIds: Optional filter by specific Rule IDs.
+            dqStatus: Optional aggregated DQ status filter (OK/KO). When KO, returns only rules whose
+            overall status is KO.
+            limit: Maximum number of results to return (1..1000, default: 10).
+
+        Returns:
+            An enumerable of DqRuleDqStatusSummaryDto items.
+        """
+        return _get_event_loop().run_until_complete(
+            self.getDqRuleDqStatusSummaryAsync(marketDataId, ruleIds, dqStatus, limit)
         )
 
 

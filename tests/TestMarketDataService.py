@@ -42,6 +42,9 @@ from Artesian.MarketData._Dto.PagedResult import (
 from Artesian.MarketData._Dto.RecordValidationConfigDto import RecordValidationConfigDto
 from Artesian.MarketData._Dto.ScheduleConfigDto import ScheduleConfigDto
 from Artesian.MarketData._Enum.RuleType import RuleType
+from Artesian.MarketData._Dto.CheckResultExtract import CheckResultExtractVts, CheckResultExtractTs
+from Artesian.MarketData._Dto.DqRuleDqStatusSummaryDto import DqRuleDqStatusSummaryDto
+from Artesian.MarketData._Dto.MarketDataDqStatusSummaryDto import MarketDataDqStatusSummaryDto
 
 cfg = ArtesianConfig("https://baseurl.com", "APIKey")
 
@@ -226,6 +229,33 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
         self.__derivedTransformQueryValidationResponseSerializedOutput = artesianJsonSerialize(
             self.__derivedTransformQueryValidationResponse
         )
+        self.__sampleVts = CheckResultExtractVts(
+            time=datetime(2024, 1, 15, 10, 0),
+            issueCount=5,
+            competenceStart=datetime(2024, 1, 1),
+            competenceEnd=datetime(2024, 1, 31),
+            providerName="PROVIDER",
+            curveName="CURVE",
+            ruleName="RULE",
+            assignmentId=1,
+            marketDataId=100,
+            ruleId=1,
+            version=datetime(2024, 1, 15, 10, 0),
+        )
+        self.__sampleTs = CheckResultExtractTs(
+            time=datetime(2024, 1, 15, 10, 0),
+            issueCount=3,
+            competenceStart=datetime(2024, 1, 1),
+            competenceEnd=datetime(2024, 1, 31),
+            providerName="PROVIDER",
+            curveName="CURVE",
+            ruleName="RULE",
+            assignmentId=3,
+            marketDataId=200,
+            ruleId=2,
+        )
+        self.__sampleMdDq = MarketDataDqStatusSummaryDto(marketDataId=100)
+        self.__sampleDqRule = DqRuleDqStatusSummaryDto(ruleId=1)
 
         return super().setUp()
 
@@ -695,3 +725,126 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             await self.__service.deleteDataQualityRuleAssignmentAsync(self.__id)
 
             self.assertEqual(len(rsps.calls), 1)
+
+    async def test_getDataQualityCheckResultExtractVtsAsync(self: "TestMarketDataServiceMarketData") -> None:
+        with responses.RequestsMock() as rsps:
+            params = {
+                "timeZone": "UTC",
+                "assignmentIds": ["1", "2"],
+            }
+            rsps.add(
+                "GET",
+                self.__baseurl + "/dataquality/checkresult/extract/vts/Version/2024-01-15T10:00:00/"
+                "Day/2024-01-01/2024-01-31",
+                match=[responses.matchers.query_param_matcher(params)],
+                json=artesianJsonSerialize([self.__sampleVts]),
+                status=200,
+            )
+            output = await self.__service.getDataQualityCheckResultExtractVtsAsync(
+                version="2024-01-15T10:00:00",
+                granularity="Day",
+                start="2024-01-01",
+                end="2024-01-31",
+                timeZone="UTC",
+                assignmentIds=[1, 2],
+            )
+            self.assertEqual(output, [self.__sampleVts])
+
+    async def test_getDataQualityCheckResultExtractTsAsync(self: "TestMarketDataServiceMarketData") -> None:
+        with responses.RequestsMock() as rsps:
+            params = {
+                "timeZone": "Europe/Rome",
+                "assignmentIds": ["3", "4"],
+            }
+            rsps.add(
+                "GET",
+                self.__baseurl + "/dataquality/checkresult/extract/ts/Hour/2024-01-01/2024-01-31",
+                match=[responses.matchers.query_param_matcher(params)],
+                json=artesianJsonSerialize([self.__sampleTs]),
+                status=200,
+            )
+            output = await self.__service.getDataQualityCheckResultExtractTsAsync(
+                granularity="Hour",
+                start="2024-01-01",
+                end="2024-01-31",
+                timeZone="Europe/Rome",
+                assignmentIds=[3, 4],
+            )
+            self.assertEqual(output, [self.__sampleTs])
+
+    async def test_getDataQualityCheckResultCheckSummaryAsync(self: "TestMarketDataServiceMarketData") -> None:
+        from Artesian.CheckAggregatedStatus import CheckAggregatedStatus
+        from Artesian.MarketData._Dto.PagedResult import PagedResultCheckResultCheckSummaryDto
+        expectedOutput = PagedResultCheckResultCheckSummaryDto(page=1, pageSize=20, count=0,
+                                                               isCountPartial=False, data=[])
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                "GET",
+                self.__baseurl + "/dataquality/checkresult/checksummary",
+                json={"page": 1, "pageSize": 20, "count": 0, "isCountPartial": False, "data": []},
+                status=200,
+            )
+            output = await self.__service.getDataQualityCheckResultCheckSummaryAsync(
+                page=1,
+                pageSize=20,
+                marketDataIds=[100, 200],
+                ruleIds=[1, 2],
+                assignmentIds=[10, 20],
+                dqStatus=CheckAggregatedStatus.KO,
+                from_date="2024-01-01T00:00:00",
+                to_date="2024-01-31T23:59:00",
+                versionFrom="2024-01-01T00:00:00",
+                versionTo="2024-01-31T23:59:00",
+                products=["PROD1", "PROD2"],
+                skipEmptyRanges=True,
+                sort=["RuleName asc"],
+            )
+            self.assertEqual(output, expectedOutput)
+
+    async def test_getMarketDataDqStatusSummaryAsync(self: "TestMarketDataServiceMarketData") -> None:
+        from Artesian.CheckAggregatedStatus import CheckAggregatedStatus
+        with responses.RequestsMock() as rsps:
+            params = {
+                "limit": "50",
+                "ruleId": "1",
+                "marketDataIds": ["100", "200"],
+                "dqStatus": "KO",
+            }
+            rsps.add(
+                "GET",
+                self.__baseurl + "/dataquality/checkresult/marketdata/dataqualitystatussummary",
+                match=[responses.matchers.query_param_matcher(params)],
+                json=artesianJsonSerialize([self.__sampleMdDq]),
+                status=200,
+            )
+            output = await self.__service.getMarketDataDqStatusSummaryAsync(
+                ruleId=1,
+                marketDataIds=[100, 200],
+                dqStatus=CheckAggregatedStatus.KO,
+                limit=50,
+            )
+            self.assertEqual(output, [self.__sampleMdDq])
+
+    async def test_getDqRuleDqStatusSummaryAsync(self: "TestMarketDataServiceMarketData") -> None:
+        from Artesian.CheckAggregatedStatus import CheckAggregatedStatus
+        with responses.RequestsMock() as rsps:
+            params = {
+                "limit": "100",
+                "marketDataId": "100",
+                "ruleIds": ["1", "2", "3"],
+                "dqStatus": "OK",
+            }
+            rsps.add(
+                "GET",
+                self.__baseurl + "/dataquality/checkresult/dqrule/dataqualitystatussummary",
+                match=[responses.matchers.query_param_matcher(params)],
+                json=artesianJsonSerialize([self.__sampleDqRule]),
+                status=200,
+            )
+            output = await self.__service.getDqRuleDqStatusSummaryAsync(
+                marketDataId=100,
+                ruleIds=[1, 2, 3],
+                dqStatus=CheckAggregatedStatus.OK,
+                limit=100,
+            )
+            self.assertEqual(output, [self.__sampleDqRule])
