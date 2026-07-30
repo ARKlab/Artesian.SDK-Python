@@ -467,7 +467,7 @@ actualCompletenessRule = DataQualityRuleDtoInput(
       maxDelay="PT2H",
     ),
     recordValidationConfig=RecordValidationConfigDto(
-      recordRangeFrom="P-1D",
+      recordRangeFrom="-P1D",
       recordRangeTo="P0D",
     ),
   ),
@@ -500,9 +500,7 @@ versionedCompletenessRule = DataQualityRuleDtoInput(
     ),
     recordValidationConfig=RecordValidationConfigDto(
       recordRangeFrom="P0D",
-      recordRangeTo="P7D",
-    ),
-    versionToleranceFrom="PT-1H",
+    versionToleranceFrom="-PT1H",
     versionToleranceTo="PT1H",
     versionPrecision=PeriodPrecision.Hour,
   ),
@@ -680,8 +678,8 @@ for event in events:
 
 ### Data Quality Rule Status
 
-Rules and assignments expose aggregated check status through the
-`aggregatedStatus` property.
+Rules expose aggregated check status through the `aggregatedStatus` property.
+Assignments expose it via `assignment.dataQualityRule.aggregatedStatus` when `dataQualityRule` is populated.
 
 <table>
   <tr><th>Status</th><th>Description</th></tr>

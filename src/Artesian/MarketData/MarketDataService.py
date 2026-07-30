@@ -494,7 +494,7 @@ class MarketDataService:
         self: MarketDataService,
         page: int,
         pageSize: int,
-        type: Optional[RuleType],
+        type: Optional[RuleType] = None,
         marketDataId: Optional[int] = None,
         name: Optional[str] = None,
         ruleIds: Optional[List[int]] = None,
@@ -551,10 +551,9 @@ class MarketDataService:
             return cast(PagedResultDataQualityRuleDtoOutput, res[0])
 
     def readDataQualityRule(
-        self: MarketDataService,
         page: int,
         pageSize: int,
-        type: Optional[RuleType],
+        type: Optional[RuleType] = None,
         marketDataId: Optional[int] = None,
         name: Optional[str] = None,
         ruleIds: Optional[List[int]] = None,
@@ -798,8 +797,10 @@ class MarketDataService:
         params = {}
         params["page"] = page
         params["pageSize"] = pageSize
-        params["marketDataId"] = marketDataId
-        params["ruleId"] = ruleId
+        if marketDataId is not None:
+            params["marketDataId"] = marketDataId
+        if ruleId is not None:
+            params["ruleId"] = ruleId
         if ruleName:
             params["ruleName"] = ruleName
         if sort:
