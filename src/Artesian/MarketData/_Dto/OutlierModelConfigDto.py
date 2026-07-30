@@ -1,9 +1,3 @@
-from dataclasses import dataclass
-
-from .._Enum.OutlierModel import OutlierModel
-from .DataQualityRuleConfigDto import DataQualityRuleConfigDto
-
-
 from dataclasses import dataclass, field
 
 from .._Enum.OutlierModel import OutlierModel
