@@ -4,7 +4,7 @@ from typing import Dict, List, Optional
 from .DerivedCfg import DerivedCfg
 from .UnitOfMeasure import UnitOfMeasure
 from .._Enum.DerivedAlgorithm import DerivedAlgorithm
-from .._Enum import MarketDataType
+from .._Enum import MarketDataTypeV2
 from .._Enum import AggregationRule
 from .._Enum import Granularity
 
@@ -33,7 +33,7 @@ class MarketDataEntityInput:
     providerName: str
     marketDataName: str
     originalGranularity: Granularity
-    type: MarketDataType
+    type: MarketDataTypeV2
     originalTimezone: str
     unitOfMeasure: Optional[UnitOfMeasure] = None
     derivedCfg: Optional[DerivedCfg] = None
@@ -73,7 +73,7 @@ class MarketDataEntityInput:
                 DerivedAlgorithm.Sum,
                 DerivedAlgorithm.Transform
                 }
-            and self.type is not MarketDataType.ActualTimeSerie
+            and self.type is not MarketDataTypeV2.ActualTimeSerie
         ):
             raise Exception(
                 f"DerivedCfg with {self.derivedCfg.derivedAlgorithm} algorithm "
@@ -83,7 +83,7 @@ class MarketDataEntityInput:
         if (
             self.derivedCfg is not None
             and self.derivedCfg.derivedAlgorithm is DerivedAlgorithm.MUV
-            and self.type is not MarketDataType.VersionedTimeSerie
+            and self.type is not MarketDataTypeV2.VersionedTimeSerie
         ):
             raise Exception(
                 f"DerivedCfg with {self.derivedCfg.derivedAlgorithm} algorithm "

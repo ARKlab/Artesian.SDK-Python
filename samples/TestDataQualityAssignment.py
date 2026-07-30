@@ -14,7 +14,6 @@ from Artesian.MarketData._Dto.MarketDataQualityRuleAssignmentDto import (
 from Artesian.MarketData._Dto.RecordValidationConfigDto import RecordValidationConfigDto
 from Artesian.MarketData._Dto.ScheduleConfigDto import ScheduleConfigDto
 from Artesian.MarketData._Enum.AggregationRule import AggregationRule
-from Artesian.MarketData._Enum.MarketDataType import MarketDataType
 from Artesian.MarketData._Enum.MarketDataTypeV2 import MarketDataTypeV2
 from Artesian.MarketData._Enum.RuleType import RuleType
 
@@ -34,7 +33,7 @@ try:
     market_data_input = MarketDataEntityInput(
         providerName=provider_name,
         marketDataName=market_data_name,
-        type=MarketDataType.ActualTimeSerie,
+        type=MarketDataTypeV2.ActualTimeSerie,
         originalGranularity=Granularity.Hour,
         originalTimezone="UTC",
         aggregationRule=AggregationRule.Undefined,

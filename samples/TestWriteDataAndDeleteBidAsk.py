@@ -14,7 +14,7 @@ bidAsk = Artesian.MarketData.MarketDataEntityInput(
     "PythonSDK",
     "TestBidAskWriteAndDelete",
     Granularity.Hour,
-    MarketData.MarketDataType.BidAsk,
+    MarketData.MarketDataTypeV2.BidAsk,
     "CET",
     tags={"TestSDKPython": ["PythonValue2"]},
 )

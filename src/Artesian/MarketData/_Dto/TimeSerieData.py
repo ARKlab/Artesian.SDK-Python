@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Dict, Optional
 from datetime import datetime
-from Artesian.MarketData._Enum.MarketDataType import MarketDataType
+from Artesian.MarketData._Enum.MarketDataTypeV2 import MarketDataTypeV2
 
 
 @dataclass
@@ -16,7 +16,7 @@ class TimeSerieData:
         timezone: The timezone of the Rows. Must be the OriginalTimezone or, when Hourly, must be "UTC".
     """
 
-    type: MarketDataType
+    type: MarketDataTypeV2
     rows: Optional[Dict[datetime, Optional[float]]] = None
     version: Optional[datetime] = None
     timezone: Optional[str] = None

@@ -309,7 +309,7 @@ Use 'None' to not fill at all: timepoints are not returned if not present.
  .withFillNone()
 ```
 
-Custom Value can be provided for each MarketDataType.
+Custom Value can be provided for each MarketDataTypeV2.
 
 Custom Value for Actual extraction type.
 
@@ -808,7 +808,7 @@ mkd = MarketData.MarketDataEntityInput(
       providerName = "TestProviderName",
       marketDataName = "TestMarketDataName",
       originalGranularity=Granularity.Day,
-      type=MarketData.MarketDataType.ActualTimeSerie,
+      type=MarketData.MarketDataTypeV2.ActualTimeSerie,
       originalTimezone="CET",
       aggregationRule=AggregationRule.SumAndDivide,
     UnitOfMeasure = CommonUnitOfMeasure.kW
@@ -1019,7 +1019,7 @@ request = DerivedTransformQueryValidation(
             (datetime(2018, 10, 1, 0, 0), 100),
             (datetime(2018, 10, 1, 1, 0), 100)
         ],
-        type=MarketDataType.ActualTimeSerie,
+        type=MarketDataTypeV2.ActualTimeSerie,
     ),
     transform="SELECT Time, (Value + 1) as Value FROM $table"
 )
@@ -1093,7 +1093,7 @@ mkd = MarketData.MarketDataEntityInput(
       providerName = mkdid.provider,
       marketDataName = mkdid.name,
       originalGranularity=Granularity.Day,
-      type=MarketData.MarketDataType.ActualTimeSerie,
+      type=MarketData.MarketDataTypeV2.ActualTimeSerie,
       originalTimezone="CET",
       aggregationRule=AggregationRule.AverageAndReplicate,
       tags={
@@ -1187,7 +1187,7 @@ mkd = MarketData.MarketDataEntityInput(
       providerName = mkdid.provider,
       marketDataName = mkdid.name,
       originalGranularity=Granularity.Hour,
-      type=MarketData.MarketDataType.ActualTimeSerie,
+      type=MarketData.MarketDataTypeV2.ActualTimeSerie,
       originalTimezone="CET",
       aggregationRule=AggregationRule.AverageAndReplicate,
       tags={
@@ -1232,7 +1232,7 @@ mkd = MarketData.MarketDataEntityInput(
       providerName = mkdid.provider,
       marketDataName = mkdid.name,
       originalGranularity=Granularity.Day,
-      type=MarketData.MarketDataType.VersionedTimeSerie,
+      type=MarketData.MarketDataTypeV2.VersionedTimeSerie,
       originalTimezone="CET",
       aggregationRule=AggregationRule.AverageAndReplicate,
       tags={
@@ -1271,7 +1271,6 @@ deferDataGeneration (true/false) choose between syncronoys and asyncronous preco
 keepNulls (true/false) if true then nulls are written in the curve replacing any data present for the instant, default is false.
 upsertMode (Merge/Replace) for VersionedTimeSeries the merge writes in to the curve replacing existing data for an existing instant, replace writes the payload removing any previous data for the version. Leaving Null/None/Empty is equivalent to Merge.
 
-
 | DATETIME     | EXISTING   | PAYLOAD    | MERGE      | REPLACE    |
 | ------------ | ---------- | ---------- | ---------- | ---------- |
 | VERSION NAME | 2025-01-01 | 2025-01-01 | 2025-01-01 | 2025-01-01 |
@@ -1306,7 +1305,7 @@ mkd = MarketData.MarketDataEntityInput(
       providerName = mkdid.provider,
       marketDataName = mkdid.name,
       originalGranularity=Granularity.Day,
-      type=MarketData.MarketDataType.MarketAssessment,
+      type=MarketData.MarketDataTypeV2.MarketAssessment,
       originalTimezone="CET",
       tags={
         'TestSDKPython': ['PythonValue2']
@@ -1366,7 +1365,7 @@ mkd = MarketData.MarketDataEntityInput(
       providerName = mkdid.provider,
       marketDataName = mkdid.name,
       originalGranularity=Granularity.Day,
-      type=MarketData.MarketDataType.BidAsk,
+      type=MarketData.MarketDataTypeV2.BidAsk,
       originalTimezone="CET",
       tags={
         'TestSDKPython': ['PythonValue2']
@@ -1425,7 +1424,7 @@ mkd = MarketData.MarketDataEntityInput(
       providerName = mkdid.provider,
       marketDataName = mkdid.name,
       originalGranularity=Granularity.Day,
-      type=MarketData.MarketDataType.Auction,
+      type=MarketData.MarketDataTypeV2.Auction,
       originalTimezone="CET",
       tags={
         'TestSDKPython': ['PythonValue2']

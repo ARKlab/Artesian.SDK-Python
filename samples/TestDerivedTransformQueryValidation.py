@@ -4,7 +4,7 @@ from Artesian.MarketData._Dto.DerivedTransformQueryValidation import (
     DerivedTransformQueryValidation,
 )
 from Artesian.MarketData._Dto.TimeSerieData import TimeSerieData
-from Artesian.MarketData._Enum.MarketDataType import MarketDataType
+from Artesian.MarketData._Enum.MarketDataTypeV2 import MarketDataTypeV2
 
 cfg = Artesian.ArtesianConfig("https://arkive.artesian.cloud/tenantName/", "APIKey")
 
@@ -13,7 +13,7 @@ mkdservice = Artesian.MarketData.MarketDataService(cfg)
 # Validate a transform query against in-memory sample time-series data.
 derivedTransformQueryValidation = DerivedTransformQueryValidation(
     data=TimeSerieData(
-        type=MarketDataType.ActualTimeSerie,
+        type=MarketDataTypeV2.ActualTimeSerie,
         timezone="UTC",
         rows={
             datetime(2020, 1, 1, 0): 10.0,

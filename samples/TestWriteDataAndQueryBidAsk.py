@@ -17,7 +17,7 @@ mktDataInput = Artesian.MarketData.MarketDataEntityInput(
     mktId.provider,
     mktId.name,
     Granularity.Hour,
-    MarketData.MarketDataType.BidAsk,
+    MarketData.MarketDataTypeV2.BidAsk,
     "CET",
     tags={"TestSDKPython": ["PythonValue2"]}
 )
@@ -30,12 +30,12 @@ bidAsk = MarketData.UpsertData(
     "UTC",
     bidAsk={
         datetime(2020, 1, 1, 3): {
-            "Feb-20": MarketData.BidAskValue(bestBidPrice=15.5, bestAskQuantity=20.3, lastPrice=16.7, lastQuantity=14.1),
-            "Mar-20": MarketData.BidAskValue(bestBidPrice=25.5, bestAskQuantity=30.4, lastPrice=26.4, lastQuantity=24.3),
+           "Feb-20": MarketData.BidAskValue(bestBidPrice=15.5, bestAskQuantity=20.3, lastPrice=16.7, lastQuantity=14.1),
+           "Mar-20": MarketData.BidAskValue(bestBidPrice=25.5, bestAskQuantity=30.4, lastPrice=26.4, lastQuantity=24.3),
         },
         datetime(2020, 1, 1, 6): {
-            "Feb-20": MarketData.BidAskValue(bestBidPrice=15.7, bestAskQuantity=20.2, lastPrice=16.6, lastQuantity=14.7),
-            "Mar-20": MarketData.BidAskValue(bestBidPrice=25.4, bestAskQuantity=30.3, lastPrice=26.8, lastQuantity=24.9),
+           "Feb-20": MarketData.BidAskValue(bestBidPrice=15.7, bestAskQuantity=20.2, lastPrice=16.6, lastQuantity=14.7),
+           "Mar-20": MarketData.BidAskValue(bestBidPrice=25.4, bestAskQuantity=30.3, lastPrice=26.8, lastQuantity=24.9),
         },
     },
     downloadedAt=datetime(2020, 1, 3).replace(tzinfo=tz.UTC),
@@ -62,10 +62,10 @@ bidAsk2 = MarketData.UpsertData(
     "UTC",
     bidAsk={
         datetime(2020, 1, 1, 6): {
-            "Mar-20": MarketData.BidAskValue(bestBidPrice=25.2, bestAskQuantity=20.8, lastPrice=16.4, lastQuantity=24.3),
+           "Mar-20": MarketData.BidAskValue(bestBidPrice=25.2, bestAskQuantity=20.8, lastPrice=16.4, lastQuantity=24.3),
         },
         datetime(2020, 1, 1, 12): {
-            "Mar-20": MarketData.BidAskValue(bestBidPrice=25.1, bestAskQuantity=20.5, lastPrice=16.8, lastQuantity=24.7),
+           "Mar-20": MarketData.BidAskValue(bestBidPrice=25.1, bestAskQuantity=20.5, lastPrice=16.8, lastQuantity=24.7),
         },
     },
     downloadedAt=datetime(2020, 1, 3).replace(tzinfo=tz.UTC),

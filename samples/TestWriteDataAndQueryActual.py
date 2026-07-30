@@ -2,7 +2,7 @@ from datetime import datetime
 import Artesian
 from Artesian import Query
 from Artesian.Granularity import Granularity
-from Artesian.MarketData._Enum.MarketDataType import MarketDataType
+from Artesian.MarketData._Enum.MarketDataTypeV2 import MarketDataTypeV2
 
 cfg = Artesian.ArtesianConfig("https://arkive.artesian.cloud/tenantName/", "APIKey")
 mkdservice = Artesian.MarketData.MarketDataService(cfg)
@@ -11,7 +11,7 @@ actual = Artesian.MarketData.MarketDataEntityInput(
     "PythonSDK",
     "TestActualWriteAndRead",
     Granularity.Hour,
-    MarketDataType.ActualTimeSerie,
+    MarketDataTypeV2.ActualTimeSerie,
     "CET",
     tags={"TestSDKPython": ["PythonValue2"]},
 )

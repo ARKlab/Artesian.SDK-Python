@@ -18,7 +18,7 @@ mktDataEntity = Artesian.MarketData.MarketDataEntityInput(
     mktId.provider,
     mktId.name,
     Granularity.Hour,
-    MarketData.MarketDataType.Auction,
+    MarketData.MarketDataTypeV2.Auction,
     "CET",
     tags={"TestSDKPython": ["PythonValue2"]},
 )
