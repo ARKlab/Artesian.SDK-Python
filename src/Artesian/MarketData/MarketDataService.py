@@ -551,6 +551,7 @@ class MarketDataService:
             return cast(PagedResultDataQualityRuleDtoOutput, res[0])
 
     def readDataQualityRule(
+        self: MarketDataService,
         page: int,
         pageSize: int,
         type: Optional[RuleType] = None,
