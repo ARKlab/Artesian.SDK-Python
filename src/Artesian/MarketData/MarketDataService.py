@@ -14,6 +14,7 @@ from ._Dto.PagedResult import (
     PagedResultCurveRangeEntity, PagedResultCheckResultCheckSummaryDto,
     PagedResultDataQualityRuleDtoOutput,
     PagedResultMarketDataQualityRuleAssignmentDtoOutput,
+    PagedResultQualityNotificationAlertDtoOutput,
 )
 from ._Dto.ArtesianSearchResults import ArtesianSearchResults
 from ._Dto.MarketDataEntityInput import MarketDataEntityInput
@@ -31,6 +32,11 @@ from ._Enum.RuleType import RuleType
 from ._Dto.CheckResultExtract import CheckResultExtractVts, CheckResultExtractTs
 from ._Dto.MarketDataDqStatusSummaryDto import MarketDataDqStatusSummaryDto
 from ._Dto.DqRuleDqStatusSummaryDto import DqRuleDqStatusSummaryDto
+from ._Dto.QualityNotificationAlertDto import (
+    QualityNotificationAlertDtoInput,
+    QualityNotificationAlertDtoOutput,
+)
+from ._Dto.AlertScheduleEventsDto import AlertScheduleEventsDtoOutput
 from ..CheckAggregatedStatus import CheckAggregatedStatus
 import asyncio
 
@@ -659,6 +665,229 @@ class MarketDataService:
         """
         return _get_event_loop().run_until_complete(
             self.deleteDataQualityRuleAsync(id)
+        )
+
+    async def registerQualityNotificationAlertAsync(
+        self: MarketDataService, entity: QualityNotificationAlertDtoInput
+    ) -> QualityNotificationAlertDtoOutput:
+        """Creates a new quality notification alert rule."""
+        url = "/dataquality/alertrule"
+        with self.__client as c:
+            res = await asyncio.gather(
+                *[
+                    self.__executor.exec(
+                        c.exec, "POST", url, entity, QualityNotificationAlertDtoOutput
+                    )
+                ]
+            )
+            return cast(QualityNotificationAlertDtoOutput, res[0])
+
+    def registerQualityNotificationAlert(
+        self: MarketDataService, entity: QualityNotificationAlertDtoInput
+    ) -> QualityNotificationAlertDtoOutput:
+        return _get_event_loop().run_until_complete(
+            self.registerQualityNotificationAlertAsync(entity)
+        )
+
+    async def readQualityNotificationAlertByIdAsync(
+        self: MarketDataService, id: int
+    ) -> QualityNotificationAlertDtoOutput:
+        """Retrieves a quality notification alert rule by id."""
+        url = "/dataquality/alertrule/" + str(id)
+        with self.__client as c:
+            res = await asyncio.gather(
+                *[
+                    self.__executor.exec(
+                        c.exec,
+                        "GET",
+                        url,
+                        None,
+                        retcls=QualityNotificationAlertDtoOutput,
+                    )
+                ]
+            )
+            return cast(QualityNotificationAlertDtoOutput, res[0])
+
+    def readQualityNotificationAlertById(
+        self: MarketDataService, id: int
+    ) -> QualityNotificationAlertDtoOutput:
+        return _get_event_loop().run_until_complete(
+            self.readQualityNotificationAlertByIdAsync(id)
+        )
+
+    async def readQualityNotificationAlertsAsync(
+        self: MarketDataService,
+        page: int,
+        pageSize: int,
+        name: Optional[str] = None,
+        marketDataId: Optional[int] = None,
+        ruleIds: Optional[List[int]] = None,
+        sort: Optional[List[str]] = None,
+    ) -> PagedResultQualityNotificationAlertDtoOutput:
+        """Retrieves a paginated list of quality notification alert rules."""
+        if page < 1:
+            raise ValueError(f"page must be >= 1 (got {page})")
+        if pageSize < 1:
+            raise ValueError(f"pageSize must be >= 1 (got {pageSize})")
+
+        params = {}
+        params["page"] = page
+        params["pageSize"] = pageSize
+        if name:
+            params["name"] = name
+        if marketDataId is not None:
+            params["marketDataId"] = marketDataId
+        if ruleIds:
+            params["ruleIds"] = ruleIds
+        if sort:
+            params["sort"] = sort
+
+        url = "/dataquality/alertrule"
+        with self.__client as c:
+            res = await asyncio.gather(
+                *[
+                    self.__executor.exec(
+                        c.exec,
+                        "GET",
+                        url,
+                        None,
+                        retcls=PagedResultQualityNotificationAlertDtoOutput,
+                        params=params,
+                    )
+                ]
+            )
+            return cast(PagedResultQualityNotificationAlertDtoOutput, res[0])
+
+    def readQualityNotificationAlerts(
+        self: MarketDataService,
+        page: int,
+        pageSize: int,
+        name: Optional[str] = None,
+        marketDataId: Optional[int] = None,
+        ruleIds: Optional[List[int]] = None,
+        sort: Optional[List[str]] = None,
+    ) -> PagedResultQualityNotificationAlertDtoOutput:
+        return _get_event_loop().run_until_complete(
+            self.readQualityNotificationAlertsAsync(
+                page, pageSize, name, marketDataId, ruleIds, sort
+            )
+        )
+
+    async def updateQualityNotificationAlertAsync(
+        self: MarketDataService,
+        id: int,
+        entity: QualityNotificationAlertDtoInput,
+    ) -> QualityNotificationAlertDtoOutput:
+        """Updates an existing quality notification alert rule."""
+        url = "/dataquality/alertrule/" + str(id)
+        with self.__client as c:
+            res = await asyncio.gather(
+                *[
+                    self.__executor.exec(
+                        c.exec, "PUT", url, entity, QualityNotificationAlertDtoOutput
+                    )
+                ]
+            )
+            return cast(QualityNotificationAlertDtoOutput, res[0])
+
+    def updateQualityNotificationAlert(
+        self: MarketDataService, id: int, entity: QualityNotificationAlertDtoInput
+    ) -> QualityNotificationAlertDtoOutput:
+        return _get_event_loop().run_until_complete(
+            self.updateQualityNotificationAlertAsync(id, entity)
+        )
+
+    async def deleteQualityNotificationAlertAsync(
+        self: MarketDataService, id: int
+    ) -> None:
+        """Deletes a quality notification alert rule by id."""
+        url = "/dataquality/alertrule/" + str(id)
+        with self.__client as c:
+            await asyncio.gather(*[self.__executor.exec(c.exec, "DELETE", url, None)])
+        return None
+
+    def deleteQualityNotificationAlert(self: MarketDataService, id: int) -> None:
+        return _get_event_loop().run_until_complete(
+            self.deleteQualityNotificationAlertAsync(id)
+        )
+
+    async def readAlertScheduleEventsAsync(
+        self: MarketDataService, alertId: int, scheduleTime: datetime
+    ) -> AlertScheduleEventsDtoOutput:
+        """Retrieves materialized events for an alert schedule occurrence."""
+        url = (
+            "/dataquality/alertrule/"
+            + str(alertId)
+            + "/schedule/"
+            + scheduleTime.isoformat()
+            + "/events"
+        )
+        with self.__client as c:
+            res = await asyncio.gather(
+                *[
+                    self.__executor.exec(
+                        c.exec, "GET", url, None, retcls=AlertScheduleEventsDtoOutput
+                    )
+                ]
+            )
+            return cast(AlertScheduleEventsDtoOutput, res[0])
+
+    def readAlertScheduleEvents(
+        self: MarketDataService, alertId: int, scheduleTime: datetime
+    ) -> AlertScheduleEventsDtoOutput:
+        return _get_event_loop().run_until_complete(
+            self.readAlertScheduleEventsAsync(alertId, scheduleTime)
+        )
+
+    async def readAlertScheduleListAsync(
+        self: MarketDataService, alertId: int, lastN: int = 10
+    ) -> List[datetime]:
+        """Lists the most recent schedule occurrence timestamps."""
+        if lastN < 1:
+            raise ValueError(f"lastN must be >= 1 (got {lastN})")
+        url = "/dataquality/alertrule/" + str(alertId) + "/schedule"
+        with self.__client as c:
+            res = await asyncio.gather(
+                *[
+                    self.__executor.exec(
+                        c.exec,
+                        "GET",
+                        url,
+                        None,
+                        retcls=List[datetime],
+                        params={"lastN": lastN},
+                    )
+                ]
+            )
+            return cast(List[datetime], res[0])
+
+    def readAlertScheduleList(
+        self: MarketDataService, alertId: int, lastN: int = 10
+    ) -> List[datetime]:
+        return _get_event_loop().run_until_complete(
+            self.readAlertScheduleListAsync(alertId, lastN)
+        )
+
+    async def readAlertScheduleLastEventsAsync(
+        self: MarketDataService, alertId: int
+    ) -> AlertScheduleEventsDtoOutput:
+        """Retrieves events from the latest alert schedule occurrence."""
+        url = "/dataquality/alertrule/" + str(alertId) + "/schedule/latest/events"
+        with self.__client as c:
+            res = await asyncio.gather(
+                *[
+                    self.__executor.exec(
+                        c.exec, "GET", url, None, retcls=AlertScheduleEventsDtoOutput
+                    )
+                ]
+            )
+            return cast(AlertScheduleEventsDtoOutput, res[0])
+
+    def readAlertScheduleLastEvents(
+        self: MarketDataService, alertId: int
+    ) -> AlertScheduleEventsDtoOutput:
+        return _get_event_loop().run_until_complete(
+            self.readAlertScheduleLastEventsAsync(alertId)
         )
 
     async def registerDataQualityRuleAssignmentAsync(

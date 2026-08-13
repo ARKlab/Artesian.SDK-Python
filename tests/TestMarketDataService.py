@@ -23,6 +23,7 @@ from Artesian.MarketData import (
     MarketDataTypeV2,
     PagedResultCurveRangeEntity,
     UnitOfMeasure,
+    AlertType,
 )
 from Artesian.MarketData._Dto.ActualCompletenessAndFreshnessConfigDto import (
     ActualCompletenessAndFreshnessConfigDto,
@@ -45,13 +46,36 @@ from Artesian.MarketData._Enum.RuleType import RuleType
 from Artesian.MarketData._Dto.CheckResultExtract import CheckResultExtractVts, CheckResultExtractTs
 from Artesian.MarketData._Dto.DqRuleDqStatusSummaryDto import DqRuleDqStatusSummaryDto
 from Artesian.MarketData._Dto.MarketDataDqStatusSummaryDto import MarketDataDqStatusSummaryDto
+from Artesian.MarketData._Dto.AlertScheduleEventsDto import AlertScheduleEventsDtoOutput
+from Artesian.MarketData._Dto.MailNotificationDto import MailNotificationDto
+from Artesian.MarketData._Dto.PagedResult import PagedResultQualityNotificationAlertDtoOutput
+from Artesian.MarketData._Dto.QualityNotificationAlertDto import (
+    QualityNotificationAlertDtoInput,
+    QualityNotificationAlertDtoOutput,
+)
+from Artesian.MarketData._Dto.TriggerConfigDto import TriggerConfigDto
 
 cfg = ArtesianConfig("https://baseurl.com", "APIKey")
+
+
+class AlertTriggerConfigFixture(TriggerConfigDto):
+    @property
+    def type(self: "AlertTriggerConfigFixture") -> AlertType:
+        return AlertType.OnEvent
+
+    def __eq__(self: "AlertTriggerConfigFixture", other: object) -> bool:
+        return isinstance(other, AlertTriggerConfigFixture)
 
 
 class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
     def setUp(self: "TestMarketDataServiceMarketData") -> None:
         self.__service = MarketDataService(cfg)
+        QualityNotificationAlertDtoInput.__init__.__annotations__["triggerConfig"] = (
+            AlertTriggerConfigFixture
+        )
+        QualityNotificationAlertDtoOutput.__init__.__annotations__["triggerConfig"] = (
+            AlertTriggerConfigFixture
+        )
 
         curveIds = [1, 2]
         derivedCfg = DerivedCfg(
@@ -256,6 +280,35 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
         )
         self.__sampleMdDq = MarketDataDqStatusSummaryDto(marketDataId=100)
         self.__sampleDqRule = DqRuleDqStatusSummaryDto(ruleId=1)
+
+        self.__qualityNotificationAlertInput = QualityNotificationAlertDtoInput(
+            name="Weather station daily digest",
+            triggerConfig=AlertTriggerConfigFixture(),
+            mailNotifications=[MailNotificationDto(recipients=["alerts@example.com"])],
+            version=0,
+        )
+        self.__qualityNotificationAlertOutput = QualityNotificationAlertDtoOutput(
+            name="Weather station daily digest",
+            triggerConfig=AlertTriggerConfigFixture(),
+            id=self.__id,
+            mailNotifications=[MailNotificationDto(recipients=["alerts@example.com"])],
+            eTag="alert-etag-1",
+            version=1,
+        )
+        self.__qualityNotificationAlertInputSerialized = artesianJsonSerialize(
+            self.__qualityNotificationAlertInput
+        )
+        self.__qualityNotificationAlertOutputSerialized = artesianJsonSerialize(
+            self.__qualityNotificationAlertOutput
+        )
+        self.__pagedQualityNotificationAlertOutput = (
+            PagedResultQualityNotificationAlertDtoOutput(
+                1, 10, 1, False, [self.__qualityNotificationAlertOutput]
+            )
+        )
+        self.__pagedQualityNotificationAlertOutputSerialized = artesianJsonSerialize(
+            self.__pagedQualityNotificationAlertOutput
+        )
 
         return super().setUp()
 
@@ -623,6 +676,146 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             await self.__service.deleteDataQualityRuleAsync(self.__id)
 
             self.assertEqual(len(rsps.calls), 1)
+
+    async def test_registerQualityNotificationAlertAsync(self: "TestMarketDataServiceMarketData") -> None:
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                "POST",
+                self.__baseurl + "/dataquality/alertrule",
+                match=[
+                    responses.matchers.json_params_matcher(
+                        self.__qualityNotificationAlertInputSerialized
+                    )
+                ],
+                json=self.__qualityNotificationAlertOutputSerialized,
+                status=200,
+            )
+
+            output = await self.__service.registerQualityNotificationAlertAsync(
+                self.__qualityNotificationAlertInput
+            )
+
+            self.assertEqual(output, self.__qualityNotificationAlertOutput)
+
+    async def test_readQualityNotificationAlertByIdAsync(self: "TestMarketDataServiceMarketData") -> None:
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                "GET",
+                self.__baseurl + "/dataquality/alertrule/" + str(self.__id),
+                json=self.__qualityNotificationAlertOutputSerialized,
+                status=200,
+            )
+
+            output = await self.__service.readQualityNotificationAlertByIdAsync(
+                self.__id
+            )
+
+            self.assertEqual(output, self.__qualityNotificationAlertOutput)
+
+    async def test_readQualityNotificationAlertsAsync(self: "TestMarketDataServiceMarketData") -> None:
+        with responses.RequestsMock() as rsps:
+            params = {
+                "name": "Weather",
+                "marketDataId": "100",
+                "page": "1",
+                "pageSize": "10",
+                "ruleIds": ["1", "2"],
+                "sort": "Name asc",
+            }
+            rsps.add(
+                "GET",
+                self.__baseurl + "/dataquality/alertrule",
+                match=[responses.matchers.query_param_matcher(params)],
+                json=self.__pagedQualityNotificationAlertOutputSerialized,
+                status=200,
+            )
+
+            output = await self.__service.readQualityNotificationAlertsAsync(
+                1, 10, "Weather", 100, [1, 2], ["Name asc"]
+            )
+
+            self.assertEqual(output, self.__pagedQualityNotificationAlertOutput)
+
+    async def test_updateQualityNotificationAlertAsync(self: "TestMarketDataServiceMarketData") -> None:
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                "PUT",
+                self.__baseurl + "/dataquality/alertrule/" + str(self.__id),
+                match=[
+                    responses.matchers.json_params_matcher(
+                        self.__qualityNotificationAlertInputSerialized
+                    )
+                ],
+                json=self.__qualityNotificationAlertOutputSerialized,
+                status=200,
+            )
+
+            output = await self.__service.updateQualityNotificationAlertAsync(
+                self.__id, self.__qualityNotificationAlertInput
+            )
+
+            self.assertEqual(output, self.__qualityNotificationAlertOutput)
+
+    async def test_deleteQualityNotificationAlertAsync(self: "TestMarketDataServiceMarketData") -> None:
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                "DELETE",
+                self.__baseurl + "/dataquality/alertrule/" + str(self.__id),
+                status=204,
+            )
+
+            await self.__service.deleteQualityNotificationAlertAsync(self.__id)
+
+            self.assertEqual(len(rsps.calls), 1)
+
+    async def test_readAlertScheduleEventsAsync(self: "TestMarketDataServiceMarketData") -> None:
+        scheduleTime = datetime(2024, 1, 15, 10, 0)
+        scheduleEvents = AlertScheduleEventsDtoOutput(scheduleTime=scheduleTime)
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                "GET",
+                self.__baseurl
+                + "/dataquality/alertrule/1/schedule/2024-01-15T10:00:00/events",
+                json=artesianJsonSerialize(scheduleEvents),
+                status=200,
+            )
+
+            output = await self.__service.readAlertScheduleEventsAsync(
+                self.__id, scheduleTime
+            )
+
+            self.assertEqual(output, scheduleEvents)
+
+    async def test_readAlertScheduleListAsync(self: "TestMarketDataServiceMarketData") -> None:
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                "GET",
+                self.__baseurl + "/dataquality/alertrule/1/schedule",
+                match=[responses.matchers.query_param_matcher({"lastN": "3"})],
+                json=["2024-01-15T10:00:00", "2024-01-14T10:00:00"],
+                status=200,
+            )
+
+            output = await self.__service.readAlertScheduleListAsync(self.__id, 3)
+
+            self.assertEqual(
+                output,
+                [datetime(2024, 1, 15, 10, 0), datetime(2024, 1, 14, 10, 0)],
+            )
+
+    async def test_readAlertScheduleLastEventsAsync(self: "TestMarketDataServiceMarketData") -> None:
+        scheduleEvents = AlertScheduleEventsDtoOutput()
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                "GET",
+                self.__baseurl + "/dataquality/alertrule/1/schedule/latest/events",
+                json=artesianJsonSerialize(scheduleEvents),
+                status=200,
+            )
+
+            output = await self.__service.readAlertScheduleLastEventsAsync(self.__id)
+
+            self.assertEqual(output, scheduleEvents)
 
     async def test_registerDataQualityRuleAssignmentAsync(self: "TestMarketDataServiceMarketData") -> None:
         with responses.RequestsMock() as rsps:

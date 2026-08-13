@@ -7,6 +7,7 @@ from Artesian.MarketData._Dto.MarketDataQualityRuleAssignmentDto import (
     MarketDataQualityRuleAssignmentDtoOutput,
 )
 from Artesian.MarketData._Dto.CheckResultCheckSummaryDto import CheckResultCheckSummaryDto
+from Artesian.MarketData._Dto.QualityNotificationAlertDto import QualityNotificationAlertDtoOutput
 
 # Has been tried extensively to use TypeVar and Generic for this purpose
 # jsons library fails with Generics thus we opted for the following
@@ -49,3 +50,8 @@ class PagedResultMarketDataQualityRuleAssignmentDtoOutput(PagedResult):
 @dataclass
 class PagedResultCheckResultCheckSummaryDto(PagedResult):
     data: List[CheckResultCheckSummaryDto]
+
+
+@dataclass
+class PagedResultQualityNotificationAlertDtoOutput(PagedResult):
+    data: List[QualityNotificationAlertDtoOutput]

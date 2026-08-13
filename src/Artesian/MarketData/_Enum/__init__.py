@@ -9,6 +9,7 @@ from .RuleType import RuleType
 from .PeriodPrecision import PeriodPrecision
 from .CheckAggregatedStatus import CheckAggregatedStatus
 from .UpsertMode import UpsertMode
+from .AlertType import AlertType
 
 __all__ = [
     AggregationRule.__name__,
@@ -22,5 +23,6 @@ __all__ = [
     RuleType.__name__,
     PeriodPrecision.__name__,
     CheckAggregatedStatus.__name__,
-    UpsertMode.__name__
+    UpsertMode.__name__,
+    AlertType.__name__
 ]  # type: ignore

@@ -1,8 +1,18 @@
 from dataclasses import dataclass
-from typing import Dict, Optional, Any
+import datetime
+from typing import Dict, Optional
 
 from .MarketDataEntityOutput import MarketDataEntityOutput
 from .DataQualityStatusSummaryDto import DataQualityStatusSummaryDto
+
+
+@dataclass
+class MarketDataCurveSummaryDto:
+    """Summary information about the market data curve."""
+
+    dataLastWritedAt: Optional[datetime.datetime] = None
+    dataRangeStart: Optional[datetime.date] = None
+    dataRangeEnd: Optional[datetime.date] = None
 
 
 @dataclass
@@ -17,4 +27,4 @@ class MarketDataEntityOutputEnriched(MarketDataEntityOutput):
             Populated when includeCurveSummary=true.
     """
     dataQualityStatusSummary: Optional[Dict[str, DataQualityStatusSummaryDto]] = None
-    curveSummary: Optional[Any] = None
+    curveSummary: Optional[MarketDataCurveSummaryDto] = None

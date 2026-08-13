@@ -4,6 +4,7 @@ from ._Enum.AggregationRule import AggregationRule
 from ..Granularity import Granularity
 from ._Enum.MarketDataTypeV2 import MarketDataTypeV2
 from ._Enum.ArtesianMetadataFacetType import ArtesianMetadataFacetType
+from ._Enum.AlertType import AlertType
 from .CommonUnitOfMeasure import CommonUnitOfMeasure
 
 from ._Dto import (
@@ -32,6 +33,13 @@ from ._Dto import (
     MarketDataDqStatusSummaryDto,
     DqRuleDqStatusSummaryDto,
     MarketDataEntityOutputEnriched,
+    MarketDataCurveSummaryDto,
+    PagedResultQualityNotificationAlertDtoOutput,
+    QualityNotificationAlertDtoInput,
+    QualityNotificationAlertDtoOutput,
+    AlertScheduleEventsDtoOutput,
+    TriggerConfigDto,
+    MailNotificationDto,
 )
 
 __all__ = [
@@ -54,6 +62,7 @@ __all__ = [
     ArtesianMetadataFacet.__name__,
     ArtesianMetadataFacetCount.__name__,
     ArtesianMetadataFacetType.__name__,
+    AlertType.__name__,
     DerivedCfg.__name__,
     CheckConversionResult.__name__,
     DerivedAlgorithm.__name__,
@@ -67,4 +76,11 @@ __all__ = [
     MarketDataDqStatusSummaryDto.__name__,
     DqRuleDqStatusSummaryDto.__name__,
     MarketDataEntityOutputEnriched.__name__,
+    MarketDataCurveSummaryDto.__name__,
+    PagedResultQualityNotificationAlertDtoOutput.__name__,
+    QualityNotificationAlertDtoInput.__name__,
+    QualityNotificationAlertDtoOutput.__name__,
+    AlertScheduleEventsDtoOutput.__name__,
+    TriggerConfigDto.__name__,
+    MailNotificationDto.__name__,
 ]  # type: ignore

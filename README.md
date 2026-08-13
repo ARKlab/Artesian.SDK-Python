@@ -697,6 +697,126 @@ if rule.aggregatedStatus == CheckAggregatedStatus.KO:
   print(f"Rule {rule.name} has failing checks!")
 ```
 
+## Quality Notification Alerts
+
+Quality Notification Alerts send notifications when Data Quality events occur.
+An alert contains a trigger configuration, email notification recipients, and
+optimistic concurrency fields (`version` and `eTag`). Market Data assignments
+are managed separately by the Data Quality Rule Assignment APIs.
+
+The examples below use the synchronous `MarketDataService` methods. Async
+counterparts with the same name plus the `Async` suffix are also available.
+
+### Create a Quality Notification Alert
+
+`TriggerConfigDto` is the base type for alert trigger configurations. The
+following example defines an on-event trigger and configures email recipients:
+
+```Python
+from Artesian.MarketData._Dto.MailNotificationDto import MailNotificationDto
+from Artesian.MarketData._Dto.QualityNotificationAlertDto import (
+  QualityNotificationAlertDtoInput,
+)
+from Artesian.MarketData._Dto.TriggerConfigDto import TriggerConfigDto
+from Artesian.MarketData._Enum.AlertType import AlertType
+
+class OnEventTriggerConfig(TriggerConfigDto):
+  @property
+  def type(self) -> AlertType:
+    return AlertType.OnEvent
+
+alert = QualityNotificationAlertDtoInput(
+  name="Weather station quality alert",
+  triggerConfig=OnEventTriggerConfig(),
+  mailNotifications=[
+    MailNotificationDto(recipients=["quality-alerts@example.com"])
+  ],
+  version=0,
+)
+
+createdAlert = marketDataService.registerQualityNotificationAlert(alert)
+print(f"Created alert with ID: {createdAlert.id}")
+```
+
+For a complete end-to-end example, see
+[`samples/TestQualityNotificationAlert.py`](samples/TestQualityNotificationAlert.py).
+
+### Read Quality Notification Alerts
+
+Read a single alert by its server-assigned ID:
+
+```Python
+alert = marketDataService.readQualityNotificationAlertById(123)
+print(f"Alert: {alert.name}")
+```
+
+Read a paginated list with optional filters:
+
+```Python
+alerts = marketDataService.readQualityNotificationAlerts(
+  page=1,
+  pageSize=20,
+  name="weather",
+  marketDataId=100000001,
+  ruleIds=[12, 15],
+  sort=["Name asc"],
+)
+
+for alert in alerts.data:
+  print(f"- {alert.name} (ID: {alert.id})")
+```
+
+### Update a Quality Notification Alert
+
+Use the `version` and `eTag` returned by the server for optimistic
+concurrency:
+
+```Python
+existingAlert = marketDataService.readQualityNotificationAlertById(123)
+
+updatedAlert = QualityNotificationAlertDtoInput(
+  id=existingAlert.id,
+  name="Updated weather station alert",
+  triggerConfig=existingAlert.triggerConfig,
+  mailNotifications=existingAlert.mailNotifications or [],
+  version=existingAlert.version,
+  eTag=existingAlert.eTag,
+)
+
+marketDataService.updateQualityNotificationAlert(
+  id=existingAlert.id,
+  entity=updatedAlert,
+)
+```
+
+### Delete a Quality Notification Alert
+
+```Python
+marketDataService.deleteQualityNotificationAlert(123)
+```
+
+### Read Alert Schedule Occurrences
+
+For scheduled alerts, retrieve the most recent materialized schedule timestamps
+and the events materialized for a specific occurrence or for the latest one:
+
+```Python
+from datetime import datetime
+
+occurrences = marketDataService.readAlertScheduleList(
+  alertId=123,
+  lastN=10,
+)
+
+events = marketDataService.readAlertScheduleEvents(
+  alertId=123,
+  scheduleTime=datetime(2024, 1, 15, 10, 0),
+)
+
+latestEvents = marketDataService.readAlertScheduleLastEvents(alertId=123)
+print(f"Latest materialized events: {len(latestEvents.events)}")
+```
+
 ## GME Public Offer
 
 Artesian support Query over GME Public Offers which comes in a custom and dedicated format.
