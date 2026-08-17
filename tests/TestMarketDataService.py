@@ -46,6 +46,11 @@ from Artesian.MarketData._Enum.RuleType import RuleType
 from Artesian.MarketData._Dto.CheckResultExtract import CheckResultExtractVts, CheckResultExtractTs
 from Artesian.MarketData._Dto.DqRuleDqStatusSummaryDto import DqRuleDqStatusSummaryDto
 from Artesian.MarketData._Dto.MarketDataDqStatusSummaryDto import MarketDataDqStatusSummaryDto
+from Artesian.MarketData._Dto.DqCheckChangeEventDto import (
+    DqCheckChangeEventDtoOutput,
+    LocalDateTimeRange,
+)
+from Artesian.MarketData._Enum.CheckAggregatedStatus import CheckAggregatedStatus
 from Artesian.MarketData._Dto.AlertScheduleEventsDto import AlertScheduleEventsDtoOutput
 from Artesian.MarketData._Dto.MailNotificationDto import MailNotificationDto
 from Artesian.MarketData._Dto.PagedResult import PagedResultQualityNotificationAlertDtoOutput
@@ -918,6 +923,45 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             await self.__service.deleteDataQualityRuleAssignmentAsync(self.__id)
 
             self.assertEqual(len(rsps.calls), 1)
+
+    async def test_readDataQualityRuleAssignmentEventsFeedAsync(
+        self: "TestMarketDataServiceMarketData",
+    ) -> None:
+        afterTimestamp = datetime(2024, 1, 15, 10, 0)
+        event = DqCheckChangeEventDtoOutput(
+            marketDataId=100,
+            ruleId=1,
+            assignmentId=self.__id,
+            rangeImpacted=LocalDateTimeRange(
+                start=datetime(2024, 1, 15),
+                end=datetime(2024, 1, 16),
+            ),
+            newStatus=CheckAggregatedStatus.KO,
+            oldStatus=CheckAggregatedStatus.OK,
+            timestamp=datetime(2024, 1, 15, 10, 0),
+            ruleName="TestRule",
+            ruleVersion=2,
+            marketDataName="TestMarketData",
+            provider="TestProvider",
+        )
+        params = {"afterTimestamp": "2024-01-15T10:00:00"}
+
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                "GET",
+                self.__baseurl
+                + "/dataquality/dqruleassignment/1/events",
+                match=[responses.matchers.query_param_matcher(params)],
+                json=artesianJsonSerialize([event]),
+                status=200,
+            )
+
+            output = await self.__service.readDataQualityRuleAssignmentEventsFeedAsync(
+                self.__id,
+                afterTimestamp,
+            )
+
+            self.assertEqual(output, [event])
 
     async def test_getDataQualityCheckResultExtractVtsAsync(self: "TestMarketDataServiceMarketData") -> None:
         with responses.RequestsMock() as rsps:
