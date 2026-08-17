@@ -702,7 +702,7 @@ if rule.aggregatedStatus == CheckAggregatedStatus.KO:
 Quality Notification Alerts send notifications when Data Quality events occur.
 An alert contains a trigger configuration, email notification recipients, and
 optimistic concurrency fields (`version` and `eTag`). Market Data assignments
-are managed separately by the Data Quality Rule Assignment APIs.
+are managed separately by the Quality Notification Alert Assignment APIs.
 
 The examples below use the synchronous `MarketDataService` methods. Async
 counterparts with the same name plus the `Async` suffix are also available.
@@ -740,6 +740,58 @@ print(f"Created alert with ID: {createdAlert.id}")
 
 For a complete end-to-end example, see
 [`samples/TestQualityNotificationAlert.py`](samples/TestQualityNotificationAlert.py).
+
+### Assign Market Data to a Quality Notification Alert
+
+An alert assignment binds an existing alert to a Market Data entity. Use
+`QualityNotificationAlertAssignmentDtoInput` for create operations and the
+output type for the enriched assignment returned by read operations:
+
+```Python
+from Artesian.MarketData._Dto.QualityNotificationAlertAssignmentDto import (
+  QualityNotificationAlertAssignmentDtoInput,
+)
+
+assignment = QualityNotificationAlertAssignmentDtoInput(
+  alertId=123,
+  marketDataId=100000001,
+)
+
+createdAssignment = marketDataService.registerQualityNotificationAlertAssignment(
+  assignment,
+)
+print(f"Created alert assignment with ID: {createdAssignment.id}")
+```
+
+Read an assignment by ID or retrieve a paginated list filtered by alert or
+Market Data:
+
+```Python
+assignment = marketDataService.readQualityNotificationAlertAssignmentById(456)
+print(f"Alert {assignment.alertId} monitors Market Data {assignment.marketDataId}")
+
+assignments = marketDataService.readQualityNotificationAlertAssignments(
+  page=1,
+  pageSize=20,
+  alertId=123,
+  marketDataId=100000001,
+  sort=["Id asc"],
+)
+
+for item in assignments.data:
+  print(f"- Assignment {item.id}: alert {item.alertId}, Market Data {item.marketDataId}")
+```
+
+Delete an assignment by its server-assigned ID:
+
+```Python
+marketDataService.deleteQualityNotificationAlertAssignment(456)
+```
+
+Async counterparts with the `Async` suffix are also available. For a complete
+sample that creates the Market Data entity, alert, and assignment and cleans
+them up, see
+[`samples/TestDataQualityNotificationAlertAssignement.py`](samples/TestDataQualityNotificationAlertAssignement.py).
 
 ### Read Quality Notification Alerts
 

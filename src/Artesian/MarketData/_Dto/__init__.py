@@ -10,6 +10,7 @@ from .PagedResult import (
     PagedResultMarketDataQualityRuleAssignmentDtoOutput,
     PagedResultCheckResultCheckSummaryDto
     , PagedResultQualityNotificationAlertDtoOutput
+    , PagedResultQualityNotificationAlertAssignmentDtoOutput
 )
 from .ArtesianSearchResults import ArtesianSearchResults
 from .ArtesianMetadataFacet import ArtesianMetadataFacet, ArtesianMetadataFacetCount
@@ -55,6 +56,10 @@ from .DqRuleDqStatusSummaryDto import DqRuleDqStatusSummaryDto
 from .QualityNotificationAlertDto import (
     QualityNotificationAlertDtoInput,
     QualityNotificationAlertDtoOutput,
+)
+from .QualityNotificationAlertAssignmentDto import (
+    QualityNotificationAlertAssignmentDtoInput,
+    QualityNotificationAlertAssignmentDtoOutput,
 )
 from .AlertScheduleEventsDto import AlertScheduleEventsDtoOutput
 from .TriggerConfigDto import TriggerConfigDto
@@ -109,8 +114,11 @@ __all__ = [
     MarketDataDqStatusSummaryDto.__name__,
     DqRuleDqStatusSummaryDto.__name__,
     PagedResultQualityNotificationAlertDtoOutput.__name__,
+    PagedResultQualityNotificationAlertAssignmentDtoOutput.__name__,
     QualityNotificationAlertDtoInput.__name__,
     QualityNotificationAlertDtoOutput.__name__,
+    QualityNotificationAlertAssignmentDtoInput.__name__,
+    QualityNotificationAlertAssignmentDtoOutput.__name__,
     AlertScheduleEventsDtoOutput.__name__,
     TriggerConfigDto.__name__,
     MailNotificationDto.__name__,

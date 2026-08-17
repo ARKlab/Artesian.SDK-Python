@@ -15,6 +15,7 @@ from ._Dto.PagedResult import (
     PagedResultDataQualityRuleDtoOutput,
     PagedResultMarketDataQualityRuleAssignmentDtoOutput,
     PagedResultQualityNotificationAlertDtoOutput,
+    PagedResultQualityNotificationAlertAssignmentDtoOutput,
 )
 from ._Dto.ArtesianSearchResults import ArtesianSearchResults
 from ._Dto.MarketDataEntityInput import MarketDataEntityInput
@@ -35,6 +36,10 @@ from ._Dto.DqRuleDqStatusSummaryDto import DqRuleDqStatusSummaryDto
 from ._Dto.QualityNotificationAlertDto import (
     QualityNotificationAlertDtoInput,
     QualityNotificationAlertDtoOutput,
+)
+from ._Dto.QualityNotificationAlertAssignmentDto import (
+    QualityNotificationAlertAssignmentDtoInput,
+    QualityNotificationAlertAssignmentDtoOutput,
 )
 from ._Dto.AlertScheduleEventsDto import AlertScheduleEventsDtoOutput
 from ..CheckAggregatedStatus import CheckAggregatedStatus
@@ -888,6 +893,136 @@ class MarketDataService:
     ) -> AlertScheduleEventsDtoOutput:
         return _get_event_loop().run_until_complete(
             self.readAlertScheduleLastEventsAsync(alertId)
+        )
+
+    async def registerQualityNotificationAlertAssignmentAsync(
+        self: MarketDataService,
+        entity: QualityNotificationAlertAssignmentDtoInput,
+    ) -> QualityNotificationAlertAssignmentDtoOutput:
+        """Creates a new assignment between Market Data and an alert rule."""
+        if entity is None:
+            raise ValueError("entity cannot be None")
+
+        url = "/dataquality/alertruleassignment"
+        with self.__client as c:
+            res = await asyncio.gather(
+                *[
+                    self.__executor.exec(
+                        c.exec,
+                        "POST",
+                        url,
+                        entity,
+                        retcls=QualityNotificationAlertAssignmentDtoOutput,
+                    )
+                ]
+            )
+            return cast(QualityNotificationAlertAssignmentDtoOutput, res[0])
+
+    def registerQualityNotificationAlertAssignment(
+        self: MarketDataService,
+        entity: QualityNotificationAlertAssignmentDtoInput,
+    ) -> QualityNotificationAlertAssignmentDtoOutput:
+        return _get_event_loop().run_until_complete(
+            self.registerQualityNotificationAlertAssignmentAsync(entity)
+        )
+
+    async def readQualityNotificationAlertAssignmentByIdAsync(
+        self: MarketDataService, id: int
+    ) -> QualityNotificationAlertAssignmentDtoOutput:
+        """Retrieves a notification alert assignment by id."""
+        url = "/dataquality/alertruleassignment/" + str(id)
+        with self.__client as c:
+            res = await asyncio.gather(
+                *[
+                    self.__executor.exec(
+                        c.exec,
+                        "GET",
+                        url,
+                        None,
+                        retcls=QualityNotificationAlertAssignmentDtoOutput,
+                    )
+                ]
+            )
+            return cast(QualityNotificationAlertAssignmentDtoOutput, res[0])
+
+    def readQualityNotificationAlertAssignmentById(
+        self: MarketDataService, id: int
+    ) -> QualityNotificationAlertAssignmentDtoOutput:
+        return _get_event_loop().run_until_complete(
+            self.readQualityNotificationAlertAssignmentByIdAsync(id)
+        )
+
+    async def readQualityNotificationAlertAssignmentsAsync(
+        self: MarketDataService,
+        page: int,
+        pageSize: int,
+        alertId: Optional[int] = None,
+        marketDataId: Optional[int] = None,
+        sort: Optional[List[str]] = None,
+    ) -> PagedResultQualityNotificationAlertAssignmentDtoOutput:
+        """Retrieves a paginated list of notification alert assignments."""
+        if page < 1:
+            raise ValueError(f"page must be >= 1 (got {page})")
+        if pageSize < 1:
+            raise ValueError(f"pageSize must be >= 1 (got {pageSize})")
+
+        params = {}
+        params["page"] = page
+        params["pageSize"] = pageSize
+
+        if alertId is not None:
+            params["alertId"] = alertId
+        if marketDataId is not None:
+            params["marketDataId"] = marketDataId
+        if sort:
+            params["sort"] = sort
+
+        url = "/dataquality/alertruleassignment"
+        with self.__client as c:
+            res = await asyncio.gather(
+                *[
+                    self.__executor.exec(
+                        c.exec,
+                        "GET",
+                        url,
+                        None,
+                        retcls=PagedResultQualityNotificationAlertAssignmentDtoOutput,
+                        params=params,
+                    )
+                ]
+            )
+            return cast(
+                PagedResultQualityNotificationAlertAssignmentDtoOutput, res[0]
+            )
+
+    def readQualityNotificationAlertAssignments(
+        self: MarketDataService,
+        page: int,
+        pageSize: int,
+        alertId: Optional[int] = None,
+        marketDataId: Optional[int] = None,
+        sort: Optional[List[str]] = None,
+    ) -> PagedResultQualityNotificationAlertAssignmentDtoOutput:
+        return _get_event_loop().run_until_complete(
+            self.readQualityNotificationAlertAssignmentsAsync(
+                page, pageSize, alertId, marketDataId, sort
+            )
+        )
+
+    async def deleteQualityNotificationAlertAssignmentAsync(
+        self: MarketDataService, id: int
+    ) -> None:
+        """Deletes a notification alert assignment by id."""
+        url = "/dataquality/alertruleassignment/" + str(id)
+        with self.__client as c:
+            await asyncio.gather(*[self.__executor.exec(c.exec, "DELETE", url, None)])
+        return None
+
+    def deleteQualityNotificationAlertAssignment(
+        self: MarketDataService, id: int
+    ) -> None:
+        return _get_event_loop().run_until_complete(
+            self.deleteQualityNotificationAlertAssignmentAsync(id)
         )
 
     async def registerDataQualityRuleAssignmentAsync(

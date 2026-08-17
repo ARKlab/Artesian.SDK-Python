@@ -54,9 +54,16 @@ from Artesian.MarketData._Enum.CheckAggregatedStatus import CheckAggregatedStatu
 from Artesian.MarketData._Dto.AlertScheduleEventsDto import AlertScheduleEventsDtoOutput
 from Artesian.MarketData._Dto.MailNotificationDto import MailNotificationDto
 from Artesian.MarketData._Dto.PagedResult import PagedResultQualityNotificationAlertDtoOutput
+from Artesian.MarketData._Dto.PagedResult import (
+    PagedResultQualityNotificationAlertAssignmentDtoOutput,
+)
 from Artesian.MarketData._Dto.QualityNotificationAlertDto import (
     QualityNotificationAlertDtoInput,
     QualityNotificationAlertDtoOutput,
+)
+from Artesian.MarketData._Dto.QualityNotificationAlertAssignmentDto import (
+    QualityNotificationAlertAssignmentDtoInput,
+    QualityNotificationAlertAssignmentDtoOutput,
 )
 from Artesian.MarketData._Dto.TriggerConfigDto import TriggerConfigDto
 
@@ -821,6 +828,116 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             output = await self.__service.readAlertScheduleLastEventsAsync(self.__id)
 
             self.assertEqual(output, scheduleEvents)
+
+    async def test_registerQualityNotificationAlertAssignmentAsync(
+        self: "TestMarketDataServiceMarketData",
+    ) -> None:
+        entity = QualityNotificationAlertAssignmentDtoInput(
+            alertId=1,
+            marketDataId=100,
+        )
+        expected = QualityNotificationAlertAssignmentDtoOutput(
+            id=1,
+            alertId=1,
+            marketDataId=100,
+            eTag="assignment-etag-1",
+        )
+
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                "POST",
+                self.__baseurl + "/dataquality/alertruleassignment",
+                match=[
+                    responses.matchers.json_params_matcher(
+                        artesianJsonSerialize(entity)
+                    )
+                ],
+                json=artesianJsonSerialize(expected),
+                status=200,
+            )
+
+            output = await self.__service.registerQualityNotificationAlertAssignmentAsync(
+                entity
+            )
+
+            self.assertEqual(output, expected)
+
+    async def test_readQualityNotificationAlertAssignmentByIdAsync(
+        self: "TestMarketDataServiceMarketData",
+    ) -> None:
+        expected = QualityNotificationAlertAssignmentDtoOutput(
+            id=1,
+            alertId=1,
+            marketDataId=100,
+        )
+
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                "GET",
+                self.__baseurl + "/dataquality/alertruleassignment/1",
+                json=artesianJsonSerialize(expected),
+                status=200,
+            )
+
+            output = await self.__service.readQualityNotificationAlertAssignmentByIdAsync(
+                1
+            )
+
+            self.assertEqual(output, expected)
+
+    async def test_readQualityNotificationAlertAssignmentsAsync(
+        self: "TestMarketDataServiceMarketData",
+    ) -> None:
+        assignment = QualityNotificationAlertAssignmentDtoOutput(
+            id=1,
+            alertId=1,
+            marketDataId=100,
+        )
+        expected = PagedResultQualityNotificationAlertAssignmentDtoOutput(
+            1, 10, 1, False, [assignment]
+        )
+        params = {
+            "alertId": "1",
+            "marketDataId": "100",
+            "page": "1",
+            "pageSize": "10",
+            "sort": "Id asc",
+        }
+
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                "GET",
+                self.__baseurl + "/dataquality/alertruleassignment",
+                match=[responses.matchers.query_param_matcher(params)],
+                json=artesianJsonSerialize(expected),
+                status=200,
+            )
+
+            output = await self.__service.readQualityNotificationAlertAssignmentsAsync(
+                1, 10, 1, 100, ["Id asc"]
+            )
+
+            self.assertEqual(output, expected)
+
+        with self.assertRaises(ValueError):
+            await self.__service.readQualityNotificationAlertAssignmentsAsync(0, 10)
+
+        with self.assertRaises(ValueError):
+            await self.__service.readQualityNotificationAlertAssignmentsAsync(1, 0)
+
+    async def test_deleteQualityNotificationAlertAssignmentAsync(
+        self: "TestMarketDataServiceMarketData",
+    ) -> None:
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                "DELETE",
+                self.__baseurl + "/dataquality/alertruleassignment/1",
+                status=204,
+            )
+
+            await self.__service.deleteQualityNotificationAlertAssignmentAsync(1)
+
+            self.assertEqual(len(rsps.calls), 1)
 
     async def test_registerDataQualityRuleAssignmentAsync(self: "TestMarketDataServiceMarketData") -> None:
         with responses.RequestsMock() as rsps:
