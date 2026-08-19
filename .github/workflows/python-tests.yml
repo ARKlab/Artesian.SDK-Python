@@ -7,7 +7,7 @@ on:
   push:
     branches: [master]
     tags:
-      - "v*"
+      - 'v[0-9]+\.[0-9]+\.[0-9]+'
   pull_request:
     branches: [master]
 
@@ -96,7 +96,15 @@ jobs:
             exit 1
           fi
 
+          git fetch origin master
+
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" "origin/master"; then
+            echo "::error::Release tag $TAG does not point to a commit contained in master."
+            exit 1
+          fi
+
           echo "Valid GA release tag: $TAG"
+          echo "Tagged commit is contained in master."
 
       - name: Set up Python ${{ env.python-version }}
         uses: actions/setup-python@v7
