@@ -1854,7 +1854,7 @@ class MarketDataService:
         if assignmentIds is not None and len(assignmentIds) > 0:
             params["assignmentIds"] = assignmentIds
         if dqStatus is not None:
-            params["dqStatus"] = dqStatus.value
+            params["dqStatus"] = dqStatus.name
         if from_date is not None:
             params["from"] = from_date
         if to_date is not None:
@@ -1961,7 +1961,7 @@ class MarketDataService:
         if marketDataIds is not None and len(marketDataIds) > 0:
             params["marketDataIds"] = marketDataIds
         if dqStatus is not None:
-            params["dqStatus"] = dqStatus.value
+            params["dqStatus"] = dqStatus.name
 
         with self.__client as c:
             res = await asyncio.gather(
@@ -2036,7 +2036,7 @@ class MarketDataService:
         if ruleIds is not None and len(ruleIds) > 0:
             params["ruleIds"] = ruleIds
         if dqStatus is not None:
-            params["dqStatus"] = dqStatus.value
+            params["dqStatus"] = dqStatus.name
 
         with self.__client as c:
             res = await asyncio.gather(
