@@ -1133,7 +1133,6 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(output, [self.__sampleTs])
 
     async def test_getDataQualityCheckResultCheckSummaryAsync(self: "TestMarketDataServiceMarketData") -> None:
-        from Artesian.CheckAggregatedStatus import CheckAggregatedStatus
         from Artesian.MarketData._Dto.PagedResult import PagedResultCheckResultCheckSummaryDto
         expectedOutput = PagedResultCheckResultCheckSummaryDto(page=1, pageSize=20, count=0,
                                                                isCountPartial=False, data=[])
@@ -1162,7 +1161,6 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(output, expectedOutput)
 
     async def test_getMarketDataDqStatusSummaryAsync(self: "TestMarketDataServiceMarketData") -> None:
-        from Artesian.CheckAggregatedStatus import CheckAggregatedStatus
         with responses.RequestsMock() as rsps:
             params = {
                 "limit": "50",
@@ -1186,7 +1184,6 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(output, [self.__sampleMdDq])
 
     async def test_getDqRuleDqStatusSummaryAsync(self: "TestMarketDataServiceMarketData") -> None:
-        from Artesian.CheckAggregatedStatus import CheckAggregatedStatus
         with responses.RequestsMock() as rsps:
             params = {
                 "limit": "100",

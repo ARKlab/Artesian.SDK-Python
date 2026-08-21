@@ -6,6 +6,7 @@ from uuid import UUID
 from Artesian.MarketData._Dto import DeleteData
 from Artesian.MarketData._Dto.DerivedTransformQueryValidation import DerivedTransformQueryValidation
 from Artesian.MarketData._Dto.DerivedTransformQueryValidationResponse import DerivedTransformQueryValidationResponse
+from Artesian.MarketData._Enum.CheckAggregatedStatus import CheckAggregatedStatus
 from ._Dto.DerivedCfg import DerivedCfg
 from .._ClientsExecutor.RequestExecutor import _RequestExecutor
 from .._ClientsExecutor.Client import _Client
@@ -47,7 +48,6 @@ from ._Dto.QualityNotificationAlertAssignmentDto import (
     QualityNotificationAlertAssignmentDtoOutput,
 )
 from ._Dto.AlertScheduleEventsDto import AlertScheduleEventsDtoOutput
-from ..CheckAggregatedStatus import CheckAggregatedStatus
 import asyncio
 
 
