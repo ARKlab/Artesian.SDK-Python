@@ -6,6 +6,7 @@ from Artesian.MarketData._Dto.DerivedTransformQueryValidationResponse import Der
 from Artesian.MarketData._Dto.TimeSerieData import TimeSerieData
 from Artesian._ClientsExecutor.ArtesianJsonSerializer import artesianJsonSerialize
 from datetime import datetime
+from uuid import UUID
 from Artesian.MarketData import (
     ArtesianMetadataFacet,
     ArtesianMetadataFacetCount,
@@ -24,6 +25,11 @@ from Artesian.MarketData import (
     PagedResultCurveRangeEntity,
     UnitOfMeasure,
     AlertType,
+    MarketDataIdentifier,
+    OverrideKind,
+    OverrideMetadataEntry,
+    PagedResultOverrideMetadataEntry,
+    UpsertCurveDataOverride,
 )
 from Artesian.MarketData._Dto.ActualCompletenessAndFreshnessConfigDto import (
     ActualCompletenessAndFreshnessConfigDto,
@@ -1202,3 +1208,110 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
                 limit=100,
             )
             self.assertEqual(output, [self.__sampleDqRule])
+
+    async def test_upsertCurveDataOverrideAsync(
+        self: "TestMarketDataServiceMarketData",
+    ) -> None:
+        betaBaseUrl = "https://baseurl.com/v2.2-beta"
+        data = UpsertCurveDataOverride(
+            MarketDataIdentifier("PROVIDER", "CURVENAME"),
+            "UTC",
+            rows={datetime(2020, 1, 1): 42.0},
+            kind=OverrideKind.Override,
+            comment="test override",
+        )
+        expected = [
+            OverrideMetadataEntry(
+                id=UUID("11111111-1111-1111-1111-111111111111"),
+                marketDataId=100,
+                kind=OverrideKind.Override,
+                version=None,
+                product=None,
+                referencedMarketDataId=100,
+                rangeExactStart=datetime(2020, 1, 1),
+                rangeExactEnd=datetime(2020, 1, 2),
+                createdBy="test-user",
+                createdAt=datetime(2020, 1, 1),
+            )
+        ]
+
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                "POST",
+                betaBaseUrl + "/marketdata/override/upsertdata",
+                match=[
+                    responses.matchers.json_params_matcher(
+                        artesianJsonSerialize(data)
+                    )
+                ],
+                json=artesianJsonSerialize(expected),
+                status=200,
+            )
+
+            output = await self.__service.upsertCurveDataOverrideAsync(data)
+
+            self.assertEqual(output, expected)
+
+    async def test_deleteOverrideDataAsync(
+        self: "TestMarketDataServiceMarketData",
+    ) -> None:
+        betaBaseUrl = "https://baseurl.com/v2.2-beta"
+        overrideId = UUID("11111111-1111-1111-1111-111111111111")
+
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                "POST",
+                betaBaseUrl
+                + "/marketdata/override/"
+                + str(overrideId)
+                + "/deletedata",
+                status=204,
+            )
+
+            await self.__service.deleteOverrideDataAsync(overrideId)
+
+            self.assertEqual(len(rsps.calls), 1)
+
+    async def test_readOverrideMetadataAsync(
+        self: "TestMarketDataServiceMarketData",
+    ) -> None:
+        betaBaseUrl = "https://baseurl.com/v2.2-beta"
+        expected = PagedResultOverrideMetadataEntry(
+            page=2,
+            pageSize=5,
+            count=1,
+            isCountPartial=False,
+            data=[
+                OverrideMetadataEntry(
+                    id=UUID("11111111-1111-1111-1111-111111111111"),
+                    marketDataId=100,
+                    kind=OverrideKind.Fallback,
+                    version=None,
+                    product=None,
+                    referencedMarketDataId=100,
+                    rangeExactStart=datetime(2020, 1, 1),
+                    rangeExactEnd=datetime(2020, 1, 2),
+                    createdBy="test-user",
+                    createdAt=datetime(2020, 1, 1),
+                )
+            ],
+        )
+        params = {"kind": "Fallback", "page": "2", "pageSize": "5"}
+
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                "GET",
+                betaBaseUrl + "/marketdata/override/100/metadata",
+                match=[responses.matchers.query_param_matcher(params)],
+                json=artesianJsonSerialize(expected),
+                status=200,
+            )
+
+            output = await self.__service.readOverrideMetadataAsync(
+                100,
+                OverrideKind.Fallback,
+                2,
+                5,
+            )
+
+            self.assertEqual(output, expected)

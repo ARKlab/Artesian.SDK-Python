@@ -18,7 +18,7 @@ class QueryService:
     """
 
     __queryRoute = "query"
-    __queryVersion = "v1.0"
+    __queryVersion = "v1.1-beta"
 
     def __init__(self: QueryService, artesianConfig: ArtesianConfig) -> None:
         """
@@ -30,7 +30,11 @@ class QueryService:
         self.__config = artesianConfig
         self.__policy = ArtesianPolicyConfig()
         self.__queryBaseurl = (
-            self.__config.baseUrl + "/" + self.__queryRoute + "/" + self.__queryVersion
+            self.__config.baseUrl.rstrip("/")
+            + "/"
+            + self.__queryRoute
+            + "/"
+            + self.__queryVersion
         )
         self.__partitionStrategy = DefaultPartitionStrategy()
         self.__executor = _RequestExecutor(self.__policy)

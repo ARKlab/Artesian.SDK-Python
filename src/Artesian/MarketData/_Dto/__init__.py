@@ -23,6 +23,9 @@ from .UpsertData import (
     UpsertData,
 )
 from .DeleteData import DeleteData
+from .UpsertCurveDataOverride import UpsertCurveDataOverride
+from .OverrideMetadataEntry import OverrideMetadataEntry
+from .PagedResultOverrideMetadataEntry import PagedResultOverrideMetadataEntry
 from .DerivedCfg import DerivedCfg
 from .DataQualityRuleDtoInput import DataQualityRuleDtoInput
 from .DataQualityRuleDtoOutput import DataQualityRuleDtoOutput
@@ -80,6 +83,9 @@ __all__ = [
     MarketAssessmentValue.__name__,
     UpsertData.__name__,
     DeleteData.__name__,
+    UpsertCurveDataOverride.__name__,
+    OverrideMetadataEntry.__name__,
+    PagedResultOverrideMetadataEntry.__name__,
     ArtesianSearchResults.__name__,
     ArtesianMetadataFacet.__name__,
     ArtesianMetadataFacetCount.__name__,

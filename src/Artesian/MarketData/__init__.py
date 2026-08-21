@@ -5,6 +5,7 @@ from ..Granularity import Granularity
 from ._Enum.MarketDataTypeV2 import MarketDataTypeV2
 from ._Enum.ArtesianMetadataFacetType import ArtesianMetadataFacetType
 from ._Enum.AlertType import AlertType
+from ._Enum.OverrideKind import OverrideKind
 from .CommonUnitOfMeasure import CommonUnitOfMeasure
 
 from ._Dto import (
@@ -43,6 +44,9 @@ from ._Dto import (
     AlertScheduleEventsDtoOutput,
     TriggerConfigDto,
     MailNotificationDto,
+    UpsertCurveDataOverride,
+    OverrideMetadataEntry,
+    PagedResultOverrideMetadataEntry,
 )
 
 __all__ = [
@@ -89,4 +93,8 @@ __all__ = [
     AlertScheduleEventsDtoOutput.__name__,
     TriggerConfigDto.__name__,
     MailNotificationDto.__name__,
+    UpsertCurveDataOverride.__name__,
+    OverrideMetadataEntry.__name__,
+    PagedResultOverrideMetadataEntry.__name__,
+    OverrideKind.__name__,
 ]  # type: ignore

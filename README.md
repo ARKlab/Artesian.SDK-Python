@@ -869,6 +869,81 @@ latestEvents = marketDataService.readAlertScheduleLastEvents(alertId=123)
 print(f"Latest materialized events: {len(latestEvents.events)}")
 ```
 
+### Market Data Overrides and Fallbacks
+
+The `MarketDataService` also supports writing corrections separately from the
+original Market Data. An override takes precedence over the original values
+for the affected range. A fallback is used while the original data is
+unavailable or does not pass the relevant Data Quality checks.
+
+Use `UpsertCurveDataOverride` to reuse the standard curve-data payload and
+provide the correction metadata. The payload supports Actual and Versioned
+time series, Market Assessment, Auction and BidAsk data.
+
+- `upsertCurveDataOverride` creates or updates an override and returns its metadata entries.
+- `readOverrideMetadata` reads paginated metadata, optionally filtered by kind.
+- `deleteOverrideData` deletes the data and metadata associated with an override.
+
+```Python
+from datetime import datetime, timezone
+
+from Artesian import ArtesianConfig
+from Artesian.MarketData import (
+  MarketDataIdentifier,
+  MarketDataService,
+  OverrideKind,
+  UpsertCurveDataOverride,
+)
+
+cfg = ArtesianConfig("https://arkive.artesian.cloud/tenantName/", "APIKey")
+marketDataService = MarketDataService(cfg)
+marketDataIdentifier = MarketDataIdentifier("TestProvider", "TestMarketData")
+
+overrideData = UpsertCurveDataOverride(
+  ID=marketDataIdentifier,
+  timezone="UTC",
+  downloadedAt=datetime.now(timezone.utc),
+  rows={
+    datetime(2025, 1, 1): 11.5,
+    datetime(2025, 1, 2): 12.5,
+  },
+  kind=OverrideKind.Override,
+  overrideId=None,
+  replaceExisting=True,
+  comment="Correction received from the data provider",
+)
+
+createdEntries = marketDataService.upsertCurveDataOverride(overrideData)
+
+metadata = marketDataService.readOverrideMetadata(
+  marketDataId=100000001,
+  kind=OverrideKind.Override,
+  page=1,
+  pageSize=10,
+)
+
+if createdEntries and createdEntries[0].id is not None:
+  marketDataService.deleteOverrideData(createdEntries[0].id)
+```
+
+Set `overrideId` to the metadata id of an existing correction when updating it. Set it
+to `None` to create a new correction. The `replaceExisting` flag controls how
+overlapping corrections of the same kind are handled.
+
+Each `OverrideMetadataEntry` describes the current state of a correction and
+includes its metadata id, Market Data id, kind, optional range, replacement
+flag, timestamps and comment. The metadata endpoint is paginated and accepts
+an optional `OverrideKind` filter.
+
+`OverrideKind` identifies how the correction is applied:
+
+- **`OverrideKind.Override`**: an explicit and persistent correction. Override values always take
+  precedence over the original Market Data values within the affected range. Use this value to
+  permanently correct invalid data or replace values supplied by the data provider.
+- **`OverrideKind.Fallback`**: an alternative value used only while the original data is unavailable
+  or does not pass the relevant Data Quality checks. When the original data becomes valid again, the
+  fallback is no longer used for the affected range.
+
 ## GME Public Offer
 
 Artesian support Query over GME Public Offers which comes in a custom and dedicated format.

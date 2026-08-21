@@ -1,6 +1,7 @@
 from __future__ import annotations
 from datetime import datetime
 from typing import List, Optional, cast, Dict
+from uuid import UUID
 
 from Artesian.MarketData._Dto import DeleteData
 from Artesian.MarketData._Dto.DerivedTransformQueryValidation import DerivedTransformQueryValidation
@@ -22,6 +23,10 @@ from ._Dto.MarketDataEntityInput import MarketDataEntityInput
 from ._Dto.MarketDataEntityOutput import MarketDataEntityOutput
 from ._Dto.CheckConversionResult import CheckConversionResult
 from ._Dto.UpsertData import UpsertData
+from ._Dto.UpsertCurveDataOverride import UpsertCurveDataOverride
+from ._Dto.OverrideMetadataEntry import OverrideMetadataEntry
+from ._Dto.PagedResultOverrideMetadataEntry import PagedResultOverrideMetadataEntry
+from ._Enum.OverrideKind import OverrideKind
 from ._Dto.DataQualityRuleDtoInput import DataQualityRuleDtoInput
 from ._Dto.DataQualityRuleDtoOutput import DataQualityRuleDtoOutput
 from ._Dto.DqCheckChangeEventDto import DqCheckChangeEventDtoOutput
@@ -53,6 +58,7 @@ class MarketDataService:
     """
 
     __version = "v2.1"
+    __versionOverride = "v2.2-beta"
 
     def __init__(self: MarketDataService, artesianConfig: ArtesianConfig) -> None:
         """
@@ -67,9 +73,12 @@ class MarketDataService:
         """
         self.__config = artesianConfig
         self.__policy = ArtesianPolicyConfig()
-        self.__serviceBaseurl = self.__config.baseUrl + "/" + self.__version
+        baseUrl = self.__config.baseUrl.rstrip("/")
+        self.__serviceBaseurl = baseUrl + "/" + self.__version
+        self.__serviceBaseOverrideurl = baseUrl + "/" + self.__versionOverride
         self.__executor = _RequestExecutor(self.__policy)
         self.__client = _Client(self.__serviceBaseurl, self.__config.apiKey)
+        self.__marketDataOverrideClient = _Client(self.__serviceBaseOverrideurl, self.__config.apiKey)
 
     async def readCurveRangeAsync(
         self: MarketDataService,
@@ -1508,6 +1517,89 @@ class MarketDataService:
 
     def deleteData(self: MarketDataService, data: DeleteData) -> None:
         return _get_event_loop().run_until_complete(self.deleteDataAsync(data))
+
+    async def upsertCurveDataOverrideAsync(
+        self: MarketDataService, data: UpsertCurveDataOverride
+    ) -> List[OverrideMetadataEntry]:
+        data.validate()
+        url = "/marketdata/override/upsertdata"
+        with self.__marketDataOverrideClient as c:
+            res = await asyncio.gather(
+                *[
+                    self.__executor.exec(
+                        c.exec,
+                        "POST",
+                        url,
+                        data,
+                        retcls=List[OverrideMetadataEntry],
+                    )
+                ]
+            )
+            return cast(List[OverrideMetadataEntry], res[0])
+
+    def upsertCurveDataOverride(
+        self: MarketDataService, data: UpsertCurveDataOverride
+    ) -> List[OverrideMetadataEntry]:
+        return _get_event_loop().run_until_complete(
+            self.upsertCurveDataOverrideAsync(data)
+        )
+
+    async def deleteOverrideDataAsync(
+        self: MarketDataService, id: UUID
+    ) -> None:
+        if id is None or id.int == 0:
+            raise ValueError("Override metadata id must be valorized")
+        url = "/marketdata/override/" + str(id) + "/deletedata"
+        with self.__marketDataOverrideClient as c:
+            await asyncio.gather(*[self.__executor.exec(c.exec, "POST", url)])
+        return None
+
+    def deleteOverrideData(self: MarketDataService, id: UUID) -> None:
+        return _get_event_loop().run_until_complete(self.deleteOverrideDataAsync(id))
+
+    async def readOverrideMetadataAsync(
+        self: MarketDataService,
+        marketDataId: int,
+        kind: Optional[OverrideKind] = None,
+        page: int = 1,
+        pageSize: int = 10,
+    ) -> PagedResultOverrideMetadataEntry:
+        if marketDataId < 1:
+            raise ValueError("Market Data id must be greater than zero")
+        if page < 1:
+            raise ValueError("Page must be greater than zero")
+        if pageSize < 1:
+            raise ValueError("PageSize must be greater than zero")
+        params = {}
+        if kind is not None:
+            params["kind"] = kind.name
+        params["page"] = page
+        params["pageSize"] = pageSize
+        url = "/marketdata/override/" + str(marketDataId) + "/metadata"
+        with self.__marketDataOverrideClient as c:
+            res = await asyncio.gather(
+                *[
+                    self.__executor.exec(
+                        c.exec,
+                        "GET",
+                        url,
+                        retcls=PagedResultOverrideMetadataEntry,
+                        params=params,
+                    )
+                ]
+            )
+            return cast(PagedResultOverrideMetadataEntry, res[0])
+
+    def readOverrideMetadata(
+        self: MarketDataService,
+        marketDataId: int,
+        kind: Optional[OverrideKind] = None,
+        page: int = 1,
+        pageSize: int = 10,
+    ) -> PagedResultOverrideMetadataEntry:
+        return _get_event_loop().run_until_complete(
+            self.readOverrideMetadataAsync(marketDataId, kind, page, pageSize)
+        )
 
     async def derivedTransformQueryValidationAsync(
         self: MarketDataService,
