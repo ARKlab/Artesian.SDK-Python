@@ -8,9 +8,9 @@ from .PagedResult import (
     PagedResultCurveRangeEntity,
     PagedResultDataQualityRuleDtoOutput,
     PagedResultMarketDataQualityRuleAssignmentDtoOutput,
-    PagedResultCheckResultCheckSummaryDto
-    , PagedResultQualityNotificationAlertDtoOutput
-    , PagedResultQualityNotificationAlertAssignmentDtoOutput
+    PagedResultCheckResultCheckSummaryDto,
+    PagedResultQualityNotificationAlertDtoOutput,
+    PagedResultQualityNotificationAlertAssignmentDtoOutput,
 )
 from .ArtesianSearchResults import ArtesianSearchResults
 from .ArtesianMetadataFacet import ArtesianMetadataFacet, ArtesianMetadataFacetCount
