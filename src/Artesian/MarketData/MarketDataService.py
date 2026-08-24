@@ -305,7 +305,7 @@ class MarketDataService:
                         "GET",
                         url,
                         None,
-                        retcls=MarketDataEntityOutput,
+                        retcls=MarketDataEntityOutputEnriched,
                         params=params,
                     )
                 ]
