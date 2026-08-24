@@ -400,7 +400,14 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
 
     async def test_readMarketDataRegistryByNameAsync(self: "TestMarketDataServiceMarketData") -> None:
         with responses.RequestsMock() as rsps:
-            params = {"provider": "PROVIDER", "curveName": "MARKETDATA"}
+            params = {
+                "provider": "PROVIDER",
+                "curveName": "MARKETDATA",
+                "includeCurveSummary": True,
+                "includeTimeTransform": True,
+                "includeDataQuality": False,
+                "skipOverrides": False,
+            }
             rsps.add(
                 "GET",
                 self.__baseurl + "/marketdata/entity",
@@ -409,7 +416,12 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
                 status=200,
             )
             output = await self.__service.readMarketDataRegistryByNameAsync(
-                params["provider"], params["curveName"]
+                params["provider"],
+                params["curveName"],
+                params["includeCurveSummary"],
+                params["includeTimeTransform"],
+                params["includeDataQuality"],
+                params["skipOverrides"],
             )
             self.assertEqual(output, self.__sampleOutput)
 
@@ -438,13 +450,26 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
 
     async def test_readMarketDataRegistryByIdAsync(self: "TestMarketDataServiceMarketData") -> None:
         with responses.RequestsMock() as rsps:
+            params = {
+                "includeCurveSummary": True,
+                "includeTimeTransform": True,
+                "includeDataQuality": False,
+                "skipOverrides": False,
+            }
             rsps.add(
                 "GET",
                 self.__baseurl + "/marketdata/entity/" + str(self.__id),
+                match=[responses.matchers.query_param_matcher(params)],
                 json=self.__serializedOutput,
                 status=200,
             )
-            output = await self.__service.readMarketDataRegistryByIdAsync(self.__id)
+            output = await self.__service.readMarketDataRegistryByIdAsync(
+                self.__id,
+                params["includeCurveSummary"],
+                params["includeTimeTransform"],
+                params["includeDataQuality"],
+                params["skipOverrides"],
+            )
             self.assertEqual(output, self.__sampleOutput)
 
     async def test_readCurveRangePaginationAsync(self: "TestMarketDataServiceMarketData") -> None:
@@ -570,6 +595,10 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
                 "filters": {"Market": ["Italy", "France"]},
                 "sorts": ["FacetName", "FacetType"],
                 "doNotLoadAdditionalInfo": True,
+                "includeCurveSummary": True,
+                "includeTimeTransform": True,
+                "includeDataQuality": False,
+                "skipOverrides": False,
             }
             paramsToMatch = {
                 "page": "1",
@@ -578,6 +607,10 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
                 "filters": ["Market:Italy", "Market:France"],
                 "sorts": ["FacetName", "FacetType"],
                 "doNotLoadAdditionalInfo": True,
+                "includeCurveSummary": True,
+                "includeTimeTransform": True,
+                "includeDataQuality": False,
+                "skipOverrides": False,
             }
 
             rsps.add(
@@ -594,6 +627,10 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
                 params["filters"],
                 params["sorts"],
                 bool(params["doNotLoadAdditionalInfo"]),
+                bool(params["includeCurveSummary"]),
+                bool(params["includeTimeTransform"]),
+                bool(params["includeDataQuality"]),
+                bool(params["skipOverrides"]),
             )
             self.assertEqual(output, self.__artesianSearchResults)
 

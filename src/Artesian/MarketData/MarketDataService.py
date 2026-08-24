@@ -165,6 +165,10 @@ class MarketDataService:
         filters: Optional[Dict[str, List[str]]] = None,
         sorts: Optional[List[str]] = None,
         doNotLoadAdditionalInfo: bool = False,
+        includeCurveSummary: bool = False,
+        includeTimeTransform: bool = False,
+        includeDataQuality: bool = False,
+        skipOverrides: bool = True,
     ) -> ArtesianSearchResults:
         """
         Search the MarketData collection with faceted results.
@@ -176,6 +180,10 @@ class MarketDataService:
             filters: ArtesianSearchFilter containing the search params.
             sorts: Sorts list.
             doNotLoadAdditionalInfo: Skip loading up-to-date curve range and transform.
+            includeCurveSummary: When true, includes curve summary (ranges) in the response.
+            includeTimeTransform: When true, includes time transform in the response.
+            includeDataQuality: When true, includes data quality status summary in the response.
+            skipOverrides: When false, includes override metadata in the response. Requires the /featureflag/overridebeta permission during beta. Default true.
 
         Returns:
             ArtesianSearchResults entity (Async).
@@ -198,6 +206,10 @@ class MarketDataService:
         if sorts is not None:
             params["sorts"] = sorts
         params["doNotLoadAdditionalInfo"] = doNotLoadAdditionalInfo
+        params["includeCurveSummary"] = includeCurveSummary
+        params["includeTimeTransform"] = includeTimeTransform
+        params["includeDataQuality"] = includeDataQuality
+        params["skipOverrides"] = skipOverrides
 
         with self.__client as c:
             res = await asyncio.gather(
@@ -221,6 +233,10 @@ class MarketDataService:
         filters: Optional[Dict[str, List[str]]] = None,
         sorts: Optional[List[str]] = None,
         doNotLoadAdditionalInfo: bool = False,
+        includeCurveSummary: bool = False,
+        includeTimeTransform: bool = False,
+        includeDataQuality: bool = False,
+        skipOverrides: bool = True,
     ) -> ArtesianSearchResults:
         """
         Search the MarketData collection with faceted results.
@@ -238,35 +254,69 @@ class MarketDataService:
         """
         return _get_event_loop().run_until_complete(
             self.searchFacetAsync(
-                page, pageSize, searchText, filters, sorts, doNotLoadAdditionalInfo
+                page,
+                pageSize,
+                searchText,
+                filters,
+                sorts,
+                doNotLoadAdditionalInfo,
+                includeCurveSummary,
+                includeTimeTransform,
+                includeDataQuality,
+                skipOverrides,
             )
         )
 
     async def readMarketDataRegistryByIdAsync(
-        self: MarketDataService, id: int
+        self: MarketDataService,
+        id: int,
+        includeCurveSummary: bool = False,
+        includeTimeTransform: bool = False,
+        includeDataQuality: bool = False,
+        skipOverrides: bool = True,
     ) -> MarketDataEntityOutput:
         """
         Reads MarketData by id with MarketDataID.
 
         Args:
             id: ID of the marketdata to be retrieved.
+            includeCurveSummary: When true, includes curve summary (ranges) in the response.
+            includeTimeTransform: When true, includes time transform in the response.
+            includeDataQuality: When true, includes data quality status summary in the response.
+            skipOverrides: When false, includes override metadata in the response. Requires the /featureflag/overridebeta permission during beta. Default true.
 
         Returns:
             MarketData Entity Output (Async).
         """
         url = "/marketdata/entity/" + str(id)
+        params = {
+            "includeCurveSummary": includeCurveSummary,
+            "includeTimeTransform": includeTimeTransform,
+            "includeDataQuality": includeDataQuality,
+            "skipOverrides": skipOverrides,
+        }
         with self.__client as c:
             res = await asyncio.gather(
                 *[
                     self.__executor.exec(
-                        c.exec, "GET", url, None, retcls=MarketDataEntityOutput
+                        c.exec,
+                        "GET",
+                        url,
+                        None,
+                        retcls=MarketDataEntityOutput,
+                        params=params,
                     )
                 ]
             )
             return cast(MarketDataEntityOutput, res[0])
 
     def readMarketDataRegistryById(
-        self: MarketDataService, id: int
+        self: MarketDataService,
+        id: int,
+        includeCurveSummary: bool = False,
+        includeTimeTransform: bool = False,
+        includeDataQuality: bool = False,
+        skipOverrides: bool = True,
     ) -> MarketDataEntityOutput:
         """
         Reads MarketData by curve name with MarketDataID.
@@ -278,7 +328,13 @@ class MarketDataService:
             MarketData Entity Output.
         """
         return _get_event_loop().run_until_complete(
-            self.readMarketDataRegistryByIdAsync(id)
+            self.readMarketDataRegistryByIdAsync(
+                id,
+                includeCurveSummary,
+                includeTimeTransform,
+                includeDataQuality,
+                skipOverrides,
+            )
         )
 
     async def updateMarketDataAsync(
@@ -348,7 +404,13 @@ class MarketDataService:
         return _get_event_loop().run_until_complete(self.deleteMarketDataAsync(id))
 
     async def readMarketDataRegistryByNameAsync(
-        self: MarketDataService, provider: str, curveName: str
+        self: MarketDataService,
+        provider: str,
+        curveName: str,
+        includeCurveSummary: bool = False,
+        includeTimeTransform: bool = False,
+        includeDataQuality: bool = False,
+        skipOverrides: bool = True,
     ) -> MarketDataEntityOutput:
         """
         Reads MarketData by provider and curve name.
@@ -356,12 +418,23 @@ class MarketDataService:
         Args:
             provider: string of the provider to be retrieved.
             curveName: string of the curve name to be retrieved.
+            includeCurveSummary: When true, includes curve summary (ranges) in the response.
+            includeTimeTransform: When true, includes time transform in the response.
+            includeDataQuality: When true, includes data quality status summary in the response.
+            skipOverrides: When false, includes override metadata in the response. Requires the /featureflag/overridebeta permission during beta. Default true.
 
         Returns:
             MarketData Entity Output (Async).
         """
         url = "/marketdata/entity"
-        params = {"provider": provider, "curveName": curveName}
+        params = {
+            "provider": provider,
+            "curveName": curveName,
+            "includeCurveSummary": includeCurveSummary,
+            "includeTimeTransform": includeTimeTransform,
+            "includeDataQuality": includeDataQuality,
+            "skipOverrides": skipOverrides,
+        }
         with self.__client as c:
             res = await asyncio.gather(
                 *[
@@ -378,7 +451,13 @@ class MarketDataService:
             return cast(MarketDataEntityOutput, res[0])
 
     def readMarketDataRegistryByName(
-        self: MarketDataService, provider: str, curveName: str
+        self: MarketDataService,
+        provider: str,
+        curveName: str,
+        includeCurveSummary: bool = False,
+        includeTimeTransform: bool = False,
+        includeDataQuality: bool = False,
+        skipOverrides: bool = True,
     ) -> MarketDataEntityOutput:
         """
         Reads MarketData by provider and curve name.
@@ -391,7 +470,14 @@ class MarketDataService:
             MarketData Entity Output.
         """
         return _get_event_loop().run_until_complete(
-            self.readMarketDataRegistryByNameAsync(provider, curveName)
+            self.readMarketDataRegistryByNameAsync(
+                provider,
+                curveName,
+                includeCurveSummary,
+                includeTimeTransform,
+                includeDataQuality,
+                skipOverrides,
+            )
         )
 
     async def registerMarketDataAsync(

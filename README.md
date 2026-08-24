@@ -404,7 +404,18 @@ searchText = "Riconsegnato_"
 filters = {"ProviderName": ["SNAM", "France"]}
 sorts=["MarketDataId asc"]
 doNotLoadAdditionalInfo=True
-res = mds.searchFacet(page, pageSize, searchText, filters, sorts, doNotLoadAdditionalInfo)
+res = mds.searchFacet(
+  page,
+  pageSize,
+  searchText,
+  filters,
+  sorts,
+  doNotLoadAdditionalInfo,
+  includeCurveSummary=True,
+  includeTimeTransform=True,
+  includeDataQuality=True,
+  skipOverrides=True,
+)
 ```
 
 ## Data Quality Rules
@@ -1059,7 +1070,14 @@ mkd = MarketData.MarketDataEntityInput(
     UnitOfMeasure = CommonUnitOfMeasure.kW
   )
 
-registered = mkservice.readMarketDataRegistryByName(mkdid.provider, mkdid.name)
+registered = mkservice.readMarketDataRegistryByName(
+  mkdid.provider,
+  mkdid.name,
+  includeCurveSummary=True,
+  includeTimeTransform=True,
+  includeDataQuality=True,
+  skipOverrides=True,
+)
 if (registered is None):
   registered = mkservice.registerMarketData(mkd)
 ```
@@ -1351,7 +1369,14 @@ mkd = MarketData.MarketDataEntityInput(
             ),
   )
 
-registered = mkservice.readMarketDataRegistryByName(mkdid.provider, mkdid.name)
+registered = mkservice.readMarketDataRegistryByName(
+  mkdid.provider,
+  mkdid.name,
+  includeCurveSummary=True,
+  includeTimeTransform=True,
+  includeDataQuality=True,
+  skipOverrides=True,
+)
 if (registered is None):
   registered = mkservice.registerMarketData(mkd)
 
@@ -1440,7 +1465,14 @@ mkd = MarketData.MarketDataEntityInput(
       }
   )
 
-registered = mkservice.readMarketDataRegistryByName(mkdid.provider, mkdid.name)
+registered = mkservice.readMarketDataRegistryByName(
+  mkdid.provider,
+  mkdid.name,
+  includeCurveSummary=True,
+  includeTimeTransform=True,
+  includeDataQuality=True,
+  skipOverrides=True,
+)
 if (registered is None):
   registered = mkservice.registerMarketData(mkd)
 
@@ -1485,7 +1517,14 @@ mkd = MarketData.MarketDataEntityInput(
       }
   )
 
-registered = mkservice.readMarketDataRegistryByName(mkdid.provider, mkdid.name)
+registered = mkservice.readMarketDataRegistryByName(
+  mkdid.provider,
+  mkdid.name,
+  includeCurveSummary=True,
+  includeTimeTransform=True,
+  includeDataQuality=True,
+  skipOverrides=True,
+)
 if (registered is None):
   registered = mkservice.registerMarketData(mkd)
 
@@ -1557,7 +1596,14 @@ mkd = MarketData.MarketDataEntityInput(
       }
   )
 
-registered = mkservice.readMarketDataRegistryByName(mkdid.provider, mkdid.name)
+registered = mkservice.readMarketDataRegistryByName(
+  mkdid.provider,
+  mkdid.name,
+  includeCurveSummary=True,
+  includeTimeTransform=True,
+  includeDataQuality=True,
+  skipOverrides=True,
+)
 if (registered is None):
   registered = mkservice.registerMarketData(mkd)
 
@@ -1617,7 +1663,14 @@ mkd = MarketData.MarketDataEntityInput(
       }
   )
 
-registered = mkservice.readMarketDataRegistryByName(mkdid.provider, mkdid.name)
+registered = mkservice.readMarketDataRegistryByName(
+  mkdid.provider,
+  mkdid.name,
+  includeCurveSummary=True,
+  includeTimeTransform=True,
+  includeDataQuality=True,
+  skipOverrides=True,
+)
 if (registered is None):
   registered = mkservice.registerMarketData(mkd)
 
@@ -1676,7 +1729,14 @@ mkd = MarketData.MarketDataEntityInput(
       }
   )
 
-registered = mkservice.readMarketDataRegistryByName(mkdid.provider, mkdid.name)
+registered = mkservice.readMarketDataRegistryByName(
+  mkdid.provider,
+  mkdid.name,
+  includeCurveSummary=True,
+  includeTimeTransform=True,
+  includeDataQuality=True,
+  skipOverrides=True,
+)
 if (registered is None):
   registered = mkservice.registerMarketData(mkd)
 
