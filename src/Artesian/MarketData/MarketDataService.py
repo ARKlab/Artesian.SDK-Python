@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import List, Optional, cast, Dict
 from uuid import UUID
 
-from Artesian.MarketData._Dto import DeleteData
+from Artesian.MarketData._Dto import DeleteData, MarketDataEntityOutputEnriched
 from Artesian.MarketData._Dto.DerivedTransformQueryValidation import DerivedTransformQueryValidation
 from Artesian.MarketData._Dto.DerivedTransformQueryValidationResponse import DerivedTransformQueryValidationResponse
 from Artesian.MarketData._Enum.CheckAggregatedStatus import CheckAggregatedStatus
@@ -183,7 +183,8 @@ class MarketDataService:
             includeCurveSummary: When true, includes curve summary (ranges) in the response.
             includeTimeTransform: When true, includes time transform in the response.
             includeDataQuality: When true, includes data quality status summary in the response.
-            skipOverrides: When false, includes override metadata in the response. Requires the /featureflag/overridebeta permission during beta. Default true.
+            skipOverrides: When false, includes override metadata in the response. Requires the /featureflag/
+            overridebeta permission during beta. Default true.
 
         Returns:
             ArtesianSearchResults entity (Async).
@@ -274,7 +275,7 @@ class MarketDataService:
         includeTimeTransform: bool = False,
         includeDataQuality: bool = False,
         skipOverrides: bool = True,
-    ) -> MarketDataEntityOutput:
+    ) -> MarketDataEntityOutputEnriched:
         """
         Reads MarketData by id with MarketDataID.
 
@@ -283,7 +284,8 @@ class MarketDataService:
             includeCurveSummary: When true, includes curve summary (ranges) in the response.
             includeTimeTransform: When true, includes time transform in the response.
             includeDataQuality: When true, includes data quality status summary in the response.
-            skipOverrides: When false, includes override metadata in the response. Requires the /featureflag/overridebeta permission during beta. Default true.
+            skipOverrides: When false, includes override metadata in the response. Requires the /featureflag/
+            overridebeta permission during beta. Default true.
 
         Returns:
             MarketData Entity Output (Async).
@@ -308,7 +310,7 @@ class MarketDataService:
                     )
                 ]
             )
-            return cast(MarketDataEntityOutput, res[0])
+            return cast(MarketDataEntityOutputEnriched, res[0])
 
     def readMarketDataRegistryById(
         self: MarketDataService,
@@ -317,7 +319,7 @@ class MarketDataService:
         includeTimeTransform: bool = False,
         includeDataQuality: bool = False,
         skipOverrides: bool = True,
-    ) -> MarketDataEntityOutput:
+    ) -> MarketDataEntityOutputEnriched:
         """
         Reads MarketData by curve name with MarketDataID.
 
@@ -325,7 +327,7 @@ class MarketDataService:
             id: ID of the marketdata to be retrieved.
 
         Returns:
-            MarketData Entity Output.
+            MarketData Entity OutputEnriched.
         """
         return _get_event_loop().run_until_complete(
             self.readMarketDataRegistryByIdAsync(
@@ -411,7 +413,7 @@ class MarketDataService:
         includeTimeTransform: bool = False,
         includeDataQuality: bool = False,
         skipOverrides: bool = True,
-    ) -> MarketDataEntityOutput:
+    ) -> MarketDataEntityOutputEnriched:
         """
         Reads MarketData by provider and curve name.
 
@@ -421,10 +423,11 @@ class MarketDataService:
             includeCurveSummary: When true, includes curve summary (ranges) in the response.
             includeTimeTransform: When true, includes time transform in the response.
             includeDataQuality: When true, includes data quality status summary in the response.
-            skipOverrides: When false, includes override metadata in the response. Requires the /featureflag/overridebeta permission during beta. Default true.
+            skipOverrides: When false, includes override metadata in the response. Requires the /featureflag/
+            overridebeta permission during beta. Default true.
 
         Returns:
-            MarketData Entity Output (Async).
+            MarketData Entity OutputEnriched (Async).
         """
         url = "/marketdata/entity"
         params = {
@@ -443,12 +446,12 @@ class MarketDataService:
                         "GET",
                         url,
                         None,
-                        retcls=MarketDataEntityOutput,
+                        retcls=MarketDataEntityOutputEnriched,
                         params=params,
                     )
                 ]
             )
-            return cast(MarketDataEntityOutput, res[0])
+            return cast(MarketDataEntityOutputEnriched, res[0])
 
     def readMarketDataRegistryByName(
         self: MarketDataService,
@@ -458,7 +461,7 @@ class MarketDataService:
         includeTimeTransform: bool = False,
         includeDataQuality: bool = False,
         skipOverrides: bool = True,
-    ) -> MarketDataEntityOutput:
+    ) -> MarketDataEntityOutputEnriched:
         """
         Reads MarketData by provider and curve name.
 
@@ -467,7 +470,7 @@ class MarketDataService:
             curveName: string of the curve name to be retrieved.
 
         Returns:
-            MarketData Entity Output.
+            MarketData Entity OutputEnriched.
         """
         return _get_event_loop().run_until_complete(
             self.readMarketDataRegistryByNameAsync(

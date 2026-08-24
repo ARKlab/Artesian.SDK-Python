@@ -443,7 +443,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
                 "GET",
                 self.__baseurl + "/marketdata/entity",
                 match=[responses.matchers.query_param_matcher(params)],
-                json=self.__serializedOutput,
+                json=self.__serializedOutputEnriched,
                 status=200,
             )
             output = await self.__service.readMarketDataRegistryByNameAsync(
@@ -454,7 +454,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
                 params["includeDataQuality"],
                 params["skipOverrides"],
             )
-            self.assertEqual(output, self.__sampleOutput)
+            self.assertEqual(output, self.__sampleOutputEnriched)
 
     async def test_deleteMarketDataAsync(self: "TestMarketDataServiceMarketData") -> None:
         with responses.RequestsMock() as rsps:
