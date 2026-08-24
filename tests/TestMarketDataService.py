@@ -5,7 +5,7 @@ from Artesian.MarketData._Dto.DerivedTransformQueryValidation import DerivedTran
 from Artesian.MarketData._Dto.DerivedTransformQueryValidationResponse import DerivedTransformQueryValidationResponse
 from Artesian.MarketData._Dto.TimeSerieData import TimeSerieData
 from Artesian._ClientsExecutor.ArtesianJsonSerializer import artesianJsonSerialize
-from datetime import datetime
+from datetime import date, datetime
 from uuid import UUID
 from Artesian.MarketData import (
     ArtesianMetadataFacet,
@@ -14,12 +14,15 @@ from Artesian.MarketData import (
     ArtesianSearchResults,
     CheckConversionResult,
     CommonUnitOfMeasure,
+    DataQualityStatusSummaryDto,
     CurveRangeEntity,
     DerivedAlgorithm,
     DerivedCfg,
     Granularity,
     MarketDataEntityInput,
     MarketDataEntityOutput,
+    MarketDataEntityOutputEnriched,
+    MarketDataCurveSummaryDto,
     MarketDataService,
     MarketDataTypeV2,
     PagedResultCurveRangeEntity,
@@ -119,6 +122,34 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             derivedCfg=derivedCfg,
             unitOfMeasure=UnitOfMeasure(value=CommonUnitOfMeasure.MW)
         )
+        self.__sampleOutputEnriched = MarketDataEntityOutputEnriched(
+            providerName="PROVIDER",
+            marketDataName="MARKETDATA",
+            originalGranularity=Granularity.Day,
+            type=MarketDataTypeV2.ActualTimeSerie,
+            originalTimezone="CET",
+            tags={"PythonTag": ["PythonTagValue1", "PythonTagValue2"]},
+            derivedCfg=derivedCfg,
+            unitOfMeasure=UnitOfMeasure(value=CommonUnitOfMeasure.MW),
+            dataQualityStatusSummary={
+                "CompletenessAndFreshness": DataQualityStatusSummaryDto(
+                    lastCheckTime=datetime(2024, 1, 3, 12, 0),
+                    overallStatus=CheckAggregatedStatus.OK,
+                    activeRulesCount=1,
+                    failedRulesCount=0,
+                    from_=date(2024, 1, 1),
+                    to=date(2024, 1, 3),
+                )
+            },
+            curveSummary=MarketDataCurveSummaryDto(
+                dataLastWritedAt=datetime(2024, 1, 3, 12, 0),
+                dataRangeStart=date(2024, 1, 1),
+                dataRangeEnd=date(2024, 1, 3),
+            ),
+        )
+        self.__serializedOutputEnriched = artesianJsonSerialize(
+            self.__sampleOutputEnriched
+        )
         self.__serializedOutput = artesianJsonSerialize(self.__sampleOutput)
         self.__sampleInput = MarketDataEntityInput(
             providerName="PROVIDER",
@@ -165,7 +196,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             values=[self.__artesianMetadataFacetCount],
         )
         self.__artesianSearchResults = ArtesianSearchResults(
-            results=[self.__sampleOutput],
+            results=[self.__sampleOutputEnriched],
             facets=[self.__artesianMetadataFacet],
             countResults=1,
         )
