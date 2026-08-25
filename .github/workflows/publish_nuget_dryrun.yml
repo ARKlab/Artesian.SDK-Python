@@ -293,19 +293,26 @@ jobs:
           fi
 
           echo "PR Preview version matches master: $MASTER_VERSION"
+          echo "MASTER_VERSION=$MASTER_VERSION" >> "$GITHUB_ENV"
 
       - name: "Set up Python 3.11"
         uses: actions/setup-python@v7
         with:
           python-version: "3.11"
 
-      - name: "Install dependencies"
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install build
+
+          if [[ "${GITHUB_REF_NAME}" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)-PR([0-9]+)\.([0-9]+)$ ]]; then
+            export SETUPTOOLS_SCM_PRETEND_VERSION="${BASH_REMATCH[1]}.dev${BASH_REMATCH[2]}"
+          fi
+
+          pip install -e ".[dev]"
 
       - name: "Build package"
         run: |
+          export SETUPTOOLS_SCM_PRETEND_VERSION="${MASTER_VERSION}.dev${{ steps.pr.outputs.number }}"
           python -m build
 
       - name: "Publish package"
