@@ -1,5 +1,5 @@
 # This workflow will install Python dependencies, run tests and lint with a single version of Python
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+# For more information see: https://help.github.com/en/actions/language-and-framework-guides/using-python-with-github-actions
 
 name: Artesian SDK Python
 
@@ -8,8 +8,11 @@ on:
     branches: [master]
     tags:
       - 'v[0-9]+\.[0-9]+\.[0-9]+'
+      - 'v[0-9]+\.[0-9]+\.[0-9]+-beta\.[0-9]+'
+      - 'v[0-9]+\.[0-9]+\.[0-9]+-PR[0-9]+\.[0-9]+'
   pull_request:
     branches: [master]
+  workflow_dispatch:
 
 jobs:
   pyright:
@@ -39,6 +42,7 @@ jobs:
           filter_mode: file
 
   build:
+    name: Build
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -48,10 +52,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v7
+
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v7
         with:
           python-version: ${{ matrix.python-version }}
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -70,22 +76,20 @@ jobs:
         with:
           name: pytest-results-${{ matrix.python-version }}-${{ matrix.os }}
           path: junit/test-results-${{ matrix.python-version }}-${{ matrix.os }}.xml
-        # Use always() to always run this step to publish test results when there are test failures
         if: ${{ always() }}
 
-  publish:
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+  publish-stable:
+    name: "Publish Stable"
     runs-on: ubuntu-latest
-    needs: [build, pyright]
-    env:
-      python-version: "3.11"
+
+    if: >
+      github.event_name == 'push' &&
+      startsWith(github.ref, 'refs/tags/v') &&
+      !contains(github.ref_name, '-beta') &&
+      !contains(github.ref_name, '-PR')
 
     steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-
-      - name: Validate GA release tag
+      - name: "Validate GA release tag"
         shell: bash
         run: |
           TAG="${GITHUB_REF_NAME}"
@@ -96,31 +100,215 @@ jobs:
             exit 1
           fi
 
+          echo "Valid GA release tag: $TAG"
+
+      - name: "Checkout"
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: "Validate tag originates from master"
+        shell: bash
+        run: |
           git fetch origin master
 
           if ! git merge-base --is-ancestor "$GITHUB_SHA" "origin/master"; then
-            echo "::error::Release tag $TAG does not point to a commit contained in master."
+            echo "::error::Release tag $GITHUB_REF_NAME does not point to a commit contained in master."
             exit 1
           fi
 
-          echo "Valid GA release tag: $TAG"
-          echo "Tagged commit is contained in master."
+          echo "Release commit is contained in master."
 
-      - name: Set up Python ${{ env.python-version }}
+      - name: "Set up Python 3.11"
         uses: actions/setup-python@v7
         with:
-          python-version: ${{ env.python-version }}
+          python-version: "3.11"
 
-      - name: Install dependencies
+      - name: "Install dependencies"
         run: |
           python -m pip install --upgrade pip
           python -m pip install build
 
-      - name: Build package
+      - name: "Build package"
         run: |
           python -m build
 
-      - name: Publish package
+      - name: "Publish package"
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
+
+  publish-beta:
+    name: "Publish Beta"
+    runs-on: ubuntu-latest
+
+    if: >
+      github.event_name == 'push' &&
+      startsWith(github.ref, 'refs/tags/v') &&
+      contains(github.ref_name, '-beta.')
+
+    steps:
+      - name: "Validate Beta release tag"
+        shell: bash
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-beta\.[0-9]+$ ]]; then
+            echo "::error::Invalid Beta release tag: $TAG"
+            echo "Expected format: vX.Y.Z-beta.N"
+            exit 1
+          fi
+
+          echo "Valid Beta release tag: $TAG"
+
+      - name: "Checkout"
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: "Validate tag originates from develop-beta"
+        shell: bash
+        run: |
+          git fetch origin develop-beta
+
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" "origin/develop-beta"; then
+            echo "::error::Beta release tag does not point to a commit contained in develop-beta."
+            exit 1
+          fi
+
+          echo "Release commit is contained in develop-beta."
+
+      - name: "Validate next version"
+        shell: bash
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+
+          git fetch origin master --tags
+
+          MASTER_VERSION=$(git describe --tags --abbrev=0 origin/master | sed 's/^v//')
+          BETA_VERSION=$(echo "$TAG" | sed -E 's/^v([0-9]+\.[0-9]+\.[0-9]+)-beta\.[0-9]+$/\1/')
+
+          MASTER_MAJOR=$(echo "$MASTER_VERSION" | cut -d. -f1)
+          MASTER_MINOR=$(echo "$MASTER_VERSION" | cut -d. -f2)
+
+          BETA_MAJOR=$(echo "$BETA_VERSION" | cut -d. -f1)
+          BETA_MINOR=$(echo "$BETA_VERSION" | cut -d. -f2)
+
+          if [[ "$BETA_MAJOR.$BETA_MINOR" != "$MASTER_MAJOR.$((MASTER_MINOR + 1))" ]]; then
+            echo "::error::Beta version $BETA_VERSION is not the next minor version after master $MASTER_VERSION."
+            exit 1
+          fi
+
+          echo "Beta version $BETA_VERSION is the next version after master $MASTER_VERSION."
+
+      - name: "Set up Python 3.11"
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+
+      - name: "Install dependencies"
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install build
+
+      - name: "Build package"
+        run: |
+          python -m build
+
+      - name: "Publish package"
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
+
+  publish-preview:
+    name: "Publish PR Preview"
+    runs-on: ubuntu-latest
+
+    if: >
+      github.event_name == 'push' &&
+      startsWith(github.ref, 'refs/tags/v') &&
+      contains(github.ref_name, '-PR')
+
+    steps:
+      - name: "Validate PR Preview tag"
+        shell: bash
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-PR[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Invalid PR Preview tag: $TAG"
+            echo "Expected format: vX.Y.Z-PR{PR_NUMBER}.{ITERATION}"
+            exit 1
+          fi
+
+          echo "Valid PR Preview tag: $TAG"
+
+      - name: "Extract PR number"
+        id: pr
+        shell: bash
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+
+          PR_NUMBER=$(echo "$TAG" | sed -E 's/^v[0-9]+\.[0-9]+\.[0-9]+-PR([0-9]+)\.[0-9]+$/\1/')
+
+          echo "number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
+
+      - name: "Checkout merged PR head"
+        uses: actions/checkout@v7
+        with:
+          ref: refs/pull/${{ steps.pr.outputs.number }}/merge
+          fetch-depth: 0
+
+      - name: "Validate PR is based on current master"
+        shell: bash
+        run: |
+          git fetch origin master
+
+          CURRENT_MASTER=$(git rev-parse origin/master)
+          MERGE_PARENT=$(git rev-parse HEAD^1)
+
+          echo "Current master: $CURRENT_MASTER"
+          echo "Merge parent:   $MERGE_PARENT"
+
+          if [[ "$MERGE_PARENT" != "$CURRENT_MASTER" ]]; then
+            echo "::error::PR Preview is not based on the current master."
+            exit 1
+          fi
+
+          echo "PR Preview is based on master."
+
+      - name: "Validate preview version"
+        shell: bash
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+
+          MASTER_VERSION=$(git describe --tags --abbrev=0 origin/master | sed 's/^v//')
+          PREVIEW_VERSION=$(echo "$TAG" | sed -E 's/^v([0-9]+\.[0-9]+\.[0-9]+)-PR[0-9]+\.[0-9]+$/\1/')
+
+          if [[ "$PREVIEW_VERSION" != "$MASTER_VERSION" ]]; then
+            echo "::error::PR Preview version $PREVIEW_VERSION does not match current master version $MASTER_VERSION."
+            exit 1
+          fi
+
+          echo "PR Preview version matches master: $MASTER_VERSION"
+
+      - name: "Set up Python 3.11"
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.11"
+
+      - name: "Install dependencies"
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install build
+
+      - name: "Build package"
+        run: |
+          python -m build
+
+      - name: "Publish package"
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
