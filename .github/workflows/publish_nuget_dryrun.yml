@@ -8,13 +8,18 @@ on:
     branches: [master]
     tags:
       - 'v[0-9]+\.[0-9]+\.[0-9]+'
-      - 'v[0-9]+\.[0-9]+\.[0-9]+-beta\.[0-9]+'
-      - 'v[0-9]+\.[0-9]+\.[0-9]+-PR[0-9]+\.[0-9]+'
+      - 'v[0-9]+\.[0-9]+\.[0-9]+b[0-9]+'
+      - 'v[0-9]+\.[0-9]+\.[0-9]+a[0-9]+\.[0-9]+'
   pull_request:
     branches: [master]
   workflow_dispatch:
 
 jobs:
+
+  # ---------------------------------------------------------------------------
+  # Pyright
+  # ---------------------------------------------------------------------------
+
   pyright:
     name: pyright
     runs-on: ubuntu-latest
@@ -40,6 +45,11 @@ jobs:
           lib:
           level: warning
           filter_mode: file
+
+
+  # ---------------------------------------------------------------------------
+  # Build / Test
+  # ---------------------------------------------------------------------------
 
   build:
     name: Build
@@ -78,6 +88,20 @@ jobs:
           path: junit/test-results-${{ matrix.python-version }}-${{ matrix.os }}.xml
         if: ${{ always() }}
 
+
+  # ---------------------------------------------------------------------------
+  # Publish Stable
+  #
+  # Tag:
+  #   v2.4.0
+  #
+  # Python version:
+  #   2.4.0
+  #
+  # Must originate from:
+  #   master
+  # ---------------------------------------------------------------------------
+
   publish-stable:
     name: "Publish Stable"
     runs-on: ubuntu-latest
@@ -85,10 +109,10 @@ jobs:
     if: >
       github.event_name == 'push' &&
       startsWith(github.ref, 'refs/tags/v') &&
-      !contains(github.ref_name, '-beta') &&
-      !contains(github.ref_name, '-PR')
+      github.ref_name =~ '^v[0-9]+\.[0-9]+\.[0-9]+$'
 
     steps:
+
       - name: "Validate GA release tag"
         shell: bash
         run: |
@@ -139,6 +163,31 @@ jobs:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
 
+
+  # ---------------------------------------------------------------------------
+  # Publish Beta
+  #
+  # Tag:
+  #   v2.5.0b1
+  #   v2.5.0b2
+  #   v2.5.0b3
+  #
+  # Python version:
+  #   2.5.0b1
+  #   2.5.0b2
+  #   2.5.0b3
+  #
+  # Must originate from:
+  #   develop-beta
+  #
+  # Beta version must target the next minor version after master.
+  # Example:
+  #
+  #   master       = 2.4.0
+  #   develop-beta = 2.5.0b1
+  #
+  # ---------------------------------------------------------------------------
+
   publish-beta:
     name: "Publish Beta"
     runs-on: ubuntu-latest
@@ -146,17 +195,18 @@ jobs:
     if: >
       github.event_name == 'push' &&
       startsWith(github.ref, 'refs/tags/v') &&
-      contains(github.ref_name, '-beta.')
+      github.ref_name =~ '^v[0-9]+\.[0-9]+\.[0-9]+b[0-9]+$'
 
     steps:
+
       - name: "Validate Beta release tag"
         shell: bash
         run: |
           TAG="${GITHUB_REF_NAME}"
 
-          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-beta\.[0-9]+$ ]]; then
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+b[0-9]+$ ]]; then
             echo "::error::Invalid Beta release tag: $TAG"
-            echo "Expected format: vX.Y.Z-beta.N"
+            echo "Expected format: vX.Y.ZbN"
             exit 1
           fi
 
@@ -187,7 +237,7 @@ jobs:
           git fetch origin master --tags
 
           MASTER_VERSION=$(git describe --tags --abbrev=0 origin/master | sed 's/^v//')
-          BETA_VERSION=$(echo "$TAG" | sed -E 's/^v([0-9]+\.[0-9]+\.[0-9]+)-beta\.[0-9]+$/\1/')
+          BETA_VERSION=$(echo "$TAG" | sed -E 's/^v([0-9]+\.[0-9]+\.[0-9]+)b[0-9]+$/\1/')
 
           MASTER_MAJOR=$(echo "$MASTER_VERSION" | cut -d. -f1)
           MASTER_MINOR=$(echo "$MASTER_VERSION" | cut -d. -f2)
@@ -222,6 +272,26 @@ jobs:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
 
+
+  # ---------------------------------------------------------------------------
+  # Publish PR Preview
+  #
+  # Tag:
+  #   v2.4.0a123.1
+  #   v2.4.0a123.2
+  #
+  # Python version:
+  #   2.4.0a123.1
+  #   2.4.0a123.2
+  #
+  # Where:
+  #   2.4.0  = current master version
+  #   123    = PR number
+  #   1 / 2  = preview iteration
+  #
+  # Must be based on the current master.
+  # ---------------------------------------------------------------------------
+
   publish-preview:
     name: "Publish PR Preview"
     runs-on: ubuntu-latest
@@ -229,17 +299,18 @@ jobs:
     if: >
       github.event_name == 'push' &&
       startsWith(github.ref, 'refs/tags/v') &&
-      contains(github.ref_name, '-PR')
+      github.ref_name =~ '^v[0-9]+\.[0-9]+\.[0-9]+a[0-9]+\.[0-9]+$'
 
     steps:
+
       - name: "Validate PR Preview tag"
         shell: bash
         run: |
           TAG="${GITHUB_REF_NAME}"
 
-          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-PR[0-9]+\.[0-9]+$ ]]; then
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+a[0-9]+\.[0-9]+$ ]]; then
             echo "::error::Invalid PR Preview tag: $TAG"
-            echo "Expected format: vX.Y.Z-PR{PR_NUMBER}.{ITERATION}"
+            echo "Expected format: vX.Y.ZaPR_NUMBER.ITERATION"
             exit 1
           fi
 
@@ -251,9 +322,14 @@ jobs:
         run: |
           TAG="${GITHUB_REF_NAME}"
 
-          PR_NUMBER=$(echo "$TAG" | sed -E 's/^v[0-9]+\.[0-9]+\.[0-9]+-PR([0-9]+)\.[0-9]+$/\1/')
+          PR_NUMBER=$(echo "$TAG" | sed -E 's/^v[0-9]+\.[0-9]+\.[0-9]+a([0-9]+)\.[0-9]+$/\1/')
+          ITERATION=$(echo "$TAG" | sed -E 's/^v[0-9]+\.[0-9]+\.[0-9]+a[0-9]+\.([0-9]+)$/\1/')
 
           echo "number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
+          echo "iteration=$ITERATION" >> "$GITHUB_OUTPUT"
+
+          echo "PR number: $PR_NUMBER"
+          echo "Iteration: $ITERATION"
 
       - name: "Checkout merged PR head"
         uses: actions/checkout@v7
@@ -285,7 +361,10 @@ jobs:
           TAG="${GITHUB_REF_NAME}"
 
           MASTER_VERSION=$(git describe --tags --abbrev=0 origin/master | sed 's/^v//')
-          PREVIEW_VERSION=$(echo "$TAG" | sed -E 's/^v([0-9]+\.[0-9]+\.[0-9]+)-PR[0-9]+\.[0-9]+$/\1/')
+          PREVIEW_VERSION=$(echo "$TAG" | sed -E 's/^v([0-9]+\.[0-9]+\.[0-9]+)a[0-9]+\.[0-9]+$/\1/')
+
+          echo "Master version:  $MASTER_VERSION"
+          echo "Preview version: $PREVIEW_VERSION"
 
           if [[ "$PREVIEW_VERSION" != "$MASTER_VERSION" ]]; then
             echo "::error::PR Preview version $PREVIEW_VERSION does not match current master version $MASTER_VERSION."
@@ -293,26 +372,19 @@ jobs:
           fi
 
           echo "PR Preview version matches master: $MASTER_VERSION"
-          echo "MASTER_VERSION=$MASTER_VERSION" >> "$GITHUB_ENV"
 
       - name: "Set up Python 3.11"
         uses: actions/setup-python@v7
         with:
           python-version: "3.11"
 
-      - name: Install dependencies
+      - name: "Install dependencies"
         run: |
           python -m pip install --upgrade pip
-
-          if [[ "${GITHUB_REF_NAME}" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)-PR([0-9]+)\.([0-9]+)$ ]]; then
-            export SETUPTOOLS_SCM_PRETEND_VERSION="${BASH_REMATCH[1]}.dev${BASH_REMATCH[2]}"
-          fi
-
-          pip install -e ".[dev]"
+          python -m pip install build
 
       - name: "Build package"
         run: |
-          export SETUPTOOLS_SCM_PRETEND_VERSION="${MASTER_VERSION}.dev${{ steps.pr.outputs.number }}"
           python -m build
 
       - name: "Publish package"
