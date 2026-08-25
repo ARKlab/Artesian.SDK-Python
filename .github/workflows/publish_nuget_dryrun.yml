@@ -32,8 +32,20 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
+        shell: bash
         run: |
           python -m pip install --upgrade pip
+
+          TAG="${GITHUB_REF_NAME}"
+
+          if [[ "$TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)a([0-9]+)\.([0-9]+)$ ]]; then
+            export SETUPTOOLS_SCM_PRETEND_VERSION="${BASH_REMATCH[1]}a${BASH_REMATCH[2]}.post${BASH_REMATCH[3]}"
+          elif [[ "$TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)b([0-9]+)$ ]]; then
+            export SETUPTOOLS_SCM_PRETEND_VERSION="${BASH_REMATCH[1]}b${BASH_REMATCH[2]}"
+          fi
+
+          echo "SETUPTOOLS_SCM_PRETEND_VERSION=${SETUPTOOLS_SCM_PRETEND_VERSION:-not-set}"
+
           pip install -e ".[dev]"
 
       - name: Run Pyright
@@ -67,8 +79,20 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
+        shell: bash
         run: |
           python -m pip install --upgrade pip
+
+          TAG="${GITHUB_REF_NAME}"
+
+          if [[ "$TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)a([0-9]+)\.([0-9]+)$ ]]; then
+            export SETUPTOOLS_SCM_PRETEND_VERSION="${BASH_REMATCH[1]}a${BASH_REMATCH[2]}.post${BASH_REMATCH[3]}"
+          elif [[ "$TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)b([0-9]+)$ ]]; then
+            export SETUPTOOLS_SCM_PRETEND_VERSION="${BASH_REMATCH[1]}b${BASH_REMATCH[2]}"
+          fi
+
+          echo "SETUPTOOLS_SCM_PRETEND_VERSION=${SETUPTOOLS_SCM_PRETEND_VERSION:-not-set}"
+
           pip install -e ".[dev]"
 
       - name: Run flake8
@@ -371,10 +395,18 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: "Install dependencies"
+      - name: "Build package"
+        shell: bash
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install build
+          TAG="${GITHUB_REF_NAME}"
+
+          if [[ "$TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)a([0-9]+)\.([0-9]+)$ ]]; then
+            export SETUPTOOLS_SCM_PRETEND_VERSION="${BASH_REMATCH[1]}a${BASH_REMATCH[2]}.post${BASH_REMATCH[3]}"
+          fi
+
+          echo "SETUPTOOLS_SCM_PRETEND_VERSION=${SETUPTOOLS_SCM_PRETEND_VERSION}"
+
+          python -m build
 
       - name: "Build package"
         run: |
