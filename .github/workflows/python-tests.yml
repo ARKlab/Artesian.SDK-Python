@@ -8,13 +8,17 @@ on:
     branches: [master]
     tags:
       - 'v[0-9]+\.[0-9]+\.[0-9]+'
-      - 'v[0-9]+\.[0-9]+\.[0-9]+-beta\.[0-9]+'
-      - 'v[0-9]+\.[0-9]+\.[0-9]+-PR[0-9]+\.[0-9]+'
+      - 'v[0-9]+\.[0-9]+\.[0-9]+b[0-9]+'
+      - 'v[0-9]+\.[0-9]+\.[0-9]+a[0-9]+\.[0-9]+'
   pull_request:
     branches: [master]
   workflow_dispatch:
 
 jobs:
+  # ---------------------------------------------------------------------------
+  # Pyright
+  # ---------------------------------------------------------------------------
+
   pyright:
     name: pyright
     runs-on: ubuntu-latest
@@ -28,8 +32,20 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
+        shell: bash
         run: |
           python -m pip install --upgrade pip
+
+          TAG="${GITHUB_REF_NAME}"
+
+          if [[ "$TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)a([0-9]+)\.([0-9]+)$ ]]; then
+            export SETUPTOOLS_SCM_PRETEND_VERSION="${BASH_REMATCH[1]}a${BASH_REMATCH[2]}.post${BASH_REMATCH[3]}"
+          elif [[ "$TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)b([0-9]+)$ ]]; then
+            export SETUPTOOLS_SCM_PRETEND_VERSION="${BASH_REMATCH[1]}b${BASH_REMATCH[2]}"
+          fi
+
+          echo "SETUPTOOLS_SCM_PRETEND_VERSION=${SETUPTOOLS_SCM_PRETEND_VERSION:-not-set}"
+
           pip install -e ".[dev]"
 
       - name: Run Pyright
@@ -40,6 +56,10 @@ jobs:
           lib:
           level: warning
           filter_mode: file
+
+  # ---------------------------------------------------------------------------
+  # Build / Test
+  # ---------------------------------------------------------------------------
 
   build:
     name: Build
@@ -59,8 +79,20 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
+        shell: bash
         run: |
           python -m pip install --upgrade pip
+
+          TAG="${GITHUB_REF_NAME}"
+
+          if [[ "$TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)a([0-9]+)\.([0-9]+)$ ]]; then
+            export SETUPTOOLS_SCM_PRETEND_VERSION="${BASH_REMATCH[1]}a${BASH_REMATCH[2]}.post${BASH_REMATCH[3]}"
+          elif [[ "$TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)b([0-9]+)$ ]]; then
+            export SETUPTOOLS_SCM_PRETEND_VERSION="${BASH_REMATCH[1]}b${BASH_REMATCH[2]}"
+          fi
+
+          echo "SETUPTOOLS_SCM_PRETEND_VERSION=${SETUPTOOLS_SCM_PRETEND_VERSION:-not-set}"
+
           pip install -e ".[dev]"
 
       - name: Run flake8
@@ -78,6 +110,19 @@ jobs:
           path: junit/test-results-${{ matrix.python-version }}-${{ matrix.os }}.xml
         if: ${{ always() }}
 
+  # ---------------------------------------------------------------------------
+  # Publish Stable
+  #
+  # Tag:
+  #   v4.3.0
+  #
+  # Python package version:
+  #   4.3.0
+  #
+  # Must originate from:
+  #   master
+  # ---------------------------------------------------------------------------
+
   publish-stable:
     name: "Publish Stable"
     runs-on: ubuntu-latest
@@ -85,8 +130,8 @@ jobs:
     if: >
       github.event_name == 'push' &&
       startsWith(github.ref, 'refs/tags/v') &&
-      !contains(github.ref_name, '-beta') &&
-      !contains(github.ref_name, '-PR')
+      !contains(github.ref_name, 'a') &&
+      !contains(github.ref_name, 'b')
 
     steps:
       - name: "Validate GA release tag"
@@ -125,12 +170,15 @@ jobs:
           python-version: "3.11"
 
       - name: "Install dependencies"
+        shell: bash
         run: |
           python -m pip install --upgrade pip
           python -m pip install build
 
       - name: "Build package"
+        shell: bash
         run: |
+          echo "Building GA package: ${GITHUB_REF_NAME#v}"
           python -m build
 
       - name: "Publish package"
@@ -139,6 +187,30 @@ jobs:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
 
+  # ---------------------------------------------------------------------------
+  # Publish Beta
+  #
+  # Tag:
+  #   v4.3.0b1
+  #   v4.3.0b2
+  #
+  # Python package version:
+  #   4.3.0b1
+  #   4.3.0b2
+  #
+  # Must originate from:
+  #   develop-beta
+  #
+  # Beta version MUST be the next minor version after
+  # the latest GA version on master.
+  #
+  # Example:
+  #
+  #   master       = v4.2.0
+  #   develop-beta = v4.3.0b1
+  #
+  # ---------------------------------------------------------------------------
+
   publish-beta:
     name: "Publish Beta"
     runs-on: ubuntu-latest
@@ -146,7 +218,7 @@ jobs:
     if: >
       github.event_name == 'push' &&
       startsWith(github.ref, 'refs/tags/v') &&
-      contains(github.ref_name, '-beta.')
+      contains(github.ref_name, 'b')
 
     steps:
       - name: "Validate Beta release tag"
@@ -154,9 +226,9 @@ jobs:
         run: |
           TAG="${GITHUB_REF_NAME}"
 
-          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-beta\.[0-9]+$ ]]; then
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+b[0-9]+$ ]]; then
             echo "::error::Invalid Beta release tag: $TAG"
-            echo "Expected format: vX.Y.Z-beta.N"
+            echo "Expected format: vX.Y.ZbN"
             exit 1
           fi
 
@@ -179,15 +251,29 @@ jobs:
 
           echo "Release commit is contained in develop-beta."
 
-      - name: "Validate next version"
+      - name: "Validate next minor version"
         shell: bash
         run: |
           TAG="${GITHUB_REF_NAME}"
 
           git fetch origin master --tags
 
-          MASTER_VERSION=$(git describe --tags --abbrev=0 origin/master | sed 's/^v//')
-          BETA_VERSION=$(echo "$TAG" | sed -E 's/^v([0-9]+\.[0-9]+\.[0-9]+)-beta\.[0-9]+$/\1/')
+          MASTER_VERSION=$(
+            git tag --merged origin/master --sort=-version:refname |
+            grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' |
+            head -n 1 |
+            sed 's/^v//'
+          )
+
+          BETA_VERSION=$(echo "$TAG" | sed -E 's/^v([0-9]+\.[0-9]+\.[0-9]+)b[0-9]+$/\1/')
+
+          echo "Master GA version: $MASTER_VERSION"
+          echo "Beta version:      $BETA_VERSION"
+
+          if [[ -z "$MASTER_VERSION" ]]; then
+            echo "::error::Could not determine the latest GA version on master."
+            exit 1
+          fi
 
           MASTER_MAJOR=$(echo "$MASTER_VERSION" | cut -d. -f1)
           MASTER_MINOR=$(echo "$MASTER_VERSION" | cut -d. -f2)
@@ -195,12 +281,17 @@ jobs:
           BETA_MAJOR=$(echo "$BETA_VERSION" | cut -d. -f1)
           BETA_MINOR=$(echo "$BETA_VERSION" | cut -d. -f2)
 
-          if [[ "$BETA_MAJOR.$BETA_MINOR" != "$MASTER_MAJOR.$((MASTER_MINOR + 1))" ]]; then
-            echo "::error::Beta version $BETA_VERSION is not the next minor version after master $MASTER_VERSION."
+          EXPECTED_MAJOR="$MASTER_MAJOR"
+          EXPECTED_MINOR="$((MASTER_MINOR + 1))"
+
+          if [[ "$BETA_MAJOR" != "$EXPECTED_MAJOR" ||
+                "$BETA_MINOR" != "$EXPECTED_MINOR" ]]; then
+            echo "::error::Beta version $BETA_VERSION is not the next minor version after master GA $MASTER_VERSION."
+            echo "::error::Expected: ${EXPECTED_MAJOR}.${EXPECTED_MINOR}.0bN"
             exit 1
           fi
 
-          echo "Beta version $BETA_VERSION is the next version after master $MASTER_VERSION."
+          echo "Beta version $BETA_VERSION is the next minor version after master GA $MASTER_VERSION."
 
       - name: "Set up Python 3.11"
         uses: actions/setup-python@v7
@@ -208,12 +299,22 @@ jobs:
           python-version: "3.11"
 
       - name: "Install dependencies"
+        shell: bash
         run: |
           python -m pip install --upgrade pip
           python -m pip install build
 
       - name: "Build package"
+        shell: bash
         run: |
+          TAG="${GITHUB_REF_NAME}"
+
+          if [[ "$TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)b([0-9]+)$ ]]; then
+            export SETUPTOOLS_SCM_PRETEND_VERSION="${BASH_REMATCH[1]}b${BASH_REMATCH[2]}"
+          fi
+
+          echo "SETUPTOOLS_SCM_PRETEND_VERSION=${SETUPTOOLS_SCM_PRETEND_VERSION}"
+
           python -m build
 
       - name: "Publish package"
@@ -222,6 +323,26 @@ jobs:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
 
+  # ---------------------------------------------------------------------------
+  # Publish PR Preview
+  #
+  # Tag:
+  #   v4.3.0a69.1
+  #   v4.3.0a69.2
+  #
+  # Python package version:
+  #   4.3.0a69.post1
+  #   4.3.0a69.post2
+  #
+  # Where:
+  #   4.3.0 = latest GA version on master
+  #   69    = PR number
+  #   1 / 2 = preview iteration
+  #
+  # The PR Preview version MUST match the latest GA version on master.
+  # The PR must be based on the current master.
+  # ---------------------------------------------------------------------------
+
   publish-preview:
     name: "Publish PR Preview"
     runs-on: ubuntu-latest
@@ -229,7 +350,7 @@ jobs:
     if: >
       github.event_name == 'push' &&
       startsWith(github.ref, 'refs/tags/v') &&
-      contains(github.ref_name, '-PR')
+      contains(github.ref_name, 'a')
 
     steps:
       - name: "Validate PR Preview tag"
@@ -237,9 +358,9 @@ jobs:
         run: |
           TAG="${GITHUB_REF_NAME}"
 
-          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+-PR[0-9]+\.[0-9]+$ ]]; then
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+a[0-9]+\.[0-9]+$ ]]; then
             echo "::error::Invalid PR Preview tag: $TAG"
-            echo "Expected format: vX.Y.Z-PR{PR_NUMBER}.{ITERATION}"
+            echo "Expected format: vX.Y.ZaPR_NUMBER.ITERATION"
             exit 1
           fi
 
@@ -251,9 +372,14 @@ jobs:
         run: |
           TAG="${GITHUB_REF_NAME}"
 
-          PR_NUMBER=$(echo "$TAG" | sed -E 's/^v[0-9]+\.[0-9]+\.[0-9]+-PR([0-9]+)\.[0-9]+$/\1/')
+          PR_NUMBER=$(echo "$TAG" | sed -E 's/^v[0-9]+\.[0-9]+\.[0-9]+a([0-9]+)\.[0-9]+$/\1/')
+          ITERATION=$(echo "$TAG" | sed -E 's/^v[0-9]+\.[0-9]+\.[0-9]+a[0-9]+\.([0-9]+)$/\1/')
 
           echo "number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
+          echo "iteration=$ITERATION" >> "$GITHUB_OUTPUT"
+
+          echo "PR number: $PR_NUMBER"
+          echo "Iteration: $ITERATION"
 
       - name: "Checkout merged PR head"
         uses: actions/checkout@v7
@@ -284,15 +410,31 @@ jobs:
         run: |
           TAG="${GITHUB_REF_NAME}"
 
-          MASTER_VERSION=$(git describe --tags --abbrev=0 origin/master | sed 's/^v//')
-          PREVIEW_VERSION=$(echo "$TAG" | sed -E 's/^v([0-9]+\.[0-9]+\.[0-9]+)-PR[0-9]+\.[0-9]+$/\1/')
+          git fetch origin master --tags
 
-          if [[ "$PREVIEW_VERSION" != "$MASTER_VERSION" ]]; then
-            echo "::error::PR Preview version $PREVIEW_VERSION does not match current master version $MASTER_VERSION."
+          MASTER_VERSION=$(
+            git tag --merged origin/master --sort=-version:refname |
+            grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' |
+            head -n 1 |
+            sed 's/^v//'
+          )
+
+          PREVIEW_VERSION=$(echo "$TAG" | sed -E 's/^v([0-9]+\.[0-9]+\.[0-9]+)a[0-9]+\.[0-9]+$/\1/')
+
+          echo "Master GA version: $MASTER_VERSION"
+          echo "Preview version:   $PREVIEW_VERSION"
+
+          if [[ -z "$MASTER_VERSION" ]]; then
+            echo "::error::Could not determine the latest GA version on master."
             exit 1
           fi
 
-          echo "PR Preview version matches master: $MASTER_VERSION"
+          if [[ "$PREVIEW_VERSION" != "$MASTER_VERSION" ]]; then
+            echo "::error::PR Preview version $PREVIEW_VERSION does not match current master GA version $MASTER_VERSION."
+            exit 1
+          fi
+
+          echo "PR Preview version matches current master GA version: $MASTER_VERSION"
 
       - name: "Set up Python 3.11"
         uses: actions/setup-python@v7
@@ -300,12 +442,22 @@ jobs:
           python-version: "3.11"
 
       - name: "Install dependencies"
+        shell: bash
         run: |
           python -m pip install --upgrade pip
           python -m pip install build
 
       - name: "Build package"
+        shell: bash
         run: |
+          TAG="${GITHUB_REF_NAME}"
+
+          if [[ "$TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)a([0-9]+)\.([0-9]+)$ ]]; then
+            export SETUPTOOLS_SCM_PRETEND_VERSION="${BASH_REMATCH[1]}a${BASH_REMATCH[2]}.post${BASH_REMATCH[3]}"
+          fi
+
+          echo "SETUPTOOLS_SCM_PRETEND_VERSION=${SETUPTOOLS_SCM_PRETEND_VERSION}"
+
           python -m build
 
       - name: "Publish package"
