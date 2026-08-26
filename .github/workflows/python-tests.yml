@@ -3,10 +3,6 @@
 
 name: Artesian SDK Python
 
-permissions:
-  contents: read
-  id-token: write
-
 on:
   push:
     branches: [master]
@@ -26,10 +22,6 @@ jobs:
   pyright:
     name: pyright
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-      checks: write
 
     steps:
       - uses: actions/checkout@v7
@@ -72,8 +64,6 @@ jobs:
   build:
     name: Build
     runs-on: ${{ matrix.os }}
-    permissions:
-      contents: read
 
     strategy:
       matrix:
