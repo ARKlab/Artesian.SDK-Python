@@ -408,6 +408,12 @@ jobs:
         with:
           python-version: "3.11"
 
+      - name: "Install dependencies"
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install build
+
       - name: "Build package"
         shell: bash
         run: |
@@ -421,12 +427,9 @@ jobs:
 
           python -m build
 
-      - name: "Build package"
-        run: |
-          python -m build
-
       - name: "Publish package"
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
           password: ${{ secrets.PYPI_API_TOKEN }}
+
