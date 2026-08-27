@@ -5,7 +5,6 @@ name: Artesian SDK Python
 
 permissions:
   contents: read
-  id-token: write
 
 on:
   push:
@@ -168,7 +167,13 @@ jobs:
         run: |
           git fetch origin master
 
-          if ! git merge-base --is-ancestor "$GITHUB_SHA" "origin/master"; then
+          TAG_COMMIT=$(git rev-list -n 1 "$GITHUB_REF_NAME")
+
+          echo "Tag:        $GITHUB_REF_NAME"
+          echo "Tag commit: $TAG_COMMIT"
+          echo "Master:     $(git rev-parse origin/master)"
+
+          if ! git merge-base --is-ancestor "$TAG_COMMIT" "origin/master"; then
             echo "::error::Release tag $GITHUB_REF_NAME does not point to a commit contained in master."
             exit 1
           fi
@@ -256,7 +261,13 @@ jobs:
         run: |
           git fetch origin develop-beta
 
-          if ! git merge-base --is-ancestor "$GITHUB_SHA" "origin/develop-beta"; then
+          TAG_COMMIT=$(git rev-list -n 1 "$GITHUB_REF_NAME")
+
+          echo "Tag:        $GITHUB_REF_NAME"
+          echo "Tag commit: $TAG_COMMIT"
+          echo "Develop-beta: $(git rev-parse origin/develop-beta)"
+
+          if ! git merge-base --is-ancestor "$TAG_COMMIT" "origin/develop-beta"; then
             echo "::error::Beta release tag does not point to a commit contained in develop-beta."
             exit 1
           fi
