@@ -97,6 +97,8 @@ jobs:
             export SETUPTOOLS_SCM_PRETEND_VERSION="${BASH_REMATCH[1]}a${BASH_REMATCH[2]}.post${BASH_REMATCH[3]}"
           elif [[ "$TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)b([0-9]+)$ ]]; then
             export SETUPTOOLS_SCM_PRETEND_VERSION="${BASH_REMATCH[1]}b${BASH_REMATCH[2]}"
+          elif [[ "$TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
+            export SETUPTOOLS_SCM_PRETEND_VERSION="${BASH_REMATCH[1]}"
           fi
 
           echo "SETUPTOOLS_SCM_PRETEND_VERSION=${SETUPTOOLS_SCM_PRETEND_VERSION}"
