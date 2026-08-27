@@ -501,6 +501,7 @@ jobs:
           fi
 
           echo "SETUPTOOLS_SCM_PRETEND_VERSION=${SETUPTOOLS_SCM_PRETEND_VERSION}"
+
           python -m build
 
       - name: "Publish package"
