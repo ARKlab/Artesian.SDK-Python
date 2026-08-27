@@ -51,7 +51,7 @@ jobs:
 
           echo "SETUPTOOLS_SCM_PRETEND_VERSION=$SETUPTOOLS_SCM_PRETEND_VERSION"
 
-          pip install -e ".[dev]"
+          pip install --no-build-isolation -e ".[dev]"
 
       - name: Run Pyright
         uses: jordemort/action-pyright@v1
