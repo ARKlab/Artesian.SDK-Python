@@ -10,7 +10,7 @@ on:
   push:
     branches: [master]
     tags:
-      - 'v*'
+      - "v[0-9]*.[0-9]*.[0-9]*"
   pull_request:
     branches: [master]
   workflow_dispatch:
@@ -164,21 +164,7 @@ jobs:
 
       - name: "Validate tag originates from master"
         shell: bash
-        run: |
-          git fetch origin master
-
-          TAG_COMMIT=$(git rev-list -n 1 "$GITHUB_REF_NAME")
-
-          echo "Tag:        $GITHUB_REF_NAME"
-          echo "Tag commit: $TAG_COMMIT"
-          echo "Master:     $(git rev-parse origin/master)"
-
-          if ! git merge-base --is-ancestor "$TAG_COMMIT" "origin/master"; then
-            echo "::error::Release tag $GITHUB_REF_NAME does not point to a commit contained in master."
-            exit 1
-          fi
-
-          echo "Release commit is contained in master."
+        run: .github/workflows/validate_tag.sh "$GITHUB_REF_NAME" "master"
 
       - name: "Set up Python 3.11"
         uses: actions/setup-python@v7
@@ -258,21 +244,7 @@ jobs:
 
       - name: "Validate tag originates from develop-beta"
         shell: bash
-        run: |
-          git fetch origin develop-beta
-
-          TAG_COMMIT=$(git rev-list -n 1 "$GITHUB_REF_NAME")
-
-          echo "Tag:        $GITHUB_REF_NAME"
-          echo "Tag commit: $TAG_COMMIT"
-          echo "Develop-beta: $(git rev-parse origin/develop-beta)"
-
-          if ! git merge-base --is-ancestor "$TAG_COMMIT" "origin/develop-beta"; then
-            echo "::error::Beta release tag does not point to a commit contained in develop-beta."
-            exit 1
-          fi
-
-          echo "Release commit is contained in develop-beta."
+        run: .github/workflows/validate_tag.sh "$GITHUB_REF_NAME" "develop-beta"
 
       - name: "Validate next minor version"
         shell: bash
