@@ -4,10 +4,12 @@ set -euo pipefail
 TAG="$1"
 EXPECTED_BRANCH="$2"
 
-git fetch origin "$EXPECTED_BRANCH"
+git fetch origin "$EXPECTED_BRANCH" --tags
 
-TAG_COMMIT=$(git rev-list -n 1 "$TAG")
-
+if ! TAG_COMMIT="$(git rev-parse -q --verify "${TAG}^{commit}")"; then
+  echo "::error::Tag $TAG could not be resolved to a commit."
+  exit 1
+fi
 echo "Tag:             $TAG"
 echo "Tag commit:      $TAG_COMMIT"
 echo "Expected branch: $EXPECTED_BRANCH"
