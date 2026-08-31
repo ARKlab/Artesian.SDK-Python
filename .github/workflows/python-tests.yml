@@ -10,7 +10,7 @@ on:
   push:
     branches: [master]
     tags:
-      - "v[0-9].[0-9].[0-9]*"
+      - "v[0-9]*.[0-9]*.[0-9]*"
   pull_request:
     branches: [master]
   workflow_dispatch:
@@ -144,27 +144,18 @@ jobs:
       !contains(github.ref_name, 'b')
 
     steps:
-      - name: "Validate GA release tag"
-        shell: bash
-        run: |
-          TAG="${GITHUB_REF_NAME}"
-
-          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "::error::Invalid GA release tag: $TAG"
-            echo "Expected format: vX.Y.Z"
-            exit 1
-          fi
-
-          echo "Valid GA release tag: $TAG"
-
       - name: "Checkout"
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
-      - name: "Validate tag originates from master"
+      - name: "Validate GA release tag"
         shell: bash
-        run: .github/workflows/validate_tag.sh "$GITHUB_REF_NAME" "master"
+        run: .github/workflows/validate_tag.sh "$GITHUB_REF_NAME" ga
+
+      - name: "Validate release commit is contained in master"
+        shell: bash
+        run: .github/workflows/validate_branch.sh "master"
 
       - name: "Set up Python 3.11"
         uses: actions/setup-python@v7
@@ -224,27 +215,18 @@ jobs:
       contains(github.ref_name, 'b')
 
     steps:
-      - name: "Validate Beta release tag"
-        shell: bash
-        run: |
-          TAG="${GITHUB_REF_NAME}"
-
-          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+b[0-9]+$ ]]; then
-            echo "::error::Invalid Beta release tag: $TAG"
-            echo "Expected format: vX.Y.ZbN"
-            exit 1
-          fi
-
-          echo "Valid Beta release tag: $TAG"
-
       - name: "Checkout"
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
-      - name: "Validate tag originates from develop-beta"
+      - name: "Validate Beta release tag"
         shell: bash
-        run: .github/workflows/validate_tag.sh "$GITHUB_REF_NAME" "develop-beta"
+        run: .github/workflows/validate_tag.sh "$GITHUB_REF_NAME" beta
+
+      - name: "Validate release commit is contained in develop-beta"
+        shell: bash
+        run: .github/workflows/validate_branch.sh "develop-beta"
 
       - name: "Validate next minor version"
         shell: bash
@@ -349,18 +331,14 @@ jobs:
       contains(github.ref_name, 'a')
 
     steps:
+      - name: "Checkout"
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
       - name: "Validate PR Preview tag"
         shell: bash
-        run: |
-          TAG="${GITHUB_REF_NAME}"
-
-          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+a[0-9]+\.[0-9]+$ ]]; then
-            echo "::error::Invalid PR Preview tag: $TAG"
-            echo "Expected format: vX.Y.ZaPR_NUMBER.ITERATION"
-            exit 1
-          fi
-
-          echo "Valid PR Preview tag: $TAG"
+        run: .github/workflows/validate_tag.sh "$GITHUB_REF_NAME" preview
 
       - name: "Extract PR number"
         id: pr
