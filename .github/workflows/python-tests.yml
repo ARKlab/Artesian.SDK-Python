@@ -450,8 +450,13 @@ jobs:
         run: |
           TAG="${GITHUB_REF_NAME}"
 
-          PR_NUMBER=$(echo "$TAG" | sed -E 's/^v[0-9]+\.[0-9]+\.[0-9]+a([0-9]+)\.[0-9]+$/\1/')
-          ITERATION=$(echo "$TAG" | sed -E 's/^v[0-9]+\.[0-9]+\.[0-9]+a[0-9]+\.([0-9]+)$/\1/')
+          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+a([0-9]+)\.([0-9]+)$ ]]; then
+            echo "::error::Invalid PR preview tag: $TAG"
+            exit 1
+          fi
+
+          PR_NUMBER="${BASH_REMATCH[1]}"
+          ITERATION="${BASH_REMATCH[2]}"
 
           echo "number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
           echo "iteration=$ITERATION" >> "$GITHUB_OUTPUT"

@@ -2,6 +2,11 @@
 
 set -euo pipefail
 
+if [[ $# -ne 2 ]]; then
+  echo "::error::Usage: $0 <tag> <ga|beta|preview>"
+  exit 2
+fi
+
 TAG="$1"
 TYPE="$2"
 
