@@ -29,6 +29,7 @@ from .PagedResultOverrideMetadataEntry import PagedResultOverrideMetadataEntry
 from .DerivedCfg import DerivedCfg
 from .DataQualityRuleDtoInput import DataQualityRuleDtoInput
 from .DataQualityRuleDtoOutput import DataQualityRuleDtoOutput
+from .DataQualityRuleConfigDto import DataQualityRuleConfigDto
 from .CompletenessAndFreshnessConfigDto import CompletenessAndFreshnessConfigDto
 from .ActualCompletenessAndFreshnessConfigDto import ActualCompletenessAndFreshnessConfigDto
 from .VersionedCompletenessAndFreshnessConfigDto import (
@@ -65,7 +66,11 @@ from .QualityNotificationAlertAssignmentDto import (
     QualityNotificationAlertAssignmentDtoOutput,
 )
 from .AlertScheduleEventsDto import AlertScheduleEventsDtoOutput
-from .TriggerConfigDto import TriggerConfigDto
+from .TriggerConfigDto import (
+    OnEventTriggerConfigDto,
+    ScheduleTriggerConfigDto,
+    TriggerConfigDto,
+)
 from .MailNotificationDto import MailNotificationDto
 
 __all__ = [
@@ -103,6 +108,7 @@ __all__ = [
     RecordValidationConfigDto.__name__,
     DataQualityRuleDtoInput.__name__,
     DataQualityRuleDtoOutput.__name__,
+    DataQualityRuleConfigDto.__name__,
     DataQualityStatusSummaryDto.__name__,
     DqCheckChangeEventDtoOutput.__name__,
     LocalDateTimeRange.__name__,
@@ -127,5 +133,7 @@ __all__ = [
     QualityNotificationAlertAssignmentDtoOutput.__name__,
     AlertScheduleEventsDtoOutput.__name__,
     TriggerConfigDto.__name__,
+    OnEventTriggerConfigDto.__name__,
+    ScheduleTriggerConfigDto.__name__,
     MailNotificationDto.__name__,
 ]  # type: ignore

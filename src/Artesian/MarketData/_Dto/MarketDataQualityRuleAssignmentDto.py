@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import Optional
 
 from .DataQualityRuleDtoOutput import DataQualityRuleDtoOutput
-from .MarketDataEntityOutput import MarketDataEntityOutput
+from .MarketDataEntityOutputEnriched import MarketDataEntityOutputEnriched
 
 
 @dataclass
@@ -42,7 +42,7 @@ class MarketDataQualityRuleAssignmentDtoOutput(MarketDataQualityRuleAssignmentDt
         version: version number for concurrency tracking
     """
 
-    marketData: Optional[MarketDataEntityOutput] = None
+    marketData: Optional[MarketDataEntityOutputEnriched] = None
     dataQualityRule: Optional[DataQualityRuleDtoOutput] = None
     lookbackDate: Optional[datetime] = None
     version: int = 0

@@ -27,10 +27,10 @@ from Artesian.MarketData import (
     MarketDataTypeV2,
     PagedResultCurveRangeEntity,
     UnitOfMeasure,
-    AlertType,
     MarketDataIdentifier,
     OverrideKind,
     OverrideMetadataEntry,
+    OnEventTriggerConfigDto,
     PagedResultOverrideMetadataEntry,
     UpsertCurveDataOverride,
 )
@@ -74,29 +74,12 @@ from Artesian.MarketData._Dto.QualityNotificationAlertAssignmentDto import (
     QualityNotificationAlertAssignmentDtoInput,
     QualityNotificationAlertAssignmentDtoOutput,
 )
-from Artesian.MarketData._Dto.TriggerConfigDto import TriggerConfigDto
-
 cfg = ArtesianConfig("https://baseurl.com", "APIKey")
-
-
-class AlertTriggerConfigFixture(TriggerConfigDto):
-    @property
-    def type(self: "AlertTriggerConfigFixture") -> AlertType:
-        return AlertType.OnEvent
-
-    def __eq__(self: "AlertTriggerConfigFixture", other: object) -> bool:
-        return isinstance(other, AlertTriggerConfigFixture)
 
 
 class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
     def setUp(self: "TestMarketDataServiceMarketData") -> None:
         self.__service = MarketDataService(cfg)
-        QualityNotificationAlertDtoInput.__init__.__annotations__["triggerConfig"] = (
-            AlertTriggerConfigFixture
-        )
-        QualityNotificationAlertDtoOutput.__init__.__annotations__["triggerConfig"] = (
-            AlertTriggerConfigFixture
-        )
 
         curveIds = [1, 2]
         derivedCfg = DerivedCfg(
@@ -332,13 +315,13 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
 
         self.__qualityNotificationAlertInput = QualityNotificationAlertDtoInput(
             name="Weather station daily digest",
-            triggerConfig=AlertTriggerConfigFixture(),
+            triggerConfig=OnEventTriggerConfigDto(),
             mailNotifications=[MailNotificationDto(recipients=["alerts@example.com"])],
             version=0,
         )
         self.__qualityNotificationAlertOutput = QualityNotificationAlertDtoOutput(
             name="Weather station daily digest",
-            triggerConfig=AlertTriggerConfigFixture(),
+            triggerConfig=OnEventTriggerConfigDto(),
             id=self.__id,
             mailNotifications=[MailNotificationDto(recipients=["alerts@example.com"])],
             eTag="alert-etag-1",
@@ -436,7 +419,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
                 "curveName": "MARKETDATA",
                 "includeCurveSummary": True,
                 "includeTimeTransform": True,
-                "includeDataQuality": False,
+                "includeDataQuality": True,
                 "skipOverrides": False,
             }
             rsps.add(
@@ -484,14 +467,14 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             params = {
                 "includeCurveSummary": True,
                 "includeTimeTransform": True,
-                "includeDataQuality": False,
+                "includeDataQuality": True,
                 "skipOverrides": False,
             }
             rsps.add(
                 "GET",
                 self.__baseurl + "/marketdata/entity/" + str(self.__id),
                 match=[responses.matchers.query_param_matcher(params)],
-                json=self.__serializedOutput,
+                json=self.__serializedOutputEnriched,
                 status=200,
             )
             output = await self.__service.readMarketDataRegistryByIdAsync(
@@ -1201,14 +1184,49 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(output, [self.__sampleTs])
 
     async def test_getDataQualityCheckResultCheckSummaryAsync(self: "TestMarketDataServiceMarketData") -> None:
+        from Artesian.MarketData._Dto.CheckResultCheckSummaryDto import (
+            CheckResultCheckSummaryDto,
+        )
         from Artesian.MarketData._Dto.PagedResult import PagedResultCheckResultCheckSummaryDto
-        expectedOutput = PagedResultCheckResultCheckSummaryDto(page=1, pageSize=20, count=0,
-                                                               isCountPartial=False, data=[])
+
+        summary = CheckResultCheckSummaryDto(
+            lastCheckTime=datetime(2024, 1, 31, 12, 0),
+            rangeStart=date(2024, 1, 1),
+            rangeEnd=date(2024, 1, 31),
+            aggregatedStatus="KO",
+            assignment=self.__dataQualityRuleAssignmentOutput,
+            product="PROD1",
+            version=datetime(2024, 1, 31, 10, 0),
+            versionFrom=datetime(2024, 1, 1, 10, 0),
+        )
+        expectedOutput = PagedResultCheckResultCheckSummaryDto(
+            page=1,
+            pageSize=20,
+            count=1,
+            isCountPartial=False,
+            data=[summary],
+        )
+        params = {
+            "page": "1",
+            "pageSize": "20",
+            "marketDataIds": ["100", "200"],
+            "ruleIds": ["1", "2"],
+            "assignmentIds": ["10", "20"],
+            "dqStatus": "KO",
+            "from": "2024-01-01T00:00:00",
+            "to": "2024-01-31T23:59:00",
+            "versionFrom": "2024-01-01T00:00:00",
+            "versionTo": "2024-01-31T23:59:00",
+            "products": ["PROD1", "PROD2"],
+            "skipEmptyRanges": "True",
+            "sort": "RuleName asc",
+        }
         with responses.RequestsMock() as rsps:
             rsps.add(
                 "GET",
                 self.__baseurl + "/dataquality/checkresult/checksummary",
-                json={"page": 1, "pageSize": 20, "count": 0, "isCountPartial": False, "data": []},
+                match=[responses.matchers.query_param_matcher(params)],
+                json=artesianJsonSerialize(expectedOutput),
                 status=200,
             )
             output = await self.__service.getDataQualityCheckResultCheckSummaryAsync(
@@ -1227,6 +1245,22 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
                 sort=["RuleName asc"],
             )
             self.assertEqual(output, expectedOutput)
+
+    async def test_dataQualityCheckResultValidation(
+        self: "TestMarketDataServiceMarketData",
+    ) -> None:
+        with self.assertRaisesRegex(ValueError, "timeZone cannot be None or empty"):
+            await self.__service.getDataQualityCheckResultExtractTsAsync(
+                "Hour", "2024-01-01", "2024-01-31", ""
+            )
+        with self.assertRaisesRegex(ValueError, "timeZone cannot be None or empty"):
+            await self.__service.getDataQualityCheckResultExtractVtsAsync(
+                "2024-01-15T10:00:00", "Day", "2024-01-01", "2024-01-31", ""
+            )
+        with self.assertRaisesRegex(ValueError, "Page must be greater than 0"):
+            await self.__service.getDataQualityCheckResultCheckSummaryAsync(0, 20)
+        with self.assertRaisesRegex(ValueError, "PageSize must be greater than 0"):
+            await self.__service.getDataQualityCheckResultCheckSummaryAsync(1, 0)
 
     async def test_getMarketDataDqStatusSummaryAsync(self: "TestMarketDataServiceMarketData") -> None:
         with responses.RequestsMock() as rsps:
@@ -1273,6 +1307,14 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
                 limit=100,
             )
             self.assertEqual(output, [self.__sampleDqRule])
+
+    async def test_dataQualityStatusSummaryLimitValidation(
+        self: "TestMarketDataServiceMarketData",
+    ) -> None:
+        with self.assertRaisesRegex(ValueError, "Limit must be between 1 and 1000"):
+            await self.__service.getMarketDataDqStatusSummaryAsync(limit=0)
+        with self.assertRaisesRegex(ValueError, "Limit must be between 1 and 1000"):
+            await self.__service.getDqRuleDqStatusSummaryAsync(limit=1001)
 
     async def test_upsertCurveDataOverrideAsync(
         self: "TestMarketDataServiceMarketData",

@@ -295,6 +295,7 @@ class ActualQuery(_Query):
                 url = url + "&aggregationRule=" + str(qp.aggregationRule)
             if not (qp.fill is None):
                 url = url + "&" + qp.fill.getUrlParams()
+            url = url + super()._buildOverrideQueryParams(qp)
             urls.append(url)
         return urls
 

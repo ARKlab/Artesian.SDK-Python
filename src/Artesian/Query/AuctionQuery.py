@@ -150,6 +150,7 @@ class AuctionQuery(_Query):
                 url = url + "&filterId=" + str(qp.filterId)
             if not (qp.timezone is None):
                 url = url + "&tz=" + qp.timezone
+            url = url + super()._buildOverrideQueryParams(qp)
             urls.append(url)
         return urls
 

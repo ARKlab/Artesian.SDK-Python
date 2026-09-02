@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from uuid import uuid4
 
 import Artesian
@@ -10,10 +9,8 @@ from Artesian.MarketData._Dto.QualityNotificationAlertAssignmentDto import (
 )
 from Artesian.MarketData._Dto.QualityNotificationAlertDto import (
     QualityNotificationAlertDtoInput,
-    QualityNotificationAlertDtoOutput,
 )
-from Artesian.MarketData._Dto.TriggerConfigDto import TriggerConfigDto
-from Artesian.MarketData._Enum.AlertType import AlertType
+from Artesian.MarketData import OnEventTriggerConfigDto
 from Artesian.MarketData._Enum.AggregationRule import AggregationRule
 from Artesian.MarketData._Enum.MarketDataTypeV2 import MarketDataTypeV2
 
@@ -21,22 +18,6 @@ from Artesian.MarketData._Enum.MarketDataTypeV2 import MarketDataTypeV2
 cfg = Artesian.ArtesianConfig("https://arkive.artesian.cloud/tenantName/", "APIKey")
 marketDataService = Artesian.MarketData.MarketDataService(cfg)
 
-
-@dataclass
-class OnEventTriggerConfig(TriggerConfigDto):
-    """Concrete trigger configuration for serializer deserialization."""
-
-    @property
-    def type(self: "OnEventTriggerConfig") -> AlertType:
-        return AlertType.OnEvent
-
-
-QualityNotificationAlertDtoInput.__init__.__annotations__["triggerConfig"] = (
-    OnEventTriggerConfig
-)
-QualityNotificationAlertDtoOutput.__init__.__annotations__["triggerConfig"] = (
-    OnEventTriggerConfig
-)
 
 alertId = None
 marketDataId = None
@@ -59,7 +40,7 @@ try:
 
     alertPayload = QualityNotificationAlertDtoInput(
         name="Data quality notification alert assignment sample",
-        triggerConfig=OnEventTriggerConfig(),
+        triggerConfig=OnEventTriggerConfigDto(),
         mailNotifications=[
             MailNotificationDto(recipients=["quality-alerts@example.com"])
         ],

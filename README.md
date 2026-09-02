@@ -455,15 +455,15 @@ marketDataService = MarketDataService(cfg)
 #### Completeness and Freshness Rule for Actual Time Series
 
 ```Python
-from Artesian.MarketData._Dto.ActualCompletenessAndFreshnessConfigDto import (
+from Artesian.MarketData import (
   ActualCompletenessAndFreshnessConfigDto,
+  CronScheduleDefinitionDto,
+  DataQualityRuleDtoInput,
+  MarketDataTypeV2,
+  RecordValidationConfigDto,
+  RuleType,
+  ScheduleConfigDto,
 )
-from Artesian.MarketData._Dto.CronScheduleDefinitionDto import CronScheduleDefinitionDto
-from Artesian.MarketData._Dto.DataQualityRuleDtoInput import DataQualityRuleDtoInput
-from Artesian.MarketData._Dto.RecordValidationConfigDto import RecordValidationConfigDto
-from Artesian.MarketData._Dto.ScheduleConfigDto import ScheduleConfigDto
-from Artesian.MarketData._Enum.MarketDataTypeV2 import MarketDataTypeV2
-from Artesian.MarketData._Enum.RuleType import RuleType
 
 actualCompletenessRule = DataQualityRuleDtoInput(
   name="Daily weather station completeness",
@@ -492,10 +492,10 @@ print(f"Created rule with ID: {createdRule.id}")
 #### Completeness and Freshness Rule for Versioned Time Series
 
 ```Python
-from Artesian.MarketData._Dto.VersionedCompletenessAndFreshnessConfigDto import (
+from Artesian.MarketData import (
+  PeriodPrecision,
   VersionedCompletenessAndFreshnessConfigDto,
 )
-from Artesian.MarketData._Enum.PeriodPrecision import PeriodPrecision
 
 versionedCompletenessRule = DataQualityRuleDtoInput(
   name="Hourly forecast version check",
@@ -511,6 +511,8 @@ versionedCompletenessRule = DataQualityRuleDtoInput(
     ),
     recordValidationConfig=RecordValidationConfigDto(
       recordRangeFrom="P0D",
+      recordRangeTo="P1D",
+    ),
     versionToleranceFrom="-PT1H",
     versionToleranceTo="PT1H",
     versionPrecision=PeriodPrecision.Hour,
@@ -526,10 +528,10 @@ createdVersionedRule = marketDataService.registerDataQualityRule(
 #### Outlier Detection Rule
 
 ```Python
-from Artesian.MarketData._Dto.OutlierAbsoluteBoundConfigDto import (
+from Artesian.MarketData import (
   OutlierAbsoluteBoundConfigDto,
+  OutlierConfigDto,
 )
-from Artesian.MarketData._Dto.OutlierConfigDto import OutlierConfigDto
 
 outlierRule = DataQualityRuleDtoInput(
   name="Temperature outlier detection",
@@ -538,7 +540,6 @@ outlierRule = DataQualityRuleDtoInput(
     model=OutlierAbsoluteBoundConfigDto(
       lowerBound=-10.0,
       upperBound=45.0,
-      type=RuleType.Outlier
     )
   ),
   version=0,
@@ -708,6 +709,55 @@ if rule.aggregatedStatus == CheckAggregatedStatus.KO:
   print(f"Rule {rule.name} has failing checks!")
 ```
 
+### Data Quality Check Results
+
+Read compact check results for actual or versioned time series. Date ranges are
+end-exclusive and periods use ISO strings:
+
+```Python
+actualResults = marketDataService.getDataQualityCheckResultExtractTs(
+  granularity="Hour",
+  start="2024-01-01",
+  end="2024-02-01",
+  timeZone="Europe/Rome",
+  assignmentIds=[456],
+)
+
+versionedResults = marketDataService.getDataQualityCheckResultExtractVts(
+  version="2024-02-01T10:00:00Z",
+  granularity="Day",
+  start="2024-01-01",
+  end="2024-02-01",
+  timeZone="UTC",
+  assignmentIds=[456],
+)
+```
+
+Retrieve paginated check summaries or the latest aggregated status by Market
+Data and rule:
+
+```Python
+from Artesian.MarketData import CheckAggregatedStatus
+
+summaries = marketDataService.getDataQualityCheckResultCheckSummary(
+  page=1,
+  pageSize=20,
+  marketDataIds=[100000001],
+  dqStatus=CheckAggregatedStatus.KO,
+  skipEmptyRanges=True,
+)
+
+marketDataStatuses = marketDataService.getMarketDataDqStatusSummary(
+  ruleId=123,
+  dqStatus=CheckAggregatedStatus.KO,
+  limit=20,
+)
+ruleStatuses = marketDataService.getDqRuleDqStatusSummary(
+  marketDataId=100000001,
+  limit=20,
+)
+```
+
 ## Quality Notification Alerts
 
 Quality Notification Alerts send notifications when Data Quality events occur.
@@ -720,25 +770,19 @@ counterparts with the same name plus the `Async` suffix are also available.
 
 ### Create a Quality Notification Alert
 
-`TriggerConfigDto` is the base type for alert trigger configurations. The
-following example defines an on-event trigger and configures email recipients:
+Use `OnEventTriggerConfigDto` for immediate notifications or
+`ScheduleTriggerConfigDto` for scheduled digests:
 
 ```Python
-from Artesian.MarketData._Dto.MailNotificationDto import MailNotificationDto
-from Artesian.MarketData._Dto.QualityNotificationAlertDto import (
+from Artesian.MarketData import (
+  MailNotificationDto,
+  OnEventTriggerConfigDto,
   QualityNotificationAlertDtoInput,
 )
-from Artesian.MarketData._Dto.TriggerConfigDto import TriggerConfigDto
-from Artesian.MarketData._Enum.AlertType import AlertType
-
-class OnEventTriggerConfig(TriggerConfigDto):
-  @property
-  def type(self) -> AlertType:
-    return AlertType.OnEvent
 
 alert = QualityNotificationAlertDtoInput(
   name="Weather station quality alert",
-  triggerConfig=OnEventTriggerConfig(),
+  triggerConfig=OnEventTriggerConfigDto(),
   mailNotifications=[
     MailNotificationDto(recipients=["quality-alerts@example.com"])
   ],
@@ -954,6 +998,27 @@ an optional `OverrideKind` filter.
 - **`OverrideKind.Fallback`**: an alternative value used only while the original data is unavailable
   or does not pass the relevant Data Quality checks. When the original data becomes valid again, the
   fallback is no longer used for the affected range.
+
+All time-series query builders support override controls. Both options default
+to `False` and are available for Actual, Versioned, Market Assessment, Auction,
+and BidAsk queries:
+
+```Python
+result = (
+  queryService.createActual()
+  .forMarketData([100000001])
+  .inAbsoluteDateRange("2024-01-01", "2024-02-01")
+  .inGranularity(Granularity.Hour)
+  .withSkipOverrides(False)
+  .withIncludeOverrideDetails(True)
+  .execute()
+)
+```
+
+| Option                             | Default | Description                                          |
+| ---------------------------------- | ------- | ---------------------------------------------------- |
+| `withSkipOverrides(bool)`          | `False` | Excludes overrides and fallbacks from query results. |
+| `withIncludeOverrideDetails(bool)` | `False` | Includes original, override, and fallback details.   |
 
 ## GME Public Offer
 

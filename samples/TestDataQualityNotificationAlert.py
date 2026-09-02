@@ -1,41 +1,21 @@
-from dataclasses import dataclass
-
 import Artesian
 from Artesian.MarketData._Dto.MailNotificationDto import MailNotificationDto
 from Artesian.MarketData._Dto.QualityNotificationAlertDto import (
     QualityNotificationAlertDtoInput,
-    QualityNotificationAlertDtoOutput,
 )
-from Artesian.MarketData._Dto.TriggerConfigDto import TriggerConfigDto
-from Artesian.MarketData._Enum.AlertType import AlertType
+from Artesian.MarketData import OnEventTriggerConfigDto
 
 # Run only manually with proper Artesian URI and ApiKey set.
 cfg = Artesian.ArtesianConfig("https://arkive.artesian.cloud/tenantName/", "APIKey")
 marketDataService = Artesian.MarketData.MarketDataService(cfg)
 
 
-@dataclass
-class OnEventTriggerConfig(TriggerConfigDto):
-    """Concrete trigger configuration for serializer deserialization."""
-
-    @property
-    def type(self: "OnEventTriggerConfig") -> AlertType:
-        return AlertType.OnEvent
-
-
-QualityNotificationAlertDtoInput.__init__.__annotations__["triggerConfig"] = (
-    OnEventTriggerConfig
-)
-QualityNotificationAlertDtoOutput.__init__.__annotations__["triggerConfig"] = (
-    OnEventTriggerConfig
-)
-
 alertId = None
 
 try:
     alertPayload = QualityNotificationAlertDtoInput(
         name="Data quality notification alert sample",
-        triggerConfig=OnEventTriggerConfig(),
+        triggerConfig=OnEventTriggerConfigDto(),
         mailNotifications=[
             MailNotificationDto(recipients=["quality-alerts@example.com"])
         ],

@@ -101,3 +101,5 @@ class _QueryParameters:
         self.timezone = timezone
         self.filterId = filterId
         self.fill = fill
+        self.includeOverrideDetails = False
+        self.skipOverrides = False

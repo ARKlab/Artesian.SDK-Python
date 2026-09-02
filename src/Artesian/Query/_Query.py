@@ -6,7 +6,10 @@ from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
 from Artesian._ClientsExecutor.Client import _Client
 import asyncio
 import itertools
-from typing import List
+from typing import List, TypeVar
+
+
+TQuery = TypeVar("TQuery", bound="_Query")
 
 
 class _Query:
@@ -125,6 +128,30 @@ class _Query:
         self._queryParameters.extractionRangeType = ExtractionRangeType.RelativeInterval
         self._queryParameters.extractionRangeConfig.relativeInterval = relativeInterval
         return self
+
+    def withSkipOverrides(
+        self: TQuery, skipOverrides: bool = True
+    ) -> TQuery:
+        """Set whether overrides and fallbacks are excluded from the query."""
+        self._queryParameters.skipOverrides = skipOverrides
+        return self
+
+    def withIncludeOverrideDetails(
+        self: TQuery, includeOverrideDetails: bool = True
+    ) -> TQuery:
+        """Set whether override and fallback details are included in results."""
+        self._queryParameters.includeOverrideDetails = includeOverrideDetails
+        return self
+
+    def _buildOverrideQueryParams(
+        self: _Query, queryParameters: _QueryParameters
+    ) -> str:
+        includeDetails = str(queryParameters.includeOverrideDetails).lower()
+        skipOverrides = str(queryParameters.skipOverrides).lower()
+        return (
+            f"&includeOverrideDetails={includeDetails}"
+            f"&skipOverrides={skipOverrides}"
+        )
 
     def _buildExtractionRangeRoute(
         self: _Query, queryParamaters: _QueryParameters

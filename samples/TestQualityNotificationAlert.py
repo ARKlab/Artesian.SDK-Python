@@ -1,42 +1,21 @@
-from dataclasses import dataclass
-
 import Artesian
 from Artesian.MarketData._Dto.MailNotificationDto import MailNotificationDto
 from Artesian.MarketData._Dto.QualityNotificationAlertDto import (
     QualityNotificationAlertDtoInput,
-    QualityNotificationAlertDtoOutput,
 )
-from Artesian.MarketData._Dto.TriggerConfigDto import TriggerConfigDto
-from Artesian.MarketData._Enum.AlertType import AlertType
+from Artesian.MarketData import OnEventTriggerConfigDto
 
 # Run only manually with proper Artesian URI and ApiKey set.
 cfg = Artesian.ArtesianConfig("https://arkive.artesian.cloud/tenantName/", "APIKey")
 marketDataService = Artesian.MarketData.MarketDataService(cfg)
 
 
-@dataclass
-class OnEventTriggerConfig(TriggerConfigDto):
-    """Minimal on-event trigger configuration used by this sample."""
-
-    @property
-    def type(self: "OnEventTriggerConfig") -> AlertType:
-        return AlertType.OnEvent
-
-
-# The Python serializer needs a concrete class for the abstract trigger payload.
-QualityNotificationAlertDtoInput.__init__.__annotations__["triggerConfig"] = (
-    OnEventTriggerConfig
-)
-QualityNotificationAlertDtoOutput.__init__.__annotations__["triggerConfig"] = (
-    OnEventTriggerConfig
-)
-
 alertCreated = None
 
 try:
     alertPayload = QualityNotificationAlertDtoInput(
         name="Weather station quality alert",
-        triggerConfig=OnEventTriggerConfig(),
+        triggerConfig=OnEventTriggerConfigDto(),
         mailNotifications=[
             MailNotificationDto(recipients=["quality-alerts@example.com"])
         ],
@@ -57,7 +36,7 @@ try:
     updatePayload = QualityNotificationAlertDtoInput(
         id=readAlert.id,
         name="Weather station quality alert updated",
-        triggerConfig=OnEventTriggerConfig(),
+        triggerConfig=OnEventTriggerConfigDto(),
         mailNotifications=readAlert.mailNotifications or [],
         version=readAlert.version,
         eTag=readAlert.eTag,
