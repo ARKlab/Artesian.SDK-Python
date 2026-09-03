@@ -154,7 +154,7 @@ jobs:
         uses: actions/checkout@v7
 
       - name: "Download test result artifacts"
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         if: always()
         with:
           pattern: test-results-*
@@ -193,7 +193,7 @@ jobs:
 
     steps:
       - name: "Download coverage artifacts"
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         if: always()
         with:
           pattern: coverage-*
