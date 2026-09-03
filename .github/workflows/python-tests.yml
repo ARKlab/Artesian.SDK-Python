@@ -64,7 +64,7 @@ jobs:
   # ---------------------------------------------------------------------------
 
   build:
-    name: "Build"
+    name: "build"
     runs-on: ${{ matrix.os }}
 
     permissions:
