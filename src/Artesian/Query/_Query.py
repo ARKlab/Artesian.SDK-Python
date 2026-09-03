@@ -132,14 +132,28 @@ class _Query:
     def withSkipOverrides(
         self: TQuery, skipOverrides: bool = True
     ) -> TQuery:
-        """Set whether overrides and fallbacks are excluded from the query."""
+        """Set whether query overrides should be skipped.
+
+        Args:
+            skipOverrides: Whether to skip query overrides.
+
+        Returns:
+            Query with the skip-overrides setting applied.
+        """
         self._queryParameters.skipOverrides = skipOverrides
         return self
 
     def withIncludeOverrideDetails(
         self: TQuery, includeOverrideDetails: bool = True
     ) -> TQuery:
-        """Set whether override and fallback details are included in results."""
+        """Set whether override details should be included in results.
+
+        Args:
+            includeOverrideDetails: Whether to include override details.
+
+        Returns:
+            Query with the override-details setting applied.
+        """
         self._queryParameters.includeOverrideDetails = includeOverrideDetails
         return self
 
