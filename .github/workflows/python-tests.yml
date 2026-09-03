@@ -255,11 +255,11 @@ jobs:
 
       - name: "Validate GA release tag"
         shell: bash
-        run: .github/workflows/validate_tag.sh "$GITHUB_REF_NAME" ga
+        run: bash .github/workflows/validate_tag.sh "$GITHUB_REF_NAME" ga
 
       - name: "Validate release commit is contained in master"
         shell: bash
-        run: .github/workflows/validate_branch.sh "master"
+        run: bash .github/workflows/validate_branch.sh "master"
 
       - name: "Set up Python 3.11"
         uses: actions/setup-python@v7
@@ -328,11 +328,11 @@ jobs:
 
       - name: "Validate Beta release tag"
         shell: bash
-        run: .github/workflows/validate_tag.sh "$GITHUB_REF_NAME" beta
+        run: bash .github/workflows/validate_tag.sh "$GITHUB_REF_NAME" beta
 
       - name: "Validate release commit is contained in develop-beta"
         shell: bash
-        run: .github/workflows/validate_branch.sh "develop-beta"
+        run: bash .github/workflows/validate_branch.sh "develop-beta"
 
       - name: "Validate next minor version"
         shell: bash
@@ -472,7 +472,7 @@ jobs:
 
       - name: "Validate PR Preview tag"
         shell: bash
-        run: .github/workflows/validate_tag.sh "$GITHUB_REF_NAME" preview
+        run: bash .github/workflows/validate_tag.sh "$GITHUB_REF_NAME" preview
 
       - name: "Validate PR is based on current master"
         shell: bash
