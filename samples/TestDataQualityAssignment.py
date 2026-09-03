@@ -14,7 +14,7 @@ from Artesian.MarketData._Dto.MarketDataQualityRuleAssignmentDto import (
 from Artesian.MarketData._Dto.RecordValidationConfigDto import RecordValidationConfigDto
 from Artesian.MarketData._Dto.ScheduleConfigDto import ScheduleConfigDto
 from Artesian.MarketData._Enum.AggregationRule import AggregationRule
-from Artesian.MarketData._Enum.MarketDataTypeV2 import MarketDataTypeV2
+from Artesian.MarketData._Enum.MarketDataType import MarketDataType
 from Artesian.MarketData._Enum.RuleType import RuleType
 
 # Run only manually with proper Artesian URI and ApiKey set.
@@ -33,7 +33,7 @@ try:
     market_data_input = MarketDataEntityInput(
         providerName=provider_name,
         marketDataName=market_data_name,
-        type=MarketDataTypeV2.ActualTimeSerie,
+        type=MarketDataType.ActualTimeSerie,
         originalGranularity=Granularity.Hour,
         originalTimezone="UTC",
         aggregationRule=AggregationRule.Undefined,
@@ -53,7 +53,7 @@ try:
         name="TestRule",
         type=RuleType.CompletenessAndFreshness,
         configuration=ActualCompletenessAndFreshnessConfigDto(
-            marketDataType=MarketDataTypeV2.ActualTimeSerie,
+            marketDataType=MarketDataType.ActualTimeSerie,
             scheduleConfig=ScheduleConfigDto(
                 scheduleDefinition=CronScheduleDefinitionDto(
                     cronExpression="0 0 * * *",

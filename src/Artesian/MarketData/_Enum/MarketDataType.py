@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class MarketDataTypeV2(Enum):
+class MarketDataType(Enum):
     ActualTimeSerie = 0
     VersionedTimeSerie = 1
     MarketAssessment = 2

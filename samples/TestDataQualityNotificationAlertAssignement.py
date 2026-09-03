@@ -12,7 +12,7 @@ from Artesian.MarketData._Dto.QualityNotificationAlertDto import (
 )
 from Artesian.MarketData import OnEventTriggerConfigDto
 from Artesian.MarketData._Enum.AggregationRule import AggregationRule
-from Artesian.MarketData._Enum.MarketDataTypeV2 import MarketDataTypeV2
+from Artesian.MarketData._Enum.MarketDataType import MarketDataType
 
 # Run only manually with proper Artesian URI and ApiKey set.
 cfg = Artesian.ArtesianConfig("https://arkive.artesian.cloud/tenantName/", "APIKey")
@@ -29,7 +29,7 @@ try:
     marketDataPayload = MarketDataEntityInput(
         providerName=providerName,
         marketDataName=marketDataName,
-        type=MarketDataTypeV2.ActualTimeSerie,
+        type=MarketDataType.ActualTimeSerie,
         originalGranularity=Granularity.Hour,
         originalTimezone="UTC",
         aggregationRule=AggregationRule.Undefined,

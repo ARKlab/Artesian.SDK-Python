@@ -309,7 +309,7 @@ Use 'None' to not fill at all: timepoints are not returned if not present.
  .withFillNone()
 ```
 
-Custom Value can be provided for each MarketDataTypeV2.
+Custom Value can be provided for each MarketDataType.
 
 Custom Value for Actual extraction type.
 
@@ -459,7 +459,7 @@ from Artesian.MarketData import (
   ActualCompletenessAndFreshnessConfigDto,
   CronScheduleDefinitionDto,
   DataQualityRuleDtoInput,
-  MarketDataTypeV2,
+  MarketDataType,
   RecordValidationConfigDto,
   RuleType,
   ScheduleConfigDto,
@@ -469,7 +469,7 @@ actualCompletenessRule = DataQualityRuleDtoInput(
   name="Daily weather station completeness",
   type=RuleType.CompletenessAndFreshness,
   configuration=ActualCompletenessAndFreshnessConfigDto(
-    marketDataType=MarketDataTypeV2.ActualTimeSerie,
+    marketDataType=MarketDataType.ActualTimeSerie,
     scheduleConfig=ScheduleConfigDto(
       scheduleDefinition=CronScheduleDefinitionDto(
         cronExpression="0 9 * * *",
@@ -501,7 +501,7 @@ versionedCompletenessRule = DataQualityRuleDtoInput(
   name="Hourly forecast version check",
   type=RuleType.CompletenessAndFreshness,
   configuration=VersionedCompletenessAndFreshnessConfigDto(
-    marketDataType=MarketDataTypeV2.VersionedTimeSerie,
+    marketDataType=MarketDataType.VersionedTimeSerie,
     scheduleConfig=ScheduleConfigDto(
       scheduleDefinition=CronScheduleDefinitionDto(
         cronExpression="15 * * * *",
@@ -1129,7 +1129,7 @@ mkd = MarketData.MarketDataEntityInput(
       providerName = "TestProviderName",
       marketDataName = "TestMarketDataName",
       originalGranularity=Granularity.Day,
-      type=MarketData.MarketDataTypeV2.ActualTimeSerie,
+      type=MarketData.MarketDataType.ActualTimeSerie,
       originalTimezone="CET",
       aggregationRule=AggregationRule.SumAndDivide,
     UnitOfMeasure = CommonUnitOfMeasure.kW
@@ -1334,9 +1334,9 @@ Use the `DerivedTransformQueryValidation` to validate and execute a derived tran
 
 ```Python
 from Artesian.MarketData import MarketDataService
+from Artesian.MarketData import MarketDataType
 from Artesian.MarketData._Dto.DerivedTransformQueryValidation import DerivedTransformQueryValidation
 from Artesian.MarketData._Dto.TimeSerieData import TimeSerieData
-from Artesian import MarketDataType
 from datetime import datetime
 
 mds = MarketDataService(cfg)
@@ -1347,7 +1347,7 @@ request = DerivedTransformQueryValidation(
             (datetime(2018, 10, 1, 0, 0), 100),
             (datetime(2018, 10, 1, 1, 0), 100)
         ],
-        type=MarketDataTypeV2.ActualTimeSerie,
+        type=MarketDataType.ActualTimeSerie,
     ),
     transform="SELECT Time, (Value + 1) as Value FROM $table"
 )
@@ -1421,7 +1421,7 @@ mkd = MarketData.MarketDataEntityInput(
       providerName = mkdid.provider,
       marketDataName = mkdid.name,
       originalGranularity=Granularity.Day,
-      type=MarketData.MarketDataTypeV2.ActualTimeSerie,
+      type=MarketData.MarketDataType.ActualTimeSerie,
       originalTimezone="CET",
       aggregationRule=AggregationRule.AverageAndReplicate,
       tags={
@@ -1522,7 +1522,7 @@ mkd = MarketData.MarketDataEntityInput(
       providerName = mkdid.provider,
       marketDataName = mkdid.name,
       originalGranularity=Granularity.Hour,
-      type=MarketData.MarketDataTypeV2.ActualTimeSerie,
+      type=MarketData.MarketDataType.ActualTimeSerie,
       originalTimezone="CET",
       aggregationRule=AggregationRule.AverageAndReplicate,
       tags={
@@ -1574,7 +1574,7 @@ mkd = MarketData.MarketDataEntityInput(
       providerName = mkdid.provider,
       marketDataName = mkdid.name,
       originalGranularity=Granularity.Day,
-      type=MarketData.MarketDataTypeV2.VersionedTimeSerie,
+      type=MarketData.MarketDataType.VersionedTimeSerie,
       originalTimezone="CET",
       aggregationRule=AggregationRule.AverageAndReplicate,
       tags={
@@ -1654,7 +1654,7 @@ mkd = MarketData.MarketDataEntityInput(
       providerName = mkdid.provider,
       marketDataName = mkdid.name,
       originalGranularity=Granularity.Day,
-      type=MarketData.MarketDataTypeV2.MarketAssessment,
+      type=MarketData.MarketDataType.MarketAssessment,
       originalTimezone="CET",
       tags={
         'TestSDKPython': ['PythonValue2']
@@ -1721,7 +1721,7 @@ mkd = MarketData.MarketDataEntityInput(
       providerName = mkdid.provider,
       marketDataName = mkdid.name,
       originalGranularity=Granularity.Day,
-      type=MarketData.MarketDataTypeV2.BidAsk,
+      type=MarketData.MarketDataType.BidAsk,
       originalTimezone="CET",
       tags={
         'TestSDKPython': ['PythonValue2']
@@ -1787,7 +1787,7 @@ mkd = MarketData.MarketDataEntityInput(
       providerName = mkdid.provider,
       marketDataName = mkdid.name,
       originalGranularity=Granularity.Day,
-      type=MarketData.MarketDataTypeV2.Auction,
+      type=MarketData.MarketDataType.Auction,
       originalTimezone="CET",
       tags={
         'TestSDKPython': ['PythonValue2']

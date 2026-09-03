@@ -24,7 +24,7 @@ from Artesian.MarketData import (
     MarketDataEntityOutputEnriched,
     MarketDataCurveSummaryDto,
     MarketDataService,
-    MarketDataTypeV2,
+    MarketDataType,
     PagedResultCurveRangeEntity,
     UnitOfMeasure,
     MarketDataIdentifier,
@@ -99,7 +99,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             providerName="PROVIDER",
             marketDataName="MARKETDATA",
             originalGranularity=Granularity.Day,
-            type=MarketDataTypeV2.ActualTimeSerie,
+            type=MarketDataType.ActualTimeSerie,
             originalTimezone="CET",
             tags={"PythonTag": ["PythonTagValue1", "PythonTagValue2"]},
             derivedCfg=derivedCfg,
@@ -109,7 +109,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             providerName="PROVIDER",
             marketDataName="MARKETDATA",
             originalGranularity=Granularity.Day,
-            type=MarketDataTypeV2.ActualTimeSerie,
+            type=MarketDataType.ActualTimeSerie,
             originalTimezone="CET",
             tags={"PythonTag": ["PythonTagValue1", "PythonTagValue2"]},
             derivedCfg=derivedCfg,
@@ -138,7 +138,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             providerName="PROVIDER",
             marketDataName="MARKETDATA",
             originalGranularity=Granularity.Day,
-            type=MarketDataTypeV2.ActualTimeSerie,
+            type=MarketDataType.ActualTimeSerie,
             originalTimezone="CET",
             tags={"PythonTag": ["PythonTagValue1", "PythonTagValue2"]},
             derivedCfg=derivedCfg,
@@ -148,7 +148,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             providerName="PROVIDER",
             marketDataName="MARKETDATA",
             originalGranularity=Granularity.Day,
-            type=MarketDataTypeV2.ActualTimeSerie,
+            type=MarketDataType.ActualTimeSerie,
             originalTimezone="CET",
             derivedCfg=derivedCfgTransform
         )
@@ -157,7 +157,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             providerName="PROVIDER",
             marketDataName="MARKETDATA",
             originalGranularity=Granularity.Day,
-            type=MarketDataTypeV2.ActualTimeSerie,
+            type=MarketDataType.ActualTimeSerie,
             originalTimezone="CET",
             derivedCfg=derivedCfgTransform
         )
@@ -195,7 +195,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             self.__checkConversionResult
         )
         self.__dataQualityRuleConfig = ActualCompletenessAndFreshnessConfigDto(
-            marketDataType=MarketDataTypeV2.ActualTimeSerie,
+            marketDataType=MarketDataType.ActualTimeSerie,
             scheduleConfig=ScheduleConfigDto(
                 scheduleDefinition=CronScheduleDefinitionDto(
                     cronExpression="0 0 * * *",
@@ -278,7 +278,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
                         datetime(2020, 1, 1, 1): 42.0,
                         datetime(2020, 1, 2, 2): 43.0,
                     },
-                    type=MarketDataTypeV2.ActualTimeSerie
+                    type=MarketDataType.ActualTimeSerie
                 ),
             valid=True
         )
@@ -580,7 +580,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
                         datetime(2020, 1, 1, 1): 42.0,
                         datetime(2020, 1, 2, 2): 43.0,
                     },
-                    type=MarketDataTypeV2.ActualTimeSerie
+                    type=MarketDataType.ActualTimeSerie
                 ),
             transform="SELECT Time, (Value + 1) as Value FROM $table"
         )

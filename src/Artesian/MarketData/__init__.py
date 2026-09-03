@@ -2,7 +2,7 @@ from ._Enum.DerivedAlgorithm import DerivedAlgorithm
 from .MarketDataService import MarketDataService
 from ._Enum.AggregationRule import AggregationRule
 from ..Granularity import Granularity
-from ._Enum.MarketDataTypeV2 import MarketDataTypeV2
+from ._Enum.MarketDataType import MarketDataType
 from ._Enum.ArtesianMetadataFacetType import ArtesianMetadataFacetType
 from ._Enum.AlertType import AlertType
 from ._Enum.CheckAggregatedStatus import CheckAggregatedStatus
@@ -80,7 +80,7 @@ __all__ = [
     MarketDataService.__name__,
     AggregationRule.__name__,
     Granularity.__name__,
-    MarketDataTypeV2.__name__,
+    MarketDataType.__name__,
     AuctionBids.__name__,
     AuctionBidValue.__name__,
     BidAskValue.__name__,

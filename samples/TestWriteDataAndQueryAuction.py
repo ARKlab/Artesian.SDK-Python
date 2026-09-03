@@ -12,7 +12,7 @@ auction = Artesian.MarketData.MarketDataEntityInput(
     "PythonSDK",
     "TestAuctionWriteAndRead",
     Granularity.Hour,
-    MarketData.MarketDataTypeV2.Auction,
+    MarketData.MarketDataType.Auction,
     "CET",
     tags={"TestSDKPython": ["PythonValue2"]},
 )

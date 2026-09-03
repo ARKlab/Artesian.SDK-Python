@@ -6,7 +6,7 @@ from Artesian.MarketData._Dto.CronScheduleDefinitionDto import CronScheduleDefin
 from Artesian.MarketData._Dto.DataQualityRuleDtoInput import DataQualityRuleDtoInput
 from Artesian.MarketData._Dto.RecordValidationConfigDto import RecordValidationConfigDto
 from Artesian.MarketData._Dto.ScheduleConfigDto import ScheduleConfigDto
-from Artesian.MarketData._Enum.MarketDataTypeV2 import MarketDataTypeV2
+from Artesian.MarketData._Enum.MarketDataType import MarketDataType
 from Artesian.MarketData._Enum.RuleType import RuleType
 
 # Run only manually with proper Artesian URI and ApiKey set.
@@ -17,7 +17,7 @@ ruleCreated = None
 
 try:
     completenessCfg = ActualCompletenessAndFreshnessConfigDto(
-        marketDataType=MarketDataTypeV2.ActualTimeSerie,
+        marketDataType=MarketDataType.ActualTimeSerie,
         scheduleConfig=ScheduleConfigDto(
             scheduleDefinition=CronScheduleDefinitionDto(
                 cronExpression="0 0 * * *",
@@ -48,7 +48,7 @@ try:
 
     # Update rule
     updatedCompletenessCfg = ActualCompletenessAndFreshnessConfigDto(
-        marketDataType=MarketDataTypeV2.ActualTimeSerie,
+        marketDataType=MarketDataType.ActualTimeSerie,
         scheduleConfig=ScheduleConfigDto(
             scheduleDefinition=CronScheduleDefinitionDto(
                 cronExpression="0 0 * * *",

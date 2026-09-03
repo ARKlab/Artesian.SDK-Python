@@ -3,7 +3,7 @@ import Artesian
 from Artesian.Granularity import Granularity
 from Artesian.MarketData._Dto.DerivedCfg import DerivedCfg
 from Artesian.MarketData._Enum.DerivedAlgorithm import DerivedAlgorithm
-from Artesian.MarketData._Enum.MarketDataTypeV2 import MarketDataTypeV2
+from Artesian.MarketData._Enum.MarketDataType import MarketDataType
 import time
 
 cfg = Artesian.ArtesianConfig("https://arkive.artesian.cloud/tenantName/", "APIKey")
@@ -15,7 +15,7 @@ actualCurveOne = Artesian.MarketData.MarketDataEntityInput(
     "TestProviderNameDerivedTransform",
     "CurveOne",
     Granularity.Hour,
-    MarketDataTypeV2.ActualTimeSerie,
+    MarketDataType.ActualTimeSerie,
     "UTC"
 )
 
@@ -53,7 +53,7 @@ actualCurveDerived = Artesian.MarketData.MarketDataEntityInput(
     "TestProviderNameDerivedTransform",
     "CurveDerived",
     Granularity.Hour,
-    MarketDataTypeV2.ActualTimeSerie,
+    MarketDataType.ActualTimeSerie,
     "UTC",
     derivedCfg=derivedCfg,
 )

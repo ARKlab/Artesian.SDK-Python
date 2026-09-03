@@ -7,7 +7,7 @@ from Artesian.MarketData import (
     AggregationRule,
     MarketDataEntityInput,
     MarketDataIdentifier,
-    MarketDataTypeV2,
+    MarketDataType,
     OverrideKind,
     UpsertCurveDataOverride,
     UpsertData,
@@ -31,7 +31,7 @@ try:
     marketDataInput = MarketDataEntityInput(
         providerName=providerName,
         marketDataName=marketDataName,
-        type=MarketDataTypeV2.ActualTimeSerie,
+        type=MarketDataType.ActualTimeSerie,
         originalGranularity=Granularity.Day,
         originalTimezone="UTC",
         aggregationRule=AggregationRule.Undefined,

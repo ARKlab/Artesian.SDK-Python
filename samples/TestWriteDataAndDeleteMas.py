@@ -12,7 +12,7 @@ marketAssessment = Artesian.MarketData.MarketDataEntityInput(
     "PythonSDK",
     "TestMasWriteAndDelete",
     Granularity.Hour,
-    MarketData.MarketDataTypeV2.MarketAssessment,
+    MarketData.MarketDataType.MarketAssessment,
     "CET",
     tags={"TestSDKPython": ["PythonValue2"]},
 )

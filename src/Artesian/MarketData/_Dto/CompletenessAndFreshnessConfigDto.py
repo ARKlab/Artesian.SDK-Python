@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 
-from .._Enum.MarketDataTypeV2 import MarketDataTypeV2
+from .._Enum.MarketDataType import MarketDataType
 from .._Enum.RuleType import RuleType
 from .DataQualityRuleConfigDto import DataQualityRuleConfigDto
 from .RecordValidationConfigDto import RecordValidationConfigDto
@@ -16,7 +16,7 @@ class CompletenessAndFreshnessConfigDto(DataQualityRuleConfigDto):
     time window and arrive within an acceptable delay.
     """
 
-    marketDataType: MarketDataTypeV2
+    marketDataType: MarketDataType
     scheduleConfig: ScheduleConfigDto
     recordValidationConfig: RecordValidationConfigDto
     type: RuleType = field(init=False, default=RuleType.CompletenessAndFreshness)

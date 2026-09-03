@@ -145,7 +145,7 @@ def __dataQualityRuleConfigDeserializer(
     from Artesian.MarketData._Dto.VersionedCompletenessAndFreshnessConfigDto import (
         VersionedCompletenessAndFreshnessConfigDto,
     )
-    from Artesian.MarketData._Enum.MarketDataTypeV2 import MarketDataTypeV2
+    from Artesian.MarketData._Enum.MarketDataType import MarketDataType
     from Artesian.MarketData._Enum.OutlierModel import OutlierModel
     from Artesian.MarketData._Enum.PeriodPrecision import PeriodPrecision
     from Artesian.MarketData._Enum.RuleType import RuleType
@@ -171,7 +171,7 @@ def __dataQualityRuleConfigDeserializer(
 
     if "MarketDataType" not in obj:
         return DataQualityRuleConfigDto(type=ruleType)
-    marketDataType = __enumValue(MarketDataTypeV2, obj["MarketDataType"])
+    marketDataType = __enumValue(MarketDataType, obj["MarketDataType"])
     scheduleObj = obj["ScheduleConfig"]
     scheduleConfig = ScheduleConfigDto(
         scheduleDefinition=__scheduleDefinitionDeserializer(
@@ -193,9 +193,9 @@ def __dataQualityRuleConfigDeserializer(
         "scheduleConfig": scheduleConfig,
         "recordValidationConfig": recordValidationConfig,
     }
-    if marketDataType is MarketDataTypeV2.ActualTimeSerie:
+    if marketDataType is MarketDataType.ActualTimeSerie:
         return ActualCompletenessAndFreshnessConfigDto(**commonValues)
-    if marketDataType is MarketDataTypeV2.VersionedTimeSerie:
+    if marketDataType is MarketDataType.VersionedTimeSerie:
         versionPrecision = obj.get("VersionPrecision")
         return VersionedCompletenessAndFreshnessConfigDto(
             **commonValues,
