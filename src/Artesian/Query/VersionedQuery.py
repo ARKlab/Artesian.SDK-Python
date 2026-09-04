@@ -418,6 +418,7 @@ class VersionedQuery(_Query):
                 url = url + "&unitOfMeasure=" + qp.unitOfMeasure
             if not (qp.aggregationRule is None):
                 url = url + "&aggregationRule=" + str(qp.aggregationRule)
+            url = url + super()._buildOverrideQueryParams(qp)
             urls.append(url)
         return urls
 

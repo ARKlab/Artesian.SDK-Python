@@ -404,8 +404,621 @@ searchText = "Riconsegnato_"
 filters = {"ProviderName": ["SNAM", "France"]}
 sorts=["MarketDataId asc"]
 doNotLoadAdditionalInfo=True
-res = mds.searchFacet(page, pageSize, searchText, filters, sorts, doNotLoadAdditionalInfo)
+res = mds.searchFacet(
+  page,
+  pageSize,
+  searchText,
+  filters,
+  sorts,
+  doNotLoadAdditionalInfo,
+  includeCurveSummary=True,
+  includeTimeTransform=True,
+  includeDataQuality=True,
+  skipOverrides=True,
+)
 ```
+
+## Data Quality Rules
+
+Artesian supports Data Quality Rules to validate market data for completeness,
+freshness, and outlier detection. Rules are reusable configurations that can be
+assigned to one or more Market Data entities through rule assignments.
+
+The examples below use the synchronous `MarketDataService` methods for brevity.
+Async counterparts with the same name plus the `Async` suffix are also
+available.
+
+### Data Quality Rule Types
+
+Two types of rules are supported:
+
+<table>
+  <tr><th>Rule Type</th><th>Description</th></tr>
+  <tr><td>Completeness and Freshness</td><td>Validates that expected data records are present within the defined time window and arrive within an acceptable delay</td></tr>
+  <tr><td>Outlier Detection</td><td>Identifies anomalous data points using statistical models</td></tr>
+</table>
+
+### MarketDataService Configuration
+
+Create an instance of `MarketDataService` to manage Data Quality Rules:
+
+```Python
+from Artesian import ArtesianConfig
+from Artesian.MarketData import MarketDataService
+
+cfg = ArtesianConfig("https://arkive.artesian.cloud/{tenantName}/", "{api-key}")
+marketDataService = MarketDataService(cfg)
+```
+
+### Create a Data Quality Rule
+
+#### Completeness and Freshness Rule for Actual Time Series
+
+```Python
+from Artesian.MarketData import (
+  ActualCompletenessAndFreshnessConfigDto,
+  CronScheduleDefinitionDto,
+  DataQualityRuleDtoInput,
+  MarketDataType,
+  RecordValidationConfigDto,
+  RuleType,
+  ScheduleConfigDto,
+)
+
+actualCompletenessRule = DataQualityRuleDtoInput(
+  name="Daily weather station completeness",
+  type=RuleType.CompletenessAndFreshness,
+  configuration=ActualCompletenessAndFreshnessConfigDto(
+    marketDataType=MarketDataType.ActualTimeSerie,
+    scheduleConfig=ScheduleConfigDto(
+      scheduleDefinition=CronScheduleDefinitionDto(
+        cronExpression="0 9 * * *",
+        timeZone="UTC",
+      ),
+      maxDelay="PT2H",
+    ),
+    recordValidationConfig=RecordValidationConfigDto(
+      recordRangeFrom="-P1D",
+      recordRangeTo="P0D",
+    ),
+  ),
+  version=0,
+)
+
+createdRule = marketDataService.registerDataQualityRule(actualCompletenessRule)
+print(f"Created rule with ID: {createdRule.id}")
+```
+
+#### Completeness and Freshness Rule for Versioned Time Series
+
+```Python
+from Artesian.MarketData import (
+  PeriodPrecision,
+  VersionedCompletenessAndFreshnessConfigDto,
+)
+
+versionedCompletenessRule = DataQualityRuleDtoInput(
+  name="Hourly forecast version check",
+  type=RuleType.CompletenessAndFreshness,
+  configuration=VersionedCompletenessAndFreshnessConfigDto(
+    marketDataType=MarketDataType.VersionedTimeSerie,
+    scheduleConfig=ScheduleConfigDto(
+      scheduleDefinition=CronScheduleDefinitionDto(
+        cronExpression="15 * * * *",
+        timeZone="UTC",
+      ),
+      maxDelay="PT30M",
+    ),
+    recordValidationConfig=RecordValidationConfigDto(
+      recordRangeFrom="P0D",
+      recordRangeTo="P1D",
+    ),
+    versionToleranceFrom="-PT1H",
+    versionToleranceTo="PT1H",
+    versionPrecision=PeriodPrecision.Hour,
+  ),
+  version=0,
+)
+
+createdVersionedRule = marketDataService.registerDataQualityRule(
+  versionedCompletenessRule
+)
+```
+
+#### Outlier Detection Rule
+
+```Python
+from Artesian.MarketData import (
+  OutlierAbsoluteBoundConfigDto,
+  OutlierConfigDto,
+)
+
+outlierRule = DataQualityRuleDtoInput(
+  name="Temperature outlier detection",
+  type=RuleType.Outlier,
+  configuration=OutlierConfigDto(
+    model=OutlierAbsoluteBoundConfigDto(
+      lowerBound=-10.0,
+      upperBound=45.0,
+    )
+  ),
+  version=0,
+)
+
+createdOutlierRule = marketDataService.registerDataQualityRule(outlierRule)
+```
+
+### Read Data Quality Rules
+
+#### Get a Single Rule by ID
+
+```Python
+rule = marketDataService.readDataQualityRuleById(123)
+print(f"Rule Name: {rule.name}, Type: {rule.type}")
+```
+
+#### Get All Rules with Pagination and Filters
+
+```Python
+rules = marketDataService.readDataQualityRule(
+  page=1,
+  pageSize=20,
+  type=RuleType.CompletenessAndFreshness,
+  name="weather",
+  sort=["Name asc"],
+)
+
+print(f"Total pages: {rules.count}")
+for rule in rules.data:
+  print(f"- {rule.name} (ID: {rule.id})")
+```
+
+### Update a Data Quality Rule
+
+```Python
+existingRule = marketDataService.readDataQualityRuleById(123)
+
+existingRule.name = "Updated rule name"
+if isinstance(
+  existingRule.configuration,
+  ActualCompletenessAndFreshnessConfigDto,
+):
+  existingRule.configuration.scheduleConfig.maxDelay = "PT3H"
+
+updatedRule = marketDataService.updateDataQualityRule(
+  id=existingRule.id,
+  entity=existingRule,
+)
+```
+
+### Delete a Data Quality Rule
+
+```Python
+marketDataService.deleteDataQualityRule(123)
+```
+
+### Data Quality Rule Assignments
+
+Once you have created Data Quality Rules, you can assign them to Market Data
+entities to start validating data.
+
+#### Create an Assignment
+
+```Python
+from Artesian.MarketData._Dto.MarketDataQualityRuleAssignmentDto import (
+  MarketDataQualityRuleAssignmentDtoInput,
+)
+
+assignment = MarketDataQualityRuleAssignmentDtoInput(
+  marketDataId=100000001,
+  dataQualityRuleId=123,
+)
+
+createdAssignment = marketDataService.registerDataQualityRuleAssignment(
+  entity=assignment,
+  initializationLookbackPeriod="P30D",
+)
+
+print(f"Assignment ID: {createdAssignment.id}")
+```
+
+#### Read Assignments
+
+Get a single assignment:
+
+```Python
+assignment = marketDataService.readDataQualityRuleAssignmentById(456)
+print(f"MarketData: {assignment.marketData.marketDataName if assignment.marketData else None}")
+print(f"Rule: {assignment.dataQualityRule.name if assignment.dataQualityRule else None}")
+```
+
+Get all assignments with filters:
+
+```Python
+assignments = marketDataService.readDataQualityRuleAssignment(
+  page=1,
+  pageSize=20,
+  marketDataId=100000001,
+  ruleId=123,
+  ruleName="weather",
+  sort=["Id desc"],
+)
+
+for assignment in assignments.data:
+  print(
+    f"Assignment {assignment.id}: "
+    f"MD {assignment.marketDataId} -> Rule {assignment.dataQualityRuleId}"
+  )
+```
+
+#### Update an Assignment
+
+Re-configure the lookback period to re-evaluate the data:
+
+```Python
+assignment = marketDataService.readDataQualityRuleAssignmentById(456)
+
+updatedAssignment = marketDataService.updateDataQualityRuleAssignment(
+  id=assignment.id,
+  initializationLookbackPeriod="P60D",
+  etag=assignment.eTag,
+)
+```
+
+#### Delete an Assignment
+
+```Python
+marketDataService.deleteDataQualityRuleAssignment(456)
+```
+
+#### Read Assignment Event Feed
+
+Retrieve raw events for a specific assignment (max 8-day lookback):
+
+```Python
+from datetime import datetime, timezone
+
+events = marketDataService.readDataQualityRuleAssignmentEventsFeed(
+  id=456,
+  afterTimestamp=datetime(2024, 1, 15, 0, 0, tzinfo=timezone.utc),
+)
+
+print(f"Retrieved {len(events)} events")
+for event in events:
+  print(f"Event at {event.timestamp}: {event.newStatus}")
+```
+
+### Data Quality Rule Status
+
+Rules expose aggregated check status through the `aggregatedStatus` property.
+Assignments expose it via `assignment.dataQualityRule.aggregatedStatus` when `dataQualityRule` is populated.
+
+<table>
+  <tr><th>Status</th><th>Description</th></tr>
+  <tr><td>OK</td><td>All checks passed</td></tr>
+  <tr><td>KO</td><td>One or more checks failed</td></tr>
+</table>
+
+Check the status after creating or reading rules:
+
+```Python
+from Artesian.MarketData._Enum.CheckAggregatedStatus import CheckAggregatedStatus
+
+rule = marketDataService.readDataQualityRuleById(123)
+if rule.aggregatedStatus == CheckAggregatedStatus.KO:
+  print(f"Rule {rule.name} has failing checks!")
+```
+
+### Data Quality Check Results
+
+Read compact check results for actual or versioned time series. Date ranges are
+end-exclusive and periods use ISO strings:
+
+```Python
+actualResults = marketDataService.getDataQualityCheckResultExtractTs(
+  granularity="Hour",
+  start="2024-01-01",
+  end="2024-02-01",
+  timeZone="Europe/Rome",
+  assignmentIds=[456],
+)
+
+versionedResults = marketDataService.getDataQualityCheckResultExtractVts(
+  version="2024-02-01T10:00:00Z",
+  granularity="Day",
+  start="2024-01-01",
+  end="2024-02-01",
+  timeZone="UTC",
+  assignmentIds=[456],
+)
+```
+
+Retrieve paginated check summaries or the latest aggregated status by Market
+Data and rule:
+
+```Python
+from Artesian.MarketData import CheckAggregatedStatus
+
+summaries = marketDataService.getDataQualityCheckResultCheckSummary(
+  page=1,
+  pageSize=20,
+  marketDataIds=[100000001],
+  dqStatus=CheckAggregatedStatus.KO,
+  skipEmptyRanges=True,
+)
+
+marketDataStatuses = marketDataService.getMarketDataDqStatusSummary(
+  ruleId=123,
+  dqStatus=CheckAggregatedStatus.KO,
+  limit=20,
+)
+ruleStatuses = marketDataService.getDqRuleDqStatusSummary(
+  marketDataId=100000001,
+  limit=20,
+)
+```
+
+## Quality Notification Alerts
+
+Quality Notification Alerts send notifications when Data Quality events occur.
+An alert contains a trigger configuration, email notification recipients, and
+optimistic concurrency fields (`version` and `eTag`). Market Data assignments
+are managed separately by the Quality Notification Alert Assignment APIs.
+
+The examples below use the synchronous `MarketDataService` methods. Async
+counterparts with the same name plus the `Async` suffix are also available.
+
+### Create a Quality Notification Alert
+
+Use `OnEventTriggerConfigDto` for immediate notifications or
+`ScheduleTriggerConfigDto` for scheduled digests:
+
+```Python
+from Artesian.MarketData import (
+  MailNotificationDto,
+  OnEventTriggerConfigDto,
+  QualityNotificationAlertDtoInput,
+)
+
+alert = QualityNotificationAlertDtoInput(
+  name="Weather station quality alert",
+  triggerConfig=OnEventTriggerConfigDto(),
+  mailNotifications=[
+    MailNotificationDto(recipients=["quality-alerts@example.com"])
+  ],
+  version=0,
+)
+
+createdAlert = marketDataService.registerQualityNotificationAlert(alert)
+print(f"Created alert with ID: {createdAlert.id}")
+```
+
+For a complete end-to-end example, see
+[`samples/TestQualityNotificationAlert.py`](samples/TestQualityNotificationAlert.py).
+
+### Assign Market Data to a Quality Notification Alert
+
+An alert assignment binds an existing alert to a Market Data entity. Use
+`QualityNotificationAlertAssignmentDtoInput` for create operations and the
+output type for the enriched assignment returned by read operations:
+
+```Python
+from Artesian.MarketData._Dto.QualityNotificationAlertAssignmentDto import (
+  QualityNotificationAlertAssignmentDtoInput,
+)
+
+assignment = QualityNotificationAlertAssignmentDtoInput(
+  alertId=123,
+  marketDataId=100000001,
+)
+
+createdAssignment = marketDataService.registerQualityNotificationAlertAssignment(
+  assignment,
+)
+print(f"Created alert assignment with ID: {createdAssignment.id}")
+```
+
+Read an assignment by ID or retrieve a paginated list filtered by alert or
+Market Data:
+
+```Python
+assignment = marketDataService.readQualityNotificationAlertAssignmentById(456)
+print(f"Alert {assignment.alertId} monitors Market Data {assignment.marketDataId}")
+
+assignments = marketDataService.readQualityNotificationAlertAssignments(
+  page=1,
+  pageSize=20,
+  alertId=123,
+  marketDataId=100000001,
+  sort=["Id asc"],
+)
+
+for item in assignments.data:
+  print(f"- Assignment {item.id}: alert {item.alertId}, Market Data {item.marketDataId}")
+```
+
+Delete an assignment by its server-assigned ID:
+
+```Python
+marketDataService.deleteQualityNotificationAlertAssignment(456)
+```
+
+Async counterparts with the `Async` suffix are also available. For a complete
+sample that creates the Market Data entity, alert, and assignment and cleans
+them up, see
+[`samples/TestDataQualityNotificationAlertAssignement.py`](samples/TestDataQualityNotificationAlertAssignement.py).
+
+### Read Quality Notification Alerts
+
+Read a single alert by its server-assigned ID:
+
+```Python
+alert = marketDataService.readQualityNotificationAlertById(123)
+print(f"Alert: {alert.name}")
+```
+
+Read a paginated list with optional filters:
+
+```Python
+alerts = marketDataService.readQualityNotificationAlerts(
+  page=1,
+  pageSize=20,
+  name="weather",
+  marketDataId=100000001,
+  ruleIds=[12, 15],
+  sort=["Name asc"],
+)
+
+for alert in alerts.data:
+  print(f"- {alert.name} (ID: {alert.id})")
+```
+
+### Update a Quality Notification Alert
+
+Use the `version` and `eTag` returned by the server for optimistic
+concurrency:
+
+```Python
+existingAlert = marketDataService.readQualityNotificationAlertById(123)
+
+updatedAlert = QualityNotificationAlertDtoInput(
+  id=existingAlert.id,
+  name="Updated weather station alert",
+  triggerConfig=existingAlert.triggerConfig,
+  mailNotifications=existingAlert.mailNotifications or [],
+  version=existingAlert.version,
+  eTag=existingAlert.eTag,
+)
+
+marketDataService.updateQualityNotificationAlert(
+  id=existingAlert.id,
+  entity=updatedAlert,
+)
+```
+
+### Delete a Quality Notification Alert
+
+```Python
+marketDataService.deleteQualityNotificationAlert(123)
+```
+
+### Read Alert Schedule Occurrences
+
+For scheduled alerts, retrieve the most recent materialized schedule timestamps
+and the events materialized for a specific occurrence or for the latest one:
+
+```Python
+from datetime import datetime
+
+occurrences = marketDataService.readAlertScheduleList(
+  alertId=123,
+  lastN=10,
+)
+
+events = marketDataService.readAlertScheduleEvents(
+  alertId=123,
+  scheduleTime=datetime(2024, 1, 15, 10, 0),
+)
+
+latestEvents = marketDataService.readAlertScheduleLastEvents(alertId=123)
+print(f"Latest materialized events: {len(latestEvents.events)}")
+```
+
+### Market Data Overrides and Fallbacks
+
+The `MarketDataService` also supports writing corrections separately from the
+original Market Data. An override takes precedence over the original values
+for the affected range. A fallback is used while the original data is
+unavailable or does not pass the relevant Data Quality checks.
+
+Use `UpsertCurveDataOverride` to reuse the standard curve-data payload and
+provide the correction metadata. The payload supports Actual and Versioned
+time series, Market Assessment, Auction and BidAsk data.
+
+- `upsertCurveDataOverride` creates or updates an override and returns its metadata entries.
+- `readOverrideMetadata` reads paginated metadata, optionally filtered by kind.
+- `deleteOverrideData` deletes the data and metadata associated with an override.
+
+```Python
+from datetime import datetime, timezone
+
+from Artesian import ArtesianConfig
+from Artesian.MarketData import (
+  MarketDataIdentifier,
+  MarketDataService,
+  OverrideKind,
+  UpsertCurveDataOverride,
+)
+
+cfg = ArtesianConfig("https://arkive.artesian.cloud/tenantName/", "APIKey")
+marketDataService = MarketDataService(cfg)
+marketDataIdentifier = MarketDataIdentifier("TestProvider", "TestMarketData")
+
+overrideData = UpsertCurveDataOverride(
+  ID=marketDataIdentifier,
+  timezone="UTC",
+  downloadedAt=datetime.now(timezone.utc),
+  rows={
+    datetime(2025, 1, 1): 11.5,
+    datetime(2025, 1, 2): 12.5,
+  },
+  kind=OverrideKind.Override,
+  overrideId=None,
+  replaceExisting=True,
+  comment="Correction received from the data provider",
+)
+
+createdEntries = marketDataService.upsertCurveDataOverride(overrideData)
+
+metadata = marketDataService.readOverrideMetadata(
+  marketDataId=100000001,
+  kind=OverrideKind.Override,
+  page=1,
+  pageSize=10,
+)
+
+if createdEntries and createdEntries[0].id is not None:
+  marketDataService.deleteOverrideData(createdEntries[0].id)
+```
+
+Set `overrideId` to the metadata id of an existing correction when updating it. Set it
+to `None` to create a new correction. The `replaceExisting` flag controls how
+overlapping corrections of the same kind are handled.
+
+Each `OverrideMetadataEntry` describes the current state of a correction and
+includes its metadata id, Market Data id, kind, optional range, replacement
+flag, timestamps and comment. The metadata endpoint is paginated and accepts
+an optional `OverrideKind` filter.
+
+`OverrideKind` identifies how the correction is applied:
+
+- **`OverrideKind.Override`**: an explicit and persistent correction. Override values always take
+  precedence over the original Market Data values within the affected range. Use this value to
+  permanently correct invalid data or replace values supplied by the data provider.
+- **`OverrideKind.Fallback`**: an alternative value used only while the original data is unavailable
+  or does not pass the relevant Data Quality checks. When the original data becomes valid again, the
+  fallback is no longer used for the affected range.
+
+All time-series query builders support override controls. Both options default
+to `False` and are available for Actual, Versioned, Market Assessment, Auction,
+and BidAsk queries:
+
+```Python
+result = (
+  queryService.createActual()
+  .forMarketData([100000001])
+  .inAbsoluteDateRange("2024-01-01", "2024-02-01")
+  .inGranularity(Granularity.Hour)
+  .withSkipOverrides(False)
+  .withIncludeOverrideDetails(True)
+  .execute()
+)
+```
+
+| Option                             | Default | Description                                          |
+| ---------------------------------- | ------- | ---------------------------------------------------- |
+| `withSkipOverrides(bool)`          | `False` | Excludes overrides and fallbacks from query results. |
+| `withIncludeOverrideDetails(bool)` | `False` | Includes original, override, and fallback details.   |
 
 ## GME Public Offer
 
@@ -522,7 +1135,14 @@ mkd = MarketData.MarketDataEntityInput(
     UnitOfMeasure = CommonUnitOfMeasure.kW
   )
 
-registered = mkservice.readMarketDataRegistryByName(mkdid.provider, mkdid.name)
+registered = mkservice.readMarketDataRegistryByName(
+  mkdid.provider,
+  mkdid.name,
+  includeCurveSummary=True,
+  includeTimeTransform=True,
+  includeDataQuality=True,
+  skipOverrides=True,
+)
 if (registered is None):
   registered = mkservice.registerMarketData(mkd)
 ```
@@ -714,9 +1334,9 @@ Use the `DerivedTransformQueryValidation` to validate and execute a derived tran
 
 ```Python
 from Artesian.MarketData import MarketDataService
+from Artesian.MarketData import MarketDataType
 from Artesian.MarketData._Dto.DerivedTransformQueryValidation import DerivedTransformQueryValidation
 from Artesian.MarketData._Dto.TimeSerieData import TimeSerieData
-from Artesian import MarketDataType
 from datetime import datetime
 
 mds = MarketDataService(cfg)
@@ -814,7 +1434,14 @@ mkd = MarketData.MarketDataEntityInput(
             ),
   )
 
-registered = mkservice.readMarketDataRegistryByName(mkdid.provider, mkdid.name)
+registered = mkservice.readMarketDataRegistryByName(
+  mkdid.provider,
+  mkdid.name,
+  includeCurveSummary=True,
+  includeTimeTransform=True,
+  includeDataQuality=True,
+  skipOverrides=True,
+)
 if (registered is None):
   registered = mkservice.registerMarketData(mkd)
 
@@ -903,7 +1530,14 @@ mkd = MarketData.MarketDataEntityInput(
       }
   )
 
-registered = mkservice.readMarketDataRegistryByName(mkdid.provider, mkdid.name)
+registered = mkservice.readMarketDataRegistryByName(
+  mkdid.provider,
+  mkdid.name,
+  includeCurveSummary=True,
+  includeTimeTransform=True,
+  includeDataQuality=True,
+  skipOverrides=True,
+)
 if (registered is None):
   registered = mkservice.registerMarketData(mkd)
 
@@ -948,7 +1582,14 @@ mkd = MarketData.MarketDataEntityInput(
       }
   )
 
-registered = mkservice.readMarketDataRegistryByName(mkdid.provider, mkdid.name)
+registered = mkservice.readMarketDataRegistryByName(
+  mkdid.provider,
+  mkdid.name,
+  includeCurveSummary=True,
+  includeTimeTransform=True,
+  includeDataQuality=True,
+  skipOverrides=True,
+)
 if (registered is None):
   registered = mkservice.registerMarketData(mkd)
 
@@ -1020,7 +1661,14 @@ mkd = MarketData.MarketDataEntityInput(
       }
   )
 
-registered = mkservice.readMarketDataRegistryByName(mkdid.provider, mkdid.name)
+registered = mkservice.readMarketDataRegistryByName(
+  mkdid.provider,
+  mkdid.name,
+  includeCurveSummary=True,
+  includeTimeTransform=True,
+  includeDataQuality=True,
+  skipOverrides=True,
+)
 if (registered is None):
   registered = mkservice.registerMarketData(mkd)
 
@@ -1080,7 +1728,14 @@ mkd = MarketData.MarketDataEntityInput(
       }
   )
 
-registered = mkservice.readMarketDataRegistryByName(mkdid.provider, mkdid.name)
+registered = mkservice.readMarketDataRegistryByName(
+  mkdid.provider,
+  mkdid.name,
+  includeCurveSummary=True,
+  includeTimeTransform=True,
+  includeDataQuality=True,
+  skipOverrides=True,
+)
 if (registered is None):
   registered = mkservice.registerMarketData(mkd)
 
@@ -1139,7 +1794,14 @@ mkd = MarketData.MarketDataEntityInput(
       }
   )
 
-registered = mkservice.readMarketDataRegistryByName(mkdid.provider, mkdid.name)
+registered = mkservice.readMarketDataRegistryByName(
+  mkdid.provider,
+  mkdid.name,
+  includeCurveSummary=True,
+  includeTimeTransform=True,
+  includeDataQuality=True,
+  skipOverrides=True,
+)
 if (registered is None):
   registered = mkservice.registerMarketData(mkd)
 
