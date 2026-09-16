@@ -22,6 +22,7 @@ def __artesianDatetimeSerializer(obj: datetime, **kwargs: Any) -> str:
     ret = obj.isoformat(timespec="seconds")
     return ret
 
+
 def __artesianDatetimeDeserializer(obj: str, *args: Any, **kwargs: Any) -> datetime:
     return parser.isoparse(obj)
 
