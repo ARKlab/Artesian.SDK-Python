@@ -70,7 +70,8 @@ class MarketDataEntityInput:
             self.derivedCfg is not None
             and self.derivedCfg.derivedAlgorithm in {
                 DerivedAlgorithm.Coalesce,
-                DerivedAlgorithm.Sum
+                DerivedAlgorithm.Sum,
+                DerivedAlgorithm.Transform
                 }
             and self.type is not MarketDataType.ActualTimeSerie
         ):
@@ -87,4 +88,27 @@ class MarketDataEntityInput:
             raise Exception(
                 f"DerivedCfg with {self.derivedCfg.derivedAlgorithm} algorithm "
                 "must be set to MarketData of type Versioned only."
+            )
+
+        if (
+            self.derivedCfg is not None
+            and self.derivedCfg.derivedAlgorithm is DerivedAlgorithm.Transform
+            and self.derivedCfg.transform is None
+        ):
+            raise Exception(
+                f"DerivedCfg with {self.derivedCfg.derivedAlgorithm} algorithm "
+                "must have transform set."
+            )
+
+        if (
+            self.derivedCfg is not None
+            and self.derivedCfg.derivedAlgorithm is DerivedAlgorithm.Transform
+            and (
+                self.derivedCfg.orderedReferencedMarketDataIds is None
+                or len(self.derivedCfg.orderedReferencedMarketDataIds) != 1
+            )
+        ):
+            raise Exception(
+                f"DerivedCfg with {self.derivedCfg.derivedAlgorithm} algorithm "
+                "must have exactly one orderedReferencedMarketDataIds."
             )
