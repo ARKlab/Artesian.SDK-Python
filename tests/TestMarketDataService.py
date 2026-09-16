@@ -1,7 +1,11 @@
 from Artesian import ArtesianConfig
 import responses
 import unittest
+from Artesian.MarketData._Dto.DerivedTransformQueryValidation import DerivedTransformQueryValidation
+from Artesian.MarketData._Dto.DerivedTransformQueryValidationResponse import DerivedTransformQueryValidationResponse
+from Artesian.MarketData._Dto.TimeSerieData import TimeSerieData
 from Artesian._ClientsExecutor.ArtesianJsonSerializer import artesianJsonSerialize
+from datetime import datetime
 from Artesian.MarketData import *
 
 cfg = ArtesianConfig("https://baseurl.com", "APIKey")
@@ -16,6 +20,13 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
                         version=1,
                         derivedAlgorithm=DerivedAlgorithm.Coalesce,
                         orderedReferencedMarketDataIds=curveIds,
+                    )
+        
+        derivedCfgTransform = DerivedCfg(
+                        version=1,
+                        derivedAlgorithm=DerivedAlgorithm.Transform,
+                        orderedReferencedMarketDataIds=[1000],
+                        transform="SELECT Time, (Value + 1) as Value FROM $table",
                     )
         
         self.__sampleOutput = MarketDataEntityOutput(
@@ -38,6 +49,23 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             tags={"PythonTag": ["PythonTagValue1", "PythonTagValue2"]},
             derivedCfg=derivedCfg,
             unitOfMeasure=UnitOfMeasure(value=CommonUnitOfMeasure.MW)
+        )
+        self.__sampleOutputTransform = MarketDataEntityOutput(
+            providerName="PROVIDER",
+            marketDataName="MARKETDATA",
+            originalGranularity=Granularity.Day,
+            type=MarketDataType.ActualTimeSerie,
+            originalTimezone="CET",
+            derivedCfg=derivedCfgTransform
+        )
+        self.__serializedOutputTransform = artesianJsonSerialize(self.__sampleOutputTransform)
+        self.__sampleInputTransform = MarketDataEntityInput(
+            providerName="PROVIDER",
+            marketDataName="MARKETDATA",
+            originalGranularity=Granularity.Day,
+            type=MarketDataType.ActualTimeSerie,
+            originalTimezone="CET",
+            derivedCfg=derivedCfgTransform
         )
         self.maxDiff = None
         self.__baseurl = "https://baseurl.com/v2.1"
@@ -71,6 +99,19 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
         )
         self.__checkConversionResultSerializedOutput = artesianJsonSerialize(
             self.__checkConversionResult
+        )
+        self.__derivedTransformQueryValidationResponse = DerivedTransformQueryValidationResponse(
+            data=TimeSerieData(
+                    rows={
+                        datetime(2020, 1, 1, 1): 42.0,
+                        datetime(2020, 1, 2, 2): 43.0,
+                    },
+                    type=MarketDataType.ActualTimeSerie
+                ),
+            valid=True
+        )
+        self.__derivedTransformQueryValidationResponseSerializedOutput = artesianJsonSerialize(
+            self.__derivedTransformQueryValidationResponse
         )
 
         return super().setUp()
@@ -111,6 +152,37 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             output = await self.__service.registerMarketDataAsync(self.__sampleInput)
 
             self.assertEqual(output, self.__sampleOutput)
+
+    async def test_registerMarketDataTransform(self):
+        expectedJson = {
+            "MarketDataId": 0,
+            "ProviderName": "PROVIDER",
+            "MarketDataName": "MARKETDATA",
+            "OriginalGranularity": "Day",
+            "Type": "ActualTimeSerie",
+            "OriginalTimezone": "CET",
+            "AggregationRule": "Undefined",
+            "DerivedCfg":
+            {
+                "DerivedAlgorithm": "Transform",
+                "Version": 1,
+                "OrderedReferencedMarketDataIds": [1000],
+                "Transform": "SELECT Time, (Value + 1) as Value FROM $table"
+            }
+        }
+
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                "POST",
+                self.__baseurl + "/marketdata/entity",
+                match=[responses.matchers.json_params_matcher(expectedJson)],
+                json=self.__serializedOutputTransform,
+                status=200,
+            )
+
+            output = await self.__service.registerMarketDataAsync(self.__sampleInputTransform)
+
+            self.assertEqual(output, self.__sampleOutputTransform)
 
     async def test_readMarketDataRegistryByNameAsync(self):
         with responses.RequestsMock() as rsps:
@@ -237,6 +309,43 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
                 params["targetUnitOfMeasure"],
             )
             self.assertEqual(output, self.__checkConversionResult)
+
+    async def test_derivedTransformQueryValidationAsync(self):
+        expectedJson = {
+            "Data": {
+                "Rows": [
+                    {"Key": "2020-01-01T01:00:00.000000", "Value": 42.0},
+                    {"Key": "2020-01-02T02:00:00.000000", "Value": 43.0},
+                ],
+                "Type": "ActualTimeSerie"
+            },
+            "Transform": "SELECT Time, (Value + 1) as Value FROM $table",
+        }
+        derivedValidation = DerivedTransformQueryValidation(
+            data=TimeSerieData(
+                    rows={
+                        datetime(2020, 1, 1, 1): 42.0,
+                        datetime(2020, 1, 2, 2): 43.0,
+                    },
+                    type=MarketDataType.ActualTimeSerie
+                ),
+            transform="SELECT Time, (Value + 1) as Value FROM $table"
+        )
+        ser = artesianJsonSerialize(derivedValidation)
+        self.assertEqual(ser, expectedJson)
+
+        with responses.RequestsMock() as rsps:
+            rsps.add(
+                "POST",
+                self.__baseurl + "/utils/derivedTransform/queryValidation",
+                match=[responses.matchers.json_params_matcher(expectedJson)],
+                json=self.__derivedTransformQueryValidationResponseSerializedOutput,
+                status=200,
+            )
+
+            output = await self.__service.derivedTransformQueryValidationAsync(derivedValidation)
+
+            self.assertEqual(output, self.__derivedTransformQueryValidationResponse)
 
     async def test_searchFacetAsync(self):
         with responses.RequestsMock() as rsps:
