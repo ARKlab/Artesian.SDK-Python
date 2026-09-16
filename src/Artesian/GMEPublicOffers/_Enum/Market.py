@@ -25,7 +25,3 @@ class Market(Enum):
     MIXBID = 70
     AFRR = 100
     AFRE = 200
-    GMP_ASTA = 230
-    GMP_Cont = 234
-    MI_Cont = 235
-    MGS = 240

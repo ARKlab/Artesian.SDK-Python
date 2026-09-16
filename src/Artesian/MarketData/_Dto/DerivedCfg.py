@@ -9,7 +9,7 @@ class DerivedCfg:
     Class for the Derived Configuration.
 
     Attributes:
-        derivedAlgorithm: the derived configuration algorithm (MUV, Coalesce, Sum, Transform)
+        derivedAlgorithm: the derived configuration algorithm (MUV, Coalesce, Sum)
         version: the derived configuration version
         orderedReferencedMarketDataIds: the ordered reference MarketData Ids
         used in the computation
@@ -19,4 +19,3 @@ class DerivedCfg:
     derivedAlgorithm: DerivedAlgorithm
     version: int
     orderedReferencedMarketDataIds: Optional[List[int]]
-    transform: Optional[str] = None
