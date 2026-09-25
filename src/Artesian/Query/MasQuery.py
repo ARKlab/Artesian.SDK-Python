@@ -205,7 +205,7 @@ class MasQuery(_Query[MasQueryParameters]):
         self._queryParameters.fill = _FillCustomMasStrategy(**val)
         return self
 
-    def execute(self: MasQuery) -> list:
+    def execute(self: MasQuery) -> list[object]:
         """
         Execute the Query.
 
@@ -215,7 +215,7 @@ class MasQuery(_Query[MasQueryParameters]):
         urls = self.__buildRequest()
         return super()._exec(urls)
 
-    async def executeAsync(self: MasQuery) -> list:
+    async def executeAsync(self: MasQuery) -> list[object]:
         """
         Execute Async Query.
 

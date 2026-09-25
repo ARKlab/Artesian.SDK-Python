@@ -115,7 +115,7 @@ class AuctionQuery(_Query[AuctionQueryParameters]):
         super()._inRelativePeriod(extractionPeriod)
         return self
 
-    def execute(self: AuctionQuery) -> list:
+    def execute(self: AuctionQuery) -> list[object]:
         """
         Execute the Query.
 
@@ -124,7 +124,7 @@ class AuctionQuery(_Query[AuctionQueryParameters]):
         urls = self.__buildRequest()
         return super()._exec(urls)
 
-    async def executeAsync(self: AuctionQuery) -> list:
+    async def executeAsync(self: AuctionQuery) -> list[object]:
         """
         Execute Async Query.
 

@@ -1,10 +1,19 @@
 from Artesian import ArtesianConfig
 from Artesian.MarketData import Granularity
 from Artesian.MarketData import CommonUnitOfMeasure
-from Artesian.Query import QueryService
+from Artesian.Query import (
+    ActualQuery,
+    AuctionQuery,
+    BidAskQuery,
+    MasQuery,
+    QueryService,
+    VersionedQuery,
+)
+from Artesian.Query._Query import _Query
 from Artesian.MarketData import AggregationRule
 from . import helpers
 import unittest
+from typing import get_type_hints
 
 cfg = ArtesianConfig("https://arkive.artesian.cloud/tenantName/", "APIKey")
 
@@ -12,6 +21,22 @@ qs = QueryService(cfg)
 
 
 class TestActual(unittest.TestCase):
+    def test_execution_return_type_contracts(self):
+        for query_type, method in (
+            (ActualQuery, "execute"),
+            (AuctionQuery, "execute"),
+            (BidAskQuery, "execute"),
+            (MasQuery, "execute"),
+            (VersionedQuery, "execute"),
+            (_Query, "_exec"),
+        ):
+            for name in (method, method + "Async"):
+                with self.subTest(query=query_type.__name__, method=name):
+                    self.assertEqual(
+                        get_type_hints(getattr(query_type, name))["return"],
+                        list[object],
+                    )
+
     @helpers.TrackRequests
     def test_Null_Fill(self, requests):
         url = (

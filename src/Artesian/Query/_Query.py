@@ -158,12 +158,12 @@ class _Query(Generic[_QueryParametersT]):
             raise Exception("Not supported RangeType")
         return subPath
 
-    def _exec(self: _Query[_QueryParametersT], urls: List[str]) -> list:
+    def _exec(self: _Query[_QueryParametersT], urls: List[str]) -> list[object]:
         loop = get_event_loop()
         rr = loop.run_until_complete(self._execAsync(urls))
         return rr
 
-    async def _execAsync(self: _Query[_QueryParametersT], urls: List[str]) -> list:
+    async def _execAsync(self: _Query[_QueryParametersT], urls: List[str]) -> list[object]:
         with self._client as c:
             res = await asyncio.gather(*[self._requestExecutor.exec(c.exec, "GET", i, None) for i in urls])
             # Time-series endpoints return iterable payloads; the shared client also handles scalar responses.

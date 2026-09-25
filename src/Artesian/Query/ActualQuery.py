@@ -245,7 +245,7 @@ class ActualQuery(_Query[ActualQueryParameters]):
         self._queryParameters.aggregationRule = aggregationRule
         return self
 
-    def execute(self: ActualQuery) -> list:
+    def execute(self: ActualQuery) -> list[object]:
         """
         Execute the Query.
 
@@ -254,7 +254,7 @@ class ActualQuery(_Query[ActualQueryParameters]):
         urls = self.__buildRequest()
         return super()._exec(urls)
 
-    async def executeAsync(self: ActualQuery) -> list:
+    async def executeAsync(self: ActualQuery) -> list[object]:
         """
         Execute Async Query.
 

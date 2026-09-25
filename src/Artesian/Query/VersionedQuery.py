@@ -353,7 +353,7 @@ class VersionedQuery(_Query[VersionedQueryParameters]):
         self._queryParameters.aggregationRule = aggregationRule
         return self
 
-    def execute(self: VersionedQuery) -> list:
+    def execute(self: VersionedQuery) -> list[object]:
         """
         Execute the Query.
 
@@ -362,7 +362,7 @@ class VersionedQuery(_Query[VersionedQueryParameters]):
         urls = self.__buildRequest()
         return super()._exec(urls)
 
-    async def executeAsync(self: VersionedQuery) -> list:
+    async def executeAsync(self: VersionedQuery) -> list[object]:
         """
         Execute Async Query.
 

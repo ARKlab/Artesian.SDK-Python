@@ -206,7 +206,7 @@ class BidAskQuery(_Query[BidAskQueryParameters]):
         self._queryParameters.fill = _FillCustomBidAskStrategy(**val)
         return self
 
-    def execute(self: BidAskQuery) -> list:
+    def execute(self: BidAskQuery) -> list[object]:
         """
         Execute the Query.
 
@@ -215,7 +215,7 @@ class BidAskQuery(_Query[BidAskQueryParameters]):
         urls = self.__buildRequest()
         return super()._exec(urls)
 
-    async def executeAsync(self: BidAskQuery) -> list:
+    async def executeAsync(self: BidAskQuery) -> list[object]:
         """
         Execute Async Query.
 
