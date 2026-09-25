@@ -1,0 +1,294 @@
+{
+  "errors": [
+    {
+      "path": "src/Artesian/MarketData/MarketDataService.py",
+      "name": "unsupported-operation",
+      "concise_description": "Cannot set item in `dict[str, int]`"
+    },
+    {
+      "path": "src/Artesian/MarketData/MarketDataService.py",
+      "name": "unsupported-operation",
+      "concise_description": "Cannot set item in `dict[str, int]`"
+    },
+    {
+      "path": "src/Artesian/MarketData/MarketDataService.py",
+      "name": "unsupported-operation",
+      "concise_description": "Cannot set item in `dict[str, int]`"
+    },
+    {
+      "path": "src/Artesian/MarketData/MarketDataService.py",
+      "name": "unsupported-operation",
+      "concise_description": "Cannot set item in `dict[str, int]`"
+    },
+    {
+      "path": "src/Artesian/MarketData/MarketDataService.py",
+      "name": "unsupported-operation",
+      "concise_description": "Cannot set item in `dict[str, int]`"
+    },
+    {
+      "path": "src/Artesian/MarketData/MarketDataService.py",
+      "name": "unsupported-operation",
+      "concise_description": "Cannot set item in `dict[str, int]`"
+    },
+    {
+      "path": "src/Artesian/Query/ActualQuery.py",
+      "name": "missing-attribute",
+      "concise_description": "Object of class `_QueryParameters` has no attribute `transformId`"
+    },
+    {
+      "path": "src/Artesian/Query/ActualQuery.py",
+      "name": "missing-attribute",
+      "concise_description": "Object of class `_QueryParameters` has no attribute `granularity`"
+    },
+    {
+      "path": "src/Artesian/Query/ActualQuery.py",
+      "name": "missing-attribute",
+      "concise_description": "Object of class `_QueryParameters` has no attribute `unitOfMeasure`"
+    },
+    {
+      "path": "src/Artesian/Query/ActualQuery.py",
+      "name": "missing-attribute",
+      "concise_description": "Object of class `_QueryParameters` has no attribute `aggregationRule`"
+    },
+    {
+      "path": "src/Artesian/Query/ActualQuery.py",
+      "name": "bad-argument-type",
+      "concise_description": "Argument `list[_QueryParameters]` is not assignable to parameter `actualQueryParameters` with type `list[ActualQueryParameters]` in function `Artesian.Query.DefaultPartitionStrategy.DefaultPartitionStrategy.PartitionActual`"
+    },
+    {
+      "path": "src/Artesian/Query/ActualQuery.py",
+      "name": "missing-attribute",
+      "concise_description": "Object of class `_QueryParameters` has no attribute `granularity`"
+    },
+    {
+      "path": "src/Artesian/Query/AuctionQuery.py",
+      "name": "bad-argument-type",
+      "concise_description": "Argument `list[_QueryParameters]` is not assignable to parameter `auctionQueryParameters` with type `list[AuctionQueryParameters]` in function `Artesian.Query.DefaultPartitionStrategy.DefaultPartitionStrategy.PartitionAuction`"
+    },
+    {
+      "path": "src/Artesian/Query/BidAskQuery.py",
+      "name": "missing-attribute",
+      "concise_description": "Object of class `_QueryParameters` has no attribute `products`"
+    },
+    {
+      "path": "src/Artesian/Query/BidAskQuery.py",
+      "name": "bad-argument-type",
+      "concise_description": "Argument `list[_QueryParameters]` is not assignable to parameter `bidAskQueryParameters` with type `list[BidAskQueryParameters]` in function `Artesian.Query.DefaultPartitionStrategy.DefaultPartitionStrategy.PartitionBidAsk`"
+    },
+    {
+      "path": "src/Artesian/Query/BidAskQuery.py",
+      "name": "missing-attribute",
+      "concise_description": "Object of class `_QueryParameters` has no attribute `products`"
+    },
+    {
+      "path": "src/Artesian/Query/MasQuery.py",
+      "name": "missing-attribute",
+      "concise_description": "Object of class `_QueryParameters` has no attribute `products`"
+    },
+    {
+      "path": "src/Artesian/Query/MasQuery.py",
+      "name": "bad-argument-type",
+      "concise_description": "Argument `list[_QueryParameters]` is not assignable to parameter `masQueryParameters` with type `list[MasQueryParameters]` in function `Artesian.Query.DefaultPartitionStrategy.DefaultPartitionStrategy.PartitionMas`"
+    },
+    {
+      "path": "src/Artesian/Query/MasQuery.py",
+      "name": "missing-attribute",
+      "concise_description": "Object of class `_QueryParameters` has no attribute `products`"
+    },
+    {
+      "path": "src/Artesian/Query/VersionedQuery.py",
+      "name": "missing-attribute",
+      "concise_description": "Object of class `_QueryParameters` has no attribute `transformId`"
+    },
+    {
+      "path": "src/Artesian/Query/VersionedQuery.py",
+      "name": "missing-attribute",
+      "concise_description": "Object of class `_QueryParameters` has no attribute `granularity`"
+    },
+    {
+      "path": "src/Artesian/Query/VersionedQuery.py",
+      "name": "missing-attribute",
+      "concise_description": "Object of class `_QueryParameters` has no attribute `versionLimit`"
+    },
+    {
+      "path": "src/Artesian/Query/VersionedQuery.py",
+      "name": "missing-attribute",
+      "concise_description": "Object of class `_QueryParameters` has no attribute `versionSelectionType`"
+    },
+    {
+      "path": "src/Artesian/Query/VersionedQuery.py",
+      "name": "missing-attribute",
+      "concise_description": "Object of class `_QueryParameters` has no attribute `versionSelectionType`"
+    },
+    {
+      "path": "src/Artesian/Query/VersionedQuery.py",
+      "name": "missing-attribute",
+      "concise_description": "Object of class `_QueryParameters` has no attribute `versionSelectionConfig`"
+    },
+    {
+      "path": "src/Artesian/Query/VersionedQuery.py",
+      "name": "missing-attribute",
+      "concise_description": "Object of class `_QueryParameters` has no attribute `versionSelectionType`"
+    },
+    {
+      "path": "src/Artesian/Query/VersionedQuery.py",
+      "name": "missing-attribute",
+      "concise_description": "Object of class `_QueryParameters` has no attribute `versionSelectionConfig`"
+    },
+    {
+      "path": "src/Artesian/Query/VersionedQuery.py",
+      "name": "missing-attribute",
+      "concise_description": "Object of class `_QueryParameters` has no attribute `versionSelectionType`"
+    },
+    {
+      "path": "src/Artesian/Query/VersionedQuery.py",
+      "name": "missing-attribute",
+      "concise_description": "Object of class `_QueryParameters` has no attribute `versionSelectionConfig`"
+    },
+    {
+      "path": "src/Artesian/Query/VersionedQuery.py",
+      "name": "missing-attribute",
+      "concise_description": "Object of class `_QueryParameters` has no attribute `versionSelectionType`"
+    },
+    {
+      "path": "src/Artesian/Query/VersionedQuery.py",
+      "name": "missing-attribute",
+      "concise_description": "Object of class `_QueryParameters` has no attribute `versionSelectionConfig`"
+    },
+    {
+      "path": "src/Artesian/Query/VersionedQuery.py",
+      "name": "missing-attribute",
+      "concise_description": "Object of class `_QueryParameters` has no attribute `versionSelectionType`"
+    },
+    {
+      "path": "src/Artesian/Query/VersionedQuery.py",
+      "name": "missing-attribute",
+      "concise_description": "Object of class `_QueryParameters` has no attribute `versionSelectionConfig`"
+    },
+    {
+      "path": "src/Artesian/Query/VersionedQuery.py",
+      "name": "missing-attribute",
+      "concise_description": "Object of class `_QueryParameters` has no attribute `unitOfMeasure`"
+    },
+    {
+      "path": "src/Artesian/Query/VersionedQuery.py",
+      "name": "missing-attribute",
+      "concise_description": "Object of class `_QueryParameters` has no attribute `aggregationRule`"
+    },
+    {
+      "path": "src/Artesian/Query/VersionedQuery.py",
+      "name": "bad-argument-type",
+      "concise_description": "Argument `list[_QueryParameters]` is not assignable to parameter `versionedQueryParameters` with type `list[VersionedQueryParameters]` in function `Artesian.Query.DefaultPartitionStrategy.DefaultPartitionStrategy.PartitionVersioned`"
+    },
+    {
+      "path": "src/Artesian/Query/VersionedQuery.py",
+      "name": "missing-attribute",
+      "concise_description": "Object of class `_QueryParameters` has no attribute `granularity`"
+    },
+    {
+      "path": "src/Artesian/Query/VersionedQuery.py",
+      "name": "missing-attribute",
+      "concise_description": "Object of class `_QueryParameters` has no attribute `versionSelectionType`"
+    },
+    {
+      "path": "src/Artesian/Query/VersionedQuery.py",
+      "name": "missing-attribute",
+      "concise_description": "Object of class `_QueryParameters` has no attribute `versionSelectionConfig`"
+    },
+    {
+      "path": "src/Artesian/Query/VersionedQuery.py",
+      "name": "missing-attribute",
+      "concise_description": "Object of class `_QueryParameters` has no attribute `versionSelectionConfig`"
+    },
+    {
+      "path": "src/Artesian/Query/VersionedQuery.py",
+      "name": "missing-attribute",
+      "concise_description": "Object of class `_QueryParameters` has no attribute `versionSelectionType`"
+    },
+    {
+      "path": "src/Artesian/Query/VersionedQuery.py",
+      "name": "no-matching-overload",
+      "concise_description": "No matching overload found for function `dict.get` called with arguments: (object, Literal['VType'])"
+    },
+    {
+      "path": "src/Artesian/Query/VersionedQuery.py",
+      "name": "missing-attribute",
+      "concise_description": "Object of class `_QueryParameters` has no attribute `versionSelectionConfig`"
+    },
+    {
+      "path": "src/Artesian/Query/VersionedQuery.py",
+      "name": "missing-attribute",
+      "concise_description": "Object of class `_QueryParameters` has no attribute `versionSelectionConfig`"
+    },
+    {
+      "path": "src/Artesian/Query/VersionedQuery.py",
+      "name": "missing-attribute",
+      "concise_description": "Object of class `_QueryParameters` has no attribute `versionSelectionConfig`"
+    },
+    {
+      "path": "src/Artesian/Query/VersionedQuery.py",
+      "name": "missing-attribute",
+      "concise_description": "Object of class `_QueryParameters` has no attribute `versionSelectionConfig`"
+    },
+    {
+      "path": "src/Artesian/Query/VersionedQuery.py",
+      "name": "missing-attribute",
+      "concise_description": "Object of class `_QueryParameters` has no attribute `versionSelectionConfig`"
+    },
+    {
+      "path": "src/Artesian/Query/VersionedQuery.py",
+      "name": "missing-attribute",
+      "concise_description": "Object of class `_QueryParameters` has no attribute `versionSelectionConfig`"
+    },
+    {
+      "path": "src/Artesian/Query/VersionedQuery.py",
+      "name": "missing-attribute",
+      "concise_description": "Object of class `_QueryParameters` has no attribute `versionSelectionConfig`"
+    },
+    {
+      "path": "src/Artesian/Query/VersionedQuery.py",
+      "name": "missing-attribute",
+      "concise_description": "Object of class `_QueryParameters` has no attribute `versionSelectionConfig`"
+    },
+    {
+      "path": "src/Artesian/Query/VersionedQuery.py",
+      "name": "missing-attribute",
+      "concise_description": "Object of class `_QueryParameters` has no attribute `versionSelectionConfig`"
+    },
+    {
+      "path": "src/Artesian/Query/VersionedQuery.py",
+      "name": "missing-attribute",
+      "concise_description": "Object of class `_QueryParameters` has no attribute `versionSelectionConfig`"
+    },
+    {
+      "path": "src/Artesian/Query/_QueryParameters/QueryParameters.py",
+      "name": "no-matching-overload",
+      "concise_description": "No matching overload found for function `str.join` called with arguments: (list[float | int | str | None])"
+    },
+    {
+      "path": "src/Artesian/_ClientsExecutor/ArtesianJsonSerializer.py",
+      "name": "bad-argument-type",
+      "concise_description": "Unpacked keyword argument `bool | type[JsonSerializable] | Any` is not assignable to parameter `strict` with type `bool` in function `jsons._dump_impl.dump`"
+    },
+    {
+      "path": "src/Artesian/_ClientsExecutor/ArtesianJsonSerializer.py",
+      "name": "bad-argument-type",
+      "concise_description": "Unpacked keyword argument `bool | type[JsonSerializable] | Any` is not assignable to parameter `fork_inst` with type `type[Any] | None` in function `jsons._dump_impl.dump`"
+    },
+    {
+      "path": "src/Artesian/_ClientsExecutor/ArtesianJsonSerializer.py",
+      "name": "bad-argument-type",
+      "concise_description": "Unpacked keyword argument `bool | type[JsonSerializable] | Any` is not assignable to parameter `strict` with type `bool` in function `jsons._load_impl.load`"
+    },
+    {
+      "path": "src/Artesian/_ClientsExecutor/ArtesianJsonSerializer.py",
+      "name": "bad-argument-type",
+      "concise_description": "Unpacked keyword argument `bool | type[JsonSerializable] | Any` is not assignable to parameter `fork_inst` with type `type[Any] | None` in function `jsons._load_impl.load`"
+    },
+    {
+      "path": "src/Artesian/_ClientsExecutor/ArtesianJsonSerializer.py",
+      "name": "bad-argument-type",
+      "concise_description": "Unpacked keyword argument `bool | type[JsonSerializable] | Any` is not assignable to parameter `attr_getters` with type `dict[str, () -> object] | None` in function `jsons._load_impl.load`"
+    }
+  ]
+}

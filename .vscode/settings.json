@@ -1,10 +1,12 @@
 {
   "python.testing.pytestEnabled": true,
   "python.testing.unittestEnabled": false,
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv",
+  "python.languageServer": "None",
   "editor.fontSize": 16,
   "editor.formatOnPaste": true,
   "editor.formatOnSave": true,
   "[python]": {
-    "editor.defaultFormatter": "ms-python.black-formatter"
+    "editor.defaultFormatter": "charliermarsh.ruff"
   }
 }
