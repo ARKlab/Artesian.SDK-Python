@@ -19,8 +19,9 @@ argument names, inferred return types, and variable types.
 
 Python 3.10 is the minimum supported **package** version. CI tests 3.10–3.14
 on Linux, Windows, and macOS; quality checks run on 3.12 for a consistent typing
-environment. The legacy `pip install -e '.[dev]'` extra remains available,
-but uv dependency groups and the lockfile are the canonical development setup.
+environment. Development tools are defined only in the `dev` and `test`
+dependency groups and installed from `uv.lock`; the legacy `.[dev]` extra
+has been removed. Use `uv sync` instead.
 
 End-of-life Python 3.8/3.9 are no longer supported.
 
