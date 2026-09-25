@@ -93,9 +93,7 @@ class DefaultPartitionStrategy:
         """
         return self._tsPartitionStrategy(bidAskQueryParameters)
 
-    def _tsPartitionStrategy(
-        self: DefaultPartitionStrategy, Parameters: List[T]
-    ) -> List[T]:
+    def _tsPartitionStrategy(self: DefaultPartitionStrategy, Parameters: List[T]) -> List[T]:
         res: List[T] = []
         for param in Parameters:
             if param.ids is None:

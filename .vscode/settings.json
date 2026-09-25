@@ -3,10 +3,19 @@
   "python.testing.unittestEnabled": false,
   "python.defaultInterpreterPath": "${workspaceFolder}/.venv",
   "python.languageServer": "None",
+  "pyrefly.pyreflyExecutable": "from-environment",
+  "python.pyrefly.diagnosticMode": "workspace",
+  "python.analysis.inlayHints": {
+    "callArgumentNames": "all",
+    "functionReturnTypes": true,
+    "variableTypes": true
+  },
+  "ruff.importStrategy": "fromEnvironment",
   "editor.fontSize": 16,
   "editor.formatOnPaste": true,
   "editor.formatOnSave": true,
   "[python]": {
-    "editor.defaultFormatter": "charliermarsh.ruff"
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.inlayHints.enabled": "on"
   }
 }

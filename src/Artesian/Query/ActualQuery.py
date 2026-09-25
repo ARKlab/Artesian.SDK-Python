@@ -18,7 +18,7 @@ from urllib import parse
 from typing import List, Optional
 
 
-class ActualQuery(_Query):
+class ActualQuery(_Query[ActualQueryParameters]):
     __routePrefix = "ts"
 
     def __init__(
@@ -123,9 +123,7 @@ class ActualQuery(_Query):
         super()._inRelativePeriod(extractionPeriod)
         return self
 
-    def inRelativeInterval(
-        self: ActualQuery, relativeInterval: RelativeInterval
-    ) -> ActualQuery:
+    def inRelativeInterval(self: ActualQuery, relativeInterval: RelativeInterval) -> ActualQuery:
         """
         Gets the Relative Interval considers a specific interval of time window.
 
@@ -189,9 +187,7 @@ class ActualQuery(_Query):
         self._queryParameters.fill = _NoFillStrategy()
         return self
 
-    def withFillLatestValue(
-        self: ActualQuery, period: str, continueToEnd: bool = False
-    ) -> ActualQuery:
+    def withFillLatestValue(self: ActualQuery, period: str, continueToEnd: bool = False) -> ActualQuery:
         """
         Optional filler strategy for the extraction.
 
@@ -235,8 +231,7 @@ class ActualQuery(_Query):
         self._queryParameters.unitOfMeasure = unitOfMeasure
         return self
 
-    def withAggregationRule(self: ActualQuery,
-                            aggregationRule: AggregationRule) -> ActualQuery:
+    def withAggregationRule(self: ActualQuery, aggregationRule: AggregationRule) -> ActualQuery:
         """
         Optional AggregationRule for the extraction.
 
@@ -278,22 +273,22 @@ class ActualQuery(_Query):
                 self.__getGranularityPath(qp.granularity),
                 super()._buildExtractionRangeRoute(qp),
             )
-            if not (qp.ids is None):
+            if qp.ids is not None:
                 sep = ","
                 ids = sep.join(map(str, qp.ids))
                 enc = parse.quote_plus(ids)
                 url = url + "&id=" + enc
-            if not (qp.filterId is None):
+            if qp.filterId is not None:
                 url = url + "&filterId=" + str(qp.filterId)
-            if not (qp.timezone is None):
+            if qp.timezone is not None:
                 url = url + "&tz=" + qp.timezone
-            if not (qp.transformId is None):
+            if qp.transformId is not None:
                 url = url + "&tr=" + str(qp.transformId)
-            if not (qp.unitOfMeasure is None):
+            if qp.unitOfMeasure is not None:
                 url = url + "&unitOfMeasure=" + qp.unitOfMeasure
-            if not (qp.aggregationRule is None):
+            if qp.aggregationRule is not None:
                 url = url + "&aggregationRule=" + str(qp.aggregationRule)
-            if not (qp.fill is None):
+            if qp.fill is not None:
                 url = url + "&" + qp.fill.getUrlParams()
             urls.append(url)
         return urls
@@ -302,13 +297,10 @@ class ActualQuery(_Query):
         super()._validateQuery()
         if self._queryParameters.granularity is None:
             raise Exception(
-                "Extraction granularity must be provided. Use .InGranularity() "
-                + "argument takes a granularity type"
+                "Extraction granularity must be provided. Use .InGranularity() " + "argument takes a granularity type"
             )
 
-    def __getGranularityPath(
-        self: ActualQuery, granularity: Optional[Granularity]
-    ) -> str:
+    def __getGranularityPath(self: ActualQuery, granularity: Optional[Granularity]) -> str:
         switcher = {
             Granularity.Day: "Day",
             Granularity.FifteenMinute: "FifteenMinute",
@@ -322,9 +314,7 @@ class ActualQuery(_Query):
             Granularity.Year: "Year",
         }
         if granularity is None:
-            raise ArtesianSdkException(
-                "Missing Granularity. Use .forGranularity() to set one."
-            )
+            raise ArtesianSdkException("Missing Granularity. Use .forGranularity() to set one.")
 
         vr = switcher.get(granularity, "VGran")
         return vr

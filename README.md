@@ -6,6 +6,8 @@ This Library provides read access to the Artesian API
 
 ### Installation
 
+Python 3.10–3.14 is supported. End-of-life Python 3.8/3.9 is no longer supported.
+
 You can install the package directly from [pip](https://pypi.org/project/artesian-sdk/).
 
 ```Python
@@ -30,8 +32,8 @@ The following breaking changes has been introduced in v3 respect to v2.
 
 ### Python Version >=3.8
 
-Python >=3.8 is **required**.
-Python 3.7 is not supported due missing 'typing' features.
+Version 3 originally required Python >=3.8 because Python 3.7 lacked necessary
+typing features. Current releases require Python >=3.10.
 
 ### SubPackaging
 

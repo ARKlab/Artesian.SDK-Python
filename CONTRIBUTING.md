@@ -13,22 +13,22 @@ This creates `.venv` and installs the SDK, test dependencies, Ruff, Pyrefly, and
 Twine from `uv.lock`. Select `.venv` as the Python interpreter in VS Code and
 install the recommended extensions. Pyrefly replaces Pylance/Pyright; Ruff
 replaces Black and Flake8. Pyrefly is a type checker, not a formatter.
+The [Pyrefly VS Code extension](https://pyrefly.org/en/docs/IDE/#vscode-extension-settings)
+uses the locked environment binary, workspace diagnostics, and inlay hints for
+argument names, inferred return types, and variable types.
 
-Python 3.8 remains the minimum supported **package** version. CI tests 3.8–3.14
+Python 3.10 is the minimum supported **package** version. CI tests 3.10–3.14
 on Linux, Windows, and macOS; quality checks run on 3.12 for a consistent typing
 environment. The legacy `pip install -e '.[dev]'` extra remains available,
 but uv dependency groups and the lockfile are the canonical development setup.
 
-Python 3.8/3.9 are end-of-life. Their compatible urllib3 releases, and the
-cryptography release used by older development tooling, have known advisories
-whose fixes require newer Python. Use a maintained interpreter for development
-and production; retaining the package's existing Python floor does not make
-those legacy dependency combinations secure.
+End-of-life Python 3.8/3.9 are no longer supported.
 
 ## 2. Run checks
 
 ```sh
 uv run --locked ruff check .
+uv run --locked ruff format --check .
 uv run --locked pyrefly check
 uv run --locked pytest
 uv build
@@ -43,7 +43,7 @@ is excluded.
 To check the minimum supported interpreter without installing development tools:
 
 ```sh
-uv sync --locked --python 3.8 --no-dev --group test
+uv sync --locked --python 3.10 --no-dev --group test
 uv run --no-sync pytest
 ```
 
@@ -55,15 +55,13 @@ To update dependencies intentionally, use `uv lock --upgrade` (or
 ## 3. Formatting and typing
 
 Use Ruff's format-on-save integration or `uv run ruff format PATH` for edited
-Python files. Repository-wide format enforcement is deferred to a separate
-formatting-only change to avoid rewriting SDK code in this tooling migration.
-Linting retains the existing source-only scope and selected legacy style rules.
+Python files. CI enforces formatting and linting for SDK source; tests and
+samples retain their existing exclusion from lint checks. Explicit `Any` is
+allowed only in the jsons adapter, which forwards dynamic plugin keyword arguments.
 
-`pyrefly-baseline.json` records existing diagnostics without changing public
-annotations or behavior. `uv run --locked pyrefly check` fails on new diagnostics;
-existing ones remain visible in the editor. After fixing existing diagnostics,
-run `uv run --locked pyrefly check --prune-baseline` and commit the reduced
-baseline. Do not regenerate it to hide new errors.
+`uv run --locked pyrefly check` checks the SDK against the minimum supported
+Python version without a diagnostic baseline. Keep annotations accurate without
+changing public method names, parameters, or runtime behavior.
 
 ## 4. GitHub coverage
 

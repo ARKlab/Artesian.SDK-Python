@@ -15,7 +15,7 @@ from .RelativeInterval import RelativeInterval
 from typing import List
 
 
-class BidAskQuery(_Query):
+class BidAskQuery(_Query[BidAskQueryParameters]):
     __routePrefix = "ba"
 
     def __init__(
@@ -120,9 +120,7 @@ class BidAskQuery(_Query):
         super()._inRelativePeriod(extractionPeriod)
         return self
 
-    def inRelativeInterval(
-        self: BidAskQuery, relativeInterval: RelativeInterval
-    ) -> BidAskQuery:
+    def inRelativeInterval(self: BidAskQuery, relativeInterval: RelativeInterval) -> BidAskQuery:
         """
         Gets the Relative Interval considers a specific interval of time window.
 
@@ -173,9 +171,7 @@ class BidAskQuery(_Query):
         self._queryParameters.fill = _NoFillStrategy()
         return self
 
-    def withFillLatestValue(
-        self: BidAskQuery, period: str, continueToEnd: bool = False
-    ) -> BidAskQuery:
+    def withFillLatestValue(self: BidAskQuery, period: str, continueToEnd: bool = False) -> BidAskQuery:
         """
         Optional filler strategy for the extraction.
 
@@ -234,18 +230,18 @@ class BidAskQuery(_Query):
         urls = []
         for qp in qps:
             url = f"/{self.__routePrefix}/{super()._buildExtractionRangeRoute(qp)}?_=1"
-            if not (qp.ids is None):
+            if qp.ids is not None:
                 sep = ","
                 ids = sep.join(map(str, qp.ids))
                 enc = parse.quote_plus(ids)
                 url = url + "&id=" + enc
-            if not (qp.filterId is None):
+            if qp.filterId is not None:
                 url = url + "&filterId=" + str(qp.filterId)
-            if not (qp.products is None):
+            if qp.products is not None:
                 sep = ","
                 prod = enc = parse.quote_plus(sep.join(qp.products))
                 url = url + "&p=" + prod
-            if not (qp.fill is None):
+            if qp.fill is not None:
                 url = url + "&" + qp.fill.getUrlParams()
             urls.append(url)
         return urls

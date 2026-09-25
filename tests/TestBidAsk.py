@@ -1,5 +1,9 @@
 from Artesian import ArtesianConfig
 from Artesian.Query import QueryService
+from Artesian.Query._QueryParameters.QueryParameters import (
+    _FillCustomBidAskStrategy,
+    _FillCustomMasStrategy,
+)
 from . import helpers
 import unittest
 
@@ -93,3 +97,20 @@ class TestBidAsk(unittest.TestCase):
         self.assertEqual(query["fillerDVbaq"], "4")
         self.assertEqual(query["fillerDVlp"], "5")
         self.assertEqual(query["fillerDVlq"], "6")
+
+    def test_Custom_Value_Fill_Preserves_Falsy_Filtering(self):
+        cases = [
+            (
+                _FillCustomBidAskStrategy(
+                    bestBidPrice=0, bestAskPrice=2.5, bestBidQuantity=0.0, lastPrice=-3
+                ),
+                "fillerK=CustomValue&fillerDVbap=2.5&fillerDVlp=-3",
+            ),
+            (
+                _FillCustomMasStrategy(settlement=0, open=2.5, close=-3, volume=0.0),
+                "fillerK=CustomValue&fillerDVo=2.5&fillerDVc=-3",
+            ),
+        ]
+        for strategy, expected in cases:
+            with self.subTest(strategy=type(strategy).__name__):
+                self.assertEqual(strategy.getUrlParams(), expected)

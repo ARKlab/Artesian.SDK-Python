@@ -33,7 +33,7 @@ class ActualQueryParameters(_QueryParameters):
         granularity: Optional[Granularity] = None,
         transformId: Optional[str] = None,
         unitOfMeasure: Optional[str] = None,
-        aggregationRule: Optional[AggregationRule] = None
+        aggregationRule: Optional[AggregationRule] = None,
     ) -> None:
         """
         Inits ActualQueryParameters
@@ -50,9 +50,7 @@ class ActualQueryParameters(_QueryParameters):
             unitOfMeasure: The UnitOfMeasure to use for extraction.
             aggregationRule: The AggregationRule to use for extraction.
         """
-        _QueryParameters.__init__(
-            self, ids, extractionRangeConfig, extractionRangeType, timezone, filterId
-        )
+        _QueryParameters.__init__(self, ids, extractionRangeConfig, extractionRangeType, timezone, filterId)
         self.granularity = granularity
         self.transformId = transformId
         self.unitOfMeasure = unitOfMeasure

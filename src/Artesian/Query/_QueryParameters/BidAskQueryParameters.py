@@ -39,7 +39,5 @@ class BidAskQueryParameters(_QueryParameters):
             filterId: An int that filters marketdata ID to be queries.
             products: A string that sets products to be queried.
         """
-        _QueryParameters.__init__(
-            self, ids, extractionRangeConfig, extractionRangeType, timezone, filterId
-        )
+        _QueryParameters.__init__(self, ids, extractionRangeConfig, extractionRangeType, timezone, filterId)
         self.products = products

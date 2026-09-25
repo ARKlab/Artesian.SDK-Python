@@ -16,7 +16,7 @@ from typing import List
 from .RelativeInterval import RelativeInterval
 
 
-class MasQuery(_Query):
+class MasQuery(_Query[MasQueryParameters]):
     __routePrefix = "mas"
 
     def __init__(
@@ -121,9 +121,7 @@ class MasQuery(_Query):
         super()._inRelativePeriod(extractionPeriod)
         return self
 
-    def inRelativeInterval(
-        self: MasQuery, relativeInterval: RelativeInterval
-    ) -> MasQuery:
+    def inRelativeInterval(self: MasQuery, relativeInterval: RelativeInterval) -> MasQuery:
         """
         Gets the Relative Interval considers a specific interval of time window.
 
@@ -175,9 +173,7 @@ class MasQuery(_Query):
         self._queryParameters.fill = _NoFillStrategy()
         return self
 
-    def withFillLatestValue(
-        self: MasQuery, period: str, continueToEnd: bool = False
-    ) -> MasQuery:
+    def withFillLatestValue(self: MasQuery, period: str, continueToEnd: bool = False) -> MasQuery:
         """
         Optional filler strategy for the extraction.
 
@@ -234,18 +230,18 @@ class MasQuery(_Query):
         urls = []
         for qp in qps:
             url = f"/{self.__routePrefix}/{super()._buildExtractionRangeRoute(qp)}?_=1"
-            if not (qp.ids is None):
+            if qp.ids is not None:
                 sep = ","
                 ids = sep.join(map(str, qp.ids))
                 enc = parse.quote_plus(ids)
                 url = url + "&id=" + enc
-            if not (qp.filterId is None):
+            if qp.filterId is not None:
                 url = url + "&filterId=" + str(qp.filterId)
-            if not (qp.products is None):
+            if qp.products is not None:
                 sep = ","
                 prod = enc = parse.quote_plus(sep.join(qp.products))
                 url = url + "&p=" + prod
-            if not (qp.fill is None):
+            if qp.fill is not None:
                 url = url + "&" + qp.fill.getUrlParams()
             urls.append(url)
         return urls

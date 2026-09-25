@@ -10,7 +10,7 @@ from Artesian.Query._QueryParameters.AuctionQueryParameters import (
 from typing import List
 
 
-class AuctionQuery(_Query):
+class AuctionQuery(_Query[AuctionQueryParameters]):
     __routePrefix = "auction"
 
     def __init__(
@@ -83,9 +83,7 @@ class AuctionQuery(_Query):
         super()._inAbsoluteDateRange(start, end)
         return self
 
-    def inRelativePeriodRange(
-        self: AuctionQuery, pStart: str, pEnd: str
-    ) -> AuctionQuery:
+    def inRelativePeriodRange(self: AuctionQuery, pStart: str, pEnd: str) -> AuctionQuery:
         """
         Gets the Auction Query in a relative period range time window.
 
@@ -141,14 +139,14 @@ class AuctionQuery(_Query):
         urls = []
         for qp in qps:
             url = f"/{self.__routePrefix}/{super()._buildExtractionRangeRoute(qp)}?_=1"
-            if not (qp.ids is None):
+            if qp.ids is not None:
                 sep = ","
                 ids = sep.join(map(str, qp.ids))
                 enc = parse.quote_plus(ids)
                 url = url + "&id=" + enc
-            if not (qp.filterId is None):
+            if qp.filterId is not None:
                 url = url + "&filterId=" + str(qp.filterId)
-            if not (qp.timezone is None):
+            if qp.timezone is not None:
                 url = url + "&tz=" + qp.timezone
             urls.append(url)
         return urls
@@ -156,7 +154,4 @@ class AuctionQuery(_Query):
     def __validateQuery(self: AuctionQuery) -> None:
         super()._validateQuery()
         if self._queryParameters.ids is None and self._queryParameters.filterId is None:
-            raise Exception(
-                "Extraction ids or filterid must be provided. Use .forMarketData() "
-                + "or .forFilterId()"
-            )
+            raise Exception("Extraction ids or filterid must be provided. Use .forMarketData() " + "or .forFilterId()")

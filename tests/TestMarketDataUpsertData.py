@@ -1,5 +1,8 @@
 from Artesian import ArtesianConfig
-from Artesian._ClientsExecutor.ArtesianJsonSerializer import artesianJsonSerialize
+from Artesian._ClientsExecutor.ArtesianJsonSerializer import (
+    artesianJsonDeserialize,
+    artesianJsonSerialize,
+)
 from Artesian.MarketData import (
     MarketDataService,
     MarketDataIdentifier,
@@ -10,8 +13,10 @@ from Artesian.MarketData import (
     AuctionBidValue,
 )
 from datetime import datetime
+import jsons
 import responses
 import unittest
+from unittest.mock import patch, sentinel
 
 from dateutil import tz
 
@@ -25,6 +30,37 @@ class TestMarketDataServiceUpsertData(unittest.IsolatedAsyncioTestCase):
         self.__baseurl = "https://baseurl.com/v2.1"
 
         return super().setUp()
+
+    def test_json_options_preserve_overrides_and_custom_kwargs(self):
+        options = {
+            "strip_privates": False,
+            "strip_nulls": False,
+            "use_enum_name": False,
+            "fork_inst": jsons.JsonSerializable.fork(),
+            "strict": True,
+            "plugin_option": sentinel.plugin_option,
+        }
+        cases = [
+            (artesianJsonSerialize, "dump", True, "camelCase", "CamelCase"),
+            (artesianJsonDeserialize, "load", False, "PascalCase", "pascalCase"),
+        ]
+        for adapter, operation, strict, key, transformed_key in cases:
+            with self.subTest(operation=operation):
+                with patch(
+                    "Artesian._ClientsExecutor.ArtesianJsonSerializer.jsons."
+                    + operation
+                ) as json_operation:
+                    result = adapter(sentinel.payload, dict, **options)
+
+                self.assertIs(result, json_operation.return_value)
+                json_operation.assert_called_once()
+                self.assertEqual(
+                    json_operation.call_args.args, (sentinel.payload, dict)
+                )
+                forwarded = json_operation.call_args.kwargs.copy()
+                key_transformer = forwarded.pop("key_transformer")
+                self.assertEqual(key_transformer(key), transformed_key)
+                self.assertEqual(forwarded, {**options, "strict": strict})
 
     async def test_upsertDateSerie(self):
         expectedJson = {

@@ -68,7 +68,7 @@ class MarketDataService:
         """
 
         url = "/marketdata/entity/" + str(id) + "/curves"
-        params = {}  # needed to avoid typing to detect dict[str,int] ...
+        params: Dict[str, str | int] = {}
         params["page"] = page
         params["pageSize"] = pageSize
         if versionFrom is not None:
@@ -115,9 +115,7 @@ class MarketDataService:
             Paged result of CurveRange entity.
         """
         return _get_event_loop().run_until_complete(
-            self.readCurveRangeAsync(
-                id, page, pageSize, product, versionFrom, versionTo
-            )
+            self.readCurveRangeAsync(id, page, pageSize, product, versionFrom, versionTo)
         )
 
     async def searchFacetAsync(
@@ -152,7 +150,7 @@ class MarketDataService:
                     filtersList.append(key + ":" + value)
 
         url = "/marketdata/searchfacet"
-        params = {}  # needed to avoid typing to detect dict[str,int] ...
+        params: Dict[str, str | int | List[str] | None] = {}
         params["page"] = page
         params["pageSize"] = pageSize
         params["searchText"] = searchText
@@ -200,14 +198,10 @@ class MarketDataService:
             ArtesianSearchResults entity.
         """
         return _get_event_loop().run_until_complete(
-            self.searchFacetAsync(
-                page, pageSize, searchText, filters, sorts, doNotLoadAdditionalInfo
-            )
+            self.searchFacetAsync(page, pageSize, searchText, filters, sorts, doNotLoadAdditionalInfo)
         )
 
-    async def readMarketDataRegistryByIdAsync(
-        self: MarketDataService, id: int
-    ) -> MarketDataEntityOutput:
+    async def readMarketDataRegistryByIdAsync(self: MarketDataService, id: int) -> MarketDataEntityOutput:
         """
         Reads MarketData by id with MarketDataID.
 
@@ -219,18 +213,10 @@ class MarketDataService:
         """
         url = "/marketdata/entity/" + str(id)
         with self.__client as c:
-            res = await asyncio.gather(
-                *[
-                    self.__executor.exec(
-                        c.exec, "GET", url, None, retcls=MarketDataEntityOutput
-                    )
-                ]
-            )
+            res = await asyncio.gather(*[self.__executor.exec(c.exec, "GET", url, None, retcls=MarketDataEntityOutput)])
             return cast(MarketDataEntityOutput, res[0])
 
-    def readMarketDataRegistryById(
-        self: MarketDataService, id: int
-    ) -> MarketDataEntityOutput:
+    def readMarketDataRegistryById(self: MarketDataService, id: int) -> MarketDataEntityOutput:
         """
         Reads MarketData by curve name with MarketDataID.
 
@@ -240,9 +226,7 @@ class MarketDataService:
         Returns:
             MarketData Entity Output.
         """
-        return _get_event_loop().run_until_complete(
-            self.readMarketDataRegistryByIdAsync(id)
-        )
+        return _get_event_loop().run_until_complete(self.readMarketDataRegistryByIdAsync(id))
 
     async def updateMarketDataAsync(
         self: MarketDataService, id: int, entity: MarketDataEntityInput
@@ -258,18 +242,10 @@ class MarketDataService:
         """
         url = "/marketdata/entity/" + str(id)
         with self.__client as c:
-            res = await asyncio.gather(
-                *[
-                    self.__executor.exec(
-                        c.exec, "PUT", url, entity, MarketDataEntityOutput
-                    )
-                ]
-            )
+            res = await asyncio.gather(*[self.__executor.exec(c.exec, "PUT", url, entity, MarketDataEntityOutput)])
             return cast(MarketDataEntityOutput, res[0])
 
-    def updateMarketData(
-        self: MarketDataService, id: int, entity: MarketDataEntityInput
-    ) -> MarketDataEntityOutput:
+    def updateMarketData(self: MarketDataService, id: int, entity: MarketDataEntityInput) -> MarketDataEntityOutput:
         """
         Saves the given MarketData Entity
 
@@ -279,9 +255,7 @@ class MarketDataService:
         Returns:
             MarketData Entity Output.
         """
-        return _get_event_loop().run_until_complete(
-            self.updateMarketDataAsync(id, entity)
-        )
+        return _get_event_loop().run_until_complete(self.updateMarketDataAsync(id, entity))
 
     async def deleteMarketDataAsync(self: MarketDataService, id: int) -> None:
         """
@@ -340,9 +314,7 @@ class MarketDataService:
             )
             return cast(MarketDataEntityOutput, res[0])
 
-    def readMarketDataRegistryByName(
-        self: MarketDataService, provider: str, curveName: str
-    ) -> MarketDataEntityOutput:
+    def readMarketDataRegistryByName(self: MarketDataService, provider: str, curveName: str) -> MarketDataEntityOutput:
         """
         Reads MarketData by provider and curve name.
 
@@ -353,13 +325,9 @@ class MarketDataService:
         Returns:
             MarketData Entity Output.
         """
-        return _get_event_loop().run_until_complete(
-            self.readMarketDataRegistryByNameAsync(provider, curveName)
-        )
+        return _get_event_loop().run_until_complete(self.readMarketDataRegistryByNameAsync(provider, curveName))
 
-    async def registerMarketDataAsync(
-        self: MarketDataService, entity: MarketDataEntityInput
-    ) -> MarketDataEntityOutput:
+    async def registerMarketDataAsync(self: MarketDataService, entity: MarketDataEntityInput) -> MarketDataEntityOutput:
         """
         Register a new MarketData entity.
 
@@ -371,18 +339,10 @@ class MarketDataService:
         """
         url = "/marketdata/entity"
         with self.__client as c:
-            res = await asyncio.gather(
-                *[
-                    self.__executor.exec(
-                        c.exec, "POST", url, entity, MarketDataEntityOutput
-                    )
-                ]
-            )
+            res = await asyncio.gather(*[self.__executor.exec(c.exec, "POST", url, entity, MarketDataEntityOutput)])
             return cast(MarketDataEntityOutput, res[0])
 
-    def registerMarketData(
-        self: MarketDataService, entity: MarketDataEntityInput
-    ) -> MarketDataEntityOutput:
+    def registerMarketData(self: MarketDataService, entity: MarketDataEntityInput) -> MarketDataEntityOutput:
         """
         Register a new MarketData entity.
 
@@ -395,14 +355,10 @@ class MarketDataService:
 
         entity._validateDerivedCfg()
 
-        return _get_event_loop().run_until_complete(
-            self.registerMarketDataAsync(entity)
-        )
+        return _get_event_loop().run_until_complete(self.registerMarketDataAsync(entity))
 
     async def checkConversionAsync(
-        self: MarketDataService,
-        inputUnitsOfMeasure: List[str],
-        targetUnitOfMeasure: str
+        self: MarketDataService, inputUnitsOfMeasure: List[str], targetUnitOfMeasure: str
     ) -> CheckConversionResult:
         """
         Check UnitOfMeasure conversion.
@@ -416,8 +372,7 @@ class MarketDataService:
             CheckConversionResult Entity (Async).
         """
         url = "/uom/checkconversion"
-        params = {"inputUnitsOfMeasure": inputUnitsOfMeasure,
-                  "targetUnitOfMeasure": targetUnitOfMeasure}
+        params = {"inputUnitsOfMeasure": inputUnitsOfMeasure, "targetUnitOfMeasure": targetUnitOfMeasure}
         with self.__client as c:
             res = await asyncio.gather(
                 *[
@@ -434,9 +389,7 @@ class MarketDataService:
             return cast(CheckConversionResult, res[0])
 
     def checkConversion(
-        self: MarketDataService,
-        inputUnitsOfMeasure: List[str],
-        targetUnitOfMeasure: str
+        self: MarketDataService, inputUnitsOfMeasure: List[str], targetUnitOfMeasure: str
     ) -> CheckConversionResult:
         """
         Check UnitOfMeasure conversion.
@@ -450,15 +403,10 @@ class MarketDataService:
             CheckConversionResult Entity.
         """
 
-        return _get_event_loop().run_until_complete(
-            self.checkConversionAsync(inputUnitsOfMeasure, targetUnitOfMeasure)
-        )
+        return _get_event_loop().run_until_complete(self.checkConversionAsync(inputUnitsOfMeasure, targetUnitOfMeasure))
 
     async def updateDerivedConfigurationAsync(
-        self: MarketDataService,
-        marketDataId: int,
-        derivedCfg: DerivedCfg,
-        force: bool = False
+        self: MarketDataService, marketDataId: int, derivedCfg: DerivedCfg, force: bool = False
     ) -> MarketDataEntityOutput:
         """
         Update Derived Configuration for marketData with id supplied in MarketDataId.
@@ -496,10 +444,7 @@ class MarketDataService:
             return cast(MarketDataEntityOutput, res[0])
 
     def updateDerivedConfiguration(
-        self: MarketDataService,
-        marketDataId: int,
-        derivedCfg: DerivedCfg,
-        force: bool = False
+        self: MarketDataService, marketDataId: int, derivedCfg: DerivedCfg, force: bool = False
     ) -> MarketDataEntityOutput:
         """
         Update Derived Configuration for marketData with id supplied in MarketDataId.
@@ -537,8 +482,7 @@ class MarketDataService:
         return _get_event_loop().run_until_complete(self.deleteDataAsync(data))
 
     async def derivedTransformQueryValidationAsync(
-        self: MarketDataService,
-        request: DerivedTransformQueryValidation
+        self: MarketDataService, request: DerivedTransformQueryValidation
     ) -> DerivedTransformQueryValidationResponse:
         """
         Derived Transform Query Validation.
@@ -552,22 +496,13 @@ class MarketDataService:
 
         with self.__client as c:
             res = await asyncio.gather(
-                *[
-                    self.__executor.exec(
-                        c.exec,
-                        "POST",
-                        url,
-                        request,
-                        retcls=DerivedTransformQueryValidationResponse
-                    )
-                ]
+                *[self.__executor.exec(c.exec, "POST", url, request, retcls=DerivedTransformQueryValidationResponse)]
             )
 
             return cast(DerivedTransformQueryValidationResponse, res[0])
 
     def derivedTransformQueryValidation(
-        self: MarketDataService,
-        request: DerivedTransformQueryValidation
+        self: MarketDataService, request: DerivedTransformQueryValidation
     ) -> DerivedTransformQueryValidationResponse:
         """
         Derived Transform Query Validation.
@@ -579,9 +514,7 @@ class MarketDataService:
             DerivedTransformQueryValidationResponse Entity.
         """
 
-        return _get_event_loop().run_until_complete(
-            self.derivedTransformQueryValidationAsync(request)
-        )
+        return _get_event_loop().run_until_complete(self.derivedTransformQueryValidationAsync(request))
 
 
 def _get_event_loop() -> asyncio.AbstractEventLoop:

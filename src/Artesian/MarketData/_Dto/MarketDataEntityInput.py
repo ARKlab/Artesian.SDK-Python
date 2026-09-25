@@ -44,17 +44,13 @@ class MarketDataEntityInput:
     marketDataId: int = 0
     eTag: Optional[str] = None
 
-    def _validateDerivedCfg(
-            self: "MarketDataEntityInput") -> None:
+    def _validateDerivedCfg(self: "MarketDataEntityInput") -> None:
         if (
             self.derivedCfg is not None
             and self.derivedCfg.derivedAlgorithm == DerivedAlgorithm.MUV
             and self.derivedCfg.orderedReferencedMarketDataIds is not None
         ):
-            raise Exception(
-                "DerivedCfg with MUV algorithm cannot have "
-                "orderedReferencedMarketDataIds"
-            )
+            raise Exception("DerivedCfg with MUV algorithm cannot have orderedReferencedMarketDataIds")
 
         if (
             self.derivedCfg is not None
@@ -68,11 +64,8 @@ class MarketDataEntityInput:
 
         if (
             self.derivedCfg is not None
-            and self.derivedCfg.derivedAlgorithm in {
-                DerivedAlgorithm.Coalesce,
-                DerivedAlgorithm.Sum,
-                DerivedAlgorithm.Transform
-                }
+            and self.derivedCfg.derivedAlgorithm
+            in {DerivedAlgorithm.Coalesce, DerivedAlgorithm.Sum, DerivedAlgorithm.Transform}
             and self.type is not MarketDataType.ActualTimeSerie
         ):
             raise Exception(
@@ -95,10 +88,7 @@ class MarketDataEntityInput:
             and self.derivedCfg.derivedAlgorithm is DerivedAlgorithm.Transform
             and self.derivedCfg.transform is None
         ):
-            raise Exception(
-                f"DerivedCfg with {self.derivedCfg.derivedAlgorithm} algorithm "
-                "must have transform set."
-            )
+            raise Exception(f"DerivedCfg with {self.derivedCfg.derivedAlgorithm} algorithm must have transform set.")
 
         if (
             self.derivedCfg is not None

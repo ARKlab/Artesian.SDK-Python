@@ -11,5 +11,5 @@ __all__ = [
     MarketDataType.__name__,
     ArtesianMetadataFacetType.__name__,
     DerivedAlgorithm.__name__,
-    UpsertMode.__name__
+    UpsertMode.__name__,
 ]  # type: ignore

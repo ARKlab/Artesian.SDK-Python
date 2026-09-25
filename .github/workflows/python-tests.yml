@@ -39,7 +39,9 @@ jobs:
         run: uv sync --locked
 
       - name: Run Ruff
-        run: uv run --no-sync ruff check --output-format github .
+        run: |
+          uv run --no-sync ruff check --output-format github .
+          uv run --no-sync ruff format --check .
 
       - name: Run Pyrefly
         run: uv run --no-sync pyrefly check --output-format github
@@ -64,7 +66,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
         os: ["ubuntu-latest", "windows-latest", "macos-latest"]
 
     steps:
@@ -540,6 +542,7 @@ jobs:
       - name: "Run Ruff and Pyrefly"
         run: |
           uv run --no-sync ruff check --output-format github .
+          uv run --no-sync ruff format --check .
           uv run --no-sync pyrefly check --output-format github
 
       - name: "Test Pytest"

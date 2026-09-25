@@ -29,9 +29,7 @@ class QueryService:
         """
         self.__config = artesianConfig
         self.__policy = ArtesianPolicyConfig()
-        self.__queryBaseurl = (
-            self.__config.baseUrl + "/" + self.__queryRoute + "/" + self.__queryVersion
-        )
+        self.__queryBaseurl = self.__config.baseUrl + "/" + self.__queryRoute + "/" + self.__queryVersion
         self.__partitionStrategy = DefaultPartitionStrategy()
         self.__executor = _RequestExecutor(self.__policy)
         self.__client = _Client(self.__queryBaseurl, self.__config.apiKey)

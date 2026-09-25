@@ -40,7 +40,7 @@ class VersionedQueryParameters(_QueryParameters):
         versionSelectionType: Optional[VersionSelectionType] = None,
         versionLimit: Optional[str] = None,
         unitOfMeasure: Optional[str] = None,
-        aggregationRule: Optional[AggregationRule] = None
+        aggregationRule: Optional[AggregationRule] = None,
     ) -> None:
         """
         Inits VersionedQueryParameters
@@ -59,9 +59,7 @@ class VersionedQueryParameters(_QueryParameters):
             unitOfMeasure: The UnitOfMeasure to use for extraction.
             aggregationRule: The AggregationRule to use for extraction.
         """
-        _QueryParameters.__init__(
-            self, ids, extractionRangeConfig, extractionRangeType, timezone, filterId
-        )
+        _QueryParameters.__init__(self, ids, extractionRangeConfig, extractionRangeType, timezone, filterId)
         self.transformId = transformId
         self.granularity = granularity
         self.versionSelectionConfig = versionSelectionConfig or VersionSelectionConfig()

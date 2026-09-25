@@ -36,6 +36,4 @@ class AuctionQueryParameters(_QueryParameters):
             timezone: IANA. A string that specifies the timezone of extracted data.
             filterId: An int that filters marketdata ID to be queries.
         """
-        _QueryParameters.__init__(
-            self, ids, extractionRangeConfig, extractionRangeType, timezone, filterId
-        )
+        _QueryParameters.__init__(self, ids, extractionRangeConfig, extractionRangeType, timezone, filterId)

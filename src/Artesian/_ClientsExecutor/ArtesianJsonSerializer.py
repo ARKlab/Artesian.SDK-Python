@@ -2,7 +2,7 @@ from datetime import datetime
 from platform import system
 from dateutil import parser
 import jsons
-from typing import Any, Callable, Dict, Optional, get_args
+from typing import Any, Callable, Dict, Optional, TypedDict, get_args
 
 
 __commonFmt = "%Y-%m-%dT%H:%M:%S.%f"
@@ -44,25 +44,16 @@ def __artesianDictSerializer(
     result = []
     for key in obj:
         obj_ = obj[key]
-        key_ = (
-            key
-            if __is_valid_json_key(key)
-            else jsons.dump(key, key_transformer=None, **kwargs)
-        )
+        key_ = key if __is_valid_json_key(key) else jsons.dump(key, key_transformer=None, **kwargs)
         elem = jsons.dump(obj_, key_transformer=key_transformer, **kwargs)
         result.append({"Key": key_, "Value": elem})
     return result
 
 
-def __artesianDictDeserializer(
-    obj: list, cls: type, *args: Any, **kwargs: Any
-) -> object:
+def __artesianDictDeserializer(obj: list, cls: type, *args: Any, **kwargs: Any) -> object:
     key, value = get_args(cls)
     result: Dict[key, value] = {  # type: ignore
-        jsons.load(item["Key"], key, *args, **kwargs): jsons.load(
-            item["Value"], value, *args, **kwargs
-        )
-        for item in obj
+        jsons.load(item["Key"], key, *args, **kwargs): jsons.load(item["Value"], value, *args, **kwargs) for item in obj
     }
 
     return result
@@ -70,12 +61,8 @@ def __artesianDictDeserializer(
 
 __artesianJsonSerializer = jsons.JsonSerializable.fork()
 
-jsons.set_serializer(
-    __artesianDictSerializer, Dict, high_prio=True, fork_inst=__artesianJsonSerializer
-)
-jsons.set_deserializer(
-    __artesianDictDeserializer, Dict, high_prio=True, fork_inst=__artesianJsonSerializer
-)
+jsons.set_serializer(__artesianDictSerializer, Dict, high_prio=True, fork_inst=__artesianJsonSerializer)
+jsons.set_deserializer(__artesianDictDeserializer, Dict, high_prio=True, fork_inst=__artesianJsonSerializer)
 
 jsons.set_serializer(
     __artesianDatetimeSerializer,
@@ -91,7 +78,14 @@ jsons.set_deserializer(
 )
 
 
-__artesianJsonKwArgs = {
+class _ArtesianJsonOptions(TypedDict):
+    strip_privates: bool
+    strip_nulls: bool
+    use_enum_name: bool
+    fork_inst: type[jsons.JsonSerializable]
+
+
+__artesianJsonKwArgs: _ArtesianJsonOptions = {
     "strip_privates": True,
     "strip_nulls": True,
     # 'strict': True, disabled due to failure in untyped Dict (Tags)
@@ -100,9 +94,7 @@ __artesianJsonKwArgs = {
 }
 
 
-def artesianJsonSerialize(
-    obj: object, cls: Optional[type] = None, **kwargs: Any
-) -> object:
+def artesianJsonSerialize(obj: object, cls: Optional[type] = None, **kwargs: Any) -> object:
     """
     Sets the Artesian Json Serializer.
 
@@ -114,13 +106,11 @@ def artesianJsonSerialize(
     Returns:
       JsonSerializer.
     """
-    kwargs_ = {**__artesianJsonKwArgs, **kwargs}
+    kwargs_: Dict[str, Any] = {**__artesianJsonKwArgs, **kwargs}
     return jsons.dump(obj, cls, key_transformer=__camelToPascal, **kwargs_)
 
 
-def artesianJsonDeserialize(
-    obj: object, cls: Optional[type] = None, **kwargs: Any
-) -> object:
+def artesianJsonDeserialize(obj: object, cls: Optional[type] = None, **kwargs: Any) -> object:
     """
     Sets the Artesian Json Deserializer.
 
@@ -132,5 +122,5 @@ def artesianJsonDeserialize(
     Returns:
       JsonDeserializer.
     """
-    kwargs_ = {**__artesianJsonKwArgs, **kwargs, "strict": False}
+    kwargs_: Dict[str, Any] = {**__artesianJsonKwArgs, **kwargs, "strict": False}
     return jsons.load(obj, cls, key_transformer=__pascalToCamel, **kwargs_)

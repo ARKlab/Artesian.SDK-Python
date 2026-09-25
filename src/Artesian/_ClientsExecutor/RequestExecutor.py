@@ -37,8 +37,9 @@ class _RequestExecutor:
         r = Retrying(
             wait_fixed=self.__policy.retryWaitTime,
             stop_max_attempt_number=self.__policy.maxRetry,
-            retry_on_exception=lambda e: isinstance(e, ArtesianSdkServerException)
-            or isinstance(e, ArtesianSdkRequestException),
+            retry_on_exception=lambda e: (
+                isinstance(e, ArtesianSdkServerException) or isinstance(e, ArtesianSdkRequestException)
+            ),
         )
         return await r.call(self.__do, callback, *args, **kwargs)
 
@@ -67,28 +68,16 @@ class Retrying(object):
         before_attempts=None,
         after_attempts=None,
     ) -> None:
-        self._stop_max_attempt_number = (
-            5 if stop_max_attempt_number is None else stop_max_attempt_number
-        )
+        self._stop_max_attempt_number = 5 if stop_max_attempt_number is None else stop_max_attempt_number
         self._stop_max_delay = 100 if stop_max_delay is None else stop_max_delay
         self._wait_fixed = 1000 if wait_fixed is None else wait_fixed
         self._wait_random_min = 0 if wait_random_min is None else wait_random_min
         self._wait_random_max = 1000 if wait_random_max is None else wait_random_max
-        self._wait_incrementing_start = (
-            0 if wait_incrementing_start is None else wait_incrementing_start
-        )
-        self._wait_incrementing_increment = (
-            100 if wait_incrementing_increment is None else wait_incrementing_increment
-        )
-        self._wait_exponential_multiplier = (
-            1 if wait_exponential_multiplier is None else wait_exponential_multiplier
-        )
-        self._wait_exponential_max = (
-            MAX_WAIT if wait_exponential_max is None else wait_exponential_max
-        )
-        self._wait_incrementing_max = (
-            MAX_WAIT if wait_incrementing_max is None else wait_incrementing_max
-        )
+        self._wait_incrementing_start = 0 if wait_incrementing_start is None else wait_incrementing_start
+        self._wait_incrementing_increment = 100 if wait_incrementing_increment is None else wait_incrementing_increment
+        self._wait_exponential_multiplier = 1 if wait_exponential_multiplier is None else wait_exponential_multiplier
+        self._wait_exponential_max = MAX_WAIT if wait_exponential_max is None else wait_exponential_max
+        self._wait_incrementing_max = MAX_WAIT if wait_incrementing_max is None else wait_incrementing_max
         self._wait_jitter_max = 0 if wait_jitter_max is None else wait_jitter_max
         self._before_attempts = before_attempts
         self._after_attempts = after_attempts
@@ -106,9 +95,7 @@ class Retrying(object):
             self.stop = stop_func
 
         elif stop is None:
-            self.stop = lambda attempts, delay: any(
-                f(attempts, delay) for f in stop_funcs
-            )
+            self.stop = lambda attempts, delay: any(f(attempts, delay) for f in stop_funcs)
 
         else:
             self.stop = getattr(self, stop)
@@ -122,10 +109,7 @@ class Retrying(object):
         if wait_random_min is not None or wait_random_max is not None:
             wait_funcs.append(self.random_sleep)
 
-        if (
-            wait_incrementing_start is not None
-            or wait_incrementing_increment is not None
-        ):
+        if wait_incrementing_start is not None or wait_incrementing_increment is not None:
             wait_funcs.append(self.incrementing_sleep)
 
         if wait_exponential_multiplier is not None or wait_exponential_max is not None:
@@ -135,9 +119,7 @@ class Retrying(object):
             self.wait = wait_func
 
         elif wait is None:
-            self.wait = lambda attempts, delay: max(
-                f(attempts, delay) for f in wait_funcs
-            )
+            self.wait = lambda attempts, delay: max(f(attempts, delay) for f in wait_funcs)
 
         else:
             self.wait = getattr(self, wait)
@@ -169,37 +151,27 @@ class Retrying(object):
         """Don't sleep at all before retrying."""
         return 0
 
-    def fixed_sleep(
-        self, previous_attempt_number: int, delay_since_first_attempt_ms: int
-    ) -> int:
+    def fixed_sleep(self, previous_attempt_number: int, delay_since_first_attempt_ms: int) -> int:
         """Sleep a fixed amount of time between each retry."""
         return self._wait_fixed
 
-    def random_sleep(
-        self, previous_attempt_number: int, delay_since_first_attempt_ms: int
-    ) -> int:
+    def random_sleep(self, previous_attempt_number: int, delay_since_first_attempt_ms: int) -> int:
         """Sleep a random amount of time between wait_random_min and wait_random_max"""
         return random.randint(self._wait_random_min, self._wait_random_max)
 
-    def incrementing_sleep(
-        self, previous_attempt_number: int, delay_since_first_attempt_ms: int
-    ) -> int:
+    def incrementing_sleep(self, previous_attempt_number: int, delay_since_first_attempt_ms: int) -> int:
         """
         Sleep an incremental amount of time after each attempt, starting at
         wait_incrementing_start and incrementing by wait_incrementing_increment
         """
-        result = self._wait_incrementing_start + (
-            self._wait_incrementing_increment * (previous_attempt_number - 1)
-        )
+        result = self._wait_incrementing_start + (self._wait_incrementing_increment * (previous_attempt_number - 1))
         if result > self._wait_incrementing_max:
             result = self._wait_incrementing_max
         if result < 0:
             result = 0
         return result
 
-    def exponential_sleep(
-        self, previous_attempt_number: int, delay_since_first_attempt_ms: int
-    ) -> int:
+    def exponential_sleep(self, previous_attempt_number: int, delay_since_first_attempt_ms: int) -> int:
         exp = 2**previous_attempt_number
         result = self._wait_exponential_multiplier * exp
         if result > self._wait_exponential_max:
@@ -290,9 +262,7 @@ class Attempt(object):
 
     def __repr__(self):
         if self.has_exception:
-            return "Attempts: {0}, Error:\n{1}".format(
-                self.attempt_number, "".join(traceback.format_tb(self.value[2]))
-            )
+            return "Attempts: {0}, Error:\n{1}".format(self.attempt_number, "".join(traceback.format_tb(self.value[2])))
         else:
             return "Attempts: {0}, Value: {1}".format(self.attempt_number, self.value)
 
