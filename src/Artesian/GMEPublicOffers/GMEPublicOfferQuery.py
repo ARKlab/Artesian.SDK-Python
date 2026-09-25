@@ -239,7 +239,7 @@ class GMEPublicOfferQuery:
             url = url + "&unit=" + enc
         if qp.generationType is not None:
             sep = ","
-            generationType = sep.join(map(lambda x: self.__getGenerationType(x), qp.generationType))
+            generationType = sep.join(map(self.__getGenerationType, qp.generationType))
             enc = parse.quote_plus(generationType)
             url = url + "&generationType=" + enc
         if qp.operators is not None:

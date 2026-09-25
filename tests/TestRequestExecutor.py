@@ -55,7 +55,7 @@ class TestRequestExecutor(unittest.IsolatedAsyncioTestCase):
 
                 try:
                     await executor.exec(callback)
-                except BaseException as caught:
+                except (RuntimeError, asyncio.CancelledError) as caught:
                     self.assertIs(caught, error)
                     self.assertEqual(traceback.extract_tb(caught.__traceback__)[-1].name, "callback")
                 else:
