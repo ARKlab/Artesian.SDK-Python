@@ -6,7 +6,7 @@ from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
 from Artesian._ClientsExecutor.Client import _Client
 import asyncio
 import itertools
-from typing import Generic, List, TypeVar
+from typing import Generic, Iterable, List, TypeVar, cast
 
 
 _QueryParametersT = TypeVar("_QueryParametersT", bound=_QueryParameters)
@@ -166,7 +166,8 @@ class _Query(Generic[_QueryParametersT]):
     async def _execAsync(self: _Query[_QueryParametersT], urls: List[str]) -> list:
         with self._client as c:
             res = await asyncio.gather(*[self._requestExecutor.exec(c.exec, "GET", i, None) for i in urls])
-            return list(itertools.chain(*res))
+            # Time-series endpoints return iterable payloads; the shared client also handles scalar responses.
+            return list(itertools.chain(*(cast(Iterable[object], response) for response in res)))
 
     def __toUrlParam(self: _Query[_QueryParametersT], start: str | None, end: str | None) -> str:
         return f"{start}/{end}"

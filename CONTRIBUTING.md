@@ -62,6 +62,9 @@ allowed only in the jsons adapter, which forwards dynamic plugin keyword argumen
 `uv run --locked pyrefly check` checks the SDK against the minimum supported
 Python version without a diagnostic baseline. Keep annotations accurate without
 changing public method names, parameters, or runtime behavior.
+Consumer typing may become stricter: unknown responses use `object` rather than
+`Any`, and nullable service results include `None`. Public import paths remain
+unchanged; internal typing cleanup must preserve jsons wire formats.
 
 ## 4. GitHub coverage
 

@@ -51,7 +51,7 @@ class MarketDataService:
         product: Optional[str] = None,
         versionFrom: Optional[str] = None,
         versionTo: Optional[str] = None,
-    ) -> PagedResultCurveRangeEntity:
+    ) -> Optional[PagedResultCurveRangeEntity]:
         """
         Reads paged set of available versions of the marketdata by id.
 
@@ -89,7 +89,7 @@ class MarketDataService:
                     )
                 ]
             )
-            return cast(PagedResultCurveRangeEntity, res[0])
+            return cast(Optional[PagedResultCurveRangeEntity], res[0])
 
     def readCurveRange(
         self: MarketDataService,
@@ -99,7 +99,7 @@ class MarketDataService:
         product: Optional[str] = None,
         versionFrom: Optional[str] = None,
         versionTo: Optional[str] = None,
-    ) -> PagedResultCurveRangeEntity:
+    ) -> Optional[PagedResultCurveRangeEntity]:
         """
         Reads paged set of available versions of the marketdata by id.
 
@@ -126,7 +126,7 @@ class MarketDataService:
         filters: Optional[Dict[str, List[str]]] = None,
         sorts: Optional[List[str]] = None,
         doNotLoadAdditionalInfo: bool = False,
-    ) -> ArtesianSearchResults:
+    ) -> Optional[ArtesianSearchResults]:
         """
         Search the MarketData collection with faceted results.
 
@@ -172,7 +172,7 @@ class MarketDataService:
                     )
                 ]
             )
-            return cast(ArtesianSearchResults, res[0])
+            return cast(Optional[ArtesianSearchResults], res[0])
 
     def searchFacet(
         self: MarketDataService,
@@ -182,7 +182,7 @@ class MarketDataService:
         filters: Optional[Dict[str, List[str]]] = None,
         sorts: Optional[List[str]] = None,
         doNotLoadAdditionalInfo: bool = False,
-    ) -> ArtesianSearchResults:
+    ) -> Optional[ArtesianSearchResults]:
         """
         Search the MarketData collection with faceted results.
 
@@ -201,7 +201,7 @@ class MarketDataService:
             self.searchFacetAsync(page, pageSize, searchText, filters, sorts, doNotLoadAdditionalInfo)
         )
 
-    async def readMarketDataRegistryByIdAsync(self: MarketDataService, id: int) -> MarketDataEntityOutput:
+    async def readMarketDataRegistryByIdAsync(self: MarketDataService, id: int) -> Optional[MarketDataEntityOutput]:
         """
         Reads MarketData by id with MarketDataID.
 
@@ -214,9 +214,9 @@ class MarketDataService:
         url = "/marketdata/entity/" + str(id)
         with self.__client as c:
             res = await asyncio.gather(*[self.__executor.exec(c.exec, "GET", url, None, retcls=MarketDataEntityOutput)])
-            return cast(MarketDataEntityOutput, res[0])
+            return cast(Optional[MarketDataEntityOutput], res[0])
 
-    def readMarketDataRegistryById(self: MarketDataService, id: int) -> MarketDataEntityOutput:
+    def readMarketDataRegistryById(self: MarketDataService, id: int) -> Optional[MarketDataEntityOutput]:
         """
         Reads MarketData by curve name with MarketDataID.
 
@@ -230,7 +230,7 @@ class MarketDataService:
 
     async def updateMarketDataAsync(
         self: MarketDataService, id: int, entity: MarketDataEntityInput
-    ) -> MarketDataEntityOutput:
+    ) -> Optional[MarketDataEntityOutput]:
         """
         Saves the given MarketData Entity
 
@@ -243,9 +243,11 @@ class MarketDataService:
         url = "/marketdata/entity/" + str(id)
         with self.__client as c:
             res = await asyncio.gather(*[self.__executor.exec(c.exec, "PUT", url, entity, MarketDataEntityOutput)])
-            return cast(MarketDataEntityOutput, res[0])
+            return cast(Optional[MarketDataEntityOutput], res[0])
 
-    def updateMarketData(self: MarketDataService, id: int, entity: MarketDataEntityInput) -> MarketDataEntityOutput:
+    def updateMarketData(
+        self: MarketDataService, id: int, entity: MarketDataEntityInput
+    ) -> Optional[MarketDataEntityOutput]:
         """
         Saves the given MarketData Entity
 
@@ -286,7 +288,7 @@ class MarketDataService:
 
     async def readMarketDataRegistryByNameAsync(
         self: MarketDataService, provider: str, curveName: str
-    ) -> MarketDataEntityOutput:
+    ) -> Optional[MarketDataEntityOutput]:
         """
         Reads MarketData by provider and curve name.
 
@@ -312,9 +314,11 @@ class MarketDataService:
                     )
                 ]
             )
-            return cast(MarketDataEntityOutput, res[0])
+            return cast(Optional[MarketDataEntityOutput], res[0])
 
-    def readMarketDataRegistryByName(self: MarketDataService, provider: str, curveName: str) -> MarketDataEntityOutput:
+    def readMarketDataRegistryByName(
+        self: MarketDataService, provider: str, curveName: str
+    ) -> Optional[MarketDataEntityOutput]:
         """
         Reads MarketData by provider and curve name.
 
@@ -327,7 +331,9 @@ class MarketDataService:
         """
         return _get_event_loop().run_until_complete(self.readMarketDataRegistryByNameAsync(provider, curveName))
 
-    async def registerMarketDataAsync(self: MarketDataService, entity: MarketDataEntityInput) -> MarketDataEntityOutput:
+    async def registerMarketDataAsync(
+        self: MarketDataService, entity: MarketDataEntityInput
+    ) -> Optional[MarketDataEntityOutput]:
         """
         Register a new MarketData entity.
 
@@ -340,9 +346,9 @@ class MarketDataService:
         url = "/marketdata/entity"
         with self.__client as c:
             res = await asyncio.gather(*[self.__executor.exec(c.exec, "POST", url, entity, MarketDataEntityOutput)])
-            return cast(MarketDataEntityOutput, res[0])
+            return cast(Optional[MarketDataEntityOutput], res[0])
 
-    def registerMarketData(self: MarketDataService, entity: MarketDataEntityInput) -> MarketDataEntityOutput:
+    def registerMarketData(self: MarketDataService, entity: MarketDataEntityInput) -> Optional[MarketDataEntityOutput]:
         """
         Register a new MarketData entity.
 
@@ -359,7 +365,7 @@ class MarketDataService:
 
     async def checkConversionAsync(
         self: MarketDataService, inputUnitsOfMeasure: List[str], targetUnitOfMeasure: str
-    ) -> CheckConversionResult:
+    ) -> Optional[CheckConversionResult]:
         """
         Check UnitOfMeasure conversion.
 
@@ -386,11 +392,11 @@ class MarketDataService:
                     )
                 ]
             )
-            return cast(CheckConversionResult, res[0])
+            return cast(Optional[CheckConversionResult], res[0])
 
     def checkConversion(
         self: MarketDataService, inputUnitsOfMeasure: List[str], targetUnitOfMeasure: str
-    ) -> CheckConversionResult:
+    ) -> Optional[CheckConversionResult]:
         """
         Check UnitOfMeasure conversion.
 
@@ -407,7 +413,7 @@ class MarketDataService:
 
     async def updateDerivedConfigurationAsync(
         self: MarketDataService, marketDataId: int, derivedCfg: DerivedCfg, force: bool = False
-    ) -> MarketDataEntityOutput:
+    ) -> Optional[MarketDataEntityOutput]:
         """
         Update Derived Configuration for marketData with id supplied in MarketDataId.
         The update will trigger a Rebuild
@@ -424,7 +430,8 @@ class MarketDataService:
 
         marketDataOutput = await self.readMarketDataRegistryByIdAsync(marketDataId)
 
-        marketDataOutput._validateUpdateDerivedCfg(derivedCfgUpdate=derivedCfg)
+        # Preserve the existing AttributeError when the source market-data entity is missing.
+        cast(MarketDataEntityOutput, marketDataOutput)._validateUpdateDerivedCfg(derivedCfgUpdate=derivedCfg)
 
         url = "/marketdata/entity/" + str(marketDataId) + "/updateDerivedConfiguration"
         params = {"force": force}
@@ -441,11 +448,11 @@ class MarketDataService:
                     )
                 ]
             )
-            return cast(MarketDataEntityOutput, res[0])
+            return cast(Optional[MarketDataEntityOutput], res[0])
 
     def updateDerivedConfiguration(
         self: MarketDataService, marketDataId: int, derivedCfg: DerivedCfg, force: bool = False
-    ) -> MarketDataEntityOutput:
+    ) -> Optional[MarketDataEntityOutput]:
         """
         Update Derived Configuration for marketData with id supplied in MarketDataId.
         The update will trigger a Rebuild
@@ -483,7 +490,7 @@ class MarketDataService:
 
     async def derivedTransformQueryValidationAsync(
         self: MarketDataService, request: DerivedTransformQueryValidation
-    ) -> DerivedTransformQueryValidationResponse:
+    ) -> Optional[DerivedTransformQueryValidationResponse]:
         """
         Derived Transform Query Validation.
 
@@ -499,11 +506,11 @@ class MarketDataService:
                 *[self.__executor.exec(c.exec, "POST", url, request, retcls=DerivedTransformQueryValidationResponse)]
             )
 
-            return cast(DerivedTransformQueryValidationResponse, res[0])
+            return cast(Optional[DerivedTransformQueryValidationResponse], res[0])
 
     def derivedTransformQueryValidation(
         self: MarketDataService, request: DerivedTransformQueryValidation
-    ) -> DerivedTransformQueryValidationResponse:
+    ) -> Optional[DerivedTransformQueryValidationResponse]:
         """
         Derived Transform Query Validation.
 

@@ -10,14 +10,14 @@ from .GMEPublicOfferService import GMEPublicOfferService
 from .GMEPublicOfferQuery import GMEPublicOfferQuery
 
 __all__ = [
-    GMEPublicOfferService.__name__,
-    GMEPublicOfferQuery.__name__,
-    BaType.__name__,
-    Scope.__name__,
-    GenerationType.__name__,
-    Market.__name__,
-    Purpose.__name__,
-    Status.__name__,
-    UnitType.__name__,
-    Zone.__name__,
-]  # type: ignore
+    "GMEPublicOfferService",
+    "GMEPublicOfferQuery",
+    "BaType",
+    "Scope",
+    "GenerationType",
+    "Market",
+    "Purpose",
+    "Status",
+    "UnitType",
+    "Zone",
+]

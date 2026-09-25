@@ -7,11 +7,11 @@ from .VersionedQuery import VersionedQuery
 from .RelativeInterval import RelativeInterval
 
 __all__ = [
-    QueryService.__name__,
-    ActualQuery.__name__,
-    MasQuery.__name__,
-    BidAskQuery.__name__,
-    VersionedQuery.__name__,
-    AuctionQuery.__name__,
-    RelativeInterval.__name__,
-]  # type: ignore
+    "QueryService",
+    "ActualQuery",
+    "MasQuery",
+    "BidAskQuery",
+    "VersionedQuery",
+    "AuctionQuery",
+    "RelativeInterval",
+]

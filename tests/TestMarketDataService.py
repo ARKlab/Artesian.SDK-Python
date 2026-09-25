@@ -116,6 +116,82 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
 
         return super().setUp()
 
+    def _not_found_cases(self):
+        validation = DerivedTransformQueryValidation(
+            data=TimeSerieData(rows={}, type=MarketDataType.ActualTimeSerie),
+            transform="SELECT * FROM $table",
+        )
+        return [
+            ("readCurveRange", "GET", "/marketdata/entity/1/curves", (1, 1, 2)),
+            ("searchFacet", "GET", "/marketdata/searchfacet", (1, 2)),
+            ("readMarketDataRegistryById", "GET", "/marketdata/entity/1", (1,)),
+            ("updateMarketData", "PUT", "/marketdata/entity/1", (1, self.__sampleInput)),
+            (
+                "readMarketDataRegistryByName",
+                "GET",
+                "/marketdata/entity",
+                ("PROVIDER", "MARKETDATA"),
+            ),
+            ("registerMarketData", "POST", "/marketdata/entity", (self.__sampleInput,)),
+            (
+                "checkConversion",
+                "GET",
+                "/uom/checkconversion",
+                ([CommonUnitOfMeasure.MW], CommonUnitOfMeasure.kW),
+            ),
+            (
+                "updateDerivedConfiguration",
+                "POST",
+                "/marketdata/entity/1/updateDerivedConfiguration",
+                (1, self.__sampleInput.derivedCfg),
+            ),
+            (
+                "derivedTransformQueryValidation",
+                "POST",
+                "/utils/derivedTransform/queryValidation",
+                (validation,),
+            ),
+        ]
+
+    def _mock_not_found(self, rsps, name, method, route):
+        if name == "updateDerivedConfiguration":
+            rsps.add(
+                "GET",
+                self.__baseurl + "/marketdata/entity/1",
+                json=self.__serializedOutput,
+                status=200,
+            )
+        rsps.add(method, self.__baseurl + route, status=404)
+
+    async def test_not_found_returns_none_async(self):
+        for name, method, route, args in self._not_found_cases():
+            with self.subTest(method=name), responses.RequestsMock() as rsps:
+                self._mock_not_found(rsps, name, method, route)
+                result = await getattr(self.__service, name + "Async")(*args)
+                self.assertIsNone(result)
+                self.assertEqual(
+                    len(rsps.calls), 2 if name == "updateDerivedConfiguration" else 1
+                )
+
+    def test_not_found_returns_none_sync(self):
+        for name, method, route, args in self._not_found_cases():
+            with self.subTest(method=name), responses.RequestsMock() as rsps:
+                self._mock_not_found(rsps, name, method, route)
+                result = getattr(self.__service, name)(*args)
+                self.assertIsNone(result)
+                self.assertEqual(
+                    len(rsps.calls), 2 if name == "updateDerivedConfiguration" else 1
+                )
+
+    async def test_updateDerivedConfiguration_missing_source_preserves_error(self):
+        with responses.RequestsMock() as rsps:
+            rsps.add("GET", self.__baseurl + "/marketdata/entity/1", status=404)
+            with self.assertRaises(AttributeError):
+                await self.__service.updateDerivedConfigurationAsync(
+                    1, self.__sampleInput.derivedCfg
+                )
+            self.assertEqual(len(rsps.calls), 1)
+
     async def test_registerMarketData(self):
         expectedJson = {
             "MarketDataId": 0,

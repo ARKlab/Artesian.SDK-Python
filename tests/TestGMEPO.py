@@ -1,3 +1,4 @@
+import Artesian
 from Artesian import ArtesianConfig
 from Artesian.GMEPublicOffers import (
     GMEPublicOfferService,
@@ -9,6 +10,7 @@ from Artesian.GMEPublicOffers import (
 )
 from . import helpers
 import unittest
+from importlib import import_module
 from urllib.parse import unquote
 from Artesian._ClientsExecutor.ArtesianJsonSerializer import artesianJsonSerialize
 import responses
@@ -153,3 +155,36 @@ class TestGMEPO(unittest.TestCase):
             )
 
         self.assertEqual(output, self.__sampleOutput)
+
+
+class TestPublicImports(unittest.TestCase):
+    def test_root_exports_preserve_public_import_identity(self):
+        expected = {
+            "__version__": Artesian.__version__,
+            "ArtesianConfig": import_module("Artesian.ArtesianConfig").ArtesianConfig,
+            "ArtesianPolicyConfig": import_module(
+                "Artesian.ArtesianPolicyConfig"
+            ).ArtesianPolicyConfig,
+            "Granularity": import_module("Artesian.Granularity").Granularity,
+        }
+        exceptions = import_module("Artesian.Exceptions")
+        for name in (
+            "ArtesianSdkException",
+            "ArtesianSdkForbiddenException",
+            "ArtesianSdkOptimisticConcurrencyException",
+            "ArtesianSdkServerException",
+            "ArtesianSdkValidationException",
+            "ArtesianSdkRemoteException",
+        ):
+            expected[name] = getattr(exceptions, name)
+        for name in ("Query", "MarketData", "GMEPublicOffers"):
+            expected[name] = import_module("Artesian." + name)
+
+        self.assertEqual(Artesian.__all__, list(expected))
+        namespace = {}
+        exec("from Artesian import *", namespace)
+        self.assertEqual(set(namespace) - {"__builtins__"}, set(expected))
+        for name, exported in expected.items():
+            with self.subTest(export=name):
+                self.assertIs(getattr(Artesian, name), exported)
+                self.assertIs(namespace[name], exported)

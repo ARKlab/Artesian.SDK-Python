@@ -1,14 +1,24 @@
-# type: ignore
-# flake8: noqa
+from __future__ import annotations
 
 import asyncio
+from collections.abc import Awaitable, Callable
 import random
 import six
 import sys
 import time
 import traceback
+from types import TracebackType
+from typing import Generic, ParamSpec, TypeVar, cast
 
+from Artesian.ArtesianPolicyConfig import ArtesianPolicyConfig
 from Artesian.Exceptions import ArtesianSdkRequestException, ArtesianSdkServerException
+
+
+_P = ParamSpec("_P")
+_T = TypeVar("_T")
+_ExceptionInfo = tuple[type[BaseException], BaseException, TracebackType | None]
+_Stop = Callable[[int, int], bool]
+_Wait = Callable[[int, int], float]
 
 
 # sys.maxint / 2, since Python 3.2 doesn't have a sys.maxint...
@@ -20,21 +30,21 @@ class _RequestExecutor:
     This class handles all of the requests sent by the Artesian Client.
     """
 
-    def __init__(self, policy) -> None:
+    def __init__(self, policy: ArtesianPolicyConfig) -> None:
         self.__policy = policy
-        self.__sem = None
+        self.__sem: asyncio.Semaphore | None = None
 
-    def getSemaphore(self):
+    def getSemaphore(self) -> asyncio.Semaphore:
         if self.__sem is None:
             self.__sem = asyncio.Semaphore(self.__policy.maxParallelism)
         return self.__sem
 
-    async def __do(self, callback, *args, **kwargs):
+    async def __do(self, callback: Callable[_P, Awaitable[_T]], *args: _P.args, **kwargs: _P.kwargs) -> _T:
         async with self.getSemaphore():
             return await callback(*args, **kwargs)
 
-    async def exec(self, callback, *args, **kwargs):
-        r = Retrying(
+    async def exec(self, callback: Callable[_P, Awaitable[_T]], *args: _P.args, **kwargs: _P.kwargs) -> _T:
+        r: Retrying[_T] = Retrying(
             wait_fixed=self.__policy.retryWaitTime,
             stop_max_attempt_number=self.__policy.maxRetry,
             retry_on_exception=lambda e: (
@@ -44,29 +54,29 @@ class _RequestExecutor:
         return await r.call(self.__do, callback, *args, **kwargs)
 
 
-class Retrying(object):
+class Retrying(Generic[_T]):
     def __init__(
         self,
-        stop=None,
-        wait=None,
-        stop_max_attempt_number=None,
-        stop_max_delay=None,
-        wait_fixed=None,
-        wait_random_min=None,
-        wait_random_max=None,
-        wait_incrementing_start=None,
-        wait_incrementing_increment=None,
-        wait_incrementing_max=None,
-        wait_exponential_multiplier=None,
-        wait_exponential_max=None,
-        retry_on_exception=None,
-        retry_on_result=None,
-        wrap_exception=False,
-        stop_func=None,
-        wait_func=None,
-        wait_jitter_max=None,
-        before_attempts=None,
-        after_attempts=None,
+        stop: str | None = None,
+        wait: str | None = None,
+        stop_max_attempt_number: int | None = None,
+        stop_max_delay: float | None = None,
+        wait_fixed: float | None = None,
+        wait_random_min: int | None = None,
+        wait_random_max: int | None = None,
+        wait_incrementing_start: float | None = None,
+        wait_incrementing_increment: float | None = None,
+        wait_incrementing_max: float | None = None,
+        wait_exponential_multiplier: float | None = None,
+        wait_exponential_max: float | None = None,
+        retry_on_exception: Callable[[BaseException], bool] | None = None,
+        retry_on_result: Callable[[_T], bool] | None = None,
+        wrap_exception: bool = False,
+        stop_func: _Stop | None = None,
+        wait_func: _Wait | None = None,
+        wait_jitter_max: float | None = None,
+        before_attempts: Callable[[int], object] | None = None,
+        after_attempts: Callable[[int], object] | None = None,
     ) -> None:
         self._stop_max_attempt_number = 5 if stop_max_attempt_number is None else stop_max_attempt_number
         self._stop_max_delay = 100 if stop_max_delay is None else stop_max_delay
@@ -84,7 +94,7 @@ class Retrying(object):
 
         # TODO add chaining of stop behaviors
         # stop behavior
-        stop_funcs = []
+        stop_funcs: list[_Stop] = []
         if stop_max_attempt_number is not None:
             stop_funcs.append(self.stop_after_attempt)
 
@@ -92,17 +102,17 @@ class Retrying(object):
             stop_funcs.append(self.stop_after_delay)
 
         if stop_func is not None:
-            self.stop = stop_func
+            self.stop: _Stop = stop_func
 
         elif stop is None:
             self.stop = lambda attempts, delay: any(f(attempts, delay) for f in stop_funcs)
 
         else:
-            self.stop = getattr(self, stop)
+            self.stop = cast(_Stop, getattr(self, stop))
 
         # TODO add chaining of wait behaviors
         # wait behavior
-        wait_funcs = []
+        wait_funcs: list[_Wait] = []
         if wait_fixed is not None:
             wait_funcs.append(self.fixed_sleep)
 
@@ -116,42 +126,42 @@ class Retrying(object):
             wait_funcs.append(self.exponential_sleep)
 
         if wait_func is not None:
-            self.wait = wait_func
+            self.wait: _Wait = wait_func
 
         elif wait is None:
             self.wait = lambda attempts, delay: max(f(attempts, delay) for f in wait_funcs)
 
         else:
-            self.wait = getattr(self, wait)
+            self.wait = cast(_Wait, getattr(self, wait))
 
         # retry on exception filter
         if retry_on_exception is None:
-            self._retry_on_exception = self.always_reject
+            self._retry_on_exception: Callable[[BaseException], bool] = self.always_reject
         else:
             self._retry_on_exception = retry_on_exception
 
         # retry on result filter
         if retry_on_result is None:
-            self._retry_on_result = self.never_reject
+            self._retry_on_result: Callable[[_T], bool] = self.never_reject
         else:
             self._retry_on_result = retry_on_result
 
         self._wrap_exception = wrap_exception
 
-    def stop_after_attempt(self, previous_attempt_number, delay_since_first_attempt_ms):
+    def stop_after_attempt(self, previous_attempt_number: int, delay_since_first_attempt_ms: int) -> bool:
         """Stop after the previous attempt >= stop_max_attempt_number."""
         return previous_attempt_number >= self._stop_max_attempt_number
 
-    def stop_after_delay(self, previous_attempt_number, delay_since_first_attempt_ms):
+    def stop_after_delay(self, previous_attempt_number: int, delay_since_first_attempt_ms: int) -> bool:
         """Stop after the time from the first attempt >= stop_max_delay."""
         return delay_since_first_attempt_ms >= self._stop_max_delay
 
     @staticmethod
-    def no_sleep(previous_attempt_number, delay_since_first_attempt_ms):
+    def no_sleep(previous_attempt_number: int, delay_since_first_attempt_ms: int) -> int:
         """Don't sleep at all before retrying."""
         return 0
 
-    def fixed_sleep(self, previous_attempt_number: int, delay_since_first_attempt_ms: int) -> int:
+    def fixed_sleep(self, previous_attempt_number: int, delay_since_first_attempt_ms: int) -> float:
         """Sleep a fixed amount of time between each retry."""
         return self._wait_fixed
 
@@ -159,7 +169,7 @@ class Retrying(object):
         """Sleep a random amount of time between wait_random_min and wait_random_max"""
         return random.randint(self._wait_random_min, self._wait_random_max)
 
-    def incrementing_sleep(self, previous_attempt_number: int, delay_since_first_attempt_ms: int) -> int:
+    def incrementing_sleep(self, previous_attempt_number: int, delay_since_first_attempt_ms: int) -> float:
         """
         Sleep an incremental amount of time after each attempt, starting at
         wait_incrementing_start and incrementing by wait_incrementing_increment
@@ -171,7 +181,7 @@ class Retrying(object):
             result = 0
         return result
 
-    def exponential_sleep(self, previous_attempt_number: int, delay_since_first_attempt_ms: int) -> int:
+    def exponential_sleep(self, previous_attempt_number: int, delay_since_first_attempt_ms: int) -> float:
         exp = 2**previous_attempt_number
         result = self._wait_exponential_multiplier * exp
         if result > self._wait_exponential_max:
@@ -181,23 +191,23 @@ class Retrying(object):
         return result
 
     @staticmethod
-    def never_reject(result):
+    def never_reject(result: object) -> bool:
         return False
 
     @staticmethod
-    def always_reject(result):
+    def always_reject(result: object) -> bool:
         return True
 
-    def should_reject(self, attempt):
+    def should_reject(self, attempt: Attempt[_T]) -> bool:
         reject = False
         if attempt.has_exception:
-            reject |= self._retry_on_exception(attempt.value[1])
+            reject |= self._retry_on_exception(cast(_ExceptionInfo, attempt.value)[1])
         else:
-            reject |= self._retry_on_result(attempt.value)
+            reject |= self._retry_on_result(cast(_T, attempt.value))
 
         return reject
 
-    async def call(self, fn, *args, **kwargs):
+    async def call(self, fn: Callable[_P, Awaitable[_T]], *args: _P.args, **kwargs: _P.kwargs) -> _T:
         start_time = int(round(time.time() * 1000))
         attempt_number = 1
         while True:
@@ -205,9 +215,10 @@ class Retrying(object):
                 self._before_attempts(attempt_number)
             try:
                 res = await fn(*args, **kwargs)
-                attempt = Attempt(res, attempt_number, False)
-            except:
-                tb = sys.exc_info()
+                attempt: Attempt[_T] = Attempt(res, attempt_number, False)
+            except BaseException:
+                # An active exception guarantees the type and value are not None.
+                tb = cast(_ExceptionInfo, sys.exc_info())
                 attempt = Attempt(tb, attempt_number, True)
 
             if not self.should_reject(attempt):
@@ -234,19 +245,20 @@ class Retrying(object):
             attempt_number += 1
 
 
-class Attempt(object):
+class Attempt(Generic[_T]):
     """
     An Attempt encapsulates a call to a target function that may end as a
     normal return value from the function or an Exception depending on what
     occurred during the execution.
     """
 
-    def __init__(self, value, attempt_number, has_exception) -> None:
+    def __init__(self, value: _T | _ExceptionInfo, attempt_number: int, has_exception: bool) -> None:
+        # has_exception distinguishes exception metadata from the callback result.
         self.value = value
         self.attempt_number = attempt_number
         self.has_exception = has_exception
 
-    def get(self, wrap_exception=False):
+    def get(self, wrap_exception: bool = False) -> _T:
         """
         Return the return value of this Attempt instance or raise an Exception.
         If wrap_exception is true, this Attempt is wrapped inside of a
@@ -256,24 +268,27 @@ class Attempt(object):
             if wrap_exception:
                 raise RetryError(self)
             else:
-                six.reraise(self.value[0], self.value[1], self.value[2])
+                value = cast(_ExceptionInfo, self.value)
+                six.reraise(value[0], value[1], value[2])
         else:
-            return self.value
+            return cast(_T, self.value)
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         if self.has_exception:
-            return "Attempts: {0}, Error:\n{1}".format(self.attempt_number, "".join(traceback.format_tb(self.value[2])))
+            return "Attempts: {0}, Error:\n{1}".format(
+                self.attempt_number, "".join(traceback.format_tb(cast(_ExceptionInfo, self.value)[2]))
+            )
         else:
             return "Attempts: {0}, Value: {1}".format(self.attempt_number, self.value)
 
 
-class RetryError(Exception):
+class RetryError(Exception, Generic[_T]):
     """
     A RetryError encapsulates the last Attempt instance right before giving up.
     """
 
-    def __init__(self, last_attempt) -> None:
+    def __init__(self, last_attempt: Attempt[_T]) -> None:
         self.last_attempt = last_attempt
 
-    def __str__(self):
+    def __str__(self) -> str:
         return "RetryError[{0}]".format(self.last_attempt)

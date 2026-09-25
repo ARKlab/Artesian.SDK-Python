@@ -10,7 +10,7 @@ if system() == "Linux":
     __commonFmt = "%04Y-%m-%dT%H:%M:%S.%f"
 
 
-def __artesianDatetimeSerializer(obj: datetime, **kwargs: Any) -> str:
+def __artesianDatetimeSerializer(obj: datetime, **kwargs: object) -> str:
     if obj.tzinfo is None:
         ret = obj.strftime(__commonFmt)
         return ret
@@ -22,7 +22,7 @@ def __artesianDatetimeSerializer(obj: datetime, **kwargs: Any) -> str:
     return ret
 
 
-def __artesianDatetimeDeserializer(obj: str, *args: Any, **kwargs: Any) -> datetime:
+def __artesianDatetimeDeserializer(obj: str, *args: object, **kwargs: object) -> datetime:
     return parser.isoparse(obj)
 
 
@@ -50,9 +50,9 @@ def __artesianDictSerializer(
     return result
 
 
-def __artesianDictDeserializer(obj: list, cls: type, *args: Any, **kwargs: Any) -> object:
+def __artesianDictDeserializer(obj: list, cls: type, *args: object, **kwargs: Any) -> object:
     key, value = get_args(cls)
-    result: Dict[key, value] = {  # type: ignore
+    result = {
         jsons.load(item["Key"], key, *args, **kwargs): jsons.load(item["Value"], value, *args, **kwargs) for item in obj
     }
 
