@@ -21,6 +21,10 @@ jobs:
     name: "Ruff / Pyrefly / Package"
     runs-on: ubuntu-latest
 
+    # These artifacts are not published; preview tags are not PEP 440 versions.
+    env:
+      SETUPTOOLS_SCM_PRETEND_VERSION: "0.0.0"
+
     permissions:
       contents: read
 
@@ -173,6 +177,8 @@ jobs:
   coverage-report:
     name: "Code Coverage"
     runs-on: ubuntu-latest
+    env:
+      SETUPTOOLS_SCM_PRETEND_VERSION: "0.0.0"
     needs:
       - build
 
