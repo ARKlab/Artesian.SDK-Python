@@ -1,5 +1,6 @@
 import os
 import tempfile
+import tomllib
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -32,6 +33,11 @@ class TestPublishingWorkflow(unittest.TestCase):
         self.assertIn('--python-version "$PYTHON_VERSION"', lint)
         self.assertEqual(steps["Run Ruff and Pyrefly"]["env"]["PYTHON_VERSION"], "${{ matrix.python-version }}")
         self.assertIn("pytest", steps["Test Pytest"]["run"])
+
+    def test_test_sources_are_included_in_lint_and_typing(self) -> None:
+        config = tomllib.loads((WORKFLOW.parents[2] / "pyproject.toml").read_text())
+        self.assertNotIn("tests", config["tool"]["ruff"]["extend-exclude"])
+        self.assertIn("tests", config["tool"]["pyrefly"]["project-includes"])
 
     def test_release_builds_are_separate_from_publisher(self) -> None:
         jobs = self.workflow["jobs"]
