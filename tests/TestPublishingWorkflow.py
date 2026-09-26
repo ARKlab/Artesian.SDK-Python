@@ -145,8 +145,17 @@ class TestPublishingWorkflow(unittest.TestCase):
             git("push", "--force", "origin", "v4.3.0a69.1")
             moved_tag = subprocess.run(command, cwd=work, env=env, capture_output=True, check=False)
             self.assertNotEqual(moved_tag.returncode, 0, moved_tag.stderr)
-            git("tag", "-f", "v4.3.0a69.1", "master")
+            git("tag", "-fa", "v4.3.0a69.1", "-m", "annotated release", "master")
             branch_validator = str(WORKFLOW.parent / "validate_branch.sh")
+            env["GITHUB_SHA"] = subprocess.check_output(
+                ["git", "rev-parse", "refs/tags/v4.3.0a69.1"], cwd=work, text=True
+            ).strip()
+            branch_check = subprocess.run(
+                ["bash", branch_validator, "master"], cwd=work, env=env, capture_output=True, check=False
+            )
+            self.assertEqual(branch_check.returncode, 0, branch_check.stderr)
+            git("tag", "-f", "v4.3.0a69.1", feature_sha)
+            git("checkout", "--detach", "master")
             branch_check = subprocess.run(
                 ["bash", branch_validator, "master"], cwd=work, env=env, capture_output=True, check=False
             )

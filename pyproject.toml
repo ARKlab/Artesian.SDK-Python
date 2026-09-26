@@ -71,12 +71,22 @@ extend-exclude = ["src/Artesian/_version.py", "samples"]
 
 [tool.ruff.lint]
 extend-select = ["ANN"]
-# ponytail: Preserve public module names, exception behavior, and jsons-sensitive typing; migrate remaining legacy rules by file.
+# ponytail: Baseline legacy patterns globally; narrow these ignores by file as the SDK is migrated.
 ignore = [
-    "BLE001", "I001", "N999",
-    "PLR1730", "RET501", "RUF022",
-    "TRY002", "UP006", "UP030", "UP032", "UP035", "UP037",
-    "UP045", "UP046", # UP046 needs Python 3.12 syntax; this package supports 3.11.
+    "BLE001", # The retry executor intentionally captures BaseException for its retry policy.
+    "I001", # Existing import order may affect package initialization; defer bulk reordering.
+    "N999", # Capitalized public module names are existing import paths.
+    "PLR1730", # Keep the retry delay clamping branches unchanged.
+    "RET501", # Service methods explicitly return None after successful async operations.
+    "RUF022", # Preserve the existing order of public __all__ exports.
+    "TRY002", # Replacing existing validation Exceptions would change callers' exception handling.
+    "UP006", # Keep legacy typing.List/Dict annotations until jsons runtime typing is verified.
+    "UP030", # Leave positional placeholders in existing query and error strings unchanged.
+    "UP032", # Leave legacy .format() query and error strings unchanged.
+    "UP035", # Keep typing collection imports used by the legacy annotations above.
+    "UP037", # Quoted self-references prevent NameError during class creation.
+    "UP045", # Keep Optional annotations until their jsons runtime typing is verified.
+    "UP046", # PEP 695 generic syntax requires Python 3.12; this package supports 3.11.
 ]
 
 [tool.ruff.lint.per-file-ignores]
