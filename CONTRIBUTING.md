@@ -85,8 +85,8 @@ artifacts and a job summary, then uses `actions/upload-code-coverage` with a
 job-scoped `code-quality: write` permission. PR coverage uses the PR head commit;
 pushes to `master` establish the comparison baseline. Fork PRs still run tests
 and produce coverage artifacts/summaries, but skip uploads requiring write
-access. Tag previews retain separate reports because they test a different
-merged commit.
+access. Tag previews also produce separate coverage artifacts for their tagged
+commit.
 
 ## 5. Release setup (maintainers)
 
@@ -105,11 +105,15 @@ Before enabling production publishing, complete these manual prerequisites:
   environment before production. A separately reviewed rehearsal workflow must
   configure its upload destination and publisher environment for TestPyPI.
 
+PRs only validate the codebase: package, lint, type, and test checks run but
+cannot build release artifacts or publish. Only a pushed release tag or a
+manual workflow dispatch **on a tag ref** can publish, after package, matrix,
+test-report, and coverage checks pass. Dispatching on a branch cannot publish.
 Release builds retain `uv build` and Twine metadata checks in `build-stable`,
 `build-beta`, and `build-preview`, without OIDC permission. Stable releases
 retain the `master` source rule, beta releases `develop-beta`, and previews
-merge the PR into current `master`, normalizing versions to `X.Y.ZaPR.postITER`.
-The preview build's merge SHA differs from the triggering tag/workflow SHA.
+build the tagged commit (which must contain current `master`), normalizing
+versions to `X.Y.ZaPR.postITER`.
 
 The separate `publish` job uses environment `pypi` and only `contents: read`
 and `id-token: write` permissions. It downloads the distribution artifact from
@@ -118,8 +122,7 @@ packages from those artifacts. Because uv publishes everything in `dist/` by
 default, the publisher first checks that the wheel and sdist filenames match the
 release tag. Build summaries record the actual build source
 SHA and distribution SHA256 digests. **Reviewers must inspect that build source
-and those digests before approving the environment**, especially for previews;
-reviewing the triggering tag alone is insufficient.
+and those digests before approving the environment**.
 
 As in [uv's GitHub publishing guide](https://docs.astral.sh/uv/guides/integration/github/#publishing-to-pypi),
 the pinned attestation action creates PEP 740 `.publish.attestation` sidecars

@@ -43,8 +43,10 @@ class TestPublishingWorkflow(unittest.TestCase):
         jobs = self.workflow["jobs"]
         publish = jobs["publish"]
         producers = ("build-stable", "build-beta", "build-preview")
-        self.assertEqual(set(publish["needs"]), set(producers))
+        self.assertEqual(set(publish["needs"]), {*producers, "test-report", "coverage-report"})
         self.assertIn("!failure()", publish["if"])
+        for name in ("test-report", "coverage-report"):
+            self.assertIn(f"needs.{name}.result == 'success'", publish["if"])
         for name in producers:
             self.assertIn(f"needs.{name}.result == 'success'", publish["if"])
             build = jobs[name]
@@ -60,11 +62,31 @@ class TestPublishingWorkflow(unittest.TestCase):
             self.assertIn("git rev-parse HEAD", steps["Record release source"]["run"])
             self.assertIn("sha256sum dist/*.whl dist/*.tar.gz", steps["Record distribution hashes"]["run"])
             self.assertEqual(steps["Upload release distributions"]["with"]["name"], "release-dist")
+            self.assertEqual(
+                next(s["with"]["ref"] for s in build["steps"] if s.get("uses", "").startswith("actions/checkout@")),
+                "${{ github.sha }}",
+            )
         preview = jobs["build-preview"]["steps"]
+        ancestry = next(s["run"] for s in preview if s["name"] == "Validate preview contains current master")
+        self.assertIn("git merge-base --is-ancestor origin/master HEAD", ancestry)
+
+    def test_release_events_require_a_tag_and_validation(self) -> None:
+        jobs = self.workflow["jobs"]
+        triggers = self.workflow.get("on", self.workflow.get(True))
+        self.assertIn("pull_request", triggers)
+        self.assertIn("workflow_dispatch", triggers)
+        self.assertIn("tags", triggers["push"])
         self.assertEqual(
-            next(s["with"]["ref"] for s in preview if s["name"] == "Checkout merged PR head"),
-            "refs/pull/${{ steps.pr.outputs.number }}/merge",
+            jobs["quality"]["steps"][0]["with"]["ref"], "${{ github.event.pull_request.head.sha || github.sha }}"
         )
+        for name in ("build-stable", "build-beta", "build-preview", "publish"):
+            condition = jobs[name]["if"]
+            self.assertIn("(github.event_name == 'push' || github.event_name == 'workflow_dispatch')", condition)
+            self.assertIn("startsWith(github.ref, 'refs/tags/v')", condition)
+        for name in ("build-stable", "build-beta", "build-preview"):
+            self.assertIn("quality", jobs[name]["needs"])
+            self.assertIn("build", jobs[name]["needs"])
+        self.assertEqual(jobs["coverage-report"]["needs"], ["build"])
 
     def test_publisher_uses_uv_attestations_without_running_build_code(self) -> None:
         jobs = self.workflow["jobs"]
