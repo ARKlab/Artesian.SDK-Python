@@ -89,6 +89,7 @@ class TestPublishingWorkflow(unittest.TestCase):
             self.assertIn("build", jobs[name]["needs"])
         self.assertEqual(jobs["coverage-report"]["needs"], ["build"])
 
+    @unittest.skipIf(os.name == "nt", "Release shell scripts run on Ubuntu; retain integration coverage on POSIX")
     def test_preview_source_must_belong_to_the_tagged_pr(self) -> None:
         steps = self.workflow["jobs"]["build-preview"]["steps"]
         script = next(s["run"] for s in steps if s["name"] == "Validate preview source")
