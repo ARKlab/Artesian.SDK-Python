@@ -13,6 +13,7 @@ from Artesian.Query._Query import _Query
 from Artesian.MarketData import AggregationRule
 from . import helpers
 from tests.helpers import Qs
+from Artesian.Query._QueryParameters.QueryParameters import toQueryParams
 import unittest
 from typing import get_type_hints
 
@@ -22,6 +23,11 @@ qs = QueryService(cfg)
 
 
 class TestActual(unittest.TestCase):
+    def test_query_params_omit_empty_values(self) -> None:
+        self.assertEqual(
+            toQueryParams([("key", "a=b"), ("zero", 0), ("absent", None), ("number", 1)]), "key=a=b&number=1"
+        )
+
     def test_execution_return_type_contracts(self) -> None:
         for query_type, method in (
             (ActualQuery, "execute"),

@@ -224,12 +224,12 @@ class GMEPublicOfferQuery:
             url = url + "&pageSize=" + str(qp.pageSize)
         if qp.scope is not None:
             sep = ","
-            scope = sep.join(map(lambda x: self.__getScope(x), qp.scope))
+            scope = sep.join(map(self.__getScope, qp.scope))
             enc = parse.quote_plus(scope)
             url = url + "&scope=" + enc
         if qp.unitType is not None:
             sep = ","
-            unitType = sep.join(map(lambda x: self.__getUnitType(x), qp.unitType))
+            unitType = sep.join(map(self.__getUnitType, qp.unitType))
             enc = parse.quote_plus(unitType)
             url = url + "&unitType=" + enc
         if qp.unit is not None:
@@ -249,17 +249,17 @@ class GMEPublicOfferQuery:
             url = url + "&operators=" + enc
         if qp.zone is not None:
             sep = ","
-            zone = sep.join(map(lambda x: self.__getZone(x), qp.zone))
+            zone = sep.join(map(self.__getZone, qp.zone))
             enc = parse.quote_plus(zone)
             url = url + "&zone=" + enc
         if qp.market is not None:
             sep = ","
-            market = sep.join(map(lambda x: self.__getMarket(x), qp.market))
+            market = sep.join(map(self.__getMarket, qp.market))
             enc = parse.quote_plus(market)
             url = url + "&market=" + enc
         if qp.baType is not None:
             sep = ","
-            baType = sep.join(map(lambda x: self.__getBaType(x), qp.baType))
+            baType = sep.join(map(self.__getBaType, qp.baType))
             enc = parse.quote_plus(baType)
             url = url + "&baType=" + enc
 
