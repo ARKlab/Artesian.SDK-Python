@@ -71,7 +71,7 @@ class TestPublishingWorkflow(unittest.TestCase):
         ancestry = next(s["run"] for s in preview if s["name"] == "Validate preview source")
         self.assertIn("git merge-base --is-ancestor origin/master HEAD", ancestry)
         self.assertIn('git fetch origin "refs/pull/$PR_NUMBER/head"', ancestry)
-        self.assertIn("git merge-base --is-ancestor HEAD FETCH_HEAD", ancestry)
+        self.assertIn("git rev-parse FETCH_HEAD^{commit}", ancestry)
         self.assertIn("git merge-base --is-ancestor HEAD origin/master", ancestry)
 
     def test_release_events_require_a_tag_and_validation(self) -> None:
@@ -110,11 +110,16 @@ class TestPublishingWorkflow(unittest.TestCase):
             git("push", "origin", "master")
             git("checkout", "-b", "feature")
             git("commit", "--allow-empty", "-m", "feature")
+            feature_sha = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=work, text=True).strip()
             git("push", "origin", "HEAD:refs/pull/69/head")
             git("push", "origin", "master:refs/pull/70/head")
+            git("commit", "--allow-empty", "-m", "stacked feature")
+            git("push", "origin", "HEAD:refs/pull/71/head")
+            git("checkout", "--detach", "HEAD^")
             for ref, tag, valid in (
                 ("HEAD", "v4.3.0a69.1", True),
                 ("HEAD", "v4.3.0a70.1", False),
+                ("HEAD", "v4.3.0a71.1", False),
                 ("master", "v4.3.0a69.1", False),
             ):
                 with self.subTest(ref=ref, tag=tag):
@@ -127,6 +132,25 @@ class TestPublishingWorkflow(unittest.TestCase):
                         check=False,
                     )
                     self.assertEqual(result.returncode == 0, valid, result.stderr)
+
+            git("checkout", "--detach", feature_sha)
+            git("tag", "v4.3.0a69.1")
+            git("push", "origin", "v4.3.0a69.1")
+            validator = str(WORKFLOW.parent / "validate_tag.sh")
+            env = {**os.environ, "GITHUB_REF": "refs/tags/v4.3.0a69.1"}
+            command = ["bash", validator, "v4.3.0a69.1", "preview"]
+            valid_tag = subprocess.run(command, cwd=work, env=env, capture_output=True, check=False)
+            self.assertEqual(valid_tag.returncode, 0, valid_tag.stderr)
+            git("tag", "-f", "v4.3.0a69.1", "master")
+            git("push", "--force", "origin", "v4.3.0a69.1")
+            moved_tag = subprocess.run(command, cwd=work, env=env, capture_output=True, check=False)
+            self.assertNotEqual(moved_tag.returncode, 0, moved_tag.stderr)
+            git("tag", "-f", "v4.3.0a69.1", "master")
+            branch_validator = str(WORKFLOW.parent / "validate_branch.sh")
+            branch_check = subprocess.run(
+                ["bash", branch_validator, "master"], cwd=work, env=env, capture_output=True, check=False
+            )
+            self.assertNotEqual(branch_check.returncode, 0, branch_check.stderr)
 
     def test_publisher_uses_uv_attestations_without_running_build_code(self) -> None:
         jobs = self.workflow["jobs"]

@@ -97,6 +97,7 @@ Before enabling production publishing, complete these manual prerequisites:
   filename **`python-tests.yml`**, and environment **`pypi`**, matching exactly.
 - Protect the GitHub **`pypi`** environment with required reviewers, prevent
   self-review, and restrict deployment to the repository's release tag patterns.
+  Protect release tags from updates or deletion after creation.
   Organization policy must allow the pinned, early-stage
   `astral-sh/attest-action` v0.0.6
   (`f589a42a7efb6fe400b4f400de60b4bc90390027`) and network access to Sigstore,
@@ -112,9 +113,9 @@ test-report, and coverage checks pass. Dispatching on a branch cannot publish.
 Release builds retain `uv build` and Twine metadata checks in `build-stable`,
 `build-beta`, and `build-preview`, without OIDC permission. Stable releases
 retain the `master` source rule, beta releases `develop-beta`, and previews
-build the tagged commit (which must contain current `master`, belong to the
-numbered PR, and not already be merged into `master`), normalizing versions
-to `X.Y.ZaPR.postITER`.
+build the tagged commit (which must contain current `master`, equal the
+numbered PR's current head, and not already be merged into `master`),
+normalizing versions to `X.Y.ZaPR.postITER`.
 
 The separate `publish` job uses environment `pypi` and only `contents: read`
 and `id-token: write` permissions. It downloads the distribution artifact from

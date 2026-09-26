@@ -38,4 +38,12 @@ if [[ ! "$TAG" =~ $PATTERN ]]; then
   exit 1
 fi
 
+if [[ "${GITHUB_REF:-}" == refs/tags/* ]]; then
+  git fetch --no-tags origin "$GITHUB_REF"
+  if [[ "$(git rev-parse FETCH_HEAD^{commit})" != "$(git rev-parse HEAD)" ]]; then
+    echo "::error::Release tag no longer points to the checked-out commit."
+    exit 1
+  fi
+fi
+
 echo "Valid $TYPE release tag: $TAG"

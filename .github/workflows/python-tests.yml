@@ -581,8 +581,8 @@ jobs:
           git fetch origin "refs/pull/$PR_NUMBER/head"
 
           if git merge-base --is-ancestor HEAD origin/master ||
-             ! git merge-base --is-ancestor HEAD FETCH_HEAD; then
-            echo "::error::PR Preview tag does not identify an unmerged commit from PR $PR_NUMBER."
+             [[ "$(git rev-parse HEAD)" != "$(git rev-parse FETCH_HEAD^{commit})" ]]; then
+            echo "::error::PR Preview tag must point to the unmerged head of PR $PR_NUMBER."
             exit 1
           fi
 
