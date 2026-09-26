@@ -1,21 +1,23 @@
 from __future__ import annotations
-from typing import List, Optional, cast, Dict
+
+import asyncio
+from typing import cast
 
 from Artesian.MarketData._Dto import DeleteData
 from Artesian.MarketData._Dto.DerivedTransformQueryValidation import DerivedTransformQueryValidation
 from Artesian.MarketData._Dto.DerivedTransformQueryValidationResponse import DerivedTransformQueryValidationResponse
-from ._Dto.DerivedCfg import DerivedCfg
-from .._ClientsExecutor.RequestExecutor import _RequestExecutor
+
 from .._ClientsExecutor.Client import _Client
+from .._ClientsExecutor.RequestExecutor import _RequestExecutor
 from ..ArtesianConfig import ArtesianConfig
 from ..ArtesianPolicyConfig import ArtesianPolicyConfig
-from ._Dto.PagedResult import PagedResultCurveRangeEntity
 from ._Dto.ArtesianSearchResults import ArtesianSearchResults
+from ._Dto.CheckConversionResult import CheckConversionResult
+from ._Dto.DerivedCfg import DerivedCfg
 from ._Dto.MarketDataEntityInput import MarketDataEntityInput
 from ._Dto.MarketDataEntityOutput import MarketDataEntityOutput
-from ._Dto.CheckConversionResult import CheckConversionResult
+from ._Dto.PagedResult import PagedResultCurveRangeEntity
 from ._Dto.UpsertData import UpsertData
-import asyncio
 
 
 class MarketDataService:
@@ -48,10 +50,10 @@ class MarketDataService:
         id: int,
         page: int,
         pageSize: int,
-        product: Optional[str] = None,
-        versionFrom: Optional[str] = None,
-        versionTo: Optional[str] = None,
-    ) -> Optional[PagedResultCurveRangeEntity]:
+        product: str | None = None,
+        versionFrom: str | None = None,
+        versionTo: str | None = None,
+    ) -> PagedResultCurveRangeEntity | None:
         """
         Reads paged set of available versions of the marketdata by id.
 
@@ -68,7 +70,7 @@ class MarketDataService:
         """
 
         url = "/marketdata/entity/" + str(id) + "/curves"
-        params: Dict[str, str | int] = {}
+        params: dict[str, str | int] = {}
         params["page"] = page
         params["pageSize"] = pageSize
         if versionFrom is not None:
@@ -89,17 +91,17 @@ class MarketDataService:
                     )
                 ]
             )
-            return cast(Optional[PagedResultCurveRangeEntity], res[0])
+            return cast(PagedResultCurveRangeEntity | None, res[0])
 
     def readCurveRange(
         self: MarketDataService,
         id: int,
         page: int,
         pageSize: int,
-        product: Optional[str] = None,
-        versionFrom: Optional[str] = None,
-        versionTo: Optional[str] = None,
-    ) -> Optional[PagedResultCurveRangeEntity]:
+        product: str | None = None,
+        versionFrom: str | None = None,
+        versionTo: str | None = None,
+    ) -> PagedResultCurveRangeEntity | None:
         """
         Reads paged set of available versions of the marketdata by id.
 
@@ -123,10 +125,10 @@ class MarketDataService:
         page: int,
         pageSize: int,
         searchText: str | None = None,
-        filters: Optional[Dict[str, List[str]]] = None,
-        sorts: Optional[List[str]] = None,
+        filters: dict[str, list[str]] | None = None,
+        sorts: list[str] | None = None,
         doNotLoadAdditionalInfo: bool = False,
-    ) -> Optional[ArtesianSearchResults]:
+    ) -> ArtesianSearchResults | None:
         """
         Search the MarketData collection with faceted results.
 
@@ -150,7 +152,7 @@ class MarketDataService:
                     filtersList.append(key + ":" + value)
 
         url = "/marketdata/searchfacet"
-        params: Dict[str, str | int | List[str] | None] = {}
+        params: dict[str, str | int | list[str] | None] = {}
         params["page"] = page
         params["pageSize"] = pageSize
         params["searchText"] = searchText
@@ -172,17 +174,17 @@ class MarketDataService:
                     )
                 ]
             )
-            return cast(Optional[ArtesianSearchResults], res[0])
+            return cast(ArtesianSearchResults | None, res[0])
 
     def searchFacet(
         self: MarketDataService,
         page: int,
         pageSize: int,
-        searchText: Optional[str] = None,
-        filters: Optional[Dict[str, List[str]]] = None,
-        sorts: Optional[List[str]] = None,
+        searchText: str | None = None,
+        filters: dict[str, list[str]] | None = None,
+        sorts: list[str] | None = None,
         doNotLoadAdditionalInfo: bool = False,
-    ) -> Optional[ArtesianSearchResults]:
+    ) -> ArtesianSearchResults | None:
         """
         Search the MarketData collection with faceted results.
 
@@ -201,7 +203,7 @@ class MarketDataService:
             self.searchFacetAsync(page, pageSize, searchText, filters, sorts, doNotLoadAdditionalInfo)
         )
 
-    async def readMarketDataRegistryByIdAsync(self: MarketDataService, id: int) -> Optional[MarketDataEntityOutput]:
+    async def readMarketDataRegistryByIdAsync(self: MarketDataService, id: int) -> MarketDataEntityOutput | None:
         """
         Reads MarketData by id with MarketDataID.
 
@@ -214,9 +216,9 @@ class MarketDataService:
         url = "/marketdata/entity/" + str(id)
         with self.__client as c:
             res = await asyncio.gather(*[self.__executor.exec(c.exec, "GET", url, None, retcls=MarketDataEntityOutput)])
-            return cast(Optional[MarketDataEntityOutput], res[0])
+            return cast(MarketDataEntityOutput | None, res[0])
 
-    def readMarketDataRegistryById(self: MarketDataService, id: int) -> Optional[MarketDataEntityOutput]:
+    def readMarketDataRegistryById(self: MarketDataService, id: int) -> MarketDataEntityOutput | None:
         """
         Reads MarketData by curve name with MarketDataID.
 
@@ -230,7 +232,7 @@ class MarketDataService:
 
     async def updateMarketDataAsync(
         self: MarketDataService, id: int, entity: MarketDataEntityInput
-    ) -> Optional[MarketDataEntityOutput]:
+    ) -> MarketDataEntityOutput | None:
         """
         Saves the given MarketData Entity
 
@@ -243,11 +245,11 @@ class MarketDataService:
         url = "/marketdata/entity/" + str(id)
         with self.__client as c:
             res = await asyncio.gather(*[self.__executor.exec(c.exec, "PUT", url, entity, MarketDataEntityOutput)])
-            return cast(Optional[MarketDataEntityOutput], res[0])
+            return cast(MarketDataEntityOutput | None, res[0])
 
     def updateMarketData(
         self: MarketDataService, id: int, entity: MarketDataEntityInput
-    ) -> Optional[MarketDataEntityOutput]:
+    ) -> MarketDataEntityOutput | None:
         """
         Saves the given MarketData Entity
 
@@ -272,7 +274,7 @@ class MarketDataService:
         url = "/marketdata/entity/" + str(id)
         with self.__client as c:
             await asyncio.gather(*[self.__executor.exec(c.exec, "DELETE", url, None)])
-            return None
+            return
 
     def deleteMarketData(self: MarketDataService, id: int) -> None:
         """
@@ -288,7 +290,7 @@ class MarketDataService:
 
     async def readMarketDataRegistryByNameAsync(
         self: MarketDataService, provider: str, curveName: str
-    ) -> Optional[MarketDataEntityOutput]:
+    ) -> MarketDataEntityOutput | None:
         """
         Reads MarketData by provider and curve name.
 
@@ -314,11 +316,11 @@ class MarketDataService:
                     )
                 ]
             )
-            return cast(Optional[MarketDataEntityOutput], res[0])
+            return cast(MarketDataEntityOutput | None, res[0])
 
     def readMarketDataRegistryByName(
         self: MarketDataService, provider: str, curveName: str
-    ) -> Optional[MarketDataEntityOutput]:
+    ) -> MarketDataEntityOutput | None:
         """
         Reads MarketData by provider and curve name.
 
@@ -333,7 +335,7 @@ class MarketDataService:
 
     async def registerMarketDataAsync(
         self: MarketDataService, entity: MarketDataEntityInput
-    ) -> Optional[MarketDataEntityOutput]:
+    ) -> MarketDataEntityOutput | None:
         """
         Register a new MarketData entity.
 
@@ -346,9 +348,9 @@ class MarketDataService:
         url = "/marketdata/entity"
         with self.__client as c:
             res = await asyncio.gather(*[self.__executor.exec(c.exec, "POST", url, entity, MarketDataEntityOutput)])
-            return cast(Optional[MarketDataEntityOutput], res[0])
+            return cast(MarketDataEntityOutput | None, res[0])
 
-    def registerMarketData(self: MarketDataService, entity: MarketDataEntityInput) -> Optional[MarketDataEntityOutput]:
+    def registerMarketData(self: MarketDataService, entity: MarketDataEntityInput) -> MarketDataEntityOutput | None:
         """
         Register a new MarketData entity.
 
@@ -364,8 +366,8 @@ class MarketDataService:
         return _get_event_loop().run_until_complete(self.registerMarketDataAsync(entity))
 
     async def checkConversionAsync(
-        self: MarketDataService, inputUnitsOfMeasure: List[str], targetUnitOfMeasure: str
-    ) -> Optional[CheckConversionResult]:
+        self: MarketDataService, inputUnitsOfMeasure: list[str], targetUnitOfMeasure: str
+    ) -> CheckConversionResult | None:
         """
         Check UnitOfMeasure conversion.
 
@@ -392,11 +394,11 @@ class MarketDataService:
                     )
                 ]
             )
-            return cast(Optional[CheckConversionResult], res[0])
+            return cast(CheckConversionResult | None, res[0])
 
     def checkConversion(
-        self: MarketDataService, inputUnitsOfMeasure: List[str], targetUnitOfMeasure: str
-    ) -> Optional[CheckConversionResult]:
+        self: MarketDataService, inputUnitsOfMeasure: list[str], targetUnitOfMeasure: str
+    ) -> CheckConversionResult | None:
         """
         Check UnitOfMeasure conversion.
 
@@ -413,7 +415,7 @@ class MarketDataService:
 
     async def updateDerivedConfigurationAsync(
         self: MarketDataService, marketDataId: int, derivedCfg: DerivedCfg, force: bool = False
-    ) -> Optional[MarketDataEntityOutput]:
+    ) -> MarketDataEntityOutput | None:
         """
         Update Derived Configuration for marketData with id supplied in MarketDataId.
         The update will trigger a Rebuild
@@ -448,11 +450,11 @@ class MarketDataService:
                     )
                 ]
             )
-            return cast(Optional[MarketDataEntityOutput], res[0])
+            return cast(MarketDataEntityOutput | None, res[0])
 
     def updateDerivedConfiguration(
         self: MarketDataService, marketDataId: int, derivedCfg: DerivedCfg, force: bool = False
-    ) -> Optional[MarketDataEntityOutput]:
+    ) -> MarketDataEntityOutput | None:
         """
         Update Derived Configuration for marketData with id supplied in MarketDataId.
         The update will trigger a Rebuild
@@ -474,7 +476,7 @@ class MarketDataService:
         url = "/marketdata/upsertdata"
         with self.__client as c:
             await asyncio.gather(*[self.__executor.exec(c.exec, "POST", url, data)])
-            return None
+            return
 
     def upsertData(self: MarketDataService, data: UpsertData) -> None:
         return _get_event_loop().run_until_complete(self.upsertDataAsync(data))
@@ -483,14 +485,14 @@ class MarketDataService:
         url = "/marketdata/deletedata"
         with self.__client as c:
             await asyncio.gather(*[self.__executor.exec(c.exec, "POST", url, data)])
-            return None
+            return
 
     def deleteData(self: MarketDataService, data: DeleteData) -> None:
         return _get_event_loop().run_until_complete(self.deleteDataAsync(data))
 
     async def derivedTransformQueryValidationAsync(
         self: MarketDataService, request: DerivedTransformQueryValidation
-    ) -> Optional[DerivedTransformQueryValidationResponse]:
+    ) -> DerivedTransformQueryValidationResponse | None:
         """
         Derived Transform Query Validation.
 
@@ -506,11 +508,11 @@ class MarketDataService:
                 *[self.__executor.exec(c.exec, "POST", url, request, retcls=DerivedTransformQueryValidationResponse)]
             )
 
-            return cast(Optional[DerivedTransformQueryValidationResponse], res[0])
+            return cast(DerivedTransformQueryValidationResponse | None, res[0])
 
     def derivedTransformQueryValidation(
         self: MarketDataService, request: DerivedTransformQueryValidation
-    ) -> Optional[DerivedTransformQueryValidationResponse]:
+    ) -> DerivedTransformQueryValidationResponse | None:
         """
         Derived Transform Query Validation.
 

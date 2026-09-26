@@ -1,6 +1,8 @@
+import unittest
+from typing import get_type_hints
+
 from Artesian import ArtesianConfig
-from Artesian.MarketData import Granularity
-from Artesian.MarketData import CommonUnitOfMeasure
+from Artesian.MarketData import AggregationRule, CommonUnitOfMeasure, Granularity
 from Artesian.Query import (
     ActualQuery,
     AuctionQuery,
@@ -10,12 +12,10 @@ from Artesian.Query import (
     VersionedQuery,
 )
 from Artesian.Query._Query import _Query
-from Artesian.MarketData import AggregationRule
-from . import helpers
-from tests.helpers import Qs
 from Artesian.Query._QueryParameters.QueryParameters import toQueryParams
-import unittest
-from typing import get_type_hints
+from tests.helpers import Qs
+
+from . import helpers
 
 cfg = ArtesianConfig("https://arkive.artesian.cloud/tenantName/", "APIKey")
 

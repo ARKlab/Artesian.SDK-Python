@@ -1,29 +1,41 @@
+import unittest
+from datetime import datetime, timedelta
+from unittest.mock import patch, sentinel
+
+import jsons
+import responses
+from dateutil import tz
+
 from Artesian import ArtesianConfig
 from Artesian._ClientsExecutor.ArtesianJsonSerializer import (
     artesianJsonDeserialize,
     artesianJsonSerialize,
 )
 from Artesian.MarketData import (
-    MarketDataService,
-    MarketDataIdentifier,
-    UpsertData,
-    MarketAssessmentValue,
-    BidAskValue,
     AuctionBids,
     AuctionBidValue,
+    BidAskValue,
+    CurveRangeEntity,
+    MarketAssessmentValue,
+    MarketDataIdentifier,
+    MarketDataService,
+    MarketDataType,
+    PagedResultCurveRangeEntity,
+    UpsertData,
 )
-from datetime import datetime, timedelta
-import jsons
-import responses
-import unittest
-from unittest.mock import patch, sentinel
-
-from dateutil import tz
+from Artesian.MarketData._Dto.TimeSerieData import TimeSerieData
 
 cfg = ArtesianConfig("https://baseurl.com", "APIKey")
 
 
 class TestMarketDataServiceUpsertData(unittest.IsolatedAsyncioTestCase):
+    def test_deserialize_nullable_dtos(self) -> None:
+        series = TimeSerieData(type=MarketDataType.ActualTimeSerie, rows={datetime(2020, 1, 1): 42.0})
+        page = PagedResultCurveRangeEntity(1, 2, 1, False, [CurveRangeEntity(5)])
+        for value in (series, page):
+            with self.subTest(cls=type(value)):
+                self.assertEqual(artesianJsonDeserialize(artesianJsonSerialize(value), type(value)), value)
+
     def test_default_downloaded_at_is_created_per_instance_in_utc(self) -> None:
         before = datetime.now(tz.UTC)
         upsert = UpsertData(MarketDataIdentifier("PROVIDER", "CURVENAME"), "UTC")

@@ -1,18 +1,20 @@
 from __future__ import annotations
+
 from urllib import parse
+
+from Artesian._ClientsExecutor.Client import _Client
+from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
 from Artesian.Query._QueryParameters.QueryParameters import (
     _FillCustomBidAskStrategy,
     _FillLatestStrategy,
     _NoFillStrategy,
     _NullFillStrategy,
 )
+
 from ._Query import _Query
 from ._QueryParameters.BidAskQueryParameters import BidAskQueryParameters
 from .DefaultPartitionStrategy import DefaultPartitionStrategy
-from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
-from Artesian._ClientsExecutor.Client import _Client
 from .RelativeInterval import RelativeInterval
-from typing import List
 
 
 class BidAskQuery(_Query[BidAskQueryParameters]):
@@ -31,7 +33,7 @@ class BidAskQuery(_Query[BidAskQueryParameters]):
         self._queryParameters = queryParameters
         self.__partition = partitionStrategy
 
-    def forMarketData(self: BidAskQuery, ids: List[int]) -> BidAskQuery:
+    def forMarketData(self: BidAskQuery, ids: list[int]) -> BidAskQuery:
         """
         Set the list of marketdata to be queried.
 
@@ -134,7 +136,7 @@ class BidAskQuery(_Query[BidAskQueryParameters]):
         super()._inRelativeInterval(relativeInterval)
         return self
 
-    def forProducts(self: BidAskQuery, products: List[str]) -> BidAskQuery:
+    def forProducts(self: BidAskQuery, products: list[str]) -> BidAskQuery:
         """
         Gets the Products tor the BidAsk Query in a time window.
 
@@ -224,7 +226,7 @@ class BidAskQuery(_Query[BidAskQueryParameters]):
         urls = self.__buildRequest()
         return await super()._execAsync(urls)
 
-    def __buildRequest(self: BidAskQuery) -> List[str]:
+    def __buildRequest(self: BidAskQuery) -> list[str]:
         self.__validateQuery()
         qps = self.__partition.PartitionBidAsk([self._queryParameters])
         urls = []
@@ -249,7 +251,7 @@ class BidAskQuery(_Query[BidAskQueryParameters]):
     def __validateQuery(self: BidAskQuery) -> None:
         super()._validateQuery()
         if self._queryParameters.products is None:
-            raise Exception(
+            raise ValueError(
                 "Products must be provided for extraction. Use .ForProducts() argument "
                 + "takes a string or string array of products"
             )

@@ -3,9 +3,9 @@ import traceback
 import unittest
 from unittest.mock import AsyncMock, call, patch
 
+from Artesian._ClientsExecutor.RequestExecutor import Attempt, RetryError, Retrying, _RequestExecutor
 from Artesian.ArtesianPolicyConfig import ArtesianPolicyConfig
 from Artesian.Exceptions import ArtesianSdkServerException
-from Artesian._ClientsExecutor.RequestExecutor import Attempt, RetryError, Retrying, _RequestExecutor
 
 
 class TestRequestExecutor(unittest.IsolatedAsyncioTestCase):

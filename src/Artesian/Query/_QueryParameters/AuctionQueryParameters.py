@@ -1,8 +1,8 @@
 from __future__ import annotations
-from typing import List, Optional
+
 from .ExtractionRangeConfig import ExtractionRangeConfig
-from .QueryParameters import _QueryParameters
 from .ExtractionRangeType import ExtractionRangeType
+from .QueryParameters import _QueryParameters
 
 
 class AuctionQueryParameters(_QueryParameters):
@@ -19,11 +19,11 @@ class AuctionQueryParameters(_QueryParameters):
 
     def __init__(
         self: AuctionQueryParameters,
-        ids: Optional[List[int]] = None,
-        extractionRangeConfig: Optional[ExtractionRangeConfig] = None,
-        extractionRangeType: Optional[ExtractionRangeType] = None,
-        timezone: Optional[str] = None,
-        filterId: Optional[int] = None,
+        ids: list[int] | None = None,
+        extractionRangeConfig: ExtractionRangeConfig | None = None,
+        extractionRangeType: ExtractionRangeType | None = None,
+        timezone: str | None = None,
+        filterId: int | None = None,
     ) -> None:
         """
         Inits AuctionQueryParameters

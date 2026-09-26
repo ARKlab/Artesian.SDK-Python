@@ -1,5 +1,4 @@
 from __future__ import annotations
-from typing import List, Optional, Tuple
 
 from .ExtractionRangeConfig import ExtractionRangeConfig
 from .ExtractionRangeType import ExtractionRangeType
@@ -37,7 +36,7 @@ class _FillCustomTimeserieStrategy(_FillStrategy):
         return f"fillerK=CustomValue&fillerDV={self.val}"
 
 
-def toQueryParams(vals: List[Tuple[str, str | float | int | None]]) -> str:
+def toQueryParams(vals: list[tuple[str, str | float | int | None]]) -> str:
     return "&".join(f"{name}={value}" for name, value in vals if value)
 
 
@@ -82,12 +81,12 @@ class _FillCustomMasStrategy(_FillStrategy):
 class _QueryParameters:
     def __init__(
         self: _QueryParameters,
-        ids: Optional[List[int]],
+        ids: list[int] | None,
         extractionRangeConfig: ExtractionRangeConfig | None = None,
-        extractionRangeType: Optional[ExtractionRangeType] = None,
-        timezone: Optional[str] = None,
-        filterId: Optional[int] = None,
-        fill: Optional[_FillStrategy] = None,
+        extractionRangeType: ExtractionRangeType | None = None,
+        timezone: str | None = None,
+        filterId: int | None = None,
+        fill: _FillStrategy | None = None,
     ) -> None:
         self.ids = ids
         self.extractionRangeConfig = (

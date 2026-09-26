@@ -1,18 +1,21 @@
 from __future__ import annotations
-from email.message import Message
-from typing import Optional, Self
-import requests
-import platform
 
-from .ArtesianJsonSerializer import artesianJsonSerialize, artesianJsonDeserialize
-from .. import __version__
+import platform
+from email.message import Message
+from typing import Self
+
+import requests
+
 from Artesian.Exceptions import (
+    ArtesianSdkForbiddenException,
+    ArtesianSdkOptimisticConcurrencyException,
     ArtesianSdkRequestException,
     ArtesianSdkServerException,
     ArtesianSdkValidationException,
-    ArtesianSdkForbiddenException,
-    ArtesianSdkOptimisticConcurrencyException,
 )
+
+from .. import __version__
+from .ArtesianJsonSerializer import artesianJsonDeserialize, artesianJsonSerialize
 
 
 class _Client:
@@ -54,8 +57,8 @@ class _Client:
         method: str,
         url: str,
         obj: object = None,
-        retcls: Optional[type] = None,
-        params: Optional[dict] = None,
+        retcls: type | None = None,
+        params: dict | None = None,
     ) -> object:
         json = artesianJsonSerialize(obj)
         url = self.__baseUrl + url
@@ -64,7 +67,7 @@ class _Client:
         try:
             res = self.__session.send(prep)
         except Exception as e:
-            raise ArtesianSdkRequestException("Unexpected error while calling {}|{}".format(method, url)) from e
+            raise ArtesianSdkRequestException(f"Unexpected error while calling {method}|{url}") from e
 
         # Replaced the deprecated 'cgi' module (removed in Python 3.13) with 'email.message'.
         msg = Message()

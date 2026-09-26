@@ -1,10 +1,11 @@
+import unittest
+from datetime import datetime
+
+import responses
+
 from Artesian import ArtesianConfig
 from Artesian._ClientsExecutor.ArtesianJsonSerializer import artesianJsonSerialize
-from Artesian.MarketData import MarketDataService, MarketDataIdentifier, DeleteData
-from datetime import datetime
-import responses
-import unittest
-
+from Artesian.MarketData import DeleteData, MarketDataIdentifier, MarketDataService
 
 cfg = ArtesianConfig("https://baseurl.com", "APIKey")
 

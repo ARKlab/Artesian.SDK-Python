@@ -1,14 +1,15 @@
 from __future__ import annotations
-from Artesian.Query.DefaultPartitionStrategy import DefaultPartitionStrategy
+
+from Artesian._ClientsExecutor.Client import _Client
+from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
+from Artesian.ArtesianConfig import ArtesianConfig
+from Artesian.ArtesianPolicyConfig import ArtesianPolicyConfig
 from Artesian.Query.ActualQuery import ActualQuery
 from Artesian.Query.AuctionQuery import AuctionQuery
-from Artesian.Query.VersionedQuery import VersionedQuery
-from Artesian.Query.MasQuery import MasQuery
 from Artesian.Query.BidAskQuery import BidAskQuery
-from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
-from Artesian._ClientsExecutor.Client import _Client
-from Artesian.ArtesianPolicyConfig import ArtesianPolicyConfig
-from Artesian.ArtesianConfig import ArtesianConfig
+from Artesian.Query.DefaultPartitionStrategy import DefaultPartitionStrategy
+from Artesian.Query.MasQuery import MasQuery
+from Artesian.Query.VersionedQuery import VersionedQuery
 
 
 class QueryService:

@@ -1,14 +1,14 @@
 from __future__ import annotations
+
 import copy
-from typing import List, TypeVar
+from typing import TypeVar
 
-from ._QueryParameters.QueryParameters import _QueryParameters
 from ._QueryParameters.ActualQueryParameters import ActualQueryParameters
-from ._QueryParameters.VersionedQueryParameters import VersionedQueryParameters
 from ._QueryParameters.AuctionQueryParameters import AuctionQueryParameters
-from ._QueryParameters.MasQueryParameters import MasQueryParameters
 from ._QueryParameters.BidAskQueryParameters import BidAskQueryParameters
-
+from ._QueryParameters.MasQueryParameters import MasQueryParameters
+from ._QueryParameters.QueryParameters import _QueryParameters
+from ._QueryParameters.VersionedQueryParameters import VersionedQueryParameters
 
 T = TypeVar("T", bound=_QueryParameters)
 
@@ -21,8 +21,8 @@ class DefaultPartitionStrategy:
 
     def PartitionActual(
         self: DefaultPartitionStrategy,
-        actualQueryParameters: List[ActualQueryParameters],
-    ) -> List[ActualQueryParameters]:
+        actualQueryParameters: list[ActualQueryParameters],
+    ) -> list[ActualQueryParameters]:
         """
         The partition strategy for the Actual Time Series Query.
 
@@ -36,8 +36,8 @@ class DefaultPartitionStrategy:
 
     def PartitionAuction(
         self: DefaultPartitionStrategy,
-        auctionQueryParameters: List[AuctionQueryParameters],
-    ) -> List[AuctionQueryParameters]:
+        auctionQueryParameters: list[AuctionQueryParameters],
+    ) -> list[AuctionQueryParameters]:
         """
         The partition strategy for the Auction Time Series Query.
 
@@ -51,8 +51,8 @@ class DefaultPartitionStrategy:
 
     def PartitionVersioned(
         self: DefaultPartitionStrategy,
-        versionedQueryParameters: List[VersionedQueryParameters],
-    ) -> List[VersionedQueryParameters]:
+        versionedQueryParameters: list[VersionedQueryParameters],
+    ) -> list[VersionedQueryParameters]:
         """
         The partition strategy for the Versioned Time Series Query.
 
@@ -65,8 +65,8 @@ class DefaultPartitionStrategy:
         return self._tsPartitionStrategy(versionedQueryParameters)
 
     def PartitionMas(
-        self: DefaultPartitionStrategy, masQueryParameters: List[MasQueryParameters]
-    ) -> List[MasQueryParameters]:
+        self: DefaultPartitionStrategy, masQueryParameters: list[MasQueryParameters]
+    ) -> list[MasQueryParameters]:
         """
         The partition strategy for the Market Assessment Query.
 
@@ -80,8 +80,8 @@ class DefaultPartitionStrategy:
 
     def PartitionBidAsk(
         self: DefaultPartitionStrategy,
-        bidAskQueryParameters: List[BidAskQueryParameters],
-    ) -> List[BidAskQueryParameters]:
+        bidAskQueryParameters: list[BidAskQueryParameters],
+    ) -> list[BidAskQueryParameters]:
         """
         The partition strategy for the Bid Ask Query.
 
@@ -93,8 +93,8 @@ class DefaultPartitionStrategy:
         """
         return self._tsPartitionStrategy(bidAskQueryParameters)
 
-    def _tsPartitionStrategy(self: DefaultPartitionStrategy, Parameters: List[T]) -> List[T]:
-        res: List[T] = []
+    def _tsPartitionStrategy(self: DefaultPartitionStrategy, Parameters: list[T]) -> list[T]:
+        res: list[T] = []
         for param in Parameters:
             if param.ids is None:
                 res.append(param)

@@ -1,5 +1,4 @@
 from __future__ import annotations
-from typing import Optional
 
 
 class ArtesianSdkException(Exception):
@@ -32,8 +31,8 @@ class ArtesianSdkRemoteException(ArtesianSdkException):
         method: str,
         url: str,
         statusCode: int,
-        problemDetails: Optional[dict] = None,
-        errorText: Optional[str] = None,
+        problemDetails: dict | None = None,
+        errorText: str | None = None,
     ) -> None:
         """
         Inits the Artesian Sdk Remote Exception.
@@ -80,11 +79,11 @@ class ArtesianSdkRemoteException(ArtesianSdkException):
         return self._statusCode
 
     @property
-    def problemDetails(self: ArtesianSdkRemoteException) -> Optional[dict]:
+    def problemDetails(self: ArtesianSdkRemoteException) -> dict | None:
         return self._problemDetails
 
     @property
-    def errorText(self: ArtesianSdkRemoteException) -> Optional[str]:
+    def errorText(self: ArtesianSdkRemoteException) -> str | None:
         return self._errorText
 
 
@@ -98,8 +97,8 @@ class ArtesianSdkValidationException(ArtesianSdkRemoteException):
         method: str,
         url: str,
         statusCode: int,
-        problemDetails: Optional[dict] = None,
-        errorText: Optional[str] = None,
+        problemDetails: dict | None = None,
+        errorText: str | None = None,
     ) -> None:
         """
         Inits the Artesian Sdk Validation Exception.
@@ -124,8 +123,8 @@ class ArtesianSdkOptimisticConcurrencyException(ArtesianSdkRemoteException):
         method: str,
         url: str,
         statusCode: int,
-        problemDetails: Optional[dict] = None,
-        errorText: Optional[str] = None,
+        problemDetails: dict | None = None,
+        errorText: str | None = None,
     ) -> None:
         """
         Inits the Artesian Sdk Optimistic Concurrency Exception.
@@ -150,8 +149,8 @@ class ArtesianSdkForbiddenException(ArtesianSdkRemoteException):
         method: str,
         url: str,
         statusCode: int,
-        problemDetails: Optional[dict] = None,
-        errorText: Optional[str] = None,
+        problemDetails: dict | None = None,
+        errorText: str | None = None,
     ) -> None:
         """
         Inits the Artesian Sdk Forbidden Exception.
@@ -176,8 +175,8 @@ class ArtesianSdkServerException(ArtesianSdkRemoteException):
         method: str,
         url: str,
         statusCode: int,
-        problemDetails: Optional[dict] = None,
-        errorText: Optional[str] = None,
+        problemDetails: dict | None = None,
+        errorText: str | None = None,
     ) -> None:
         """
         Inits the Artesian Sdk Server Exception.

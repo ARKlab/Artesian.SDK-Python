@@ -1,9 +1,12 @@
 from __future__ import annotations
-from typing import Any, Callable
+
+from collections.abc import Callable
+from typing import Any
 from unittest.mock import Mock, patch
-import Artesian.Query._Query as _Query
+from urllib.parse import unquote, urlparse
+
 import Artesian.GMEPublicOffers as _GMEPO
-from urllib.parse import urlparse, unquote
+import Artesian.Query._Query as _Query
 
 
 class Qs:

@@ -1,18 +1,19 @@
 from __future__ import annotations
+
 from urllib import parse
+
+from Artesian._ClientsExecutor.Client import _Client
+from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
 from Artesian.Query._QueryParameters.QueryParameters import (
     _FillCustomMasStrategy,
     _FillLatestStrategy,
     _NoFillStrategy,
     _NullFillStrategy,
 )
-from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
-from Artesian._ClientsExecutor.Client import _Client
-from .DefaultPartitionStrategy import DefaultPartitionStrategy
+
 from ._Query import _Query
 from ._QueryParameters.MasQueryParameters import MasQueryParameters
-from typing import List
-
+from .DefaultPartitionStrategy import DefaultPartitionStrategy
 from .RelativeInterval import RelativeInterval
 
 
@@ -32,7 +33,7 @@ class MasQuery(_Query[MasQueryParameters]):
         self._queryParameters = queryParameters
         self.__partition = partitionStrategy
 
-    def forMarketData(self: MasQuery, ids: List[int]) -> MasQuery:
+    def forMarketData(self: MasQuery, ids: list[int]) -> MasQuery:
         """
         Set the list of marketdata to be queried.
 
@@ -136,7 +137,7 @@ class MasQuery(_Query[MasQueryParameters]):
         super()._inRelativeInterval(relativeInterval)
         return self
 
-    def forProducts(self: MasQuery, products: List[str]) -> MasQuery:
+    def forProducts(self: MasQuery, products: list[str]) -> MasQuery:
         """
         Gets the Products tor the BidAsk Query in a time window.
 
@@ -224,7 +225,7 @@ class MasQuery(_Query[MasQueryParameters]):
         urls = self.__buildRequest()
         return await super()._execAsync(urls)
 
-    def __buildRequest(self: MasQuery) -> List[str]:
+    def __buildRequest(self: MasQuery) -> list[str]:
         self.__validateQuery()
         qps = self.__partition.PartitionMas([self._queryParameters])
         urls = []
@@ -249,7 +250,7 @@ class MasQuery(_Query[MasQueryParameters]):
     def __validateQuery(self: MasQuery) -> None:
         super()._validateQuery()
         if self._queryParameters.products is None:
-            raise Exception(
+            raise ValueError(
                 "Products must be provided for extraction. Use .ForProducts() "
                 + "argument takes a string or string array of products"
             )

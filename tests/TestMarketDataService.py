@@ -1,12 +1,14 @@
-from Artesian import ArtesianConfig
-import responses
 import unittest
+from datetime import datetime
+
+import responses
+
+from Artesian import ArtesianConfig
+from Artesian._ClientsExecutor.ArtesianJsonSerializer import artesianJsonSerialize
+from Artesian.MarketData import *
 from Artesian.MarketData._Dto.DerivedTransformQueryValidation import DerivedTransformQueryValidation
 from Artesian.MarketData._Dto.DerivedTransformQueryValidationResponse import DerivedTransformQueryValidationResponse
 from Artesian.MarketData._Dto.TimeSerieData import TimeSerieData
-from Artesian._ClientsExecutor.ArtesianJsonSerializer import artesianJsonSerialize
-from datetime import datetime
-from Artesian.MarketData import *
 
 cfg = ArtesianConfig("https://baseurl.com", "APIKey")
 

@@ -1,12 +1,10 @@
 from dataclasses import dataclass
-from typing import Dict, List, Optional
+from typing import Optional
 
+from .._Enum import AggregationRule, Granularity, MarketDataType
+from .._Enum.DerivedAlgorithm import DerivedAlgorithm
 from .DerivedCfg import DerivedCfg
 from .UnitOfMeasure import UnitOfMeasure
-from .._Enum.DerivedAlgorithm import DerivedAlgorithm
-from .._Enum import MarketDataType
-from .._Enum import AggregationRule
-from .._Enum import Granularity
 
 
 @dataclass
@@ -38,26 +36,26 @@ class MarketDataEntityInput:
     unitOfMeasure: Optional[UnitOfMeasure] = None
     derivedCfg: Optional[DerivedCfg] = None
     aggregationRule: AggregationRule = AggregationRule.Undefined
-    tags: Optional[Dict[str, List[str]]] = None
+    tags: Optional[dict[str, list[str]]] = None
     providerDescription: Optional[str] = None
     transformID: Optional[int] = None
     marketDataId: int = 0
     eTag: Optional[str] = None
 
-    def _validateDerivedCfg(self: "MarketDataEntityInput") -> None:
+    def _validateDerivedCfg(self) -> None:
         if (
             self.derivedCfg is not None
             and self.derivedCfg.derivedAlgorithm == DerivedAlgorithm.MUV
             and self.derivedCfg.orderedReferencedMarketDataIds is not None
         ):
-            raise Exception("DerivedCfg with MUV algorithm cannot have orderedReferencedMarketDataIds")
+            raise ValueError("DerivedCfg with MUV algorithm cannot have orderedReferencedMarketDataIds")
 
         if (
             self.derivedCfg is not None
             and self.derivedCfg.derivedAlgorithm is not DerivedAlgorithm.MUV
             and self.derivedCfg.orderedReferencedMarketDataIds is None
         ):
-            raise Exception(
+            raise ValueError(
                 f"DerivedCfg with {self.derivedCfg.derivedAlgorithm} algorithm "
                 "must have orderedReferencedMarketDataIds valorized or empty []"
             )
@@ -68,7 +66,7 @@ class MarketDataEntityInput:
             in {DerivedAlgorithm.Coalesce, DerivedAlgorithm.Sum, DerivedAlgorithm.Transform}
             and self.type is not MarketDataType.ActualTimeSerie
         ):
-            raise Exception(
+            raise ValueError(
                 f"DerivedCfg with {self.derivedCfg.derivedAlgorithm} algorithm "
                 "must be set to MarketData of type Actual only."
             )
@@ -78,7 +76,7 @@ class MarketDataEntityInput:
             and self.derivedCfg.derivedAlgorithm is DerivedAlgorithm.MUV
             and self.type is not MarketDataType.VersionedTimeSerie
         ):
-            raise Exception(
+            raise ValueError(
                 f"DerivedCfg with {self.derivedCfg.derivedAlgorithm} algorithm "
                 "must be set to MarketData of type Versioned only."
             )
@@ -88,7 +86,7 @@ class MarketDataEntityInput:
             and self.derivedCfg.derivedAlgorithm is DerivedAlgorithm.Transform
             and self.derivedCfg.transform is None
         ):
-            raise Exception(f"DerivedCfg with {self.derivedCfg.derivedAlgorithm} algorithm must have transform set.")
+            raise ValueError(f"DerivedCfg with {self.derivedCfg.derivedAlgorithm} algorithm must have transform set.")
 
         if (
             self.derivedCfg is not None
@@ -98,7 +96,7 @@ class MarketDataEntityInput:
                 or len(self.derivedCfg.orderedReferencedMarketDataIds) != 1
             )
         ):
-            raise Exception(
+            raise ValueError(
                 f"DerivedCfg with {self.derivedCfg.derivedAlgorithm} algorithm "
                 "must have exactly one orderedReferencedMarketDataIds."
             )

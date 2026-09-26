@@ -1,8 +1,9 @@
 from __future__ import annotations
+
+from Artesian._ClientsExecutor.Client import _Client
+from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
 from Artesian.ArtesianConfig import ArtesianConfig
 from Artesian.ArtesianPolicyConfig import ArtesianPolicyConfig
-from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
-from Artesian._ClientsExecutor.Client import _Client
 
 from .GMEPublicOfferQuery import GMEPublicOfferQuery
 

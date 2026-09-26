@@ -1,13 +1,15 @@
+import unittest
 from ast import Dict
+
+import responses
+
 from Artesian import (
-    ArtesianSdkValidationException,
-    ArtesianSdkOptimisticConcurrencyException,
     ArtesianSdkForbiddenException,
+    ArtesianSdkOptimisticConcurrencyException,
     ArtesianSdkServerException,
+    ArtesianSdkValidationException,
 )
 from Artesian._ClientsExecutor.Client import _Client
-import unittest
-import responses
 
 
 class TestClientErrorHandling(unittest.IsolatedAsyncioTestCase):
@@ -88,9 +90,7 @@ class TestClientErrorHandling(unittest.IsolatedAsyncioTestCase):
                     self.assertEqual(ex.exception.problemDetails, problemDetails)
                     self.assertEqual(
                         ex.exception.message,
-                        "Failed REST call to Artesian. GET https://baseurl.com/{} returned {}. DETAIL".format(
-                            code, code
-                        ),
+                        f"Failed REST call to Artesian. GET https://baseurl.com/{code} returned {code}. DETAIL",
                     )
 
     async def test_problemDetailsWithoutDetails(self) -> None:
@@ -150,7 +150,5 @@ class TestClientErrorHandling(unittest.IsolatedAsyncioTestCase):
                     self.assertEqual(ex.exception.errorText, body)
                     self.assertEqual(
                         ex.exception.message,
-                        "Failed REST call to Artesian. GET https://baseurl.com/{} returned {}. BODY STRING".format(
-                            code, code
-                        ),
+                        f"Failed REST call to Artesian. GET https://baseurl.com/{code} returned {code}. BODY STRING",
                     )

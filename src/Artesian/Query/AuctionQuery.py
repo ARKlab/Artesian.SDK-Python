@@ -1,13 +1,14 @@
 from __future__ import annotations
+
 from urllib import parse
-from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
+
 from Artesian._ClientsExecutor.Client import _Client
-from Artesian.Query.DefaultPartitionStrategy import DefaultPartitionStrategy
+from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
 from Artesian.Query._Query import _Query
 from Artesian.Query._QueryParameters.AuctionQueryParameters import (
     AuctionQueryParameters,
 )
-from typing import List
+from Artesian.Query.DefaultPartitionStrategy import DefaultPartitionStrategy
 
 
 class AuctionQuery(_Query[AuctionQueryParameters]):
@@ -26,7 +27,7 @@ class AuctionQuery(_Query[AuctionQueryParameters]):
         self._queryParameters = queryParameters
         self.__partition = partitionStrategy
 
-    def forMarketData(self: AuctionQuery, ids: List[int]) -> AuctionQuery:
+    def forMarketData(self: AuctionQuery, ids: list[int]) -> AuctionQuery:
         """
         Set the list of marketdata to be queried.
 
@@ -133,7 +134,7 @@ class AuctionQuery(_Query[AuctionQueryParameters]):
         urls = self.__buildRequest()
         return await super()._execAsync(urls)
 
-    def __buildRequest(self: AuctionQuery) -> List[str]:
+    def __buildRequest(self: AuctionQuery) -> list[str]:
         self.__validateQuery()
         qps = self.__partition.PartitionAuction([self._queryParameters])
         urls = []
@@ -154,4 +155,4 @@ class AuctionQuery(_Query[AuctionQueryParameters]):
     def __validateQuery(self: AuctionQuery) -> None:
         super()._validateQuery()
         if self._queryParameters.ids is None and self._queryParameters.filterId is None:
-            raise Exception("Extraction ids or filterid must be provided. Use .forMarketData() " + "or .forFilterId()")
+            raise ValueError("Extraction ids or filterid must be provided. Use .forMarketData() " + "or .forFilterId()")

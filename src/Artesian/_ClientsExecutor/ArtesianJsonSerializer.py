@@ -1,9 +1,10 @@
+from collections.abc import Callable
 from datetime import datetime
 from platform import system
-from dateutil import parser
-import jsons
-from typing import Any, Callable, Dict, Optional, TypedDict, get_args
+from typing import Any, TypedDict, get_args
 
+import jsons
+from dateutil import parser
 
 __commonFmt = "%Y-%m-%dT%H:%M:%S.%f"
 if system() == "Linux":
@@ -38,9 +39,7 @@ def __is_valid_json_key(key: object) -> bool:
     return issubclass(type(key), (str, int, float, bool)) or key is None
 
 
-def __artesianDictSerializer(
-    obj: dict, *, key_transformer: Optional[Callable[[str], str]] = None, **kwargs: Any
-) -> list:
+def __artesianDictSerializer(obj: dict, *, key_transformer: Callable[[str], str] | None = None, **kwargs: Any) -> list:
     result = []
     for key, obj_ in obj.items():
         key_ = key if __is_valid_json_key(key) else jsons.dump(key, key_transformer=None, **kwargs)
@@ -60,8 +59,8 @@ def __artesianDictDeserializer(obj: list, cls: type, *args: object, **kwargs: An
 
 __artesianJsonSerializer = jsons.JsonSerializable.fork()
 
-jsons.set_serializer(__artesianDictSerializer, Dict, high_prio=True, fork_inst=__artesianJsonSerializer)
-jsons.set_deserializer(__artesianDictDeserializer, Dict, high_prio=True, fork_inst=__artesianJsonSerializer)
+jsons.set_serializer(__artesianDictSerializer, dict, high_prio=True, fork_inst=__artesianJsonSerializer)
+jsons.set_deserializer(__artesianDictDeserializer, dict, high_prio=True, fork_inst=__artesianJsonSerializer)
 
 jsons.set_serializer(
     __artesianDatetimeSerializer,
@@ -93,7 +92,7 @@ __artesianJsonKwArgs: _ArtesianJsonOptions = {
 }
 
 
-def artesianJsonSerialize(obj: object, cls: Optional[type] = None, **kwargs: Any) -> object:
+def artesianJsonSerialize(obj: object, cls: type | None = None, **kwargs: Any) -> object:
     """
     Sets the Artesian Json Serializer.
 
@@ -105,11 +104,11 @@ def artesianJsonSerialize(obj: object, cls: Optional[type] = None, **kwargs: Any
     Returns:
       JsonSerializer.
     """
-    kwargs_: Dict[str, Any] = {**__artesianJsonKwArgs, **kwargs}
+    kwargs_: dict[str, Any] = {**__artesianJsonKwArgs, **kwargs}
     return jsons.dump(obj, cls, key_transformer=__camelToPascal, **kwargs_)
 
 
-def artesianJsonDeserialize(obj: object, cls: Optional[type] = None, **kwargs: Any) -> object:
+def artesianJsonDeserialize(obj: object, cls: type | None = None, **kwargs: Any) -> object:
     """
     Sets the Artesian Json Deserializer.
 
@@ -121,5 +120,5 @@ def artesianJsonDeserialize(obj: object, cls: Optional[type] = None, **kwargs: A
     Returns:
       JsonDeserializer.
     """
-    kwargs_: Dict[str, Any] = {**__artesianJsonKwArgs, **kwargs, "strict": False}
+    kwargs_: dict[str, Any] = {**__artesianJsonKwArgs, **kwargs, "strict": False}
     return jsons.load(obj, cls, key_transformer=__pascalToCamel, **kwargs_)

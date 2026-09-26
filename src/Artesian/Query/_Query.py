@@ -1,13 +1,16 @@
 from __future__ import annotations
-from ._QueryParameters.QueryParameters import _QueryParameters
-from ._QueryParameters.ExtractionRangeType import ExtractionRangeType
-from .RelativeInterval import RelativeInterval
-from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
-from Artesian._ClientsExecutor.Client import _Client
+
 import asyncio
 import itertools
-from typing import Generic, Iterable, List, TypeVar, cast
+from collections.abc import Iterable
+from typing import Generic, TypeVar, cast
 
+from Artesian._ClientsExecutor.Client import _Client
+from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
+
+from ._QueryParameters.ExtractionRangeType import ExtractionRangeType
+from ._QueryParameters.QueryParameters import _QueryParameters
+from .RelativeInterval import RelativeInterval
 
 _QueryParametersT = TypeVar("_QueryParametersT", bound=_QueryParameters)
 
@@ -25,7 +28,7 @@ class _Query(Generic[_QueryParametersT]):
         self._client = client
         self._requestExecutor = requestExecutor
 
-    def _forMarketData(self: _Query[_QueryParametersT], ids: List[int]) -> _Query[_QueryParametersT]:
+    def _forMarketData(self: _Query[_QueryParametersT], ids: list[int]) -> _Query[_QueryParametersT]:
         """Set the list of marketdata to be queried.
 
         Args:
@@ -155,15 +158,15 @@ class _Query(Generic[_QueryParametersT]):
         assert queryParamaters.extractionRangeType is not None
         subPath = switcher.get(queryParamaters.extractionRangeType, "ExtractionRangeType")
         if subPath == "ExtractionRangeType" or subPath is None:
-            raise Exception("Not supported RangeType")
+            raise ValueError("Not supported RangeType")
         return subPath
 
-    def _exec(self: _Query[_QueryParametersT], urls: List[str]) -> list[object]:
+    def _exec(self: _Query[_QueryParametersT], urls: list[str]) -> list[object]:
         loop = get_event_loop()
         rr = loop.run_until_complete(self._execAsync(urls))
         return rr
 
-    async def _execAsync(self: _Query[_QueryParametersT], urls: List[str]) -> list[object]:
+    async def _execAsync(self: _Query[_QueryParametersT], urls: list[str]) -> list[object]:
         with self._client as c:
             res = await asyncio.gather(*[self._requestExecutor.exec(c.exec, "GET", i, None) for i in urls])
             # Time-series endpoints return iterable payloads; the shared client also handles scalar responses.
@@ -174,12 +177,12 @@ class _Query(Generic[_QueryParametersT]):
 
     def _validateQuery(self: _Query[_QueryParametersT]) -> None:
         if self._queryParameters.extractionRangeType is None:
-            raise Exception(
+            raise ValueError(
                 "Data extraction range must be provided. Provide a date range, period"
                 + " or period range or an interval eg .InAbsoluteDateRange()"
             )
         if self._queryParameters.ids is None and self._queryParameters.filterId is None:
-            raise Exception(
+            raise ValueError(
                 "Marketadata ids OR filterId must be provided for extraction. "
                 + "Use .ForMarketData() OR .ForFilterId() and provide an integer "
                 + "or integer array as an argument"
@@ -198,7 +201,7 @@ class _Query(Generic[_QueryParametersT]):
         }
         subPath = switcher.get(interval, "RelativeInterval")
         if subPath == "RelativeInterval":
-            raise Exception("Not supported RelativeInterval")
+            raise ValueError("Not supported RelativeInterval")
         return subPath
 
 

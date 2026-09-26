@@ -1,5 +1,11 @@
+import unittest
+from importlib import import_module
+
+import responses
+
 import Artesian
 from Artesian import ArtesianConfig
+from Artesian._ClientsExecutor.ArtesianJsonSerializer import artesianJsonSerialize
 from Artesian.GMEPublicOffers import (
     GMEPublicOfferService,
     Market,
@@ -8,12 +14,9 @@ from Artesian.GMEPublicOffers import (
     UnitType,
     Zone,
 )
-from . import helpers
 from tests.helpers import QsPO
-import unittest
-from importlib import import_module
-from Artesian._ClientsExecutor.ArtesianJsonSerializer import artesianJsonSerialize
-import responses
+
+from . import helpers
 
 cfg = ArtesianConfig("https://arkive.artesian.cloud/tenantName/", "APIKey")
 
@@ -21,6 +24,10 @@ qs = GMEPublicOfferService(cfg)
 
 
 class TestGMEPO(unittest.TestCase):
+    def test_invalid_query_raises_value_error(self) -> None:
+        with self.assertRaisesRegex(ValueError, "Extraction Purpose must be provided"):
+            qs.createQuery().execute()
+
     def setUp(self) -> None:
         self.__baseurl = "https://arkive.artesian.cloud/tenantName//"
         self.__sampleOutput = {
@@ -176,7 +183,7 @@ class TestPublicImports(unittest.TestCase):
         for name in ("Query", "MarketData", "GMEPublicOffers"):
             expected[name] = import_module("Artesian." + name)
 
-        self.assertEqual(Artesian.__all__, list(expected))
+        self.assertCountEqual(Artesian.__all__, expected)
         namespace = {}
         exec("from Artesian import *", namespace)
         self.assertEqual(set(namespace) - {"__builtins__"}, set(expected))

@@ -1,12 +1,12 @@
 from __future__ import annotations
-from typing import List, Optional
+
+from Artesian.MarketData import AggregationRule, Granularity
+
 from .ExtractionRangeConfig import ExtractionRangeConfig
+from .ExtractionRangeType import ExtractionRangeType
 from .QueryParameters import _QueryParameters
 from .VersionSelectionConfig import VersionSelectionConfig
-from .ExtractionRangeType import ExtractionRangeType
 from .VersionSelectionType import VersionSelectionType
-from Artesian.MarketData import Granularity
-from Artesian.MarketData import AggregationRule
 
 
 class VersionedQueryParameters(_QueryParameters):
@@ -29,18 +29,18 @@ class VersionedQueryParameters(_QueryParameters):
 
     def __init__(
         self: VersionedQueryParameters,
-        ids: Optional[List[int]] = None,
-        extractionRangeConfig: Optional[ExtractionRangeConfig] = None,
-        extractionRangeType: Optional[ExtractionRangeType] = None,
-        timezone: Optional[str] = None,
-        filterId: Optional[int] = None,
-        granularity: Optional[Granularity] = None,
-        transformId: Optional[str] = None,
-        versionSelectionConfig: Optional[VersionSelectionConfig] = None,
-        versionSelectionType: Optional[VersionSelectionType] = None,
-        versionLimit: Optional[str] = None,
-        unitOfMeasure: Optional[str] = None,
-        aggregationRule: Optional[AggregationRule] = None,
+        ids: list[int] | None = None,
+        extractionRangeConfig: ExtractionRangeConfig | None = None,
+        extractionRangeType: ExtractionRangeType | None = None,
+        timezone: str | None = None,
+        filterId: int | None = None,
+        granularity: Granularity | None = None,
+        transformId: str | None = None,
+        versionSelectionConfig: VersionSelectionConfig | None = None,
+        versionSelectionType: VersionSelectionType | None = None,
+        versionLimit: str | None = None,
+        unitOfMeasure: str | None = None,
+        aggregationRule: AggregationRule | None = None,
     ) -> None:
         """
         Inits VersionedQueryParameters

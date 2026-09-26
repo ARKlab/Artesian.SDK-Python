@@ -1,12 +1,14 @@
+import unittest
+
 from Artesian import ArtesianConfig
 from Artesian.Query import QueryService
 from Artesian.Query._QueryParameters.QueryParameters import (
     _FillCustomBidAskStrategy,
     _FillCustomMasStrategy,
 )
-from . import helpers
 from tests.helpers import Qs
-import unittest
+
+from . import helpers
 
 cfg = ArtesianConfig("https://arkive.artesian.cloud/tenantName/", "APIKey")
 

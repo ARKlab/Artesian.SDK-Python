@@ -1,18 +1,18 @@
 from __future__ import annotations
 
 import asyncio
-from collections.abc import Awaitable, Callable
 import random
-import six
 import sys
 import time
 import traceback
+from collections.abc import Awaitable, Callable
 from types import TracebackType
 from typing import Generic, ParamSpec, TypeVar, cast
 
+import six
+
 from Artesian.ArtesianPolicyConfig import ArtesianPolicyConfig
 from Artesian.Exceptions import ArtesianSdkRequestException, ArtesianSdkServerException
-
 
 _P = ParamSpec("_P")
 _T = TypeVar("_T")
@@ -173,18 +173,18 @@ class Retrying(Generic[_T]):
         wait_incrementing_start and incrementing by wait_incrementing_increment
         """
         result = self._wait_incrementing_start + (self._wait_incrementing_increment * (previous_attempt_number - 1))
-        if result > self._wait_incrementing_max:
+        if result > self._wait_incrementing_max:  # noqa: PLR1730 - preserve the retry delay bounds
             result = self._wait_incrementing_max
-        if result < 0:
+        if result < 0:  # noqa: PLR1730 - preserve the retry delay bounds
             result = 0
         return result
 
     def exponential_sleep(self, previous_attempt_number: int, delay_since_first_attempt_ms: int) -> float:
         exp = 2**previous_attempt_number
         result = self._wait_exponential_multiplier * exp
-        if result > self._wait_exponential_max:
+        if result > self._wait_exponential_max:  # noqa: PLR1730 - preserve the retry delay bounds
             result = self._wait_exponential_max
-        if result < 0:
+        if result < 0:  # noqa: PLR1730 - preserve the retry delay bounds
             result = 0
         return result
 
@@ -214,7 +214,7 @@ class Retrying(Generic[_T]):
             try:
                 res = await fn(*args, **kwargs)
                 attempt: Attempt[_T] = Attempt(res, attempt_number, False)
-            except BaseException:
+            except BaseException:  # noqa: BLE001 - retry policy handles callback exceptions, including cancellation
                 # An active exception guarantees the type and value are not None.
                 tb = cast(_ExceptionInfo, sys.exc_info())
                 attempt = Attempt(tb, attempt_number, True)
@@ -273,11 +273,9 @@ class Attempt(Generic[_T]):
 
     def __repr__(self) -> str:
         if self.has_exception:
-            return "Attempts: {0}, Error:\n{1}".format(
-                self.attempt_number, "".join(traceback.format_tb(cast(_ExceptionInfo, self.value)[2]))
-            )
+            return f"Attempts: {self.attempt_number}, Error:\n{''.join(traceback.format_tb(cast(_ExceptionInfo, self.value)[2]))}"
         else:
-            return "Attempts: {0}, Value: {1}".format(self.attempt_number, self.value)
+            return f"Attempts: {self.attempt_number}, Value: {self.value}"
 
 
 class RetryError(Exception, Generic[_T]):
@@ -289,4 +287,4 @@ class RetryError(Exception, Generic[_T]):
         self.last_attempt = last_attempt
 
     def __str__(self) -> str:
-        return "RetryError[{0}]".format(self.last_attempt)
+        return f"RetryError[{self.last_attempt}]"

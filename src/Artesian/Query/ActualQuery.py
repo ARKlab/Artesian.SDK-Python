@@ -1,21 +1,22 @@
 from __future__ import annotations
+
+from urllib import parse
+
 from Artesian.Exceptions import ArtesianSdkException
+from Artesian.MarketData import AggregationRule, Granularity
 from Artesian.Query._QueryParameters.QueryParameters import (
     _FillCustomTimeserieStrategy,
     _FillLatestStrategy,
     _NoFillStrategy,
     _NullFillStrategy,
 )
-from .._ClientsExecutor.RequestExecutor import _RequestExecutor
+
 from .._ClientsExecutor.Client import _Client
-from .DefaultPartitionStrategy import DefaultPartitionStrategy
+from .._ClientsExecutor.RequestExecutor import _RequestExecutor
 from ._Query import _Query
-from .RelativeInterval import RelativeInterval
 from ._QueryParameters.ActualQueryParameters import ActualQueryParameters
-from Artesian.MarketData import Granularity
-from Artesian.MarketData import AggregationRule
-from urllib import parse
-from typing import List, Optional
+from .DefaultPartitionStrategy import DefaultPartitionStrategy
+from .RelativeInterval import RelativeInterval
 
 
 class ActualQuery(_Query[ActualQueryParameters]):
@@ -34,7 +35,7 @@ class ActualQuery(_Query[ActualQueryParameters]):
         self._queryParameters = queryParameters
         self.__partition = partitionStrategy
 
-    def forMarketData(self: ActualQuery, ids: List[int]) -> ActualQuery:
+    def forMarketData(self: ActualQuery, ids: list[int]) -> ActualQuery:
         """
         Set the list of marketdata to be queried.
 
@@ -263,16 +264,12 @@ class ActualQuery(_Query[ActualQueryParameters]):
         urls = self.__buildRequest()
         return await super()._execAsync(urls)
 
-    def __buildRequest(self: ActualQuery) -> List[str]:
+    def __buildRequest(self: ActualQuery) -> list[str]:
         self.__validateQuery()
         qps = self.__partition.PartitionActual([self._queryParameters])
         urls = []
         for qp in qps:
-            url = "/{0}/{1}/{2}?_=1".format(
-                self.__routePrefix,
-                self.__getGranularityPath(qp.granularity),
-                super()._buildExtractionRangeRoute(qp),
-            )
+            url = f"/{self.__routePrefix}/{self.__getGranularityPath(qp.granularity)}/{super()._buildExtractionRangeRoute(qp)}?_=1"
             if qp.ids is not None:
                 sep = ","
                 ids = sep.join(map(str, qp.ids))
@@ -296,11 +293,11 @@ class ActualQuery(_Query[ActualQueryParameters]):
     def __validateQuery(self: ActualQuery) -> None:
         super()._validateQuery()
         if self._queryParameters.granularity is None:
-            raise Exception(
+            raise ValueError(
                 "Extraction granularity must be provided. Use .InGranularity() " + "argument takes a granularity type"
             )
 
-    def __getGranularityPath(self: ActualQuery, granularity: Optional[Granularity]) -> str:
+    def __getGranularityPath(self: ActualQuery, granularity: Granularity | None) -> str:
         switcher = {
             Granularity.Day: "Day",
             Granularity.FifteenMinute: "FifteenMinute",

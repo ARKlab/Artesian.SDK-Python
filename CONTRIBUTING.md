@@ -70,6 +70,10 @@ dynamic plugin keyword arguments and the test decorators' dynamic unittest insta
 version without a diagnostic baseline. CI also checks each supported version.
 Keep annotations accurate without
 changing public method names, parameters, or runtime behavior.
+Use `TypeVar` and `Generic[T]` for generic classes until the minimum supported
+Python is 3.12; PEP 695's `class Name[T]` syntax cannot be parsed by Python 3.11.
+MarketData DTOs retain `Optional[T]` because jsons 1.6 cannot deserialize their
+`T | None` annotations on Python 3.11.
 Consumer typing may become stricter: unknown responses use `object` rather than
 `Any`, and nullable service results include `None`. Public import paths remain
 unchanged; internal typing cleanup must preserve jsons wire formats.
