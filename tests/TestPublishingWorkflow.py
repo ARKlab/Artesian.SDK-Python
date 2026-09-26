@@ -1,4 +1,5 @@
 import os
+import subprocess
 import tempfile
 import tomllib
 import unittest
@@ -67,8 +68,11 @@ class TestPublishingWorkflow(unittest.TestCase):
                 "${{ github.sha }}",
             )
         preview = jobs["build-preview"]["steps"]
-        ancestry = next(s["run"] for s in preview if s["name"] == "Validate preview contains current master")
+        ancestry = next(s["run"] for s in preview if s["name"] == "Validate preview source")
         self.assertIn("git merge-base --is-ancestor origin/master HEAD", ancestry)
+        self.assertIn('git fetch origin "refs/pull/$PR_NUMBER/head"', ancestry)
+        self.assertIn("git merge-base --is-ancestor HEAD FETCH_HEAD", ancestry)
+        self.assertIn("git merge-base --is-ancestor HEAD origin/master", ancestry)
 
     def test_release_events_require_a_tag_and_validation(self) -> None:
         jobs = self.workflow["jobs"]
@@ -76,9 +80,7 @@ class TestPublishingWorkflow(unittest.TestCase):
         self.assertIn("pull_request", triggers)
         self.assertIn("workflow_dispatch", triggers)
         self.assertIn("tags", triggers["push"])
-        self.assertEqual(
-            jobs["quality"]["steps"][0]["with"]["ref"], "${{ github.event.pull_request.head.sha || github.sha }}"
-        )
+        self.assertNotIn("ref", jobs["quality"]["steps"][0]["with"])
         for name in ("build-stable", "build-beta", "build-preview", "publish"):
             condition = jobs[name]["if"]
             self.assertIn("(github.event_name == 'push' || github.event_name == 'workflow_dispatch')", condition)
@@ -87,6 +89,44 @@ class TestPublishingWorkflow(unittest.TestCase):
             self.assertIn("quality", jobs[name]["needs"])
             self.assertIn("build", jobs[name]["needs"])
         self.assertEqual(jobs["coverage-report"]["needs"], ["build"])
+
+    def test_preview_source_must_belong_to_the_tagged_pr(self) -> None:
+        steps = self.workflow["jobs"]["build-preview"]["steps"]
+        script = next(s["run"] for s in steps if s["name"] == "Validate preview source")
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            work = root / "work"
+            work.mkdir()
+            subprocess.run(["git", "init", "--bare", str(root / "origin.git")], check=True, capture_output=True)
+
+            def git(*args: str) -> None:
+                subprocess.run(["git", *args], cwd=work, check=True, capture_output=True)
+
+            git("init", "-b", "master")
+            git("config", "user.name", "CI")
+            git("config", "user.email", "ci@example.invalid")
+            git("remote", "add", "origin", str(root / "origin.git"))
+            git("commit", "--allow-empty", "-m", "base")
+            git("push", "origin", "master")
+            git("checkout", "-b", "feature")
+            git("commit", "--allow-empty", "-m", "feature")
+            git("push", "origin", "HEAD:refs/pull/69/head")
+            git("push", "origin", "master:refs/pull/70/head")
+            for ref, tag, valid in (
+                ("HEAD", "v4.3.0a69.1", True),
+                ("HEAD", "v4.3.0a70.1", False),
+                ("master", "v4.3.0a69.1", False),
+            ):
+                with self.subTest(ref=ref, tag=tag):
+                    git("checkout", "--detach", ref)
+                    result = subprocess.run(
+                        ["bash", "-e", "-o", "pipefail", "-c", script],
+                        cwd=work,
+                        env={**os.environ, "GITHUB_REF_NAME": tag},
+                        capture_output=True,
+                        check=False,
+                    )
+                    self.assertEqual(result.returncode == 0, valid, result.stderr)
 
     def test_publisher_uses_uv_attestations_without_running_build_code(self) -> None:
         jobs = self.workflow["jobs"]

@@ -32,7 +32,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
         with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
 
       - name: Set up uv
@@ -567,7 +566,7 @@ jobs:
         shell: bash
         run: bash .github/workflows/validate_tag.sh "$GITHUB_REF_NAME" preview
 
-      - name: "Validate preview contains current master"
+      - name: "Validate preview source"
         shell: bash
         run: |
           git fetch origin master
@@ -577,7 +576,15 @@ jobs:
             exit 1
           fi
 
-          echo "PR Preview tag contains the current master."
+          PR_NUMBER="${GITHUB_REF_NAME#*a}"
+          PR_NUMBER="${PR_NUMBER%%.*}"
+          git fetch origin "refs/pull/$PR_NUMBER/head"
+
+          if git merge-base --is-ancestor HEAD origin/master ||
+             ! git merge-base --is-ancestor HEAD FETCH_HEAD; then
+            echo "::error::PR Preview tag does not identify an unmerged commit from PR $PR_NUMBER."
+            exit 1
+          fi
 
       - name: "Record release source"
         id: source

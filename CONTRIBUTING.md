@@ -112,8 +112,9 @@ test-report, and coverage checks pass. Dispatching on a branch cannot publish.
 Release builds retain `uv build` and Twine metadata checks in `build-stable`,
 `build-beta`, and `build-preview`, without OIDC permission. Stable releases
 retain the `master` source rule, beta releases `develop-beta`, and previews
-build the tagged commit (which must contain current `master`), normalizing
-versions to `X.Y.ZaPR.postITER`.
+build the tagged commit (which must contain current `master`, belong to the
+numbered PR, and not already be merged into `master`), normalizing versions
+to `X.Y.ZaPR.postITER`.
 
 The separate `publish` job uses environment `pypi` and only `contents: read`
 and `id-token: write` permissions. It downloads the distribution artifact from
