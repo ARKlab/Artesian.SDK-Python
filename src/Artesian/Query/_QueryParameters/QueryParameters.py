@@ -86,14 +86,14 @@ class _QueryParameters:
     def __init__(
         self: _QueryParameters,
         ids: Optional[List[int]],
-        extractionRangeConfig: ExtractionRangeConfig = ExtractionRangeConfig(),
+        extractionRangeConfig: ExtractionRangeConfig | None = None,
         extractionRangeType: Optional[ExtractionRangeType] = None,
         timezone: Optional[str] = None,
         filterId: Optional[int] = None,
         fill: Optional[_FillStrategy] = None,
     ) -> None:
         self.ids = ids
-        self.extractionRangeConfig = extractionRangeConfig
+        self.extractionRangeConfig = extractionRangeConfig if extractionRangeConfig is not None else ExtractionRangeConfig()
         self.extractionRangeType = extractionRangeType
         self.timezone = timezone
         self.filterId = filterId

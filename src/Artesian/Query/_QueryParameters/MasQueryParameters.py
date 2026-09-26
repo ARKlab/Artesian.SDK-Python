@@ -21,7 +21,7 @@ class MasQueryParameters(_QueryParameters):
     def __init__(
         self: MasQueryParameters,
         ids: Optional[List[int]] = None,
-        extractionRangeConfig: ExtractionRangeConfig = ExtractionRangeConfig(),
+        extractionRangeConfig: Optional[ExtractionRangeConfig] = None,
         extractionRangeType: Optional[ExtractionRangeType] = None,
         timezone: Optional[str] = None,
         filterId: Optional[int] = None,

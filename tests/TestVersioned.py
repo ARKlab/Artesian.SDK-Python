@@ -7,6 +7,12 @@ from . import helpers
 import unittest
 
 from tests.helpers import Qs
+from Artesian.Query._QueryParameters.ActualQueryParameters import ActualQueryParameters
+from Artesian.Query._QueryParameters.AuctionQueryParameters import AuctionQueryParameters
+from Artesian.Query._QueryParameters.BidAskQueryParameters import BidAskQueryParameters
+from Artesian.Query._QueryParameters.MasQueryParameters import MasQueryParameters
+from Artesian.Query._QueryParameters.QueryParameters import _QueryParameters
+from Artesian.Query._QueryParameters.VersionedQueryParameters import VersionedQueryParameters
 
 cfg = ArtesianConfig("https://arkive.artesian.cloud/tenantName/", "APIKey")
 
@@ -14,6 +20,25 @@ qs = QueryService(cfg)
 
 
 class TestVersioned(unittest.TestCase):
+    def test_default_query_configs_are_not_shared(self) -> None:
+        for params_type in (
+            ActualQueryParameters,
+            AuctionQueryParameters,
+            BidAskQueryParameters,
+            MasQueryParameters,
+            VersionedQueryParameters,
+            _QueryParameters,
+        ):
+            with self.subTest(params_type=params_type):
+                first = params_type(ids=None)
+                second = params_type(ids=None)
+                first.extractionRangeConfig.dateStart = "2020-01-01"
+                self.assertIsNone(second.extractionRangeConfig.dateStart)
+        first_versioned = VersionedQueryParameters()
+        second_versioned = VersionedQueryParameters()
+        first_versioned.versionSelectionConfig.lastN = 3
+        self.assertIsNone(second_versioned.versionSelectionConfig.lastN)
+
     @helpers.TrackRequests
     def test_Null_Fill(self: TestVersioned, requests: Qs) -> None:
         (

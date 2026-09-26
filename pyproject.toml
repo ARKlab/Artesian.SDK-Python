@@ -73,7 +73,7 @@ extend-exclude = ["src/Artesian/_version.py", "tests", "samples"]
 extend-select = ["ANN"]
 # ponytail: Legacy SDK naming and annotations produce 516 findings; remove these baselines as files are migrated.
 ignore = [
-    "B008", "BLE001", "C417", "I001", "N999", "PLC0206",
+    "BLE001", "C417", "I001", "N999", "PLC0206",
     "PLR1730", "PYI034", "RET501", "RUF009", "RUF022", "RUF046",
     "SIM101", "TRY002", "UP006", "UP030", "UP032", "UP035", "UP037",
     "UP045", "UP046",
