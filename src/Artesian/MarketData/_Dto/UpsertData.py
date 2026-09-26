@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Dict, List, Optional
 from dateutil import tz
@@ -111,7 +111,7 @@ class UpsertData:
 
     ID: MarketDataIdentifier
     timezone: str
-    downloadedAt: datetime = datetime.utcnow().replace(tzinfo=tz.UTC)
+    downloadedAt: datetime = field(default_factory=lambda: datetime.now(tz.UTC))
     version: Optional[datetime] = None
     rows: Optional[Dict[datetime, Optional[float]]] = None
     marketAssessment: Optional[Dict[datetime, Dict[str, MarketAssessmentValue]]] = None

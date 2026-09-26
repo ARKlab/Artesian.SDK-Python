@@ -12,7 +12,7 @@ from Artesian.MarketData import (
     AuctionBids,
     AuctionBidValue,
 )
-from datetime import datetime
+from datetime import datetime, timedelta
 import jsons
 import responses
 import unittest
@@ -24,6 +24,14 @@ cfg = ArtesianConfig("https://baseurl.com", "APIKey")
 
 
 class TestMarketDataServiceUpsertData(unittest.IsolatedAsyncioTestCase):
+    def test_default_downloaded_at_is_created_per_instance_in_utc(self):
+        before = datetime.now(tz.UTC)
+        upsert = UpsertData(MarketDataIdentifier("PROVIDER", "CURVENAME"), "UTC")
+        after = datetime.now(tz.UTC)
+        self.assertLessEqual(before, upsert.downloadedAt)
+        self.assertLessEqual(upsert.downloadedAt, after)
+        self.assertEqual(upsert.downloadedAt.utcoffset(), timedelta(0))
+
     def setUp(self) -> None:
         self.__service = MarketDataService(cfg)
         self.maxDiff = None
