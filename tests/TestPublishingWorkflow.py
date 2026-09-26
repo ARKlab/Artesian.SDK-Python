@@ -1,3 +1,4 @@
+import json
 import os
 import subprocess
 import tempfile
@@ -15,6 +16,20 @@ class TestPublishingWorkflow(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.workflow = yaml.safe_load(WORKFLOW.read_text())
+
+    def test_workflow_actions_are_pinned_and_renovate_keeps_pins(self) -> None:
+        for path in sorted(WORKFLOW.parent.glob("*")):
+            if path.suffix not in {".yml", ".yaml"}:
+                continue
+            workflow = yaml.safe_load(path.read_text())
+            for job in workflow["jobs"].values():
+                for entry in [job, *job.get("steps", [])]:
+                    if "uses" not in entry or entry["uses"].startswith("./"):
+                        continue
+                    with self.subTest(workflow=path.name, action=entry["uses"]):
+                        self.assertRegex(entry["uses"], r"^[^@\s]+@[0-9a-f]{40}$")
+        config = json.loads((WORKFLOW.parents[2] / "renovate.json").read_text())
+        self.assertIn("helpers:pinGitHubActionDigests", config["extends"])
 
     def test_supported_python_versions_get_linted_and_tested(self) -> None:
         jobs = self.workflow["jobs"]
