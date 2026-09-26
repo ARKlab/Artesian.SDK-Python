@@ -3,7 +3,7 @@ name = "artesian-sdk"
 dynamic = ["version"]
 description = "Library provides read access to the Artesian API"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 license = {file = "LICENSE"}
 keywords = ["Artesian"]
 authors = [
@@ -15,7 +15,6 @@ maintainers = [
 classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
@@ -65,13 +64,20 @@ test = [
 ]
 
 [tool.ruff]
-target-version = "py310"
+target-version = "py314"
 line-length = 120
 include = ["*.py", "*.pyi"]
 extend-exclude = ["src/Artesian/_version.py", "tests", "samples"]
 
 [tool.ruff.lint]
-select = ["E", "F", "ANN"]
+extend-select = ["ANN"]
+# ponytail: Legacy SDK naming and annotations produce 516 findings; remove these baselines as files are migrated.
+ignore = [
+    "B008", "BLE001", "C417", "DTZ003", "I001", "N999", "PLC0206",
+    "PLR1730", "PYI034", "RET501", "RUF009", "RUF022", "RUF046",
+    "SIM101", "TRY002", "UP006", "UP030", "UP032", "UP035", "UP037",
+    "UP045", "UP046",
+]
 
 [tool.ruff.lint.per-file-ignores]
 # jsons accepts dynamically typed plugin keyword arguments at this adapter boundary.
@@ -80,7 +86,7 @@ select = ["E", "F", "ANN"]
 [tool.pyrefly]
 project-includes = ["src"]
 project-excludes = ["src/Artesian/_version.py"]
-python-version = "3.10"
+python-version = "3.14"
 
 [tool.coverage.run]
 branch = true

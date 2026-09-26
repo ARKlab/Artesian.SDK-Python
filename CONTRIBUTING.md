@@ -6,7 +6,7 @@ Install [uv](https://docs.astral.sh/uv/getting-started/installation/) using the
 version in `[tool.uv].required-version` in `pyproject.toml`, then:
 
 ```sh
-uv sync --locked --python 3.12
+uv sync --locked --python 3.14
 ```
 
 This creates `.venv` and installs the SDK, test dependencies, Ruff, Pyrefly, and
@@ -17,13 +17,13 @@ The [Pyrefly VS Code extension](https://pyrefly.org/en/docs/IDE/#vscode-extensio
 uses the locked environment binary, workspace diagnostics, and inlay hints for
 argument names, inferred return types, and variable types.
 
-Python 3.10 is the minimum supported **package** version. CI tests 3.10–3.14
-on Linux, Windows, and macOS; quality checks run on 3.12 for a consistent typing
-environment. Development tools are defined only in the `dev` and `test`
+Python 3.11 is the minimum supported **package** version. CI tests and lints
+3.11–3.14 on Linux, Windows, and macOS; development defaults to 3.14.
+Development tools are defined only in the `dev` and `test`
 dependency groups and installed from `uv.lock`; the legacy `.[dev]` extra
 has been removed. Use `uv sync` instead.
 
-End-of-life Python 3.8/3.9 are no longer supported.
+Python 3.8–3.10 are no longer supported.
 
 ## 2. Run checks
 
@@ -41,14 +41,20 @@ discovers `Test*.py` files and writes JUnit XML, terminal coverage, `coverage.xm
 (Cobertura), and `htmlcov/`. Branch coverage is enabled; generated version code
 is excluded.
 
-To check the minimum supported interpreter without installing development tools:
+To check compatibility on an older supported interpreter (including polyfills
+and syntax/type compatibility), switch interpreters and run the same checks as CI:
 
 ```sh
-uv sync --locked --python 3.10 --no-dev --group test
+uv sync --locked --python 3.11
+uv run --no-sync ruff check --target-version py311 .
+uv run --no-sync ruff format --check --target-version py311 .
+uv run --no-sync pyrefly check --python-version 3.11
 uv run --no-sync pytest
 ```
 
-Run `uv sync --locked --python 3.12` to restore the development environment.
+Repeat with 3.12 and 3.13 (and matching Ruff/Pyrefly flags); don't assume that
+passing checks on 3.14 guarantees compatibility with earlier supported versions.
+Run `uv sync --locked --python 3.14` to restore the development environment.
 To update dependencies intentionally, use `uv lock --upgrade` (or
 `uv lock --upgrade-package NAME`) and commit the resulting lockfile with any
 `pyproject.toml` changes. Tool upgrades must also update their pinned constraints.
@@ -60,8 +66,9 @@ Python files. CI enforces formatting and linting for SDK source; tests and
 samples retain their existing exclusion from lint checks. Explicit `Any` is
 allowed only in the jsons adapter, which forwards dynamic plugin keyword arguments.
 
-`uv run --locked pyrefly check` checks the SDK against the minimum supported
-Python version without a diagnostic baseline. Keep annotations accurate without
+`uv run --locked pyrefly check` checks the SDK on the development Python
+version without a diagnostic baseline. CI also checks each supported version.
+Keep annotations accurate without
 changing public method names, parameters, or runtime behavior.
 Consumer typing may become stricter: unknown responses use `object` rather than
 `Any`, and nullable service results include `None`. Public import paths remain
@@ -96,10 +103,7 @@ Before enabling production publishing, complete these manual prerequisites:
   GitHub OIDC, and PyPI.
 - Rehearse on TestPyPI using a separate project, Trusted Publisher, and protected
   environment before production. A separately reviewed rehearsal workflow must
-  configure **both** the upload destination and its Integrity API verification
-  endpoint, and change the verifier's expected publisher environment (currently
-  literal `pypi`) to match the rehearsal environment. Changing only the upload
-  URL is insufficient.
+  configure its upload destination and publisher environment for TestPyPI.
 
 Release builds retain `uv build` and Twine metadata checks in `build-stable`,
 `build-beta`, and `build-preview`, without OIDC permission. Stable releases
@@ -108,22 +112,20 @@ merge the PR into current `master`, normalizing versions to `X.Y.ZaPR.postITER`.
 The preview build's merge SHA differs from the triggering tag/workflow SHA.
 
 The separate `publish` job uses environment `pypi` and only `contents: read`
-and `id-token: write` permissions. It downloads wheel/sdist artifacts by
-immutable Actions artifact ID; it does not check out or build source, or
-install packages from those artifacts. Summaries record the actual build source
-SHA, artifact SHA256 digests, and workflow run identity. **Reviewers must inspect
-that build source and those digests before approving the environment**, especially
-for previews; reviewing the triggering tag alone is insufficient.
+and `id-token: write` permissions. It downloads the distribution artifact from
+the successful release build; it does not check out or build source, or install
+packages from those artifacts. Build summaries record the actual build source
+SHA and distribution SHA256 digests. **Reviewers must inspect that build source
+and those digests before approving the environment**, especially for previews;
+reviewing the triggering tag alone is insufficient.
 
-The pinned attestation action creates PEP 740 `.publish.attestation` sidecars;
-uv **0.12.19** uploads with `--trusted-publishing always`. Explicit checks require
-sidecars before upload and confirm post-upload PyPI Integrity API attestation
-presence, subject digests, and publisher identity over HTTPS. This is a
-consistency/presence check, **not independent cryptographic verification**;
-PyPI verifies signatures on upload. These attestations establish publication
-identity, **not full build provenance**. A post-upload check failure cannot roll
-back published files. Retrying an identical file may skip its upload, so missing
-attestations require investigation rather than assuming a retry will repair them.
+As in [uv's GitHub publishing guide](https://docs.astral.sh/uv/guides/integration/github/#publishing-to-pypi),
+the pinned attestation action creates PEP 740 `.publish.attestation` sidecars
+and `uv publish --trusted-publishing always` uploads them with the distributions.
+PyPI verifies attestations on upload; they establish publication identity,
+**not full build provenance**. uv retries uploads and skips identical files
+already present on PyPI; investigate any missing attestations rather than
+assuming a retry will repair them.
 
 This repository change does not perform external administrative setup or publish
 to production. Revoke `PYPI_API_TOKEN` only after a successful migration,
