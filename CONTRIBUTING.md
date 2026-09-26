@@ -114,7 +114,9 @@ The preview build's merge SHA differs from the triggering tag/workflow SHA.
 The separate `publish` job uses environment `pypi` and only `contents: read`
 and `id-token: write` permissions. It downloads the distribution artifact from
 the successful release build; it does not check out or build source, or install
-packages from those artifacts. Build summaries record the actual build source
+packages from those artifacts. Because uv publishes everything in `dist/` by
+default, the publisher first checks that the wheel and sdist filenames match the
+release tag. Build summaries record the actual build source
 SHA and distribution SHA256 digests. **Reviewers must inspect that build source
 and those digests before approving the environment**, especially for previews;
 reviewing the triggering tag alone is insufficient.

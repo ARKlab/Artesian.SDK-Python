@@ -1,5 +1,8 @@
+import os
+import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 import yaml
 
@@ -59,10 +62,10 @@ class TestPublishingWorkflow(unittest.TestCase):
         publish = jobs["publish"]
         self.assertEqual(publish["environment"]["name"], "pypi")
         self.assertEqual([s["name"] for s in publish["steps"]], [
-            "Download release distributions", "Set up pinned uv",
+            "Download release distributions", "Check release filenames", "Set up pinned uv",
             "Generate PEP 740 publish attestations", "Publish with required Trusted Publishing",
         ])
-        download, setup, attest, upload = publish["steps"]
+        download, _, setup, attest, upload = publish["steps"]
         self.assertEqual(download["with"], {"name": "release-dist", "path": "dist"})
         self.assertEqual(setup["with"]["version"], "0.12.19")
         self.assertRegex(attest["uses"], r"^astral-sh/attest-action@[0-9a-f]{40}$")
@@ -71,3 +74,33 @@ class TestPublishingWorkflow(unittest.TestCase):
         self.assertIn("uv publish --no-config --trusted-publishing always", upload["run"])
         self.assertIn("https://upload.pypi.org/legacy/", upload["run"])
         self.assertFalse(any("actions/checkout" in s.get("uses", "") for s in publish["steps"]))
+
+    def test_publisher_rejects_distributions_outside_release_tag(self):
+        step = next(s for s in self.workflow["jobs"]["publish"]["steps"] if s["name"] == "Check release filenames")
+        self.assertEqual(step["shell"], "python")
+        with tempfile.TemporaryDirectory() as directory:
+            previous = Path.cwd()
+            try:
+                os.chdir(directory)
+                dist = Path("dist")
+                dist.mkdir()
+                for tag, version in (
+                    ("v4.3.0", "4.3.0"),
+                    ("v4.3.0b2", "4.3.0b2"),
+                    ("v04.03.00a069.02", "4.3.0a69.post2"),
+                ):
+                    with self.subTest(tag=tag), patch.dict(os.environ, {"GITHUB_REF_NAME": tag}):
+                        for path in dist.iterdir():
+                            path.unlink()
+                        (dist / f"artesian_sdk-{version}-py3-none-any.whl").touch()
+                        (dist / f"artesian_sdk-{version}.tar.gz").touch()
+                        exec(compile(step["run"], str(WORKFLOW), "exec"), {})
+                        (dist / "other.whl").touch()
+                        with self.assertRaisesRegex(SystemExit, "do not match"):
+                            exec(compile(step["run"], str(WORKFLOW), "exec"), {})
+                        (dist / "other.whl").unlink()
+                        with patch.dict(os.environ, {"GITHUB_REF_NAME": "v9.9.9"}):
+                            with self.assertRaisesRegex(SystemExit, "do not match"):
+                                exec(compile(step["run"], str(WORKFLOW), "exec"), {})
+            finally:
+                os.chdir(previous)

@@ -343,6 +343,26 @@ jobs:
           name: release-dist
           path: dist
 
+      - name: "Check release filenames"
+        shell: python
+        run: |
+          import os
+          import re
+          from pathlib import Path
+
+          match = re.fullmatch(r"v(\d+\.\d+\.\d+)(?:b(\d+)|a(\d+)\.(\d+))?", os.environ["GITHUB_REF_NAME"])
+          if not match:
+              raise SystemExit("Invalid release tag")
+          base, beta, pr, iteration = match.groups()
+          version = ".".join(str(int(part)) for part in base.split("."))
+          if beta:
+              version += f"b{int(beta)}"
+          elif pr:
+              version += f"a{int(pr)}.post{int(iteration)}"
+          expected = {f"artesian_sdk-{version}-py3-none-any.whl", f"artesian_sdk-{version}.tar.gz"}
+          if {path.name for path in Path("dist").iterdir()} != expected:
+              raise SystemExit("Release distributions do not match the tag")
+
       - name: "Set up pinned uv"
         uses: astral-sh/setup-uv@v10.2.0
         with:
