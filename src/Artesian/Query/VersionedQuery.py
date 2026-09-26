@@ -1,25 +1,26 @@
 from __future__ import annotations
-from typing import List, Optional
+
 from urllib import parse
-from Artesian.Exceptions import ArtesianSdkException
-from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
+
 from Artesian._ClientsExecutor.Client import _Client
-from .DefaultPartitionStrategy import DefaultPartitionStrategy
-from ._Query import _Query
+from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
+from Artesian.Exceptions import ArtesianSdkException
+from Artesian.MarketData import AggregationRule, Granularity
 from Artesian.Query._QueryParameters.QueryParameters import (
     _FillCustomTimeserieStrategy,
     _FillLatestStrategy,
     _NoFillStrategy,
     _NullFillStrategy,
 )
+
+from ._Query import _Query
 from ._QueryParameters.VersionedQueryParameters import VersionedQueryParameters
 from ._QueryParameters.VersionSelectionType import VersionSelectionType
+from .DefaultPartitionStrategy import DefaultPartitionStrategy
 from .RelativeInterval import RelativeInterval
-from Artesian.MarketData import Granularity
-from Artesian.MarketData import AggregationRule
 
 
-class VersionedQuery(_Query):
+class VersionedQuery(_Query[VersionedQueryParameters]):
     __routePrefix = "vts"
 
     def __init__(
@@ -35,7 +36,7 @@ class VersionedQuery(_Query):
         self._queryParameters = queryParameters
         self.__partition = partitionStrategy
 
-    def forMarketData(self: VersionedQuery, ids: List[int]) -> VersionedQuery:
+    def forMarketData(self: VersionedQuery, ids: list[int]) -> VersionedQuery:
         """Set the list of marketdata to be queried.
 
         Args:
@@ -71,9 +72,7 @@ class VersionedQuery(_Query):
         super()._inTimezone(tz)
         return self
 
-    def inAbsoluteDateRange(
-        self: VersionedQuery, start: str, end: str
-    ) -> VersionedQuery:
+    def inAbsoluteDateRange(self: VersionedQuery, start: str, end: str) -> VersionedQuery:
         """Gets the Versioned Query in an absolute date range window.
         The Absolute Date Range is in ISO8601 format.
 
@@ -89,9 +88,7 @@ class VersionedQuery(_Query):
         super()._inAbsoluteDateRange(start, end)
         return self
 
-    def inRelativePeriodRange(
-        self: VersionedQuery, pStart: str, pEnd: str
-    ) -> VersionedQuery:
+    def inRelativePeriodRange(self: VersionedQuery, pStart: str, pEnd: str) -> VersionedQuery:
         """Gets the Versioned Query in a relative period range time window.
 
         Args:
@@ -119,9 +116,7 @@ class VersionedQuery(_Query):
         super()._inRelativePeriod(extractionPeriod)
         return self
 
-    def inRelativeInterval(
-        self: VersionedQuery, relativeInterval: RelativeInterval
-    ) -> VersionedQuery:
+    def inRelativeInterval(self: VersionedQuery, relativeInterval: RelativeInterval) -> VersionedQuery:
         """Gets the Relative Interval considers a specific interval of time window.
 
         Args:
@@ -158,9 +153,7 @@ class VersionedQuery(_Query):
         self._queryParameters.granularity = granularity
         return self
 
-    def forMUV(
-        self: VersionedQuery, versionLimit: Optional[str] = None
-    ) -> VersionedQuery:
+    def forMUV(self: VersionedQuery, versionLimit: str | None = None) -> VersionedQuery:
         """Gets the timeseries of the most updated version of each timepoint of
            a versioned timeseries.
 
@@ -176,9 +169,7 @@ class VersionedQuery(_Query):
         self._queryParameters.versionSelectionType = VersionSelectionType.MUV
         return self
 
-    def forLastOfDays(
-        self: VersionedQuery, start: str, end: Optional[str] = None
-    ) -> VersionedQuery:
+    def forLastOfDays(self: VersionedQuery, start: str, end: str | None = None) -> VersionedQuery:
         """Gets the lastest version of a versioned timeseries of each day
            in a time window..
 
@@ -206,9 +197,7 @@ class VersionedQuery(_Query):
             vr.dateEnd = end
         return self
 
-    def forLastOfMonths(
-        self: VersionedQuery, start: str, end: Optional[str] = None
-    ) -> VersionedQuery:
+    def forLastOfMonths(self: VersionedQuery, start: str, end: str | None = None) -> VersionedQuery:
         """Gets the lastest version of a versioned timeseries of each month
            in a time window.
 
@@ -261,9 +250,7 @@ class VersionedQuery(_Query):
         self._queryParameters.versionSelectionConfig.version = version
         return self
 
-    def forMostRecent(
-        self: VersionedQuery, start: str, end: Optional[str] = None
-    ) -> VersionedQuery:
+    def forMostRecent(self: VersionedQuery, start: str, end: str | None = None) -> VersionedQuery:
         """Gets the most recent version of a versioned timeseries in a time window.
 
         Args:
@@ -311,9 +298,7 @@ class VersionedQuery(_Query):
         self._queryParameters.fill = _NoFillStrategy()
         return self
 
-    def withFillLatestValue(
-        self: VersionedQuery, period: str, continueToEnd: bool = False
-    ) -> VersionedQuery:
+    def withFillLatestValue(self: VersionedQuery, period: str, continueToEnd: bool = False) -> VersionedQuery:
         """Optional filler strategy for the extraction.
 
         Args:
@@ -355,8 +340,7 @@ class VersionedQuery(_Query):
         self._queryParameters.unitOfMeasure = unitOfMeasure
         return self
 
-    def withAggregationRule(self: VersionedQuery,
-                            aggregationRule: AggregationRule) -> VersionedQuery:
+    def withAggregationRule(self: VersionedQuery, aggregationRule: AggregationRule) -> VersionedQuery:
         """
         Optional AggregationRule for the extraction.
 
@@ -370,7 +354,7 @@ class VersionedQuery(_Query):
         self._queryParameters.aggregationRule = aggregationRule
         return self
 
-    def execute(self: VersionedQuery) -> list:
+    def execute(self: VersionedQuery) -> list[object]:
         """
         Execute the Query.
 
@@ -379,7 +363,7 @@ class VersionedQuery(_Query):
         urls = self.__buildRequest()
         return super()._exec(urls)
 
-    async def executeAsync(self: VersionedQuery) -> list:
+    async def executeAsync(self: VersionedQuery) -> list[object]:
         """
         Execute Async Query.
 
@@ -388,35 +372,30 @@ class VersionedQuery(_Query):
         urls = self.__buildRequest()
         return await super()._execAsync(urls)
 
-    def __buildRequest(self: VersionedQuery) -> List[str]:
+    def __buildRequest(self: VersionedQuery) -> list[str]:
         self.__validateQuery()
         qps = self.__partition.PartitionVersioned([self._queryParameters])
         urls = []
         for qp in qps:
-            url = "/{0}/{1}/{2}/{3}?_=1".format(
-                self.__routePrefix,
-                self.__buildVersionRoute(),
-                self.__getGranularityPath(qp.granularity),
-                super()._buildExtractionRangeRoute(qp),
-            )
-            if not (qp.ids is None):
+            url = f"/{self.__routePrefix}/{self.__buildVersionRoute()}/{self.__getGranularityPath(qp.granularity)}/{super()._buildExtractionRangeRoute(qp)}?_=1"
+            if qp.ids is not None:
                 sep = ","
                 ids = sep.join(map(str, qp.ids))
                 enc = parse.quote_plus(ids)
                 url = url + "&id=" + enc
-            if not (qp.filterId is None):
+            if qp.filterId is not None:
                 url = url + "&filterId=" + str(qp.filterId)
-            if not (qp.timezone is None):
+            if qp.timezone is not None:
                 url = url + "&tz=" + qp.timezone
-            if not (qp.transformId is None):
+            if qp.transformId is not None:
                 url = url + "&tr=" + qp.transformId
-            if not (qp.fill is None):
+            if qp.fill is not None:
                 url = url + "&" + qp.fill.getUrlParams()
-            if not (qp.versionLimit is None):
+            if qp.versionLimit is not None:
                 url = url + "&versionLimit=" + qp.versionLimit
-            if not (qp.unitOfMeasure is None):
+            if qp.unitOfMeasure is not None:
                 url = url + "&unitOfMeasure=" + qp.unitOfMeasure
-            if not (qp.aggregationRule is None):
+            if qp.aggregationRule is not None:
                 url = url + "&aggregationRule=" + str(qp.aggregationRule)
             urls.append(url)
         return urls
@@ -424,12 +403,11 @@ class VersionedQuery(_Query):
     def __validateQuery(self: VersionedQuery) -> None:
         super()._validateQuery()
         if self._queryParameters.granularity is None:
-            raise Exception(
-                "Extraction granularity must be provided. Use .InGranularity() "
-                + "argument takes a granularity type"
+            raise ValueError(
+                "Extraction granularity must be provided. Use .InGranularity() " + "argument takes a granularity type"
             )
         if self._queryParameters.versionSelectionType is None:
-            raise Exception(
+            raise ValueError(
                 "Version selection must be provided. Provide a version to query. "
                 + "eg .ForLastOfDays() arguments take a date range, period or range"
             )
@@ -441,51 +419,31 @@ class VersionedQuery(_Query):
             VersionSelectionType.LastN: lastN,
             VersionSelectionType.MUV: "Muv",
             VersionSelectionType.LastOfDays: "LastOfDays/" + self.__buildVersionRange(),
-            VersionSelectionType.LastOfMonths: "LastOfMonths/"
-            + self.__buildVersionRange(),
+            VersionSelectionType.LastOfMonths: "LastOfMonths/" + self.__buildVersionRange(),
             VersionSelectionType.MostRecent: "MostRecent/" + self.__buildVersionRange(),
             VersionSelectionType.Version: version,
         }
         assert self._queryParameters.versionSelectionType is not None
         vr = switcher.get(self._queryParameters.versionSelectionType, "VType")
         if vr == "VType":
-            raise Exception("Not supported VersionType")
+            raise ValueError("Not supported VersionType")
         return vr
 
     def __buildVersionRange(self: VersionedQuery) -> str:
         vr = ""
-        if (
-            self._queryParameters.versionSelectionConfig.versionsRange.dateStart
-            is not None
-        ) and (
-            self._queryParameters.versionSelectionConfig.versionsRange.dateEnd
-            is not None
+        if (self._queryParameters.versionSelectionConfig.versionsRange.dateStart is not None) and (
+            self._queryParameters.versionSelectionConfig.versionsRange.dateEnd is not None
         ):
-            vr = "{0}/{1}".format(
-                self._queryParameters.versionSelectionConfig.versionsRange.dateStart,
-                self._queryParameters.versionSelectionConfig.versionsRange.dateEnd,
-            )
-        elif (
-            self._queryParameters.versionSelectionConfig.versionsRange.period
-            is not None
-        ):
+            vr = f"{self._queryParameters.versionSelectionConfig.versionsRange.dateStart}/{self._queryParameters.versionSelectionConfig.versionsRange.dateEnd}"
+        elif self._queryParameters.versionSelectionConfig.versionsRange.period is not None:
             vr = f"{self._queryParameters.versionSelectionConfig.versionsRange.period}"
-        elif (
-            self._queryParameters.versionSelectionConfig.versionsRange.periodFrom
-            is not None
-        ) and (
-            self._queryParameters.versionSelectionConfig.versionsRange.periodTo
-            is not None
+        elif (self._queryParameters.versionSelectionConfig.versionsRange.periodFrom is not None) and (
+            self._queryParameters.versionSelectionConfig.versionsRange.periodTo is not None
         ):
-            vr = "{0}/{1}".format(
-                self._queryParameters.versionSelectionConfig.versionsRange.periodFrom,
-                self._queryParameters.versionSelectionConfig.versionsRange.periodTo,
-            )
+            vr = f"{self._queryParameters.versionSelectionConfig.versionsRange.periodFrom}/{self._queryParameters.versionSelectionConfig.versionsRange.periodTo}"
         return vr
 
-    def __getGranularityPath(
-        self: VersionedQuery, granularity: Optional[Granularity]
-    ) -> str:
+    def __getGranularityPath(self: VersionedQuery, granularity: Granularity | None) -> str:
         switcher = {
             Granularity.Day: "Day",
             Granularity.FifteenMinute: "FifteenMinute",
@@ -499,9 +457,7 @@ class VersionedQuery(_Query):
             Granularity.Year: "Year",
         }
         if granularity is None:
-            raise ArtesianSdkException(
-                "Missing Granularity. Use .forGranularity() to set one."
-            )
+            raise ArtesianSdkException("Missing Granularity. Use .forGranularity() to set one.")
 
         vr = switcher.get(granularity, "VGran")
         return vr

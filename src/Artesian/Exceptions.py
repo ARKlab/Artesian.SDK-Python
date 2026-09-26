@@ -1,5 +1,4 @@
 from __future__ import annotations
-from typing import Optional
 
 
 class ArtesianSdkException(Exception):
@@ -32,8 +31,8 @@ class ArtesianSdkRemoteException(ArtesianSdkException):
         method: str,
         url: str,
         statusCode: int,
-        problemDetails: Optional[dict] = None,
-        errorText: Optional[str] = None,
+        problemDetails: dict | None = None,
+        errorText: str | None = None,
     ) -> None:
         """
         Inits the Artesian Sdk Remote Exception.
@@ -61,10 +60,7 @@ class ArtesianSdkRemoteException(ArtesianSdkException):
             detail = errorText
 
         params = {"method": method, "url": url, "statusCode": statusCode}
-        message = (
-            "Failed REST call to Artesian. "
-            + "{method} {url} returned {statusCode}.".format(**params)
-        )
+        message = "Failed REST call to Artesian. " + "{method} {url} returned {statusCode}.".format(**params)
         if detail is not None:
             message = message + " " + detail
 
@@ -83,11 +79,11 @@ class ArtesianSdkRemoteException(ArtesianSdkException):
         return self._statusCode
 
     @property
-    def problemDetails(self: ArtesianSdkRemoteException) -> Optional[dict]:
+    def problemDetails(self: ArtesianSdkRemoteException) -> dict | None:
         return self._problemDetails
 
     @property
-    def errorText(self: ArtesianSdkRemoteException) -> Optional[str]:
+    def errorText(self: ArtesianSdkRemoteException) -> str | None:
         return self._errorText
 
 
@@ -101,8 +97,8 @@ class ArtesianSdkValidationException(ArtesianSdkRemoteException):
         method: str,
         url: str,
         statusCode: int,
-        problemDetails: Optional[dict] = None,
-        errorText: Optional[str] = None,
+        problemDetails: dict | None = None,
+        errorText: str | None = None,
     ) -> None:
         """
         Inits the Artesian Sdk Validation Exception.
@@ -114,9 +110,7 @@ class ArtesianSdkValidationException(ArtesianSdkRemoteException):
             problemDetails: the returned problemDetails object (if any)
             errorText: the response as text if problem details are not provided
         """
-        ArtesianSdkRemoteException.__init__(
-            self, method, url, statusCode, problemDetails, errorText
-        )
+        ArtesianSdkRemoteException.__init__(self, method, url, statusCode, problemDetails, errorText)
 
 
 class ArtesianSdkOptimisticConcurrencyException(ArtesianSdkRemoteException):
@@ -129,8 +123,8 @@ class ArtesianSdkOptimisticConcurrencyException(ArtesianSdkRemoteException):
         method: str,
         url: str,
         statusCode: int,
-        problemDetails: Optional[dict] = None,
-        errorText: Optional[str] = None,
+        problemDetails: dict | None = None,
+        errorText: str | None = None,
     ) -> None:
         """
         Inits the Artesian Sdk Optimistic Concurrency Exception.
@@ -142,9 +136,7 @@ class ArtesianSdkOptimisticConcurrencyException(ArtesianSdkRemoteException):
             problemDetails: the returned problemDetails object (if any)
             errorText: the response as text if problem details are not provided
         """
-        ArtesianSdkRemoteException.__init__(
-            self, method, url, statusCode, problemDetails, errorText
-        )
+        ArtesianSdkRemoteException.__init__(self, method, url, statusCode, problemDetails, errorText)
 
 
 class ArtesianSdkForbiddenException(ArtesianSdkRemoteException):
@@ -157,8 +149,8 @@ class ArtesianSdkForbiddenException(ArtesianSdkRemoteException):
         method: str,
         url: str,
         statusCode: int,
-        problemDetails: Optional[dict] = None,
-        errorText: Optional[str] = None,
+        problemDetails: dict | None = None,
+        errorText: str | None = None,
     ) -> None:
         """
         Inits the Artesian Sdk Forbidden Exception.
@@ -170,9 +162,7 @@ class ArtesianSdkForbiddenException(ArtesianSdkRemoteException):
             problemDetails: the returned problemDetails object (if any)
             errorText: the response as text if problem details are not provided
         """
-        ArtesianSdkRemoteException.__init__(
-            self, method, url, statusCode, problemDetails, errorText
-        )
+        ArtesianSdkRemoteException.__init__(self, method, url, statusCode, problemDetails, errorText)
 
 
 class ArtesianSdkServerException(ArtesianSdkRemoteException):
@@ -185,8 +175,8 @@ class ArtesianSdkServerException(ArtesianSdkRemoteException):
         method: str,
         url: str,
         statusCode: int,
-        problemDetails: Optional[dict] = None,
-        errorText: Optional[str] = None,
+        problemDetails: dict | None = None,
+        errorText: str | None = None,
     ) -> None:
         """
         Inits the Artesian Sdk Server Exception.
@@ -198,9 +188,7 @@ class ArtesianSdkServerException(ArtesianSdkRemoteException):
             problemDetails: the returned problemDetails object (if any)
             errorText: the response as text if problem details are not provided
         """
-        ArtesianSdkRemoteException.__init__(
-            self, method, url, statusCode, problemDetails, errorText
-        )
+        ArtesianSdkRemoteException.__init__(self, method, url, statusCode, problemDetails, errorText)
 
 
 class ArtesianSdkRequestException(ArtesianSdkException):

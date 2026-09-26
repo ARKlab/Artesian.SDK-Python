@@ -1,6 +1,5 @@
 from __future__ import annotations
-from typing import List, Optional
-from .ExtractionRangeConfig import ExtractionRangeConfig
+
 from ._Enum.BaType import BaType
 from ._Enum.GenerationType import GenerationType
 from ._Enum.Market import Market
@@ -9,6 +8,7 @@ from ._Enum.Scope import Scope
 from ._Enum.Status import Status
 from ._Enum.UnitType import UnitType
 from ._Enum.Zone import Zone
+from .ExtractionRangeConfig import ExtractionRangeConfig
 
 
 class _GMEPublicOfferQueryParameters:
@@ -32,19 +32,19 @@ class _GMEPublicOfferQueryParameters:
 
     def __init__(
         self: _GMEPublicOfferQueryParameters,
-        page: Optional[int] = None,
-        pageSize: Optional[int] = None,
-        extractionRangeConfig: Optional[ExtractionRangeConfig] = None,
-        scope: Optional[List[Scope]] = None,
-        status: Optional[Status] = None,
-        unitType: Optional[List[UnitType]] = None,
-        generationType: Optional[List[GenerationType]] = None,
-        operators: Optional[List[str]] = None,
-        unit: Optional[List[str]] = None,
-        zone: Optional[List[Zone]] = None,
-        market: Optional[List[Market]] = None,
-        purpose: Optional[Purpose] = None,
-        baType: Optional[List[BaType]] = None,
+        page: int | None = None,
+        pageSize: int | None = None,
+        extractionRangeConfig: ExtractionRangeConfig | None = None,
+        scope: list[Scope] | None = None,
+        status: Status | None = None,
+        unitType: list[UnitType] | None = None,
+        generationType: list[GenerationType] | None = None,
+        operators: list[str] | None = None,
+        unit: list[str] | None = None,
+        zone: list[Zone] | None = None,
+        market: list[Market] | None = None,
+        purpose: Purpose | None = None,
+        baType: list[BaType] | None = None,
     ) -> None:
         """
         Inits the GME Public Offer Query Parameters with optional overrides.

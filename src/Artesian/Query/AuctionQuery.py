@@ -1,16 +1,17 @@
 from __future__ import annotations
+
 from urllib import parse
-from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
+
 from Artesian._ClientsExecutor.Client import _Client
-from Artesian.Query.DefaultPartitionStrategy import DefaultPartitionStrategy
+from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
 from Artesian.Query._Query import _Query
 from Artesian.Query._QueryParameters.AuctionQueryParameters import (
     AuctionQueryParameters,
 )
-from typing import List
+from Artesian.Query.DefaultPartitionStrategy import DefaultPartitionStrategy
 
 
-class AuctionQuery(_Query):
+class AuctionQuery(_Query[AuctionQueryParameters]):
     __routePrefix = "auction"
 
     def __init__(
@@ -26,7 +27,7 @@ class AuctionQuery(_Query):
         self._queryParameters = queryParameters
         self.__partition = partitionStrategy
 
-    def forMarketData(self: AuctionQuery, ids: List[int]) -> AuctionQuery:
+    def forMarketData(self: AuctionQuery, ids: list[int]) -> AuctionQuery:
         """
         Set the list of marketdata to be queried.
 
@@ -83,9 +84,7 @@ class AuctionQuery(_Query):
         super()._inAbsoluteDateRange(start, end)
         return self
 
-    def inRelativePeriodRange(
-        self: AuctionQuery, pStart: str, pEnd: str
-    ) -> AuctionQuery:
+    def inRelativePeriodRange(self: AuctionQuery, pStart: str, pEnd: str) -> AuctionQuery:
         """
         Gets the Auction Query in a relative period range time window.
 
@@ -117,7 +116,7 @@ class AuctionQuery(_Query):
         super()._inRelativePeriod(extractionPeriod)
         return self
 
-    def execute(self: AuctionQuery) -> list:
+    def execute(self: AuctionQuery) -> list[object]:
         """
         Execute the Query.
 
@@ -126,7 +125,7 @@ class AuctionQuery(_Query):
         urls = self.__buildRequest()
         return super()._exec(urls)
 
-    async def executeAsync(self: AuctionQuery) -> list:
+    async def executeAsync(self: AuctionQuery) -> list[object]:
         """
         Execute Async Query.
 
@@ -135,20 +134,20 @@ class AuctionQuery(_Query):
         urls = self.__buildRequest()
         return await super()._execAsync(urls)
 
-    def __buildRequest(self: AuctionQuery) -> List[str]:
+    def __buildRequest(self: AuctionQuery) -> list[str]:
         self.__validateQuery()
         qps = self.__partition.PartitionAuction([self._queryParameters])
         urls = []
         for qp in qps:
             url = f"/{self.__routePrefix}/{super()._buildExtractionRangeRoute(qp)}?_=1"
-            if not (qp.ids is None):
+            if qp.ids is not None:
                 sep = ","
                 ids = sep.join(map(str, qp.ids))
                 enc = parse.quote_plus(ids)
                 url = url + "&id=" + enc
-            if not (qp.filterId is None):
+            if qp.filterId is not None:
                 url = url + "&filterId=" + str(qp.filterId)
-            if not (qp.timezone is None):
+            if qp.timezone is not None:
                 url = url + "&tz=" + qp.timezone
             urls.append(url)
         return urls
@@ -156,7 +155,4 @@ class AuctionQuery(_Query):
     def __validateQuery(self: AuctionQuery) -> None:
         super()._validateQuery()
         if self._queryParameters.ids is None and self._queryParameters.filterId is None:
-            raise Exception(
-                "Extraction ids or filterid must be provided. Use .forMarketData() "
-                + "or .forFilterId()"
-            )
+            raise ValueError("Extraction ids or filterid must be provided. Use .forMarketData() " + "or .forFilterId()")

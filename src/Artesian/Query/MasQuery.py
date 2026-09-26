@@ -1,22 +1,23 @@
 from __future__ import annotations
+
 from urllib import parse
+
+from Artesian._ClientsExecutor.Client import _Client
+from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
 from Artesian.Query._QueryParameters.QueryParameters import (
     _FillCustomMasStrategy,
     _FillLatestStrategy,
     _NoFillStrategy,
     _NullFillStrategy,
 )
-from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
-from Artesian._ClientsExecutor.Client import _Client
-from .DefaultPartitionStrategy import DefaultPartitionStrategy
+
 from ._Query import _Query
 from ._QueryParameters.MasQueryParameters import MasQueryParameters
-from typing import List
-
+from .DefaultPartitionStrategy import DefaultPartitionStrategy
 from .RelativeInterval import RelativeInterval
 
 
-class MasQuery(_Query):
+class MasQuery(_Query[MasQueryParameters]):
     __routePrefix = "mas"
 
     def __init__(
@@ -32,7 +33,7 @@ class MasQuery(_Query):
         self._queryParameters = queryParameters
         self.__partition = partitionStrategy
 
-    def forMarketData(self: MasQuery, ids: List[int]) -> MasQuery:
+    def forMarketData(self: MasQuery, ids: list[int]) -> MasQuery:
         """
         Set the list of marketdata to be queried.
 
@@ -121,9 +122,7 @@ class MasQuery(_Query):
         super()._inRelativePeriod(extractionPeriod)
         return self
 
-    def inRelativeInterval(
-        self: MasQuery, relativeInterval: RelativeInterval
-    ) -> MasQuery:
+    def inRelativeInterval(self: MasQuery, relativeInterval: RelativeInterval) -> MasQuery:
         """
         Gets the Relative Interval considers a specific interval of time window.
 
@@ -138,7 +137,7 @@ class MasQuery(_Query):
         super()._inRelativeInterval(relativeInterval)
         return self
 
-    def forProducts(self: MasQuery, products: List[str]) -> MasQuery:
+    def forProducts(self: MasQuery, products: list[str]) -> MasQuery:
         """
         Gets the Products tor the BidAsk Query in a time window.
 
@@ -175,9 +174,7 @@ class MasQuery(_Query):
         self._queryParameters.fill = _NoFillStrategy()
         return self
 
-    def withFillLatestValue(
-        self: MasQuery, period: str, continueToEnd: bool = False
-    ) -> MasQuery:
+    def withFillLatestValue(self: MasQuery, period: str, continueToEnd: bool = False) -> MasQuery:
         """
         Optional filler strategy for the extraction.
 
@@ -209,7 +206,7 @@ class MasQuery(_Query):
         self._queryParameters.fill = _FillCustomMasStrategy(**val)
         return self
 
-    def execute(self: MasQuery) -> list:
+    def execute(self: MasQuery) -> list[object]:
         """
         Execute the Query.
 
@@ -219,7 +216,7 @@ class MasQuery(_Query):
         urls = self.__buildRequest()
         return super()._exec(urls)
 
-    async def executeAsync(self: MasQuery) -> list:
+    async def executeAsync(self: MasQuery) -> list[object]:
         """
         Execute Async Query.
 
@@ -228,24 +225,24 @@ class MasQuery(_Query):
         urls = self.__buildRequest()
         return await super()._execAsync(urls)
 
-    def __buildRequest(self: MasQuery) -> List[str]:
+    def __buildRequest(self: MasQuery) -> list[str]:
         self.__validateQuery()
         qps = self.__partition.PartitionMas([self._queryParameters])
         urls = []
         for qp in qps:
             url = f"/{self.__routePrefix}/{super()._buildExtractionRangeRoute(qp)}?_=1"
-            if not (qp.ids is None):
+            if qp.ids is not None:
                 sep = ","
                 ids = sep.join(map(str, qp.ids))
                 enc = parse.quote_plus(ids)
                 url = url + "&id=" + enc
-            if not (qp.filterId is None):
+            if qp.filterId is not None:
                 url = url + "&filterId=" + str(qp.filterId)
-            if not (qp.products is None):
+            if qp.products is not None:
                 sep = ","
                 prod = enc = parse.quote_plus(sep.join(qp.products))
                 url = url + "&p=" + prod
-            if not (qp.fill is None):
+            if qp.fill is not None:
                 url = url + "&" + qp.fill.getUrlParams()
             urls.append(url)
         return urls
@@ -253,7 +250,7 @@ class MasQuery(_Query):
     def __validateQuery(self: MasQuery) -> None:
         super()._validateQuery()
         if self._queryParameters.products is None:
-            raise Exception(
+            raise ValueError(
                 "Products must be provided for extraction. Use .ForProducts() "
                 + "argument takes a string or string array of products"
             )

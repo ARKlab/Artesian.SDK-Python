@@ -1,10 +1,14 @@
 from __future__ import annotations
-from typing import Any, List
-from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
+
+import asyncio
+from urllib import parse
+
 from Artesian._ClientsExecutor.Client import _Client
+from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
 from Artesian.GMEPublicOffers.GMEPublicOfferQueryParameters import (
     _GMEPublicOfferQueryParameters,
 )
+
 from ._Enum.BaType import BaType
 from ._Enum.GenerationType import GenerationType
 from ._Enum.Market import Market
@@ -13,16 +17,12 @@ from ._Enum.Scope import Scope
 from ._Enum.Status import Status
 from ._Enum.UnitType import UnitType
 from ._Enum.Zone import Zone
-import asyncio
-from urllib import parse
 
 
 class GMEPublicOfferQuery:
     __routePrefix = "extract"
 
-    def __init__(
-        self: GMEPublicOfferQuery, client: _Client, requestExecutor: _RequestExecutor
-    ) -> None:
+    def __init__(self: GMEPublicOfferQuery, client: _Client, requestExecutor: _RequestExecutor) -> None:
         """Inits _GME Public Offer Query"""
 
         queryParameters = _GMEPublicOfferQueryParameters()
@@ -30,9 +30,7 @@ class GMEPublicOfferQuery:
         self.__client = client
         self.__executor = requestExecutor
 
-    def withPagination(
-        self: GMEPublicOfferQuery, pagenumber: int, pagesize: int
-    ) -> GMEPublicOfferQuery:
+    def withPagination(self: GMEPublicOfferQuery, pagenumber: int, pagesize: int) -> GMEPublicOfferQuery:
         """
         Set the request pagination.
 
@@ -48,7 +46,7 @@ class GMEPublicOfferQuery:
         self._queryParameters.pageSize = pagesize
         return self
 
-    def forScope(self: GMEPublicOfferQuery, scope: List[Scope]) -> GMEPublicOfferQuery:
+    def forScope(self: GMEPublicOfferQuery, scope: list[Scope]) -> GMEPublicOfferQuery:
         """
         Set the scopes to be queried.
 
@@ -74,9 +72,7 @@ class GMEPublicOfferQuery:
         self._queryParameters.status = status
         return self
 
-    def forUnitType(
-        self: GMEPublicOfferQuery, unitType: List[UnitType]
-    ) -> GMEPublicOfferQuery:
+    def forUnitType(self: GMEPublicOfferQuery, unitType: list[UnitType]) -> GMEPublicOfferQuery:
         """
         Set the unit types to be queried.
 
@@ -102,7 +98,7 @@ class GMEPublicOfferQuery:
         self._queryParameters.extractionRangeConfig.date = date
         return self
 
-    def forUnit(self: GMEPublicOfferQuery, unit: List[str]) -> GMEPublicOfferQuery:
+    def forUnit(self: GMEPublicOfferQuery, unit: list[str]) -> GMEPublicOfferQuery:
         """
         Set the units to be queried.
 
@@ -115,9 +111,7 @@ class GMEPublicOfferQuery:
         self._queryParameters.unit = unit
         return self
 
-    def forOperators(
-        self: GMEPublicOfferQuery, operators: List[str]
-    ) -> GMEPublicOfferQuery:
+    def forOperators(self: GMEPublicOfferQuery, operators: list[str]) -> GMEPublicOfferQuery:
         """
         Set the operators to be queried.
 
@@ -130,7 +124,7 @@ class GMEPublicOfferQuery:
         self._queryParameters.operators = operators
         return self
 
-    def forZone(self: GMEPublicOfferQuery, zone: List[Zone]) -> GMEPublicOfferQuery:
+    def forZone(self: GMEPublicOfferQuery, zone: list[Zone]) -> GMEPublicOfferQuery:
         """
         Set the zones to be queried.
 
@@ -143,9 +137,7 @@ class GMEPublicOfferQuery:
         self._queryParameters.zone = zone
         return self
 
-    def forMarket(
-        self: GMEPublicOfferQuery, market: List[Market]
-    ) -> GMEPublicOfferQuery:
+    def forMarket(self: GMEPublicOfferQuery, market: list[Market]) -> GMEPublicOfferQuery:
         """
         Set the markets to be queried.
 
@@ -171,9 +163,7 @@ class GMEPublicOfferQuery:
         self._queryParameters.purpose = purpose
         return self
 
-    def forBAType(
-        self: GMEPublicOfferQuery, baType: List[BaType]
-    ) -> GMEPublicOfferQuery:
+    def forBAType(self: GMEPublicOfferQuery, baType: list[BaType]) -> GMEPublicOfferQuery:
         """
         Set the BATypes to be queried.
 
@@ -186,9 +176,7 @@ class GMEPublicOfferQuery:
         self._queryParameters.baType = baType
         return self
 
-    def forGenerationType(
-        self: GMEPublicOfferQuery, generationType: List[GenerationType]
-    ) -> GMEPublicOfferQuery:
+    def forGenerationType(self: GMEPublicOfferQuery, generationType: list[GenerationType]) -> GMEPublicOfferQuery:
         """
         Set the generation types to be queried.
 
@@ -201,7 +189,7 @@ class GMEPublicOfferQuery:
         self._queryParameters.generationType = generationType
         return self
 
-    def execute(self: GMEPublicOfferQuery) -> Any:
+    def execute(self: GMEPublicOfferQuery) -> object:
         """
         Execute GME Public Offer Query.
 
@@ -211,7 +199,7 @@ class GMEPublicOfferQuery:
         url = self.__buildRequest()
         return self._exec(url)
 
-    async def executeAsync(self: GMEPublicOfferQuery) -> Any:
+    async def executeAsync(self: GMEPublicOfferQuery) -> object:
         """
         Execute GME Public Offer Query.
 
@@ -225,57 +213,50 @@ class GMEPublicOfferQuery:
         self._validateQuery()
         qp = self._queryParameters
 
-        url = "/{0}/{1}/{2}/{3}?_=1".format(
-            self.__routePrefix,
-            self._buildExtractionRangeRoute(qp),
-            self.__getPurpose(qp.purpose),
-            self.__getStatus(qp.status),
-        )
+        url = f"/{self.__routePrefix}/{self._buildExtractionRangeRoute(qp)}/{self.__getPurpose(qp.purpose)}/{self.__getStatus(qp.status)}?_=1"
 
-        if not (qp.page is None):
+        if qp.page is not None:
             url = url + "&page=" + str(qp.page)
-        if not (qp.pageSize is None):
+        if qp.pageSize is not None:
             url = url + "&pageSize=" + str(qp.pageSize)
-        if not (qp.scope is None):
+        if qp.scope is not None:
             sep = ","
-            scope = sep.join(map(lambda x: self.__getScope(x), qp.scope))
+            scope = sep.join(map(self.__getScope, qp.scope))
             enc = parse.quote_plus(scope)
             url = url + "&scope=" + enc
-        if not (qp.unitType is None):
+        if qp.unitType is not None:
             sep = ","
-            unitType = sep.join(map(lambda x: self.__getUnitType(x), qp.unitType))
+            unitType = sep.join(map(self.__getUnitType, qp.unitType))
             enc = parse.quote_plus(unitType)
             url = url + "&unitType=" + enc
-        if not (qp.unit is None):
+        if qp.unit is not None:
             sep = ","
             unit = sep.join(map(str, qp.unit))
             enc = parse.quote_plus(unit)
             url = url + "&unit=" + enc
-        if not (qp.generationType is None):
+        if qp.generationType is not None:
             sep = ","
-            generationType = sep.join(
-                map(lambda x: self.__getGenerationType(x), qp.generationType)
-            )
+            generationType = sep.join(map(self.__getGenerationType, qp.generationType))
             enc = parse.quote_plus(generationType)
             url = url + "&generationType=" + enc
-        if not (qp.operators is None):
+        if qp.operators is not None:
             sep = ","
             operators = sep.join(map(str, qp.operators))
             enc = parse.quote_plus(operators)
             url = url + "&operators=" + enc
-        if not (qp.zone is None):
+        if qp.zone is not None:
             sep = ","
-            zone = sep.join(map(lambda x: self.__getZone(x), qp.zone))
+            zone = sep.join(map(self.__getZone, qp.zone))
             enc = parse.quote_plus(zone)
             url = url + "&zone=" + enc
-        if not (qp.market is None):
+        if qp.market is not None:
             sep = ","
-            market = sep.join(map(lambda x: self.__getMarket(x), qp.market))
+            market = sep.join(map(self.__getMarket, qp.market))
             enc = parse.quote_plus(market)
             url = url + "&market=" + enc
-        if not (qp.baType is None):
+        if qp.baType is not None:
             sep = ","
-            baType = sep.join(map(lambda x: self.__getBaType(x), qp.baType))
+            baType = sep.join(map(self.__getBaType, qp.baType))
             enc = parse.quote_plus(baType)
             url = url + "&baType=" + enc
 
@@ -294,12 +275,10 @@ class GMEPublicOfferQuery:
         }
         vr = switcher.get(scope, "DefScope")
         if vr == "DefScope":
-            raise Exception("Not supported Scope")
+            raise ValueError("Not supported Scope")
         return vr
 
-    def __getGenerationType(
-        self: GMEPublicOfferQuery, generationType: GenerationType
-    ) -> str:
+    def __getGenerationType(self: GMEPublicOfferQuery, generationType: GenerationType) -> str:
         switcher = {
             GenerationType.AUTOGENERATION: "AUTOGENERATION",
             GenerationType.BIOMASS: "BIOMASS",
@@ -316,7 +295,7 @@ class GMEPublicOfferQuery:
         }
         vr = switcher.get(generationType, "DefGen")
         if vr == "DefGen":
-            raise Exception("Not supported GeneratioType")
+            raise ValueError("Not supported GeneratioType")
         return vr
 
     def __getMarket(self: GMEPublicOfferQuery, market: Market) -> str:
@@ -351,21 +330,21 @@ class GMEPublicOfferQuery:
         }
         vr = switcher.get(market, "DefMarket")
         if vr == "DefMarket":
-            raise Exception("Not supported Market")
+            raise ValueError("Not supported Market")
         return vr
 
     def __getPurpose(self: GMEPublicOfferQuery, purpose: Purpose | None) -> str:
         if purpose is None:
-            raise Exception("Not supported Purpose")
+            raise ValueError("Not supported Purpose")
         switcher = {Purpose.BID: "BID", Purpose.OFF: "OFF"}
         vr = switcher.get(purpose, "Defpurp")
         if vr == "Defpurp":
-            raise Exception("Not supported Purpose")
+            raise ValueError("Not supported Purpose")
         return vr
 
     def __getStatus(self: GMEPublicOfferQuery, status: Status | None) -> str:
         if status is None:
-            raise Exception("Not supported Status")
+            raise ValueError("Not supported Status")
 
         switcher = {
             Status.ACC: "ACC",
@@ -380,7 +359,7 @@ class GMEPublicOfferQuery:
         }
         vr = switcher.get(status, "DefStatus")
         if vr == "DefStatus":
-            raise Exception("Not supported Status")
+            raise ValueError("Not supported Status")
         return vr
 
     def __getUnitType(self: GMEPublicOfferQuery, unitType: UnitType) -> str:
@@ -394,7 +373,7 @@ class GMEPublicOfferQuery:
         }
         vr = switcher.get(unitType, "DefunitType")
         if vr == "DefunitType":
-            raise Exception("Not supported Unit Type")
+            raise ValueError("Not supported Unit Type")
         return vr
 
     def __getBaType(self: GMEPublicOfferQuery, baType: BaType) -> str:
@@ -406,7 +385,7 @@ class GMEPublicOfferQuery:
         }
         vr = switcher.get(baType, "DefbaType")
         if vr == "DefbaType":
-            raise Exception("Not supported BaType")
+            raise ValueError("Not supported BaType")
         return vr
 
     def __getZone(self: GMEPublicOfferQuery, zone: Zone) -> str:
@@ -439,25 +418,21 @@ class GMEPublicOfferQuery:
         }
         vr = switcher.get(zone, "DefZone")
         if vr == "DefZone":
-            raise Exception("Not supported Zone")
+            raise ValueError("Not supported Zone")
         return vr
 
-    def _buildExtractionRangeRoute(
-        self: GMEPublicOfferQuery, queryParamaters: _GMEPublicOfferQueryParameters
-    ) -> str:
+    def _buildExtractionRangeRoute(self: GMEPublicOfferQuery, queryParamaters: _GMEPublicOfferQueryParameters) -> str:
         subPath = f"{self.__toUrlParam(queryParamaters.extractionRangeConfig.date)}"
         return subPath
 
-    def _exec(self: GMEPublicOfferQuery, url: str) -> Any:
+    def _exec(self: GMEPublicOfferQuery, url: str) -> object:
         loop = get_event_loop()
         rr = loop.run_until_complete(self._execAsync(url))
         return rr
 
-    async def _execAsync(self: GMEPublicOfferQuery, url: str) -> Any:
+    async def _execAsync(self: GMEPublicOfferQuery, url: str) -> object:
         with self.__client as c:
-            res = await asyncio.gather(
-                *[self.__executor.exec(c.exec, "GET", url, None)]
-            )
+            res = await asyncio.gather(*[self.__executor.exec(c.exec, "GET", url, None)])
             return res[0]
 
     def __toUrlParam(self: GMEPublicOfferQuery, date: str | None) -> str:
@@ -465,20 +440,13 @@ class GMEPublicOfferQuery:
 
     def _validateQuery(self: GMEPublicOfferQuery) -> None:
         if self._queryParameters.purpose is None:
-            raise Exception(
-                "Extraction Purpose must be provided. Use .forScope()"
-                + " argument takes a scope type"
-            )
+            raise ValueError("Extraction Purpose must be provided. Use .forScope()" + " argument takes a scope type")
         if self._queryParameters.extractionRangeConfig.date is None:
-            raise Exception(
-                "Extraction Date must be provided. Use .forDate() argument"
-                + " takes a string formatted as YYYY-MM-DD"
+            raise ValueError(
+                "Extraction Date must be provided. Use .forDate() argument" + " takes a string formatted as YYYY-MM-DD"
             )
         if self._queryParameters.status is None:
-            raise Exception(
-                "Extraction Status must be provided. Use .forStatus() "
-                + "argument takes a status type"
-            )
+            raise ValueError("Extraction Status must be provided. Use .forStatus() " + "argument takes a status type")
 
 
 def get_event_loop() -> asyncio.AbstractEventLoop:

@@ -1,24 +1,25 @@
 from __future__ import annotations
+
+from urllib import parse
+
 from Artesian.Exceptions import ArtesianSdkException
+from Artesian.MarketData import AggregationRule, Granularity
 from Artesian.Query._QueryParameters.QueryParameters import (
     _FillCustomTimeserieStrategy,
     _FillLatestStrategy,
     _NoFillStrategy,
     _NullFillStrategy,
 )
-from .._ClientsExecutor.RequestExecutor import _RequestExecutor
+
 from .._ClientsExecutor.Client import _Client
-from .DefaultPartitionStrategy import DefaultPartitionStrategy
+from .._ClientsExecutor.RequestExecutor import _RequestExecutor
 from ._Query import _Query
-from .RelativeInterval import RelativeInterval
 from ._QueryParameters.ActualQueryParameters import ActualQueryParameters
-from Artesian.MarketData import Granularity
-from Artesian.MarketData import AggregationRule
-from urllib import parse
-from typing import List, Optional
+from .DefaultPartitionStrategy import DefaultPartitionStrategy
+from .RelativeInterval import RelativeInterval
 
 
-class ActualQuery(_Query):
+class ActualQuery(_Query[ActualQueryParameters]):
     __routePrefix = "ts"
 
     def __init__(
@@ -34,7 +35,7 @@ class ActualQuery(_Query):
         self._queryParameters = queryParameters
         self.__partition = partitionStrategy
 
-    def forMarketData(self: ActualQuery, ids: List[int]) -> ActualQuery:
+    def forMarketData(self: ActualQuery, ids: list[int]) -> ActualQuery:
         """
         Set the list of marketdata to be queried.
 
@@ -123,9 +124,7 @@ class ActualQuery(_Query):
         super()._inRelativePeriod(extractionPeriod)
         return self
 
-    def inRelativeInterval(
-        self: ActualQuery, relativeInterval: RelativeInterval
-    ) -> ActualQuery:
+    def inRelativeInterval(self: ActualQuery, relativeInterval: RelativeInterval) -> ActualQuery:
         """
         Gets the Relative Interval considers a specific interval of time window.
 
@@ -189,9 +188,7 @@ class ActualQuery(_Query):
         self._queryParameters.fill = _NoFillStrategy()
         return self
 
-    def withFillLatestValue(
-        self: ActualQuery, period: str, continueToEnd: bool = False
-    ) -> ActualQuery:
+    def withFillLatestValue(self: ActualQuery, period: str, continueToEnd: bool = False) -> ActualQuery:
         """
         Optional filler strategy for the extraction.
 
@@ -235,8 +232,7 @@ class ActualQuery(_Query):
         self._queryParameters.unitOfMeasure = unitOfMeasure
         return self
 
-    def withAggregationRule(self: ActualQuery,
-                            aggregationRule: AggregationRule) -> ActualQuery:
+    def withAggregationRule(self: ActualQuery, aggregationRule: AggregationRule) -> ActualQuery:
         """
         Optional AggregationRule for the extraction.
 
@@ -250,7 +246,7 @@ class ActualQuery(_Query):
         self._queryParameters.aggregationRule = aggregationRule
         return self
 
-    def execute(self: ActualQuery) -> list:
+    def execute(self: ActualQuery) -> list[object]:
         """
         Execute the Query.
 
@@ -259,7 +255,7 @@ class ActualQuery(_Query):
         urls = self.__buildRequest()
         return super()._exec(urls)
 
-    async def executeAsync(self: ActualQuery) -> list:
+    async def executeAsync(self: ActualQuery) -> list[object]:
         """
         Execute Async Query.
 
@@ -268,32 +264,28 @@ class ActualQuery(_Query):
         urls = self.__buildRequest()
         return await super()._execAsync(urls)
 
-    def __buildRequest(self: ActualQuery) -> List[str]:
+    def __buildRequest(self: ActualQuery) -> list[str]:
         self.__validateQuery()
         qps = self.__partition.PartitionActual([self._queryParameters])
         urls = []
         for qp in qps:
-            url = "/{0}/{1}/{2}?_=1".format(
-                self.__routePrefix,
-                self.__getGranularityPath(qp.granularity),
-                super()._buildExtractionRangeRoute(qp),
-            )
-            if not (qp.ids is None):
+            url = f"/{self.__routePrefix}/{self.__getGranularityPath(qp.granularity)}/{super()._buildExtractionRangeRoute(qp)}?_=1"
+            if qp.ids is not None:
                 sep = ","
                 ids = sep.join(map(str, qp.ids))
                 enc = parse.quote_plus(ids)
                 url = url + "&id=" + enc
-            if not (qp.filterId is None):
+            if qp.filterId is not None:
                 url = url + "&filterId=" + str(qp.filterId)
-            if not (qp.timezone is None):
+            if qp.timezone is not None:
                 url = url + "&tz=" + qp.timezone
-            if not (qp.transformId is None):
+            if qp.transformId is not None:
                 url = url + "&tr=" + str(qp.transformId)
-            if not (qp.unitOfMeasure is None):
+            if qp.unitOfMeasure is not None:
                 url = url + "&unitOfMeasure=" + qp.unitOfMeasure
-            if not (qp.aggregationRule is None):
+            if qp.aggregationRule is not None:
                 url = url + "&aggregationRule=" + str(qp.aggregationRule)
-            if not (qp.fill is None):
+            if qp.fill is not None:
                 url = url + "&" + qp.fill.getUrlParams()
             urls.append(url)
         return urls
@@ -301,14 +293,11 @@ class ActualQuery(_Query):
     def __validateQuery(self: ActualQuery) -> None:
         super()._validateQuery()
         if self._queryParameters.granularity is None:
-            raise Exception(
-                "Extraction granularity must be provided. Use .InGranularity() "
-                + "argument takes a granularity type"
+            raise ValueError(
+                "Extraction granularity must be provided. Use .InGranularity() " + "argument takes a granularity type"
             )
 
-    def __getGranularityPath(
-        self: ActualQuery, granularity: Optional[Granularity]
-    ) -> str:
+    def __getGranularityPath(self: ActualQuery, granularity: Granularity | None) -> str:
         switcher = {
             Granularity.Day: "Day",
             Granularity.FifteenMinute: "FifteenMinute",
@@ -322,9 +311,7 @@ class ActualQuery(_Query):
             Granularity.Year: "Year",
         }
         if granularity is None:
-            raise ArtesianSdkException(
-                "Missing Granularity. Use .forGranularity() to set one."
-            )
+            raise ArtesianSdkException("Missing Granularity. Use .forGranularity() to set one.")
 
         vr = switcher.get(granularity, "VGran")
         return vr

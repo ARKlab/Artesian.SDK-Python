@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import Optional
+
 from .._Enum import ArtesianMetadataFacetType
 
 
@@ -30,4 +31,4 @@ class ArtesianMetadataFacet:
 
     facetName: Optional[str] = None
     facetType: Optional[ArtesianMetadataFacetType] = None
-    values: Optional[List[ArtesianMetadataFacetCount]] = None
+    values: Optional[list[ArtesianMetadataFacetCount]] = None

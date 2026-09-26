@@ -1,5 +1,4 @@
 from __future__ import annotations
-from typing import List, Optional
 
 from .ExtractionRangeConfig import ExtractionRangeConfig
 from .ExtractionRangeType import ExtractionRangeType
@@ -26,10 +25,7 @@ class _FillLatestStrategy(_FillStrategy):
         self.continueToEnd = continueToEnd
 
     def getUrlParams(self: _FillLatestStrategy) -> str:
-        return (
-            f"fillerK=LatestValidValue&fillerP={self.period}"
-            + f"&fillerC={self.continueToEnd}"
-        )
+        return f"fillerK=LatestValidValue&fillerP={self.period}" + f"&fillerC={self.continueToEnd}"
 
 
 class _FillCustomTimeserieStrategy(_FillStrategy):
@@ -40,11 +36,8 @@ class _FillCustomTimeserieStrategy(_FillStrategy):
         return f"fillerK=CustomValue&fillerDV={self.val}"
 
 
-def toQueryParams(vals: List[List[str | float | int | None]]) -> str:
-    filtered = filter(lambda x: x[1], vals)
-    stringVals = map(lambda x: [x[0], str(x[1])], filtered)
-    joinedEqual = map(lambda x: "=".join(x), stringVals)
-    return "&".join(joinedEqual)
+def toQueryParams(vals: list[tuple[str, str | float | int | None]]) -> str:
+    return "&".join(f"{name}={value}" for name, value in vals if value)
 
 
 class _FillCustomBidAskStrategy(_FillStrategy):
@@ -54,13 +47,13 @@ class _FillCustomBidAskStrategy(_FillStrategy):
     def getUrlParams(self: _FillCustomBidAskStrategy) -> str:
         return toQueryParams(
             [
-                ["fillerK", "CustomValue"],
-                ["fillerDVbbp", self.val.get("bestBidPrice")],
-                ["fillerDVbap", self.val.get("bestAskPrice")],
-                ["fillerDVbbq", self.val.get("bestBidQuantity")],
-                ["fillerDVbaq", self.val.get("bestAskQuantity")],
-                ["fillerDVlp", self.val.get("lastPrice")],
-                ["fillerDVlq", self.val.get("lastQuantity")],
+                ("fillerK", "CustomValue"),
+                ("fillerDVbbp", self.val.get("bestBidPrice")),
+                ("fillerDVbap", self.val.get("bestAskPrice")),
+                ("fillerDVbbq", self.val.get("bestBidQuantity")),
+                ("fillerDVbaq", self.val.get("bestAskQuantity")),
+                ("fillerDVlp", self.val.get("lastPrice")),
+                ("fillerDVlq", self.val.get("lastQuantity")),
             ]
         )
 
@@ -72,15 +65,15 @@ class _FillCustomMasStrategy(_FillStrategy):
     def getUrlParams(self: _FillCustomMasStrategy) -> str:
         return toQueryParams(
             [
-                ["fillerK", "CustomValue"],
-                ["fillerDVs", self.val.get("settlement")],
-                ["fillerDVo", self.val.get("open")],
-                ["fillerDVc", self.val.get("close")],
-                ["fillerDVh", self.val.get("high")],
-                ["fillerDVl", self.val.get("low")],
-                ["fillerDVvp", self.val.get("volumePaid")],
-                ["fillerDVvg", self.val.get("volumeGiven")],
-                ["fillerDVvt", self.val.get("volume")],
+                ("fillerK", "CustomValue"),
+                ("fillerDVs", self.val.get("settlement")),
+                ("fillerDVo", self.val.get("open")),
+                ("fillerDVc", self.val.get("close")),
+                ("fillerDVh", self.val.get("high")),
+                ("fillerDVl", self.val.get("low")),
+                ("fillerDVvp", self.val.get("volumePaid")),
+                ("fillerDVvg", self.val.get("volumeGiven")),
+                ("fillerDVvt", self.val.get("volume")),
             ]
         )
 
@@ -88,15 +81,17 @@ class _FillCustomMasStrategy(_FillStrategy):
 class _QueryParameters:
     def __init__(
         self: _QueryParameters,
-        ids: Optional[List[int]],
-        extractionRangeConfig: ExtractionRangeConfig = ExtractionRangeConfig(),
-        extractionRangeType: Optional[ExtractionRangeType] = None,
-        timezone: Optional[str] = None,
-        filterId: Optional[int] = None,
-        fill: Optional[_FillStrategy] = None,
+        ids: list[int] | None,
+        extractionRangeConfig: ExtractionRangeConfig | None = None,
+        extractionRangeType: ExtractionRangeType | None = None,
+        timezone: str | None = None,
+        filterId: int | None = None,
+        fill: _FillStrategy | None = None,
     ) -> None:
         self.ids = ids
-        self.extractionRangeConfig = extractionRangeConfig
+        self.extractionRangeConfig = (
+            extractionRangeConfig if extractionRangeConfig is not None else ExtractionRangeConfig()
+        )
         self.extractionRangeType = extractionRangeType
         self.timezone = timezone
         self.filterId = filterId

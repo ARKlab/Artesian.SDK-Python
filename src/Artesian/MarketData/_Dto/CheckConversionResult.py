@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import List
 
 
 @dataclass
@@ -15,5 +14,5 @@ class CheckConversionResult:
     """
 
     targetUnitOfMeasure: str
-    convertibleInputUnitsOfMeasure: List[str]
-    notConvertibleInputUnitsOfMeasure: List[str]
+    convertibleInputUnitsOfMeasure: list[str]
+    notConvertibleInputUnitsOfMeasure: list[str]

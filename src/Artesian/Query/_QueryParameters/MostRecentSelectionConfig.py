@@ -1,5 +1,4 @@
 from __future__ import annotations
-from typing import Optional
 
 
 class MostRecentSelectionConfig:
@@ -15,20 +14,20 @@ class MostRecentSelectionConfig:
 
     def __init__(
         self: MostRecentSelectionConfig,
-        dateStart: Optional[str] = None,
-        dateEnd: Optional[str] = None,
-        period: Optional[str] = None,
-        periodFrom: Optional[str] = None,
-        periodTo: Optional[str] = None,
+        dateStart: str | None = None,
+        dateEnd: str | None = None,
+        period: str | None = None,
+        periodFrom: str | None = None,
+        periodTo: str | None = None,
     ) -> None:
         """Inits for the Most Recent Selection Configuration."""
-        self.dateStart: Optional[str] = dateStart
+        self.dateStart: str | None = dateStart
         """ Start date for most recent selection. (ISO format)"""
-        self.dateEnd: Optional[str] = dateEnd
+        self.dateEnd: str | None = dateEnd
         """ End date for most recent selection. (ISO format)"""
-        self.period: Optional[str] = period
+        self.period: str | None = period
         """ Period for most recent selection. (ISO format)"""
-        self.periodFrom: Optional[str] = periodFrom
+        self.periodFrom: str | None = periodFrom
         """ Period start for most recent selection. (ISO format)"""
-        self.periodTo: Optional[str] = periodTo
+        self.periodTo: str | None = periodTo
         """ Period end for most recent selection. (ISO format)"""

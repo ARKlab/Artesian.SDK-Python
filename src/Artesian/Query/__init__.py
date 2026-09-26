@@ -1,17 +1,17 @@
 from .ActualQuery import ActualQuery
-from .MasQuery import MasQuery
-from .BidAskQuery import BidAskQuery
 from .AuctionQuery import AuctionQuery
+from .BidAskQuery import BidAskQuery
+from .MasQuery import MasQuery
 from .QueryService import QueryService
-from .VersionedQuery import VersionedQuery
 from .RelativeInterval import RelativeInterval
+from .VersionedQuery import VersionedQuery
 
 __all__ = [
-    QueryService.__name__,
-    ActualQuery.__name__,
-    MasQuery.__name__,
-    BidAskQuery.__name__,
-    VersionedQuery.__name__,
-    AuctionQuery.__name__,
-    RelativeInterval.__name__,
-]  # type: ignore
+    "ActualQuery",
+    "AuctionQuery",
+    "BidAskQuery",
+    "MasQuery",
+    "QueryService",
+    "RelativeInterval",
+    "VersionedQuery",
+]

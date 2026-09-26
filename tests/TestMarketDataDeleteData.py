@@ -1,12 +1,11 @@
-from Artesian import ArtesianConfig
-from Artesian.MarketData._Dto.UpsertData import BidAskValue
-from Artesian._ClientsExecutor.ArtesianJsonSerializer import artesianJsonSerialize
-from Artesian.MarketData import MarketDataService, MarketDataIdentifier, DeleteData
-from datetime import datetime
-import responses
 import unittest
+from datetime import datetime
 
-from dateutil import tz
+import responses
+
+from Artesian import ArtesianConfig
+from Artesian._ClientsExecutor.ArtesianJsonSerializer import artesianJsonSerialize
+from Artesian.MarketData import DeleteData, MarketDataIdentifier, MarketDataService
 
 cfg = ArtesianConfig("https://baseurl.com", "APIKey")
 
@@ -19,7 +18,7 @@ class TestMarketDataServiceDeleteData(unittest.IsolatedAsyncioTestCase):
 
         return super().setUp()
 
-    async def test_deleteDateSerie(self):
+    async def test_deleteDateSerie(self) -> None:
         expectedJson = {
             "ID": {"Provider": "PROVIDER", "Name": "CURVENAME"},
             "Timezone": "CET",
@@ -49,7 +48,7 @@ class TestMarketDataServiceDeleteData(unittest.IsolatedAsyncioTestCase):
 
             self.assertEqual(len(rsps.calls), 1)
 
-    async def test_deleteDateSerieWithoutTimezone(self):
+    async def test_deleteDateSerieWithoutTimezone(self) -> None:
         expectedJson = {
             "ID": {"Provider": "PROVIDER", "Name": "CURVENAME"},
             "RangeStart": "2020-01-01T01:00:00.000000",
@@ -77,7 +76,7 @@ class TestMarketDataServiceDeleteData(unittest.IsolatedAsyncioTestCase):
 
             self.assertEqual(len(rsps.calls), 1)
 
-    async def test_deleteDateSerieWithProduct(self):
+    async def test_deleteDateSerieWithProduct(self) -> None:
         expectedJson = {
             "ID": {"Provider": "PROVIDER", "Name": "CURVENAME"},
             "Timezone": "CET",
@@ -109,7 +108,7 @@ class TestMarketDataServiceDeleteData(unittest.IsolatedAsyncioTestCase):
 
             self.assertEqual(len(rsps.calls), 1)
 
-    async def test_deleteDateSerieWithProductWithoutTimezone(self):
+    async def test_deleteDateSerieWithProductWithoutTimezone(self) -> None:
         expectedJson = {
             "ID": {"Provider": "PROVIDER", "Name": "CURVENAME"},
             "Product": ["Jan-15"],
@@ -139,7 +138,7 @@ class TestMarketDataServiceDeleteData(unittest.IsolatedAsyncioTestCase):
 
             self.assertEqual(len(rsps.calls), 1)
 
-    async def test_deleteVersionedSerie(self):
+    async def test_deleteVersionedSerie(self) -> None:
         expectedJson = {
             "ID": {"Provider": "PROVIDER", "Name": "CURVENAME"},
             "Timezone": "CET",
@@ -171,7 +170,7 @@ class TestMarketDataServiceDeleteData(unittest.IsolatedAsyncioTestCase):
 
             self.assertEqual(len(rsps.calls), 1)
 
-    async def test_deleteVersionedSerieWithoutTimezone(self):
+    async def test_deleteVersionedSerieWithoutTimezone(self) -> None:
         expectedJson = {
             "ID": {"Provider": "PROVIDER", "Name": "CURVENAME"},
             "Version": "2020-01-01T01:00:00.000000",

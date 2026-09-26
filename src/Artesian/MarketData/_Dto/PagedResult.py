@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import List
 
 from Artesian.MarketData._Dto.CurveRangeEntity import CurveRangeEntity
 
@@ -28,4 +27,4 @@ class PagedResult:
 
 @dataclass
 class PagedResultCurveRangeEntity(PagedResult):
-    data: List[CurveRangeEntity]
+    data: list[CurveRangeEntity]
