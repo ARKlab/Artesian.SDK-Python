@@ -128,7 +128,7 @@ jobs:
   # ---------------------------------------------------------------------------
   # Test Report
   #
-  # Consolidates test results from all jobs (build and publish-preview)
+  # Consolidates test results from all jobs (build and build-preview)
   # into a single report.
   # ---------------------------------------------------------------------------
 
@@ -137,7 +137,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - build
-      - publish-preview
+      - build-preview
 
     if: always()
 
@@ -238,7 +238,7 @@ jobs:
           label: code-coverage/pytest
 
   # ---------------------------------------------------------------------------
-  # Publish Stable
+  # Build Stable
   #
   # Tag:
   #   v4.3.0
@@ -250,9 +250,17 @@ jobs:
   #   master
   # ---------------------------------------------------------------------------
 
-  publish-stable:
-    name: "Publish Stable"
+  build-stable:
+    name: "Build Stable"
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      artifact-id: ${{ steps.distributions.outputs.artifact-id }}
+      artifact-digest: ${{ steps.distributions.outputs.artifact-digest }}
+      source-sha: ${{ steps.source.outputs.sha }}
+      wheel-sha: ${{ steps.hashes.outputs.wheel-sha }}
+      sdist-sha: ${{ steps.hashes.outputs.sdist-sha }}
     needs:
       - quality
       - build
@@ -277,6 +285,10 @@ jobs:
         shell: bash
         run: bash .github/workflows/validate_branch.sh "master"
 
+      - name: "Record release source"
+        id: source
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
       - name: "Set up uv"
         uses: astral-sh/setup-uv@v10.2.0
         with:
@@ -288,14 +300,239 @@ jobs:
           echo "Building GA package: ${GITHUB_REF_NAME#v}"
           uv build
 
-      - name: "Publish package"
-        uses: pypa/gh-action-pypi-publish@release/v1
+      - name: "Check release metadata"
+        run: |
+          uv sync --locked
+          uv run --no-sync twine check dist/*
+
+      - name: "Record distribution hashes"
+        id: hashes
+        run: |
+          echo "Source commit: ${{ steps.source.outputs.sha }}" >> "$GITHUB_STEP_SUMMARY"
+          sha256sum dist/*.whl dist/*.tar.gz >> "$GITHUB_STEP_SUMMARY"
+          echo "wheel-sha=$(sha256sum dist/*.whl | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+          echo "sdist-sha=$(sha256sum dist/*.tar.gz | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+
+      - name: "Upload release distributions"
+        id: distributions
+        uses: actions/upload-artifact@v7
         with:
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
+          name: release-dist
+          path: |
+            dist/*.whl
+            dist/*.tar.gz
+          if-no-files-found: error
+
+  # Only this job can obtain a publishing/signing identity. Never execute build
+  # output or check out PR code here; the pypi environment requires approval.
+  publish:
+    name: "Attest and publish to PyPI"
+    runs-on: ubuntu-latest
+    needs: [build-stable, build-beta, build-preview]
+    if: >-
+      ${{
+        !cancelled() && github.event_name == 'push' &&
+        startsWith(github.ref, 'refs/tags/v') &&
+        (
+          (needs.build-stable.result == 'success' && needs.build-beta.result == 'skipped' && needs.build-preview.result == 'skipped') ||
+          (needs.build-beta.result == 'success' && needs.build-stable.result == 'skipped' && needs.build-preview.result == 'skipped') ||
+          (needs.build-preview.result == 'success' && needs.build-stable.result == 'skipped' && needs.build-beta.result == 'skipped')
+        )
+      }}
+    environment:
+      name: pypi
+    permissions:
+      contents: read
+      id-token: write
+    concurrency:
+      group: pypi-${{ github.ref }}
+      cancel-in-progress: false
+    env:
+      SOURCE_SHA: ${{ needs.build-stable.outputs.source-sha || needs.build-beta.outputs.source-sha || needs.build-preview.outputs.source-sha }}
+      ARTIFACT_ID: ${{ needs.build-stable.outputs.artifact-id || needs.build-beta.outputs.artifact-id || needs.build-preview.outputs.artifact-id }}
+      ARTIFACT_DIGEST: ${{ needs.build-stable.outputs.artifact-digest || needs.build-beta.outputs.artifact-digest || needs.build-preview.outputs.artifact-digest }}
+      WHEEL_SHA: ${{ needs.build-stable.outputs.wheel-sha || needs.build-beta.outputs.wheel-sha || needs.build-preview.outputs.wheel-sha }}
+      SDIST_SHA: ${{ needs.build-stable.outputs.sdist-sha || needs.build-beta.outputs.sdist-sha || needs.build-preview.outputs.sdist-sha }}
+
+    steps:
+      - name: "Download validated distributions"
+        uses: actions/download-artifact@v8
+        with:
+          artifact-ids: ${{ env.ARTIFACT_ID }}
+          path: dist
+          merge-multiple: true
+
+      - name: "Validate distribution identity"
+        id: identity
+        shell: python
+        run: |
+          import hashlib
+          import json
+          import os
+          import re
+          from pathlib import Path
+
+          tag = os.environ["GITHUB_REF_NAME"]
+          match = re.fullmatch(r"v(\d+\.\d+\.\d+)(?:b(\d+)|a(\d+)\.(\d+))?", tag)
+          if not match:
+              raise SystemExit("Invalid release tag")
+          version, beta, pr, iteration = match.groups()
+          version = ".".join(str(int(part)) for part in version.split("."))
+          if beta:
+              version += f"b{int(beta)}"
+          elif pr:
+              version += f"a{int(pr)}.post{int(iteration)}"
+          expected = {
+              f"artesian_sdk-{version}-py3-none-any.whl": os.environ["WHEEL_SHA"],
+              f"artesian_sdk-{version}.tar.gz": os.environ["SDIST_SHA"],
+          }
+          paths = list(Path("dist").iterdir())
+          if {path.name for path in paths} != set(expected):
+              raise SystemExit("Expected only the release wheel and sdist; no supplied attestations or code")
+          for path in paths:
+              if path.is_symlink() or not path.is_file():
+                  raise SystemExit(f"Not a regular distribution: {path.name}")
+              if hashlib.sha256(path.read_bytes()).hexdigest() != expected[path.name]:
+                  raise SystemExit(f"Distribution changed since validation: {path.name}")
+          if not re.fullmatch(r"[0-9a-f]{40}", os.environ["SOURCE_SHA"]):
+              raise SystemExit("Missing or invalid build source SHA")
+          if not re.fullmatch(r"[0-9a-f]{64}", os.environ["ARTIFACT_DIGEST"]):
+              raise SystemExit("Missing or invalid artifact digest")
+          if not os.environ["ARTIFACT_ID"].isdigit():
+              raise SystemExit("Missing artifact ID")
+          record = {
+              "version": version,
+              "source_sha": os.environ["SOURCE_SHA"],
+              "trigger_sha": os.environ["GITHUB_SHA"],
+              "workflow_sha": os.environ["GITHUB_WORKFLOW_SHA"],
+              "run_id": os.environ["GITHUB_RUN_ID"],
+              "run_attempt": os.environ["GITHUB_RUN_ATTEMPT"],
+              "artifact_id": os.environ["ARTIFACT_ID"],
+              "artifact_digest": os.environ["ARTIFACT_DIGEST"],
+              "files": expected,
+          }
+          Path("release.json").write_text(json.dumps(record, indent=2))
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as summary:
+              summary.write("## Release identity\n\n```json\n" + json.dumps(record, indent=2) + "\n```\n")
+
+      - name: "Set up pinned uv"
+        uses: astral-sh/setup-uv@v10.2.0
+        with:
+          version: "0.12.19"
+          python-version: "3.12"
+          enable-cache: false
+
+      - name: "Generate PEP 740 publish attestations"
+        uses: astral-sh/attest-action@f589a42a7efb6fe400b4f400de60b4bc90390027 # v0.0.6
+        with:
+          paths: |
+            dist/*.whl
+            dist/*.tar.gz
+
+      - name: "Require matching attestations"
+        shell: python
+        run: |
+          import base64
+          import hashlib
+          import json
+          from pathlib import Path
+
+          files = json.loads(Path("release.json").read_text())["files"]
+          expected = set(files) | {name + ".publish.attestation" for name in files}
+          if {path.name for path in Path("dist").iterdir()} != expected:
+              raise SystemExit("Every distribution must have exactly one publish attestation")
+          for name, digest in files.items():
+              if hashlib.sha256((Path("dist") / name).read_bytes()).hexdigest() != digest:
+                  raise SystemExit(f"Distribution changed during signing: {name}")
+              attestation = json.loads((Path("dist") / (name + ".publish.attestation")).read_text())
+              statement = json.loads(base64.b64decode(attestation["envelope"]["statement"], validate=True))
+              if (
+                  attestation["version"] != 1
+                  or not attestation["envelope"]["signature"]
+                  or not attestation["verification_material"]["certificate"]
+                  or not attestation["verification_material"]["transparency_entries"]
+                  or statement["_type"] != "https://in-toto.io/Statement/v1"
+                  or statement["predicateType"] != "https://docs.pypi.org/attestations/publish/v1"
+                  or statement["subject"] != [{"name": name, "digest": {"sha256": digest}}]
+              ):
+                  raise SystemExit(f"Invalid or mismatched publish attestation: {name}")
+
+      - name: "Publish with required Trusted Publishing"
+        run: >-
+          env -u UV_PUBLISH_TOKEN -u UV_PUBLISH_USERNAME -u UV_PUBLISH_PASSWORD
+          -u UV_PUBLISH_NO_ATTESTATIONS -u UV_PUBLISH_INDEX -u UV_PUBLISH_CHECK_URL
+          uv publish --no-config --trusted-publishing always --keyring-provider disabled
+          --publish-url https://upload.pypi.org/legacy/ dist/*.whl dist/*.tar.gz
+
+      - name: "Verify PyPI attestation availability"
+        shell: python
+        run: |
+          import base64
+          import json
+          import os
+          import time
+          from pathlib import Path
+          from urllib.error import HTTPError, URLError
+          from urllib.parse import quote
+          from urllib.request import Request, urlopen
+
+          record = json.loads(Path("release.json").read_text())
+          for name, digest in record["files"].items():
+              url = "https://pypi.org/integrity/artesian-sdk/" + "/".join(
+                  quote(part, safe="") for part in (record["version"], name)
+              ) + "/provenance"
+              for attempt in range(6):
+                  try:
+                      request = Request(url, headers={"Accept": "application/vnd.pypi.integrity.v1+json"})
+                      with urlopen(request, timeout=30) as response:
+                          provenance = json.load(response)
+                      if provenance["version"] != 1:
+                          raise SystemExit("Unsupported PyPI provenance version")
+                      found = False
+                      for bundle in provenance["attestation_bundles"]:
+                          publisher = bundle["publisher"]
+                          if (
+                              publisher["kind"] != "GitHub"
+                              or publisher["repository"] != "ARKlab/Artesian.SDK-Python"
+                              or publisher["workflow"] != "python-tests.yml"
+                              or publisher["environment"] != "pypi"
+                          ):
+                              continue
+                          for attestation in bundle["attestations"]:
+                              statement = json.loads(base64.b64decode(attestation["envelope"]["statement"], validate=True))
+                              if (
+                                  attestation["version"] == 1
+                                  and statement["_type"] == "https://in-toto.io/Statement/v1"
+                                  and statement["predicateType"] == "https://docs.pypi.org/attestations/publish/v1"
+                                  and statement["subject"] == [{"name": name, "digest": {"sha256": digest}}]
+                              ):
+                                  found = True
+                      if found:
+                          break
+                  except HTTPError as error:
+                      if error.code not in (404, 429, 500, 502, 503, 504):
+                          raise
+                  except (URLError, TimeoutError):
+                      pass
+                  if attempt < 5:
+                      time.sleep(10)
+              else:
+                  raise SystemExit(f"PyPI has no matching publish attestation for {name}")
+              with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as summary:
+                  summary.write(f"- Verified PyPI publisher and SHA256 for [{name}]({url})\n")
+
+      - name: "Retain release identity and signed distributions"
+        if: ${{ always() && steps.identity.outcome == 'success' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: attested-release-${{ github.run_attempt }}
+          path: |
+            dist/
+            release.json
+          if-no-files-found: error
 
   # ---------------------------------------------------------------------------
-  # Publish Beta
+  # Build Beta
   #
   # Tag:
   #   v4.3.0b1
@@ -318,9 +555,17 @@ jobs:
   #
   # ---------------------------------------------------------------------------
 
-  publish-beta:
-    name: "Publish Beta"
+  build-beta:
+    name: "Build Beta"
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      artifact-id: ${{ steps.distributions.outputs.artifact-id }}
+      artifact-digest: ${{ steps.distributions.outputs.artifact-digest }}
+      source-sha: ${{ steps.source.outputs.sha }}
+      wheel-sha: ${{ steps.hashes.outputs.wheel-sha }}
+      sdist-sha: ${{ steps.hashes.outputs.sdist-sha }}
     needs:
       - quality
       - build
@@ -386,6 +631,10 @@ jobs:
 
           echo "Beta version $BETA_VERSION is the next minor version after master GA $MASTER_VERSION."
 
+      - name: "Record release source"
+        id: source
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
       - name: "Set up uv"
         uses: astral-sh/setup-uv@v10.2.0
         with:
@@ -404,14 +653,31 @@ jobs:
 
           uv build
 
-      - name: "Publish package"
-        uses: pypa/gh-action-pypi-publish@release/v1
+      - name: "Check release metadata"
+        run: |
+          uv sync --locked
+          uv run --no-sync twine check dist/*
+
+      - name: "Record distribution hashes"
+        id: hashes
+        run: |
+          echo "Source commit: ${{ steps.source.outputs.sha }}" >> "$GITHUB_STEP_SUMMARY"
+          sha256sum dist/*.whl dist/*.tar.gz >> "$GITHUB_STEP_SUMMARY"
+          echo "wheel-sha=$(sha256sum dist/*.whl | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+          echo "sdist-sha=$(sha256sum dist/*.tar.gz | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+
+      - name: "Upload release distributions"
+        id: distributions
+        uses: actions/upload-artifact@v7
         with:
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
+          name: release-dist
+          path: |
+            dist/*.whl
+            dist/*.tar.gz
+          if-no-files-found: error
 
   # ---------------------------------------------------------------------------
-  # Publish PR Preview
+  # Build PR Preview
   #
   # Tag:
   #   v4.3.0a69.1
@@ -430,13 +696,18 @@ jobs:
   # The PR must be based on the current master.
   # ---------------------------------------------------------------------------
 
-  publish-preview:
-    name: "Publish PR Preview"
+  build-preview:
+    name: "Build PR Preview"
     runs-on: ubuntu-latest
+    outputs:
+      artifact-id: ${{ steps.distributions.outputs.artifact-id }}
+      artifact-digest: ${{ steps.distributions.outputs.artifact-digest }}
+      source-sha: ${{ steps.source.outputs.sha }}
+      wheel-sha: ${{ steps.hashes.outputs.wheel-sha }}
+      sdist-sha: ${{ steps.hashes.outputs.sdist-sha }}
 
     permissions:
       contents: read
-      checks: write
 
     needs:
       - quality
@@ -495,6 +766,10 @@ jobs:
           fi
 
           echo "PR Preview is based on master."
+
+      - name: "Record release source"
+        id: source
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: "Validate preview version"
         shell: bash
@@ -582,8 +857,23 @@ jobs:
 
           uv build
 
-      - name: "Publish package"
-        uses: pypa/gh-action-pypi-publish@release/v1
+      - name: "Check release metadata"
+        run: uv run --no-sync twine check dist/*
+
+      - name: "Record distribution hashes"
+        id: hashes
+        run: |
+          echo "Source commit: ${{ steps.source.outputs.sha }}" >> "$GITHUB_STEP_SUMMARY"
+          sha256sum dist/*.whl dist/*.tar.gz >> "$GITHUB_STEP_SUMMARY"
+          echo "wheel-sha=$(sha256sum dist/*.whl | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+          echo "sdist-sha=$(sha256sum dist/*.tar.gz | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+
+      - name: "Upload release distributions"
+        id: distributions
+        uses: actions/upload-artifact@v7
         with:
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
+          name: release-dist
+          path: |
+            dist/*.whl
+            dist/*.tar.gz
+          if-no-files-found: error

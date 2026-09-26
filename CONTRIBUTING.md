@@ -80,3 +80,52 @@ pushes to `master` establish the comparison baseline. Fork PRs still run tests
 and produce coverage artifacts/summaries, but skip uploads requiring write
 access. Tag previews retain separate reports because they test a different
 merged commit.
+
+## 5. Release setup (maintainers)
+
+Before enabling production publishing, complete these manual prerequisites:
+
+- An owner of the PyPI project **`artesian-sdk`** must register a Trusted
+  Publisher with owner **`ARKlab`**, repository **`Artesian.SDK-Python`**, workflow
+  filename **`python-tests.yml`**, and environment **`pypi`**, matching exactly.
+- Protect the GitHub **`pypi`** environment with required reviewers, prevent
+  self-review, and restrict deployment to the repository's release tag patterns.
+  Organization policy must allow the pinned, early-stage
+  `astral-sh/attest-action` v0.0.6
+  (`f589a42a7efb6fe400b4f400de60b4bc90390027`) and network access to Sigstore,
+  GitHub OIDC, and PyPI.
+- Rehearse on TestPyPI using a separate project, Trusted Publisher, and protected
+  environment before production. A separately reviewed rehearsal workflow must
+  configure **both** the upload destination and its Integrity API verification
+  endpoint, and change the verifier's expected publisher environment (currently
+  literal `pypi`) to match the rehearsal environment. Changing only the upload
+  URL is insufficient.
+
+Release builds retain `uv build` and Twine metadata checks in `build-stable`,
+`build-beta`, and `build-preview`, without OIDC permission. Stable releases
+retain the `master` source rule, beta releases `develop-beta`, and previews
+merge the PR into current `master`, normalizing versions to `X.Y.ZaPR.postITER`.
+The preview build's merge SHA differs from the triggering tag/workflow SHA.
+
+The separate `publish` job uses environment `pypi` and only `contents: read`
+and `id-token: write` permissions. It downloads wheel/sdist artifacts by
+immutable Actions artifact ID; it does not check out or build source, or
+install packages from those artifacts. Summaries record the actual build source
+SHA, artifact SHA256 digests, and workflow run identity. **Reviewers must inspect
+that build source and those digests before approving the environment**, especially
+for previews; reviewing the triggering tag alone is insufficient.
+
+The pinned attestation action creates PEP 740 `.publish.attestation` sidecars;
+uv **0.12.19** uploads with `--trusted-publishing always`. Explicit checks require
+sidecars before upload and confirm post-upload PyPI Integrity API attestation
+presence, subject digests, and publisher identity over HTTPS. This is a
+consistency/presence check, **not independent cryptographic verification**;
+PyPI verifies signatures on upload. These attestations establish publication
+identity, **not full build provenance**. A post-upload check failure cannot roll
+back published files. Retrying an identical file may skip its upload, so missing
+attestations require investigation rather than assuming a retry will repair them.
+
+This repository change does not perform external administrative setup or publish
+to production. Revoke `PYPI_API_TOKEN` only after a successful migration,
+verification checks, and confirmation that no other consumers need it; its
+revocation is a separate maintainer action.
