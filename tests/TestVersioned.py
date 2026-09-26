@@ -206,8 +206,8 @@ class TestVersioned(unittest.TestCase):
         self.assertEqual(query["fillerK"], "Null")
 
     @helpers.TrackRequests
-    def test_UnitOfMeasure(self, requests):
-        url = (
+    def test_UnitOfMeasure(self, requests: Qs) -> None:
+        (
             qs.createVersioned()
             .forMarketData([100000001])
             .inAbsoluteDateRange("2021-09-22", "2021-09-23")
@@ -223,8 +223,8 @@ class TestVersioned(unittest.TestCase):
         self.assertEqual(query["unitOfMeasure"], "kW")
 
     @helpers.TrackRequests
-    def test_AggregationRule(self, requests):
-        url = (
+    def test_AggregationRule(self, requests: Qs) -> None:
+        (
             qs.createVersioned()
             .forMarketData([100000001])
             .inAbsoluteDateRange("2021-09-22", "2021-09-23")

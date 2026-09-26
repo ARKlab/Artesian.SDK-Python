@@ -12,6 +12,7 @@ from Artesian.Query import (
 from Artesian.Query._Query import _Query
 from Artesian.MarketData import AggregationRule
 from . import helpers
+from tests.helpers import Qs
 import unittest
 from typing import get_type_hints
 
@@ -21,7 +22,7 @@ qs = QueryService(cfg)
 
 
 class TestActual(unittest.TestCase):
-    def test_execution_return_type_contracts(self):
+    def test_execution_return_type_contracts(self) -> None:
         for query_type, method in (
             (ActualQuery, "execute"),
             (AuctionQuery, "execute"),
@@ -38,8 +39,8 @@ class TestActual(unittest.TestCase):
                     )
 
     @helpers.TrackRequests
-    def test_Null_Fill(self, requests):
-        url = (
+    def test_Null_Fill(self, requests: Qs) -> None:
+        (
             qs.createActual()
             .forFilterId(1003)
             .inAbsoluteDateRange("2018-01-01", "2018-01-02")
@@ -52,8 +53,8 @@ class TestActual(unittest.TestCase):
         self.assertEqual(requests.getQs()["fillerK"], "Null")
 
     @helpers.TrackRequests
-    def test_No_Fill(self, requests):
-        url = (
+    def test_No_Fill(self, requests: Qs) -> None:
+        (
             qs.createActual()
             .forFilterId(1003)
             .inAbsoluteDateRange("2018-01-01", "2018-01-02")
@@ -67,8 +68,8 @@ class TestActual(unittest.TestCase):
         self.assertEqual(requests.getQs()["filterId"], "1003")
 
     @helpers.TrackRequests
-    def test_Latest_Fill(self, requests):
-        url = (
+    def test_Latest_Fill(self, requests: Qs) -> None:
+        (
             qs.createActual()
             .forFilterId(1003)
             .inAbsoluteDateRange("2018-01-01", "2018-01-02")
@@ -84,8 +85,8 @@ class TestActual(unittest.TestCase):
         self.assertEqual(query["fillerC"], "False")
 
     @helpers.TrackRequests
-    def test_Latest_Fill_Continue(self, requests):
-        url = (
+    def test_Latest_Fill_Continue(self, requests: Qs) -> None:
+        (
             qs.createActual()
             .forFilterId(1003)
             .inAbsoluteDateRange("2018-01-01", "2018-01-02")
@@ -101,8 +102,8 @@ class TestActual(unittest.TestCase):
         self.assertEqual(query["fillerC"], "True")
 
     @helpers.TrackRequests
-    def test_Custom_Value_Fill(self, requests):
-        url = (
+    def test_Custom_Value_Fill(self, requests: Qs) -> None:
+        (
             qs.createActual()
             .forFilterId(1003)
             .inAbsoluteDateRange("2018-01-01", "2018-01-02")
@@ -117,8 +118,8 @@ class TestActual(unittest.TestCase):
         self.assertEqual(query["fillerDV"], "10")
 
     @helpers.TrackRequests
-    def test_UnitOfMeasure(self, requests):
-        url = (
+    def test_UnitOfMeasure(self, requests: Qs) -> None:
+        (
             qs.createActual()
             .forFilterId(1003)
             .inAbsoluteDateRange("2018-01-01", "2018-01-02")
@@ -133,8 +134,8 @@ class TestActual(unittest.TestCase):
         self.assertEqual(query["unitOfMeasure"], CommonUnitOfMeasure.kW)
 
     @helpers.TrackRequests
-    def test_AggregationRule(self, requests):
-        url = (
+    def test_AggregationRule(self, requests: Qs) -> None:
+        (
             qs.createActual()
             .forFilterId(1003)
             .inAbsoluteDateRange("2018-01-01", "2018-01-02")

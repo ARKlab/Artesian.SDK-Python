@@ -1,6 +1,6 @@
 from __future__ import annotations
 from email.message import Message
-from typing import Optional
+from typing import Optional, Self
 import requests
 import platform
 
@@ -42,7 +42,7 @@ class _Client:
             }
         )
 
-    def __enter__(self: _Client) -> _Client:
+    def __enter__(self: Self) -> Self:
         self.__session.__enter__()
         return self
 

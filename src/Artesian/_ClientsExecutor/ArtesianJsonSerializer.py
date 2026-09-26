@@ -42,8 +42,7 @@ def __artesianDictSerializer(
     obj: dict, *, key_transformer: Optional[Callable[[str], str]] = None, **kwargs: Any
 ) -> list:
     result = []
-    for key in obj:
-        obj_ = obj[key]
+    for key, obj_ in obj.items():
         key_ = key if __is_valid_json_key(key) else jsons.dump(key, key_transformer=None, **kwargs)
         elem = jsons.dump(obj_, key_transformer=key_transformer, **kwargs)
         result.append({"Key": key_, "Value": elem})

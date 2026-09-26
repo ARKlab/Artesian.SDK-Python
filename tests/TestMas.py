@@ -1,6 +1,7 @@
 from Artesian import ArtesianConfig
 from Artesian.Query import QueryService
 from . import helpers
+from tests.helpers import Qs
 import unittest
 
 cfg = ArtesianConfig("https://arkive.artesian.cloud/tenantName/", "APIKey")
@@ -10,8 +11,8 @@ qs = QueryService(cfg)
 
 class TestMas(unittest.TestCase):
     @helpers.TrackRequests
-    def test_Null_Fill(self, requests):
-        url = (
+    def test_Null_Fill(self, requests: Qs) -> None:
+        (
             qs.createMarketAssessment()
             .forMarketData([100000001])
             .forProducts(["M+1", "M+2"])
@@ -23,8 +24,8 @@ class TestMas(unittest.TestCase):
         self.assertEqual(requests.getQs()["fillerK"], "Null")
 
     @helpers.TrackRequests
-    def test_No_Fill(self, requests):
-        url = (
+    def test_No_Fill(self, requests: Qs) -> None:
+        (
             qs.createMarketAssessment()
             .forMarketData([100000001])
             .forProducts(["M+1", "M+2"])
@@ -36,8 +37,8 @@ class TestMas(unittest.TestCase):
         self.assertEqual(requests.getQs()["fillerK"], "NoFill")
 
     @helpers.TrackRequests
-    def test_Latest_Fill(self, requests):
-        url = (
+    def test_Latest_Fill(self, requests: Qs) -> None:
+        (
             qs.createMarketAssessment()
             .forMarketData([100000001])
             .forProducts(["M+1", "M+2"])
@@ -52,13 +53,13 @@ class TestMas(unittest.TestCase):
         self.assertEqual(query["fillerC"], "False")
 
     @helpers.TrackRequests
-    def test_Latest_Fill_Continue(self, requests):
-        url = (
+    def test_Latest_Fill_Continue(self, requests: Qs) -> None:
+        (
             qs.createMarketAssessment()
             .forMarketData([100000001])
             .forProducts(["M+1", "M+2"])
             .inAbsoluteDateRange("2018-01-01", "2018-01-02")
-            .withFillLatestValue("P5D", "True")
+            .withFillLatestValue("P5D", True)
             .execute()
         )
 
@@ -68,8 +69,8 @@ class TestMas(unittest.TestCase):
         self.assertEqual(query["fillerC"], "True")
 
     @helpers.TrackRequests
-    def test_Custom_Value_Fill(self, requests):
-        url = (
+    def test_Custom_Value_Fill(self, requests: Qs) -> None:
+        (
             qs.createMarketAssessment()
             .forMarketData([100000001])
             .forProducts(["M+1", "M+2"])

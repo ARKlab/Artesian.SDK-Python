@@ -93,7 +93,9 @@ class _QueryParameters:
         fill: Optional[_FillStrategy] = None,
     ) -> None:
         self.ids = ids
-        self.extractionRangeConfig = extractionRangeConfig if extractionRangeConfig is not None else ExtractionRangeConfig()
+        self.extractionRangeConfig = (
+            extractionRangeConfig if extractionRangeConfig is not None else ExtractionRangeConfig()
+        )
         self.extractionRangeType = extractionRangeType
         self.timezone = timezone
         self.filterId = filterId

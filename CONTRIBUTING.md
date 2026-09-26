@@ -62,11 +62,11 @@ To update dependencies intentionally, use `uv lock --upgrade` (or
 ## 3. Formatting and typing
 
 Use Ruff's format-on-save integration or `uv run ruff format PATH` for edited
-Python files. CI enforces formatting and linting for SDK source; tests and
-samples retain their existing exclusion from lint checks. Explicit `Any` is
-allowed only in the jsons adapter, which forwards dynamic plugin keyword arguments.
+Python files. CI enforces formatting and linting for SDK source and tests;
+samples remain excluded. Explicit `Any` is limited to the jsons adapter's
+dynamic plugin keyword arguments and the test decorators' dynamic unittest instances.
 
-`uv run --locked pyrefly check` checks the SDK on the development Python
+`uv run --locked pyrefly check` checks the SDK and tests on the development Python
 version without a diagnostic baseline. CI also checks each supported version.
 Keep annotations accurate without
 changing public method names, parameters, or runtime behavior.

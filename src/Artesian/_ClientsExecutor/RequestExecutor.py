@@ -47,9 +47,7 @@ class _RequestExecutor:
         r: Retrying[_T] = Retrying(
             wait_fixed=self.__policy.retryWaitTime,
             stop_max_attempt_number=self.__policy.maxRetry,
-            retry_on_exception=lambda e: (
-                isinstance(e, ArtesianSdkServerException) or isinstance(e, ArtesianSdkRequestException)
-            ),
+            retry_on_exception=lambda e: isinstance(e, (ArtesianSdkServerException, ArtesianSdkRequestException)),
         )
         return await r.call(self.__do, callback, *args, **kwargs)
 
@@ -208,7 +206,7 @@ class Retrying(Generic[_T]):
         return reject
 
     async def call(self, fn: Callable[_P, Awaitable[_T]], *args: _P.args, **kwargs: _P.kwargs) -> _T:
-        start_time = int(round(time.time() * 1000))
+        start_time = round(time.time() * 1000)
         attempt_number = 1
         while True:
             if self._before_attempts:
@@ -227,7 +225,7 @@ class Retrying(Generic[_T]):
             if self._after_attempts:
                 self._after_attempts(attempt_number)
 
-            delay_since_first_attempt_ms = int(round(time.time() * 1000)) - start_time
+            delay_since_first_attempt_ms = round(time.time() * 1000) - start_time
             if self.stop(attempt_number, delay_since_first_attempt_ms):
                 if not self._wrap_exception and attempt.has_exception:
                     # get() on an attempt with an exception should cause it to be

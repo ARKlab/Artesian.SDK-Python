@@ -67,25 +67,39 @@ test = [
 target-version = "py314"
 line-length = 120
 include = ["*.py", "*.pyi"]
-extend-exclude = ["src/Artesian/_version.py", "tests", "samples"]
+extend-exclude = ["src/Artesian/_version.py", "samples"]
 
 [tool.ruff.lint]
 extend-select = ["ANN"]
-# ponytail: Legacy SDK naming and annotations produce 516 findings; remove these baselines as files are migrated.
+# ponytail: Preserve public module names, exception behavior, and jsons-sensitive typing; migrate remaining legacy rules by file.
 ignore = [
-    "BLE001", "C417", "I001", "N999", "PLC0206",
-    "PLR1730", "PYI034", "RET501", "RUF009", "RUF022", "RUF046",
-    "SIM101", "TRY002", "UP006", "UP030", "UP032", "UP035", "UP037",
-    "UP045", "UP046",
+    "BLE001", "C417", "I001", "N999",
+    "PLR1730", "RET501", "RUF022",
+    "TRY002", "UP006", "UP030", "UP032", "UP035", "UP037",
+    "UP045", "UP046", # UP046 needs Python 3.12 syntax; this package supports 3.11.
 ]
 
 [tool.ruff.lint.per-file-ignores]
 # jsons accepts dynamically typed plugin keyword arguments at this adapter boundary.
 "src/Artesian/_ClientsExecutor/ArtesianJsonSerializer.py" = ["ANN401"]
+# These sentinel datetimes are immutable and intentionally shared as field defaults.
+"src/Artesian/MarketData/_Dto/CurveRangeEntity.py" = ["RUF009"]
+# Time-series test data deliberately uses naive timestamps in the source timezone.
+"tests/TestMarketDataDeleteData.py" = ["DTZ001"]
+"tests/TestMarketDataService.py" = ["DTZ001"]
+"tests/TestMarketDataUpsertData.py" = ["DTZ001"]
+# These tests exercise nested context lifetimes and execute checked-in test/workflow code.
+"tests/TestClientErrorHandling.py" = ["SIM117"]
+"tests/TestRequestExecutor.py" = ["SIM117"]
+"tests/TestGMEPO.py" = ["S102"]
+"tests/TestPublishingWorkflow.py" = ["S102", "SIM117"]
+# The request decorators forward dynamically typed unittest instances and need the module, not the exported class.
+"tests/helpers.py" = ["ANN401", "PLR0402"]
 
 [tool.pyrefly]
-project-includes = ["src"]
+project-includes = ["src", "tests"]
 project-excludes = ["src/Artesian/_version.py"]
+search-path = ["src", "."]
 python-version = "3.14"
 
 [tool.coverage.run]

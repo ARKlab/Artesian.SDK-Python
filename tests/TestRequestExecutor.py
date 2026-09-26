@@ -48,7 +48,7 @@ class TestRequestExecutor(unittest.IsolatedAsyncioTestCase):
                 executor = _RequestExecutor(ArtesianPolicyConfig(maxRetry=3, maxParallelism=1))
                 attempts = 0
 
-                async def callback() -> None:
+                async def callback(error: RuntimeError | asyncio.CancelledError = error) -> None:
                     nonlocal attempts
                     attempts += 1
                     raise error
@@ -136,7 +136,7 @@ class TestRequestExecutor(unittest.IsolatedAsyncioTestCase):
             with self.subTest(retry=reject):
                 retry: Retrying[None] = Retrying(
                     stop_max_attempt_number=1,
-                    retry_on_exception=lambda exception: reject,
+                    retry_on_exception=lambda exception, reject=reject: reject,
                     wrap_exception=True,
                 )
                 with self.assertRaises(RetryError) as caught:
