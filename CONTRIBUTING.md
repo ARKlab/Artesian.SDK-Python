@@ -83,13 +83,14 @@ Enable **Code Quality** in the repository's GitHub settings to use native
 [code coverage](https://docs.github.com/en/code-security/how-tos/maintain-quality-code/set-up-code-coverage).
 No third-party coverage account or token is required.
 
-CI combines raw coverage data from the Python/OS matrix, publishes HTML/XML
-artifacts and a job summary, then uses `actions/upload-code-coverage` with a
+The OS/Python matrix builds the package and runs Ruff, Pyrefly, and pytest for
+every event. The single **Checks** job is the required PR check: it combines
+coverage data, publishes test results, HTML/XML artifacts and a job summary,
+and fails if the matrix or reporting fails. Native GitHub coverage uses a
 job-scoped `code-quality: write` permission. PR coverage uses the PR head commit;
 pushes to `master` establish the comparison baseline. Fork PRs still run tests
 and produce coverage artifacts/summaries, but skip uploads requiring write
-access. Tag previews also produce separate coverage artifacts for their tagged
-commit.
+access. Preview tags use the same matrix and report their tagged commit.
 
 ## 5. Release setup (maintainers)
 
@@ -109,12 +110,12 @@ Before enabling production publishing, complete these manual prerequisites:
   environment before production. A separately reviewed rehearsal workflow must
   configure its upload destination and publisher environment for TestPyPI.
 
-PRs only validate the codebase: package, lint, type, and test checks run but
-cannot build release artifacts or publish. Only a pushed release tag or a
-manual workflow dispatch **on a tag ref** can publish, after package, matrix,
-test-report, and coverage checks pass. Dispatching on a branch cannot publish.
-Release builds use `uv build` in `build-stable`, `build-beta`, and
-`build-preview`, without OIDC permission. Stable releases
+PRs only validate the codebase; they cannot build release artifacts or publish.
+Only a pushed release tag or a manual workflow dispatch **on a tag ref** can
+publish, after **Checks** passes. Dispatching on a branch cannot publish.
+The single `build-release` job validates the tag, source, and version for
+stable, beta, or preview releases, then runs the same `uv build` and artifact
+upload steps for each, without OIDC permission. Stable releases
 retain the `master` source rule, beta releases `develop-beta`, and previews
 build the tagged commit (which must contain current `master`, equal the
 numbered PR's current head, and not already be merged into `master`),

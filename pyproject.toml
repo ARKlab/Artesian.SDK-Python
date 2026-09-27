@@ -92,7 +92,6 @@ extend-select = ["ANN"]
 "tests/TestClientErrorHandling.py" = ["SIM117"]
 "tests/TestRequestExecutor.py" = ["SIM117"]
 "tests/TestGMEPO.py" = ["S102"]
-"tests/TestPublishingWorkflow.py" = ["S102", "SIM117"]
 # The request decorators forward dynamically typed unittest instances and need the module, not the exported class.
 "tests/helpers.py" = ["ANN401", "PLR0402"]
 
