@@ -87,10 +87,11 @@ The OS/Python matrix builds the package and runs Ruff, Pyrefly, and pytest for
 every event. The single **Checks** job is the required PR check: it combines
 coverage data, publishes test results, HTML/XML artifacts and a job summary,
 and fails if the matrix or reporting fails. Native GitHub coverage uses a
-job-scoped `code-quality: write` permission. PR coverage uses the PR head commit;
-pushes to `master` establish the comparison baseline. Fork PRs still run tests
-and produce coverage artifacts/summaries, but skip uploads requiring write
-access. Preview tags use the same matrix and report their tagged commit.
+job-scoped `code-quality: write` permission. PR checks run on GitHub's merge
+commit; pushes to `master` establish the comparison baseline. Fork PRs still
+run tests and produce coverage artifacts/summaries, but skip uploads
+requiring write access. Preview tags use the same matrix and report their
+tagged commit.
 
 ## 5. Release setup (maintainers)
 
