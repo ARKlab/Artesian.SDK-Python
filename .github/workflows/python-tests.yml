@@ -172,6 +172,14 @@ jobs:
           MATRIX_RESULT: ${{ needs.test-matrix.result }}
         run: test "$MATRIX_RESULT" = success
 
+  # Stable: v4.3.0 -> 4.3.0; tag commit must be contained in master.
+  # Beta: v4.3.0b1 / v4.3.0b2 -> 4.3.0b1 / 4.3.0b2; tag commit must be
+  # contained in develop-beta. The beta version must be the next minor after
+  # the latest master GA version (e.g. master v4.2.0 -> beta v4.3.0b1).
+  # PR preview: v4.3.0a69.1 / v4.3.0a69.2 -> 4.3.0a69.post1 /
+  # 4.3.0a69.post2. The base version must match the latest master GA version,
+  # 69 is the PR number, and 1 / 2 are preview iterations. The tagged commit
+  # must contain current master and equal the unmerged PR head.
   build-release:
     name: "Build release"
     runs-on: ubuntu-latest
