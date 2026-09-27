@@ -92,6 +92,7 @@ class TestPublishingWorkflow(unittest.TestCase):
         jobs = self.workflow["jobs"]
         triggers = self.workflow.get("on", self.workflow.get(True))
         self.assertIn("pull_request", triggers)
+        self.assertEqual(triggers["pull_request"]["branches"], ["main", "master", "develop", "develop-beta"])
         self.assertIn("workflow_dispatch", triggers)
         self.assertIn("tags", triggers["push"])
         self.assertNotIn("ref", jobs["quality"]["steps"][0]["with"])

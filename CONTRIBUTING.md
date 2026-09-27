@@ -133,6 +133,10 @@ and those digests before approving the environment**.
 As in [uv's GitHub publishing guide](https://docs.astral.sh/uv/guides/integration/github/#publishing-to-pypi),
 the pinned attestation action creates PEP 740 `.publish.attestation` sidecars
 and `uv publish --trusted-publishing always` uploads them with the distributions.
+PyPI's [`/legacy/` Upload API](https://docs.pypi.org/api/upload/) accepts
+distribution uploads; `/simple/` is the read-only package index used for
+installation. The `legacy` name is historical, not a deprecated publishing
+destination. Trusted Publishing changes authentication, not the upload API.
 PyPI verifies attestations on upload; they establish publication identity,
 **not full build provenance**. uv retries uploads and skips identical files
 already present on PyPI; investigate any missing attestations rather than
