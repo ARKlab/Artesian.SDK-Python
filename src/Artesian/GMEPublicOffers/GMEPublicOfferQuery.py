@@ -440,7 +440,7 @@ class GMEPublicOfferQuery:
 
     def _validateQuery(self: GMEPublicOfferQuery) -> None:
         if self._queryParameters.purpose is None:
-            raise ValueError("Extraction Purpose must be provided. Use .forScope()" + " argument takes a scope type")
+            raise ValueError("Extraction Purpose must be provided. Use .forPurpose(); argument takes a purpose type")
         if self._queryParameters.extractionRangeConfig.date is None:
             raise ValueError(
                 "Extraction Date must be provided. Use .forDate() argument" + " takes a string formatted as YYYY-MM-DD"
