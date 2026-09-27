@@ -9,8 +9,8 @@ version in `[tool.uv].required-version` in `pyproject.toml`, then:
 uv sync --locked --python 3.14
 ```
 
-This creates `.venv` and installs the SDK, test dependencies, Ruff, Pyrefly, and
-Twine from `uv.lock`. Select `.venv` as the Python interpreter in VS Code and
+This creates `.venv` and installs the SDK, test dependencies, Ruff, and Pyrefly
+from `uv.lock`. Select `.venv` as the Python interpreter in VS Code and
 install the recommended extensions. Pyrefly replaces Pylance/Pyright; Ruff
 replaces Black and Flake8. Pyrefly is a type checker, not a formatter.
 The [Pyrefly VS Code extension](https://pyrefly.org/en/docs/IDE/#vscode-extension-settings)
@@ -33,7 +33,6 @@ uv run --locked ruff format --check .
 uv run --locked pyrefly check
 uv run --locked pytest
 uv build
-uv run --locked twine check dist/*
 ```
 
 Tests use mocked HTTP responses; no live tenant or API key is needed. Pytest
@@ -114,8 +113,8 @@ PRs only validate the codebase: package, lint, type, and test checks run but
 cannot build release artifacts or publish. Only a pushed release tag or a
 manual workflow dispatch **on a tag ref** can publish, after package, matrix,
 test-report, and coverage checks pass. Dispatching on a branch cannot publish.
-Release builds retain `uv build` and Twine metadata checks in `build-stable`,
-`build-beta`, and `build-preview`, without OIDC permission. Stable releases
+Release builds use `uv build` in `build-stable`, `build-beta`, and
+`build-preview`, without OIDC permission. Stable releases
 retain the `master` source rule, beta releases `develop-beta`, and previews
 build the tagged commit (which must contain current `master`, equal the
 numbered PR's current head, and not already be merged into `master`),

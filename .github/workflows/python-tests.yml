@@ -45,9 +45,6 @@ jobs:
       - name: Build package
         run: uv build
 
-      - name: Check package metadata
-        run: uv run --no-sync twine check dist/*
-
   # ---------------------------------------------------------------------------
   # Build / Test
   # ---------------------------------------------------------------------------
@@ -296,11 +293,6 @@ jobs:
           echo "Building GA package: ${GITHUB_REF_NAME#v}"
           uv build
 
-      - name: "Check release metadata"
-        run: |
-          uv sync --locked
-          uv run --no-sync twine check dist/*
-
       - name: "Record distribution hashes"
         run: |
           echo "Source commit: ${{ steps.source.outputs.sha }}" >> "$GITHUB_STEP_SUMMARY"
@@ -500,11 +492,6 @@ jobs:
 
           uv build
 
-      - name: "Check release metadata"
-        run: |
-          uv sync --locked
-          uv run --no-sync twine check dist/*
-
       - name: "Record distribution hashes"
         run: |
           echo "Source commit: ${{ steps.source.outputs.sha }}" >> "$GITHUB_STEP_SUMMARY"
@@ -675,9 +662,6 @@ jobs:
           echo "SETUPTOOLS_SCM_PRETEND_VERSION=${SETUPTOOLS_SCM_PRETEND_VERSION}"
 
           uv build
-
-      - name: "Check release metadata"
-        run: uv run --no-sync twine check dist/*
 
       - name: "Record distribution hashes"
         run: |

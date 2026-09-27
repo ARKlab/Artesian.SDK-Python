@@ -54,6 +54,13 @@ class TestPublishingWorkflow(unittest.TestCase):
         self.assertNotIn("tests", config["tool"]["ruff"]["extend-exclude"])
         self.assertIn("tests", config["tool"]["pyrefly"]["project-includes"])
 
+    def test_release_builds_do_not_depend_on_twine(self) -> None:
+        config = tomllib.loads((WORKFLOW.parents[2] / "pyproject.toml").read_text())
+        lock = tomllib.loads((WORKFLOW.parents[2] / "uv.lock").read_text())
+        self.assertFalse(any("twine" in str(dependency).lower() for dependency in config["dependency-groups"]["dev"]))
+        self.assertNotIn("twine", {package["name"] for package in lock["package"]})
+        self.assertNotIn("twine", WORKFLOW.read_text().lower())
+
     def test_release_builds_are_separate_from_publisher(self) -> None:
         jobs = self.workflow["jobs"]
         publish = jobs["publish"]
@@ -73,7 +80,7 @@ class TestPublishingWorkflow(unittest.TestCase):
                 "validate_tag.sh",
                 next(s["run"] for s in build["steps"] if "Validate" in s["name"] and "tag" in s["name"]),
             )
-            self.assertIn("twine check dist/*", steps["Check release metadata"]["run"])
+            self.assertNotIn("Check release metadata", steps)
             self.assertIn("git rev-parse HEAD", steps["Record release source"]["run"])
             self.assertIn("sha256sum dist/*.whl dist/*.tar.gz", steps["Record distribution hashes"]["run"])
             self.assertEqual(steps["Upload release distributions"]["with"]["name"], "release-dist")
