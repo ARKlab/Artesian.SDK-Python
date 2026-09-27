@@ -181,7 +181,8 @@ jobs:
 
     if: >
       (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
-      startsWith(github.ref, 'refs/tags/v')
+      startsWith(github.ref, 'refs/tags/v') &&
+      needs.checks.result == 'success'
 
     steps:
       - name: "Checkout"
