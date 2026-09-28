@@ -7,6 +7,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
 class TestReleaseTags(unittest.TestCase):
+    @unittest.skipIf(os.name == "nt", "Release tag validation runs on Unix")
     def test_tag_formats(self) -> None:
         env = {key: value for key, value in os.environ.items() if key != "GITHUB_REF"}
         for tag, kind, valid in (
