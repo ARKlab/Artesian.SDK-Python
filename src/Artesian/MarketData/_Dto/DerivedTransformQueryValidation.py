@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 
 from .TimeSerieData import TimeSerieData
 
@@ -27,7 +26,7 @@ class DerivedTransformQueryValidation:
     """
 
     data: TimeSerieData
-    transform: Optional[str] = None
+    transform: str | None = None
 
     def __post_init__(self) -> None:
         if self.transform is None:

@@ -68,8 +68,8 @@ Keep annotations accurate without
 changing public method names, parameters, or runtime behavior.
 Use `TypeVar` and `Generic[T]` for generic classes until the minimum supported
 Python is 3.12; PEP 695's `class Name[T]` syntax cannot be parsed by Python 3.11.
-MarketData DTOs still use `Optional[T]`; the msgspec serializer also accepts
-`T | None`, so converting them is a separate, purely stylistic change.
+DTOs use PEP 604 `T | None` annotations; the msgspec wire-schema compiler
+resolves them on every supported Python version.
 Unknown responses use `object` rather than `Any`, and nullable service results
 include `None`. Preserve public import paths and wire formats when
 changing internal typing.

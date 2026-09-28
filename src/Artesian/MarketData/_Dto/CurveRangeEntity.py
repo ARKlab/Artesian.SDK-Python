@@ -1,6 +1,5 @@
 import datetime
 from dataclasses import dataclass
-from typing import Optional
 
 from dateutil import tz
 
@@ -21,9 +20,9 @@ class CurveRangeEntity:
     """
 
     marketDataId: int = 0
-    product: Optional[str] = None
-    version: Optional[str] = None
+    product: str | None = None
+    version: str | None = None
     lastUpdated: datetime.datetime = datetime.datetime.min.replace(tzinfo=tz.UTC)
     created: datetime.datetime = datetime.datetime.min.replace(tzinfo=tz.UTC)
-    rangeStart: Optional[datetime.date] = None
-    rangeEnd: Optional[datetime.date] = None
+    rangeStart: datetime.date | None = None
+    rangeEnd: datetime.date | None = None

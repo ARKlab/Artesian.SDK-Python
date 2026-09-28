@@ -1,6 +1,5 @@
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Optional
 
 from dateutil import tz
 
@@ -26,14 +25,14 @@ class MarketAssessmentValue:
         volume: the Market Assessment volume
     """
 
-    settlement: Optional[float] = None
-    open: Optional[float] = None
-    close: Optional[float] = None
-    high: Optional[float] = None
-    low: Optional[float] = None
-    volumePaid: Optional[float] = None
-    volumeGiven: Optional[float] = None
-    volume: Optional[float] = None
+    settlement: float | None = None
+    open: float | None = None
+    close: float | None = None
+    high: float | None = None
+    low: float | None = None
+    volumePaid: float | None = None
+    volumeGiven: float | None = None
+    volume: float | None = None
 
 
 @dataclass
@@ -50,12 +49,12 @@ class BidAskValue:
         lastQuantity: the Bid Ask last quantity
     """
 
-    bestBidPrice: Optional[float] = None
-    bestAskPrice: Optional[float] = None
-    bestBidQuantity: Optional[float] = None
-    bestAskQuantity: Optional[float] = None
-    lastPrice: Optional[float] = None
-    lastQuantity: Optional[float] = None
+    bestBidPrice: float | None = None
+    bestAskPrice: float | None = None
+    bestBidQuantity: float | None = None
+    bestAskQuantity: float | None = None
+    lastPrice: float | None = None
+    lastQuantity: float | None = None
 
 
 @dataclass
@@ -115,12 +114,12 @@ class UpsertData:
     ID: MarketDataIdentifier
     timezone: str
     downloadedAt: datetime = field(default_factory=lambda: datetime.now(tz.UTC))
-    version: Optional[datetime] = None
-    rows: Optional[dict[datetime, Optional[float]]] = keyValueArrayField()
-    marketAssessment: Optional[dict[datetime, dict[str, MarketAssessmentValue]]] = keyValueArrayField()
-    bidAsk: Optional[dict[datetime, dict[str, BidAskValue]]] = keyValueArrayField()
-    auctionRows: Optional[dict[datetime, AuctionBids]] = keyValueArrayField()
+    version: datetime | None = None
+    rows: dict[datetime, float | None] | None = keyValueArrayField()
+    marketAssessment: dict[datetime, dict[str, MarketAssessmentValue]] | None = keyValueArrayField()
+    bidAsk: dict[datetime, dict[str, BidAskValue]] | None = keyValueArrayField()
+    auctionRows: dict[datetime, AuctionBids] | None = keyValueArrayField()
     deferCommandExecution: bool = False
     deferDataGeneration: bool = True
     keepNulls: bool = False
-    upsertMode: Optional[UpsertMode] = None
+    upsertMode: UpsertMode | None = None

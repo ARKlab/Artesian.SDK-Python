@@ -82,8 +82,6 @@ extend-immutable-calls = ["Artesian._ClientsExecutor.ArtesianJsonSerializer.keyV
 # PEP 695 class parameters require Python 3.12; use TypeVar with Generic on 3.11.
 "src/Artesian/Query/_Query.py" = ["UP046"]
 "src/Artesian/_ClientsExecutor/RequestExecutor.py" = ["UP046"]
-# DTOs keep Optional[T]; converting them to PEP 604 unions is a separate change.
-"src/Artesian/MarketData/_Dto/*.py" = ["UP045"]
 # The wire-schema compiler handles arbitrary runtime annotations and msgspec mirror values.
 "src/Artesian/_ClientsExecutor/ArtesianJsonSerializer.py" = ["ANN401"]
 # These sentinel datetimes are immutable and intentionally shared as field defaults.

@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 
 from Artesian._ClientsExecutor.ArtesianJsonSerializer import keyValueArrayField
 
@@ -35,14 +34,14 @@ class MarketDataEntityInput:
     originalGranularity: Granularity
     type: MarketDataType
     originalTimezone: str
-    unitOfMeasure: Optional[UnitOfMeasure] = None
-    derivedCfg: Optional[DerivedCfg] = None
+    unitOfMeasure: UnitOfMeasure | None = None
+    derivedCfg: DerivedCfg | None = None
     aggregationRule: AggregationRule = AggregationRule.Undefined
-    tags: Optional[dict[str, list[str]]] = keyValueArrayField()
-    providerDescription: Optional[str] = None
-    transformID: Optional[int] = None
+    tags: dict[str, list[str]] | None = keyValueArrayField()
+    providerDescription: str | None = None
+    transformID: int | None = None
     marketDataId: int = 0
-    eTag: Optional[str] = None
+    eTag: str | None = None
 
     def _validateDerivedCfg(self) -> None:
         if (
