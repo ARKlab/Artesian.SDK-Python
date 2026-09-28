@@ -3,7 +3,7 @@ import subprocess
 import unittest
 from pathlib import Path
 
-VALIDATOR = Path(__file__).resolve().parents[1] / ".github/workflows/validate_tag.sh"
+REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
 class TestReleaseTags(unittest.TestCase):
@@ -22,9 +22,10 @@ class TestReleaseTags(unittest.TestCase):
         ):
             with self.subTest(tag=tag):
                 result = subprocess.run(
-                    ["bash", str(VALIDATOR), tag, kind],
+                    ["bash", ".github/workflows/validate_tag.sh", tag, kind],
+                    cwd=REPO_ROOT,
                     env=env,
                     capture_output=True,
                     check=False,
                 )
-                self.assertEqual(result.returncode == 0, valid, result.stderr)
+                self.assertEqual(result.returncode == 0, valid, result.stdout + result.stderr)
