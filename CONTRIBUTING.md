@@ -117,10 +117,13 @@ publish, after **Checks** passes. Dispatching on a branch cannot publish.
 The single `build-release` job validates the tag, source, and version for
 stable, beta, or preview releases, then runs the same `uv build` and artifact
 upload steps for each, without OIDC permission. Stable releases
-retain the `master` source rule, beta releases `develop-beta`, and previews
+retain the `master` source rule; beta releases come from `develop-beta` and
+target the next minor (`v4.3.0b1` after `v4.2.0`) or next major
+(`v5.0.0b1`). Preview tags use `vX.Y.ZaPR.postITER`; removing only the
+Git tag's `v` prefix yields the exact PyPI version without remapping. Previews
 build the tagged commit (which must contain current `master`, equal the
-numbered PR's current head, and not already be merged into `master`),
-normalizing versions to `X.Y.ZaPR.postITER`.
+numbered PR's current head, and not already be merged into `master`), never
+the synthetic PR merge commit.
 
 The separate `publish` job uses environment `pypi` and only `contents: read`
 and `id-token: write` permissions. It downloads the distribution artifact from

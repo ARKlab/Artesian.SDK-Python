@@ -22,8 +22,8 @@ case "$TYPE" in
     ;;
 
   preview)
-    PATTERN='^v[0-9]+\.[0-9]+\.[0-9]+a[0-9]+\.[0-9]+$'
-    EXPECTED='vX.Y.Za{PR_NUMBER}.{ITERATION}'
+    PATTERN='^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)a(0|[1-9][0-9]*)\.post(0|[1-9][0-9]*)$'
+    EXPECTED='vX.Y.Za{PR_NUMBER}.post{ITERATION}'
     ;;
 
   *)

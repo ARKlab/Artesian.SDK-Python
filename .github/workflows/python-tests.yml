@@ -16,7 +16,7 @@ jobs:
   test-matrix:
     name: "Python ${{ matrix.python-version }} / ${{ matrix.os }}"
     runs-on: ${{ matrix.os }}
-    # Test artifacts need not carry the preview tag's non-PEP-440 version.
+    # Test artifacts use a fixed version regardless of the release tag.
     env:
       SETUPTOOLS_SCM_PRETEND_VERSION: "0.0.0"
 
@@ -171,13 +171,12 @@ jobs:
         run: test "$MATRIX_RESULT" = success
 
   # Stable: v4.3.0 -> 4.3.0; tag commit must be contained in master.
-  # Beta: v4.3.0b1 / v4.3.0b2 -> 4.3.0b1 / 4.3.0b2; tag commit must be
-  # contained in develop-beta. The beta version must be the next minor after
-  # the latest master GA version (e.g. master v4.2.0 -> beta v4.3.0b1).
-  # PR preview: v4.3.0a69.1 / v4.3.0a69.2 -> 4.3.0a69.post1 /
-  # 4.3.0a69.post2. The base version must match the latest master GA version,
-  # 69 is the PR number, and 1 / 2 are preview iterations. The tagged commit
-  # must contain current master and equal the unmerged PR head.
+  # Beta: v4.3.0b1 / v5.0.0b1; tag commit must be contained in develop-beta.
+  # The beta version must be the next minor or major after the latest master GA.
+  # PR preview: v4.3.0a69.post1 / v4.3.0a69.post2. The base version
+  # must match the latest master GA version; 69 is the PR number, and
+  # 1 / 2 are preview iterations. The tag must point to the unmerged PR
+  # head containing current master, not to a synthetic merge commit.
   build-release:
     name: "Build release"
     runs-on: ubuntu-latest
@@ -202,19 +201,16 @@ jobs:
         shell: bash
         run: |
           TAG="$GITHUB_REF_NAME"
-          if [[ "$TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)a([0-9]+)\.([0-9]+)$ ]]; then
+          if [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+a[0-9]+\.post[0-9]+$ ]]; then
             KIND=preview
-            VERSION="${BASH_REMATCH[1]}a${BASH_REMATCH[2]}.post${BASH_REMATCH[3]}"
-          elif [[ "$TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)b([0-9]+)$ ]]; then
+          elif [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+b[0-9]+$ ]]; then
             KIND=beta
-            VERSION="${BASH_REMATCH[1]}b${BASH_REMATCH[2]}"
           else
             KIND=ga
-            VERSION="${TAG#v}"
           fi
           bash .github/workflows/validate_tag.sh "$TAG" "$KIND"
           echo "kind=$KIND" >> "$GITHUB_OUTPUT"
-          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
 
       - name: "Validate release commit is contained in master"
         if: steps.tag.outputs.kind == 'ga'
@@ -226,7 +222,7 @@ jobs:
         shell: bash
         run: bash .github/workflows/validate_branch.sh "develop-beta"
 
-      - name: "Validate next minor version"
+      - name: "Validate next minor or major version"
         if: steps.tag.outputs.kind == 'beta'
         shell: bash
         run: |
@@ -253,21 +249,17 @@ jobs:
 
           MASTER_MAJOR=$(echo "$MASTER_VERSION" | cut -d. -f1)
           MASTER_MINOR=$(echo "$MASTER_VERSION" | cut -d. -f2)
+          NEXT_MINOR="$((10#$MASTER_MINOR + 1))"
+          NEXT_MAJOR="$((10#$MASTER_MAJOR + 1))"
 
-          BETA_MAJOR=$(echo "$BETA_VERSION" | cut -d. -f1)
-          BETA_MINOR=$(echo "$BETA_VERSION" | cut -d. -f2)
-
-          EXPECTED_MAJOR="$MASTER_MAJOR"
-          EXPECTED_MINOR="$((MASTER_MINOR + 1))"
-
-          if [[ "$BETA_MAJOR" != "$EXPECTED_MAJOR" ||
-                "$BETA_MINOR" != "$EXPECTED_MINOR" ]]; then
-            echo "::error::Beta version $BETA_VERSION is not the next minor version after master GA $MASTER_VERSION."
-            echo "::error::Expected: ${EXPECTED_MAJOR}.${EXPECTED_MINOR}.0bN"
+          if [[ "$BETA_VERSION" != "${MASTER_MAJOR}.${NEXT_MINOR}.0" &&
+                "$BETA_VERSION" != "${NEXT_MAJOR}.0.0" ]]; then
+            echo "::error::Beta version $BETA_VERSION is not the next minor or major version after master GA $MASTER_VERSION."
+            echo "::error::Expected: ${MASTER_MAJOR}.${NEXT_MINOR}.0bN or ${NEXT_MAJOR}.0.0bN"
             exit 1
           fi
 
-          echo "Beta version $BETA_VERSION is the next minor version after master GA $MASTER_VERSION."
+          echo "Beta version $BETA_VERSION is the next minor or major version after master GA $MASTER_VERSION."
 
       - name: "Validate preview source"
         if: steps.tag.outputs.kind == 'preview'
@@ -305,7 +297,7 @@ jobs:
             sed 's/^v//'
           )
 
-          PREVIEW_VERSION=$(echo "$TAG" | sed -E 's/^v([0-9]+\.[0-9]+\.[0-9]+)a[0-9]+\.[0-9]+$/\1/')
+          PREVIEW_VERSION=$(echo "$TAG" | sed -E 's/^v([0-9]+\.[0-9]+\.[0-9]+)a[0-9]+\.post[0-9]+$/\1/')
 
           echo "Master GA version: $MASTER_VERSION"
           echo "Preview version:   $PREVIEW_VERSION"
@@ -382,15 +374,10 @@ jobs:
           import re
           from pathlib import Path
 
-          match = re.fullmatch(r"v(\d+\.\d+\.\d+)(?:b(\d+)|a(\d+)\.(\d+))?", os.environ["GITHUB_REF_NAME"])
+          match = re.fullmatch(r"v\d+\.\d+\.\d+(?:b\d+|a\d+\.post\d+)?", os.environ["GITHUB_REF_NAME"])
           if not match:
               raise SystemExit("Invalid release tag")
-          base, beta, pr, iteration = match.groups()
-          version = ".".join(str(int(part)) for part in base.split("."))
-          if beta:
-              version += f"b{int(beta)}"
-          elif pr:
-              version += f"a{int(pr)}.post{int(iteration)}"
+          version = match.group()[1:]
           expected = {f"artesian_sdk-{version}-py3-none-any.whl", f"artesian_sdk-{version}.tar.gz"}
           if {path.name for path in Path("dist").iterdir()} != expected:
               raise SystemExit("Release distributions do not match the tag")

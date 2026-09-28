@@ -1,0 +1,28 @@
+import os
+import subprocess
+import unittest
+from pathlib import Path
+
+VALIDATOR = Path(__file__).resolve().parents[1] / ".github/workflows/validate_tag.sh"
+
+
+class TestReleaseTags(unittest.TestCase):
+    def test_tag_formats(self) -> None:
+        env = {key: value for key, value in os.environ.items() if key != "GITHUB_REF"}
+        for tag, kind, valid in (
+            ("v4.3.0", "ga", True),
+            ("v4.3.0b1", "beta", True),
+            ("v5.0.0b1", "beta", True),
+            ("v4.3.0a69.post2", "preview", True),
+            ("v4.3.0a69.2", "preview", False),
+            ("v4.3.0a069.post02", "preview", False),
+            ("v4.3.0a69.post2junk", "preview", False),
+        ):
+            with self.subTest(tag=tag):
+                result = subprocess.run(
+                    ["bash", str(VALIDATOR), tag, kind],
+                    env=env,
+                    capture_output=True,
+                    check=False,
+                )
+                self.assertEqual(result.returncode == 0, valid, result.stderr)
