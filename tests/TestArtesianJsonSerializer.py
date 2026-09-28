@@ -65,6 +65,17 @@ class TestArtesianJsonSerializer(unittest.TestCase):
                 self.assertEqual(artesianJsonSerialize(value), expected)
                 self.assertEqual(artesianJsonEncode(value), f'"{expected}"'.encode())
 
+    def test_builtin_subclasses(self) -> None:
+        class Timestamp(datetime):
+            pass
+
+        class Float64(float):
+            pass
+
+        sample = _Sample("x", MarketDataType.ActualTimeSerie, rows={Timestamp(2020, 1, 1, 1): Float64(2.0)})
+        expected = b'{"FirstName":"x","Kind":"ActualTimeSerie","Rows":[{"Key":"2020-01-01T01:00:00","Value":2.0}]}'
+        self.assertEqual(artesianJsonEncode(sample), expected)
+
     def test_marker_uses_shared_metadata(self) -> None:
         marked = {f.name for f in fields(UpsertData) if f.metadata.get(WIRE_METADATA_KEY) == KEY_VALUE_ARRAY}
         self.assertEqual(marked, {"rows", "marketAssessment", "bidAsk", "auctionRows"})

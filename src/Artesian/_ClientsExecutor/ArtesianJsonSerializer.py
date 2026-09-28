@@ -59,6 +59,16 @@ def _toWire(obj: object, kv: bool) -> object:
         return obj
     if isinstance(obj, Enum):
         return obj.name
+    # msgspec only encodes exact builtins: coerce subclasses such as pandas.Timestamp or numpy.float64.
+    if isinstance(obj, datetime):
+        return datetime(
+            obj.year, obj.month, obj.day, obj.hour, obj.minute, obj.second, obj.microsecond, obj.tzinfo, fold=obj.fold
+        )
+    if isinstance(obj, date):
+        return date(obj.year, obj.month, obj.day)
+    for base in (float, int, str):
+        if isinstance(obj, base):
+            return base(obj)
     if isinstance(obj, dict):
         if kv:
             return [
