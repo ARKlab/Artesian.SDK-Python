@@ -17,6 +17,8 @@ class TestReleaseTags(unittest.TestCase):
             ("v4.3.0a69.2", "preview", False),
             ("v4.3.0a069.post02", "preview", False),
             ("v4.3.0a69.post2junk", "preview", False),
+            ("v04.3.0", "ga", False),
+            ("v4.3.0b01", "beta", False),
         ):
             with self.subTest(tag=tag):
                 result = subprocess.run(
