@@ -1,0 +1,79 @@
+[
+  {
+    "case": "upsert actual: serialize",
+    "rows": 100000,
+    "seconds": 0.9849989680001272,
+    "peak_mib": 24.72977352142334,
+    "body_mib": 0.0
+  },
+  {
+    "case": "upsert actual: Client.exec POST",
+    "rows": 100000,
+    "seconds": 0.9043709400000353,
+    "peak_mib": 35.58756160736084,
+    "body_mib": 0.0
+  },
+  {
+    "case": "upsert mas: serialize",
+    "rows": 100000,
+    "seconds": 10.441776289000018,
+    "peak_mib": 116.85380935668945,
+    "body_mib": 0.0
+  },
+  {
+    "case": "upsert mas: Client.exec POST",
+    "rows": 100000,
+    "seconds": 10.113774639000212,
+    "peak_mib": 146.61311149597168,
+    "body_mib": 0.0
+  },
+  {
+    "case": "upsert bidask: serialize",
+    "rows": 100000,
+    "seconds": 5.121973002999994,
+    "peak_mib": 78.32343196868896,
+    "body_mib": 0.0
+  },
+  {
+    "case": "upsert bidask: Client.exec POST",
+    "rows": 100000,
+    "seconds": 5.214395219999915,
+    "peak_mib": 101.5994758605957,
+    "body_mib": 0.0
+  },
+  {
+    "case": "upsert auction: serialize",
+    "rows": 100000,
+    "seconds": 10.387281561000009,
+    "peak_mib": 132.31492519378662,
+    "body_mib": 0.0
+  },
+  {
+    "case": "upsert auction: Client.exec POST",
+    "rows": 100000,
+    "seconds": 9.91051807000008,
+    "peak_mib": 167.02331733703613,
+    "body_mib": 0.0
+  },
+  {
+    "case": "TimeSerieData: deserialize",
+    "rows": 100000,
+    "seconds": 1.2815874069999609,
+    "peak_mib": 10.84180736541748,
+    "body_mib": 0.0
+  },
+  {
+    "case": "TimeSerieData: Client.exec GET",
+    "rows": 100000,
+    "seconds": 1.8587852539999403,
+    "peak_mib": 41.93502998352051,
+    "body_mib": 4.757811546325684
+  },
+  {
+    "case": "query result: Client.exec GET",
+    "rows": 100000,
+    "seconds": 0.11609970799986513,
+    "peak_mib": 50.82037544250488,
+    "body_mib": 7.809534072875977
+  }
+]
