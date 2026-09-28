@@ -31,7 +31,38 @@ class _Sample:
     _hidden: int = field(default=0)
 
 
+@dataclass
+class _Inner:
+    plain: dict[str, int]
+
+
+@dataclass
+class _Outer:
+    marked: list[_Inner] | None = keyValueArrayField()
+    unmarked: list[_Inner] | None = None
+
+
 class TestArtesianJsonSerializer(unittest.TestCase):
+    def test_marker_propagates_through_nested_dataclasses(self) -> None:
+        inner = _Inner({"a": 1})
+        self.assertEqual(
+            artesianJsonSerialize(_Outer(marked=[inner], unmarked=[inner])),
+            {"Marked": [{"Plain": [{"Key": "a", "Value": 1}]}], "Unmarked": [{"Plain": {"a": 1}}]},
+        )
+
+    def test_non_finite_floats_are_rejected(self) -> None:
+        class Float64(float):
+            pass
+
+        for value in (float("nan"), float("inf"), float("-inf"), Float64("nan")):
+            for payload in (
+                _Sample("x", MarketDataType.ActualTimeSerie, rows={NAIVE: value}),
+                {"k": value},
+                [value],
+            ):
+                with self.subTest(value=value, payload=type(payload).__name__), self.assertRaises(ValueError):
+                    artesianJsonEncode(payload)
+
     def test_wire_conventions(self) -> None:
         sample = _Sample(
             "x",

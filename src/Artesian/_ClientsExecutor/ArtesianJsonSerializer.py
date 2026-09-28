@@ -3,6 +3,7 @@
 DTOs stay plain dataclasses. On the wire:
 - keys are PascalCase, private (``_x``) fields are dropped and ``None`` fields are omitted;
 - enums travel by name; datetimes are RFC 3339 (naive stays naive, UTC gets ``Z``);
+- non-finite floats (NaN, Infinity) are rejected with ``ValueError``;
 - a dict is sent as ``[{"Key": k, "Value": v}]`` only when its field is marked with
   :func:`keyValueArrayField` (the marker applies to every dict nested inside that field),
   otherwise as a JSON object. When decoding, any dict accepts both shapes.
@@ -17,7 +18,8 @@ from dataclasses import field, fields, is_dataclass
 from datetime import date, datetime
 from enum import Enum
 from functools import cache
-from typing import Any, Literal, Union, get_args, get_origin, get_type_hints
+from math import isfinite
+from typing import Any, Literal, Union, cast, get_args, get_origin, get_type_hints
 
 import msgspec
 
@@ -36,7 +38,8 @@ def _pascal(name: str) -> str:
 
 # ---------------------------------------------------------------- encode
 
-_PASSTHROUGH = frozenset({str, int, float, bool, type(None), datetime, date})
+# float is excluded so every value goes through the non-finite check in _toWire.
+_PASSTHROUGH = frozenset({str, int, bool, type(None), datetime, date})
 
 
 class _KeyValue(msgspec.Struct):
@@ -53,10 +56,19 @@ def _encodePlan(cls: type) -> tuple[tuple[str, str, bool], ...]:
     )
 
 
+def _finite(value: float) -> float:
+    # msgspec writes NaN/Infinity as null; refuse them like requests' json= (allow_nan=False) did.
+    if not isfinite(value):
+        raise ValueError(f"Out of range float values are not JSON compliant: {value!r}")
+    return value
+
+
 def _toWire(obj: object, kv: bool) -> object:
     t = type(obj)
     if t in _PASSTHROUGH:
         return obj
+    if t is float:
+        return _finite(cast(float, obj))
     if isinstance(obj, Enum):
         return obj.name
     # msgspec only encodes exact builtins: coerce subclasses such as pandas.Timestamp or numpy.float64.
@@ -66,7 +78,9 @@ def _toWire(obj: object, kv: bool) -> object:
         )
     if isinstance(obj, date):
         return date(obj.year, obj.month, obj.day)
-    for base in (float, int, str):
+    if isinstance(obj, float):
+        return _finite(float(obj))
+    for base in (int, str):
         if isinstance(obj, base):
             return base(obj)
     if isinstance(obj, dict):
@@ -86,7 +100,7 @@ def _toWire(obj: object, kv: bool) -> object:
         for name, wire, fieldKv in _encodePlan(t):
             v = getattr(obj, name)
             if v is not None:
-                out[wire] = _toWire(v, fieldKv)
+                out[wire] = _toWire(v, kv or fieldKv)
         return out
     return obj
 
