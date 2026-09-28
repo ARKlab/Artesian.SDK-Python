@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import Optional
 
+from Artesian._ClientsExecutor.ArtesianJsonSerializer import keyValueArrayField
 from Artesian.MarketData._Enum.MarketDataType import MarketDataType
 
 
@@ -18,6 +19,6 @@ class TimeSerieData:
     """
 
     type: MarketDataType
-    rows: Optional[dict[datetime, Optional[float]]] = None
+    rows: Optional[dict[datetime, Optional[float]]] = keyValueArrayField()
     version: Optional[datetime] = None
     timezone: Optional[str] = None

@@ -24,8 +24,8 @@ classifiers = [
 dependencies = [
     "requests~=2.27",
     "six~=1.16",
-    "jsons~=1.6,>=1.6.1",
-    "python-dateutil~=2.8,>=2.8.2"
+    "python-dateutil~=2.8,>=2.8.2",
+    "msgspec~=0.21,>=0.21.1",
 ]
 
 [project.urls]
@@ -71,6 +71,10 @@ extend-exclude = ["src/Artesian/_version.py", "samples"]
 [tool.ruff.lint]
 extend-select = ["ANN"]
 
+[tool.ruff.lint.flake8-bugbear]
+# Returns an immutable dataclasses.field() specifier marking Key/Value-array dicts.
+extend-immutable-calls = ["Artesian._ClientsExecutor.ArtesianJsonSerializer.keyValueArrayField"]
+
 [tool.ruff.lint.per-file-ignores]
 # Existing capitalized public SDK module names and Test*.py filenames are import paths.
 "src/Artesian/**/*.py" = ["N999"]
@@ -78,9 +82,9 @@ extend-select = ["ANN"]
 # PEP 695 class parameters require Python 3.12; use TypeVar with Generic on 3.11.
 "src/Artesian/Query/_Query.py" = ["UP046"]
 "src/Artesian/_ClientsExecutor/RequestExecutor.py" = ["UP046"]
-# jsons 1.6 cannot deserialize PEP 604 nullable DTO fields on Python 3.11.
+# DTOs keep Optional[T]; converting them to PEP 604 unions is a separate change.
 "src/Artesian/MarketData/_Dto/*.py" = ["UP045"]
-# jsons accepts dynamically typed plugin keyword arguments at this adapter boundary.
+# The wire-schema compiler handles arbitrary runtime annotations and msgspec mirror values.
 "src/Artesian/_ClientsExecutor/ArtesianJsonSerializer.py" = ["ANN401"]
 # These sentinel datetimes are immutable and intentionally shared as field defaults.
 "src/Artesian/MarketData/_Dto/CurveRangeEntity.py" = ["RUF009"]

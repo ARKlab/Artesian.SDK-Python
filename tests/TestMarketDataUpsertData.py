@@ -1,8 +1,6 @@
 import unittest
 from datetime import datetime, timedelta
-from unittest.mock import patch, sentinel
 
-import jsons
 import responses
 from dateutil import tz
 
@@ -51,44 +49,18 @@ class TestMarketDataServiceUpsertData(unittest.IsolatedAsyncioTestCase):
 
         return super().setUp()
 
-    def test_json_options_preserve_overrides_and_custom_kwargs(self) -> None:
-        options = {
-            "strip_privates": False,
-            "strip_nulls": False,
-            "use_enum_name": False,
-            "fork_inst": jsons.JsonSerializable.fork(),
-            "strict": True,
-            "plugin_option": sentinel.plugin_option,
-        }
-        cases = [
-            (artesianJsonSerialize, "dump", True, "camelCase", "CamelCase"),
-            (artesianJsonDeserialize, "load", False, "PascalCase", "pascalCase"),
-        ]
-        for adapter, operation, strict, key, transformed_key in cases:
-            with self.subTest(operation=operation):
-                with patch("Artesian._ClientsExecutor.ArtesianJsonSerializer.jsons." + operation) as json_operation:
-                    result = adapter(sentinel.payload, dict, **options)
-
-                self.assertIs(result, json_operation.return_value)
-                json_operation.assert_called_once()
-                self.assertEqual(json_operation.call_args.args, (sentinel.payload, dict))
-                forwarded = dict(json_operation.call_args.kwargs)
-                key_transformer = forwarded.pop("key_transformer")
-                self.assertEqual(key_transformer(key), transformed_key)
-                self.assertEqual(forwarded, {**options, "strict": strict})
-
     async def test_upsertDateSerie(self) -> None:
         expectedJson = {
             "ID": {"Provider": "PROVIDER", "Name": "CURVENAME"},
             "Timezone": "CET",
             "Rows": [
-                {"Key": "2020-01-01T01:00:00.000000", "Value": 42.0},
-                {"Key": "2020-01-02T02:00:00.000000", "Value": 43.0},
+                {"Key": "2020-01-01T01:00:00", "Value": 42.0},
+                {"Key": "2020-01-02T02:00:00", "Value": 43.0},
             ],
             "DeferCommandExecution": False,
             "DeferDataGeneration": True,
             "KeepNulls": False,
-            "DownloadedAt": "2020-01-03T00:00:00.000000Z",
+            "DownloadedAt": "2020-01-03T00:00:00Z",
         }
         upsert = UpsertData(
             MarketDataIdentifier("PROVIDER", "CURVENAME"),
@@ -119,14 +91,14 @@ class TestMarketDataServiceUpsertData(unittest.IsolatedAsyncioTestCase):
             "ID": {"Provider": "PROVIDER", "Name": "CURVENAME"},
             "MarketAssessment": [
                 {
-                    "Key": "2020-01-01T00:00:00.000000",
+                    "Key": "2020-01-01T00:00:00",
                     "Value": [
                         {"Key": "Feb-20", "Value": {"Open": 10.0, "Close": 11.0}},
                         {"Key": "Mar-20", "Value": {"Open": 20.0, "Close": 21.0}},
                     ],
                 },
                 {
-                    "Key": "2020-01-02T00:00:00.000000",
+                    "Key": "2020-01-02T00:00:00",
                     "Value": [
                         {
                             "Key": "Feb-20",
@@ -140,7 +112,7 @@ class TestMarketDataServiceUpsertData(unittest.IsolatedAsyncioTestCase):
             "DeferCommandExecution": False,
             "DeferDataGeneration": True,
             "KeepNulls": False,
-            "DownloadedAt": "2020-01-03T00:00:00.000000Z",
+            "DownloadedAt": "2020-01-03T00:00:00Z",
         }
         upsert = UpsertData(
             MarketDataIdentifier("PROVIDER", "CURVENAME"),
@@ -177,7 +149,7 @@ class TestMarketDataServiceUpsertData(unittest.IsolatedAsyncioTestCase):
             "ID": {"Provider": "PROVIDER", "Name": "CURVENAME"},
             "BidAsk": [
                 {
-                    "Key": "2020-01-01T00:00:00.000000",
+                    "Key": "2020-01-01T00:00:00",
                     "Value": [
                         {
                             "Key": "Feb-20",
@@ -190,7 +162,7 @@ class TestMarketDataServiceUpsertData(unittest.IsolatedAsyncioTestCase):
                     ],
                 },
                 {
-                    "Key": "2020-01-02T00:00:00.000000",
+                    "Key": "2020-01-02T00:00:00",
                     "Value": [
                         {
                             "Key": "Feb-20",
@@ -207,7 +179,7 @@ class TestMarketDataServiceUpsertData(unittest.IsolatedAsyncioTestCase):
             "DeferCommandExecution": False,
             "DeferDataGeneration": True,
             "KeepNulls": False,
-            "DownloadedAt": "2020-01-03T00:00:00.000000Z",
+            "DownloadedAt": "2020-01-03T00:00:00Z",
         }
         upsert = UpsertData(
             MarketDataIdentifier("PROVIDER", "CURVENAME"),
@@ -244,9 +216,9 @@ class TestMarketDataServiceUpsertData(unittest.IsolatedAsyncioTestCase):
             "ID": {"Provider": "PROVIDER", "Name": "CURVENAME"},
             "AuctionRows": [
                 {
-                    "Key": "2020-01-01T00:00:00.000000",
+                    "Key": "2020-01-01T00:00:00",
                     "Value": {
-                        "BidTimestamp": "2020-01-01T00:00:00.000000",
+                        "BidTimestamp": "2020-01-01T00:00:00",
                         "Bid": [
                             {"Price": 11.0, "Quantity": 12.0},
                             {"Price": 13.0, "Quantity": 14.0},
@@ -262,7 +234,7 @@ class TestMarketDataServiceUpsertData(unittest.IsolatedAsyncioTestCase):
             "DeferCommandExecution": False,
             "DeferDataGeneration": True,
             "KeepNulls": False,
-            "DownloadedAt": "2020-01-03T00:00:00.000000Z",
+            "DownloadedAt": "2020-01-03T00:00:00Z",
         }
         upsert = UpsertData(
             MarketDataIdentifier("PROVIDER", "CURVENAME"),

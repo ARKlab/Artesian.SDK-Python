@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from typing import Optional
 
+from Artesian._ClientsExecutor.ArtesianJsonSerializer import keyValueArrayField
+
 from .._Enum import AggregationRule, Granularity, MarketDataType
 from .._Enum.DerivedAlgorithm import DerivedAlgorithm
 from .DerivedCfg import DerivedCfg
@@ -36,7 +38,7 @@ class MarketDataEntityInput:
     unitOfMeasure: Optional[UnitOfMeasure] = None
     derivedCfg: Optional[DerivedCfg] = None
     aggregationRule: AggregationRule = AggregationRule.Undefined
-    tags: Optional[dict[str, list[str]]] = None
+    tags: Optional[dict[str, list[str]]] = keyValueArrayField()
     providerDescription: Optional[str] = None
     transformID: Optional[int] = None
     marketDataId: int = 0

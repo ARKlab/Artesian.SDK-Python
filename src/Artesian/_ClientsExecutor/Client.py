@@ -4,6 +4,7 @@ import platform
 from email.message import Message
 from typing import Self
 
+import msgspec
 import requests
 
 from Artesian.Exceptions import (
@@ -15,7 +16,7 @@ from Artesian.Exceptions import (
 )
 
 from .. import __version__
-from .ArtesianJsonSerializer import artesianJsonDeserialize, artesianJsonSerialize
+from .ArtesianJsonSerializer import artesianJsonDecode, artesianJsonEncode
 
 
 class _Client:
@@ -60,9 +61,10 @@ class _Client:
         retcls: type | None = None,
         params: dict | None = None,
     ) -> object:
-        json = artesianJsonSerialize(obj)
+        body = None if obj is None else artesianJsonEncode(obj)
+        headers = None if body is None else {"Content-Type": "application/json"}
         url = self.__baseUrl + url
-        r = requests.Request(method, url, json=json, params=params)
+        r = requests.Request(method, url, data=body, headers=headers, params=params)
         prep = self.__session.prepare_request(r)
         try:
             res = self.__session.send(prep)
@@ -77,7 +79,7 @@ class _Client:
 
         if res.status_code >= 200 and res.status_code < 300:
             if mimetype == "application/json":
-                return artesianJsonDeserialize(res.json(), retcls) if retcls is not None else res.json()
+                return artesianJsonDecode(res.content, retcls)
             if mimetype.split("/")[0] == "text":
                 return res.text
             return res.content
@@ -91,8 +93,15 @@ class _Client:
         errorText = None
 
         if mimetype == "application/problem+json":
-            problemDetails = dict(res.json())
-        if mimetype == "application/json" or mimetype.split("/")[0] == "text":
+            try:
+                decoded = artesianJsonDecode(res.content)
+            except msgspec.DecodeError:
+                decoded = None
+            if isinstance(decoded, dict):
+                problemDetails = decoded
+        if problemDetails is None and (
+            mimetype in ("application/json", "application/problem+json") or mimetype.split("/")[0] == "text"
+        ):
             errorText = res.text if res.text != "" else None
 
         if res.status_code == 400:  # BadRequest

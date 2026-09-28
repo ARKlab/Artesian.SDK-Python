@@ -4,6 +4,8 @@ from typing import Optional
 
 from dateutil import tz
 
+from Artesian._ClientsExecutor.ArtesianJsonSerializer import keyValueArrayField
+
 from .._Enum import UpsertMode
 from .MarketDataIdentifier import MarketDataIdentifier
 
@@ -114,10 +116,10 @@ class UpsertData:
     timezone: str
     downloadedAt: datetime = field(default_factory=lambda: datetime.now(tz.UTC))
     version: Optional[datetime] = None
-    rows: Optional[dict[datetime, Optional[float]]] = None
-    marketAssessment: Optional[dict[datetime, dict[str, MarketAssessmentValue]]] = None
-    bidAsk: Optional[dict[datetime, dict[str, BidAskValue]]] = None
-    auctionRows: Optional[dict[datetime, AuctionBids]] = None
+    rows: Optional[dict[datetime, Optional[float]]] = keyValueArrayField()
+    marketAssessment: Optional[dict[datetime, dict[str, MarketAssessmentValue]]] = keyValueArrayField()
+    bidAsk: Optional[dict[datetime, dict[str, BidAskValue]]] = keyValueArrayField()
+    auctionRows: Optional[dict[datetime, AuctionBids]] = keyValueArrayField()
     deferCommandExecution: bool = False
     deferDataGeneration: bool = True
     keepNulls: bool = False
