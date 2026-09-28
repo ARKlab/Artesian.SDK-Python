@@ -11,8 +11,8 @@ uv sync --locked --python 3.14
 
 This creates `.venv` and installs the SDK, test dependencies, Ruff, and Pyrefly
 from `uv.lock`. Select `.venv` as the Python interpreter in VS Code and
-install the recommended extensions. Pyrefly replaces Pylance/Pyright; Ruff
-replaces Black and Flake8. Pyrefly is a type checker, not a formatter.
+install the recommended extensions. Use Ruff for linting and formatting and
+Pyrefly for type checking.
 The [Pyrefly VS Code extension](https://pyrefly.org/en/docs/IDE/#vscode-extension-settings)
 uses the locked environment binary, workspace diagnostics, and inlay hints for
 argument names, inferred return types, and variable types.
@@ -20,10 +20,7 @@ argument names, inferred return types, and variable types.
 Python 3.11 is the minimum supported **package** version. CI tests and lints
 3.11–3.14 on Linux, Windows, and macOS; development defaults to 3.14.
 Development tools are defined only in the `dev` and `test`
-dependency groups and installed from `uv.lock`; the legacy `.[dev]` extra
-has been removed. Use `uv sync` instead.
-
-Python 3.8–3.10 are no longer supported.
+dependency groups and installed from `uv.lock`.
 
 ## 2. Run checks
 
@@ -73,15 +70,11 @@ Use `TypeVar` and `Generic[T]` for generic classes until the minimum supported
 Python is 3.12; PEP 695's `class Name[T]` syntax cannot be parsed by Python 3.11.
 MarketData DTOs retain `Optional[T]` because jsons 1.6 cannot deserialize their
 `T | None` annotations on Python 3.11.
-Consumer typing may become stricter: unknown responses use `object` rather than
-`Any`, and nullable service results include `None`. Public import paths remain
-unchanged; internal typing cleanup must preserve jsons wire formats.
+Unknown responses use `object` rather than `Any`, and nullable service results
+include `None`. Preserve public import paths and jsons wire formats when
+changing internal typing.
 
-## 4. GitHub coverage
-
-Enable **Code Quality** in the repository's GitHub settings to use native
-[code coverage](https://docs.github.com/en/code-security/how-tos/maintain-quality-code/set-up-code-coverage).
-No third-party coverage account or token is required.
+## 4. CI and coverage
 
 The OS/Python matrix builds the package and runs Ruff, Pyrefly, and pytest for
 every event. The single **Checks** job is the required PR check: it combines
@@ -93,61 +86,26 @@ run tests and produce coverage artifacts/summaries, but skip uploads
 requiring write access. Preview tags use the same matrix and report their
 tagged commit.
 
-## 5. Release setup (maintainers)
+## 5. Release tags
 
-Before enabling production publishing, complete these manual prerequisites:
+Use a `v` prefix and canonical, unpadded numeric components. The package
+version on PyPI is the tag without `v`; no version remapping is performed.
 
-- An owner of the PyPI project **`artesian-sdk`** must register a Trusted
-  Publisher with owner **`ARKlab`**, repository **`Artesian.SDK-Python`**, workflow
-  filename **`python-tests.yml`**, and environment **`pypi`**, matching exactly.
-- Protect the GitHub **`pypi`** environment with required reviewers, prevent
-  self-review, and restrict deployment to the repository's release tag patterns.
-  Protect release tags from updates or deletion after creation.
-  Organization policy must allow the pinned, early-stage
-  `astral-sh/attest-action` v0.0.6
-  (`f589a42a7efb6fe400b4f400de60b4bc90390027`) and network access to Sigstore,
-  GitHub OIDC, and PyPI.
-- Rehearse on TestPyPI using a separate project, Trusted Publisher, and protected
-  environment before production. A separately reviewed rehearsal workflow must
-  configure its upload destination and publisher environment for TestPyPI.
+- **Stable:** `vX.Y.Z` (for example, `v4.3.0`). The tagged commit must be
+  contained in `master`.
+- **Beta:** `vX.Y.ZbN` (for example, `v4.3.0b1` or `v5.0.0b1`). The tagged
+  commit must be contained in `develop-beta`. Compared with the latest stable
+  tag on `master`, the base version must be either the next minor
+  (`X.(Y+1).0`) or the next major (`(X+1).0.0`).
+- **PR preview:** `vX.Y.ZaPR.postITER` (for example, `v4.3.0a69.post2`).
+  `X.Y.Z` must match the latest stable tag on `master`; `PR` is the pull
+  request number and `ITER` is the preview iteration. The tag must point
+  to that PR's current, unmerged head commit, which must contain current
+  `master`—not GitHub's synthetic PR merge commit.
 
-PRs only validate the codebase; they cannot build release artifacts or publish.
 Only a pushed release tag or a manual workflow dispatch **on a tag ref** can
-publish, after **Checks** passes. Dispatching on a branch cannot publish.
-The single `build-release` job validates the tag, source, and version for
-stable, beta, or preview releases, then runs the same `uv build` and artifact
-upload steps for each, without OIDC permission. Stable releases
-retain the `master` source rule; beta releases come from `develop-beta` and
-target the next minor (`v4.3.0b1` after `v4.2.0`) or next major
-(`v5.0.0b1`). Release tags require canonical numbers without leading zeros.
-Preview tags use `vX.Y.ZaPR.postITER`; removing only the Git tag's `v`
-prefix yields the exact PyPI version without remapping. Previews
-build the tagged commit (which must contain current `master`, equal the
-numbered PR's current head, and not already be merged into `master`), never
-the synthetic PR merge commit.
-
-The separate `publish` job uses environment `pypi` and only `contents: read`
-and `id-token: write` permissions. It downloads the distribution artifact from
-the successful release build; it does not check out or build source, or install
-packages from those artifacts. Because uv publishes everything in `dist/` by
-default, the publisher first checks that the wheel and sdist filenames match the
-release tag. Build summaries record the actual build source
-SHA and distribution SHA256 digests. **Reviewers must inspect that build source
-and those digests before approving the environment**.
-
-As in [uv's GitHub publishing guide](https://docs.astral.sh/uv/guides/integration/github/#publishing-to-pypi),
-the pinned attestation action creates PEP 740 `.publish.attestation` sidecars
-and `uv publish --trusted-publishing always` uploads them with the distributions.
-PyPI's [`/legacy/` Upload API](https://docs.pypi.org/api/upload/) accepts
-distribution uploads; `/simple/` is the read-only package index used for
-installation. The `legacy` name is historical, not a deprecated publishing
-destination. Trusted Publishing changes authentication, not the upload API.
-PyPI verifies attestations on upload; they establish publication identity,
-**not full build provenance**. uv retries uploads and skips identical files
-already present on PyPI; investigate any missing attestations rather than
-assuming a retry will repair them.
-
-This repository change does not perform external administrative setup or publish
-to production. Revoke `PYPI_API_TOKEN` only after a successful migration,
-verification checks, and confirmation that no other consumers need it; its
-revocation is a separate maintainer action.
+build a release and publish, after the matrix and **Checks** job pass. The
+release build verifies that the remote tag still points at the checked-out
+commit. PRs and branch dispatches cannot publish. The protected publisher
+checks that the wheel and sdist filenames match the release tag before upload;
+review the build source SHA and distribution hashes before approving it.
