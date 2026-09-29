@@ -7,6 +7,7 @@ if [[ $# -ne 1 ]]; then
   exit 2
 fi
 
+
 EXPECTED_BRANCH="$1"
 
 git fetch origin "$EXPECTED_BRANCH"

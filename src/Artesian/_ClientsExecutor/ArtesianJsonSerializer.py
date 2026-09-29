@@ -14,6 +14,7 @@ def __artesianDatetimeSerializer(obj: datetime, **kwargs: Any) -> str:
     if obj.tzinfo is None:
         ret = obj.strftime(__commonFmt)
         return ret
+
     offset = obj.utcoffset()
     if offset is not None and offset.total_seconds() == 0:
         ret = obj.strftime(__commonFmt + "Z")
@@ -39,18 +40,39 @@ def __is_valid_json_key(key: object) -> bool:
 
 
 def __artesianDictSerializer(
-    obj: dict, *, key_transformer: Optional[Callable[[str], str]] = None, **kwargs: Any
+    obj: dict,
+    *,
+    key_transformer: Optional[Callable[[str], str]] = None,
+    **kwargs: Any
 ) -> list:
+
     result = []
-    for key in obj:
-        obj_ = obj[key]
-        key_ = (
-            key
-            if __is_valid_json_key(key)
-            else jsons.dump(key, key_transformer=None, **kwargs)
-        )
-        elem = jsons.dump(obj_, key_transformer=key_transformer, **kwargs)
-        result.append({"Key": key_, "Value": elem})
+    append = result.append
+
+    dt_ser = __artesianDatetimeSerializer
+    nested_key_transformer = key_transformer or __camelToPascal
+    items = obj.items
+
+    for k, v in items():
+
+        # ---- KEY ----
+        if isinstance(k, datetime):
+            k_out = dt_ser(k, **kwargs)
+        elif isinstance(k, (str, int, float, bool)) or k is None:
+            k_out = k
+        else:
+            k_out = str(k)
+
+        # ---- VALUE ----
+        if isinstance(v, datetime):
+            v_out = dt_ser(v, **kwargs)
+        elif isinstance(v, (str, int, float, bool)) or v is None:
+            v_out = v
+        else:
+            v_out = jsons.dump(v, key_transformer=nested_key_transformer, **kwargs)
+
+        append({"Key": k_out, "Value": v_out})
+
     return result
 
 
