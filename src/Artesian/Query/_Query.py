@@ -1,20 +1,26 @@
 from __future__ import annotations
-from ._QueryParameters.QueryParameters import _QueryParameters
-from ._QueryParameters.ExtractionRangeType import ExtractionRangeType
-from .RelativeInterval import RelativeInterval
-from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
-from Artesian._ClientsExecutor.Client import _Client
+
 import asyncio
 import itertools
-from typing import List
+from collections.abc import Iterable
+from typing import Generic, TypeVar, cast
+
+from Artesian._ClientsExecutor.Client import _Client
+from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
+
+from ._QueryParameters.ExtractionRangeType import ExtractionRangeType
+from ._QueryParameters.QueryParameters import _QueryParameters
+from .RelativeInterval import RelativeInterval
+
+_QueryParametersT = TypeVar("_QueryParametersT", bound=_QueryParameters)
 
 
-class _Query:
+class _Query(Generic[_QueryParametersT]):
     def __init__(
-        self: _Query,
+        self,
         client: _Client,
         requestExecutor: _RequestExecutor,
-        queryParameters: _QueryParameters,
+        queryParameters: _QueryParametersT,
     ) -> None:
         """Inits _Query"""
 
@@ -22,7 +28,7 @@ class _Query:
         self._client = client
         self._requestExecutor = requestExecutor
 
-    def _forMarketData(self: _Query, ids: List[int]) -> _Query:
+    def _forMarketData(self: _Query[_QueryParametersT], ids: list[int]) -> _Query[_QueryParametersT]:
         """Set the list of marketdata to be queried.
 
         Args:
@@ -35,7 +41,7 @@ class _Query:
         self._queryParameters.filterId = None
         return self
 
-    def _forFilterId(self: _Query, filterId: int) -> _Query:
+    def _forFilterId(self: _Query[_QueryParametersT], filterId: int) -> _Query[_QueryParametersT]:
         """Sets the list of filtered marketdata id to be queried
 
         Args:
@@ -48,7 +54,7 @@ class _Query:
         self._queryParameters.ids = None
         return self
 
-    def _inTimezone(self: _Query, tz: str) -> _Query:
+    def _inTimezone(self: _Query[_QueryParametersT], tz: str) -> _Query[_QueryParametersT]:
         """Gets the Query in a specific TimeZone in IANA format.
 
         Args:
@@ -60,7 +66,7 @@ class _Query:
         self._queryParameters.timezone = tz
         return self
 
-    def _inAbsoluteDateRange(self: _Query, start: str, end: str) -> _Query:
+    def _inAbsoluteDateRange(self: _Query[_QueryParametersT], start: str, end: str) -> _Query[_QueryParametersT]:
         """Gets the Query in an absolute date range window.
         The Absolute Date Range is in ISO8601 format.
         The Range is end exclusive
@@ -80,7 +86,7 @@ class _Query:
         self._queryParameters.extractionRangeConfig.dateEnd = end
         return self
 
-    def _inRelativePeriodRange(self: _Query, pstart: str, pend: str) -> _Query:
+    def _inRelativePeriodRange(self: _Query[_QueryParametersT], pstart: str, pend: str) -> _Query[_QueryParametersT]:
         """Gets the Query in a relative period range time window.
 
         Args:
@@ -98,7 +104,7 @@ class _Query:
         self._queryParameters.extractionRangeConfig.periodTo = pend
         return self
 
-    def _inRelativePeriod(self: _Query, period: str) -> _Query:
+    def _inRelativePeriod(self: _Query[_QueryParametersT], period: str) -> _Query[_QueryParametersT]:
         """Gets the Query in a relative period of a time window.
 
         Args:
@@ -112,7 +118,9 @@ class _Query:
         self._queryParameters.extractionRangeConfig.period = period
         return self
 
-    def _inRelativeInterval(self: _Query, relativeInterval: RelativeInterval) -> _Query:
+    def _inRelativeInterval(
+        self: _Query[_QueryParametersT], relativeInterval: RelativeInterval
+    ) -> _Query[_QueryParametersT]:
         """Gets the Relative Interval considers a specific interval of time window.
 
         Args:
@@ -126,14 +134,10 @@ class _Query:
         self._queryParameters.extractionRangeConfig.relativeInterval = relativeInterval
         return self
 
-    def _buildExtractionRangeRoute(
-        self: _Query, queryParamaters: _QueryParameters
-    ) -> str:
+    def _buildExtractionRangeRoute(self: _Query[_QueryParametersT], queryParamaters: _QueryParameters) -> str:
         rela = None
         if queryParamaters.extractionRangeConfig.relativeInterval is not None:
-            rela = self.__getRelativeInterval(
-                queryParamaters.extractionRangeConfig.relativeInterval
-            )
+            rela = self.__getRelativeInterval(queryParamaters.extractionRangeConfig.relativeInterval)
 
         daterange = self.__toUrlParam(
             queryParamaters.extractionRangeConfig.dateStart,
@@ -142,8 +146,7 @@ class _Query:
 
         period = f"{queryParamaters.extractionRangeConfig.period}"
         periodRange = (
-            f"{queryParamaters.extractionRangeConfig.periodFrom}"
-            + f"/{queryParamaters.extractionRangeConfig.periodTo}"
+            f"{queryParamaters.extractionRangeConfig.periodFrom}" + f"/{queryParamaters.extractionRangeConfig.periodTo}"
         )
 
         switcher = {
@@ -153,42 +156,39 @@ class _Query:
             ExtractionRangeType.RelativeInterval: f"{rela}",
         }
         assert queryParamaters.extractionRangeType is not None
-        subPath = switcher.get(
-            queryParamaters.extractionRangeType, "ExtractionRangeType"
-        )
+        subPath = switcher.get(queryParamaters.extractionRangeType, "ExtractionRangeType")
         if subPath == "ExtractionRangeType" or subPath is None:
-            raise Exception("Not supported RangeType")
+            raise ValueError("Not supported RangeType")
         return subPath
 
-    def _exec(self: _Query, urls: List[str]) -> list:
+    def _exec(self: _Query[_QueryParametersT], urls: list[str]) -> list[object]:
         loop = get_event_loop()
         rr = loop.run_until_complete(self._execAsync(urls))
         return rr
 
-    async def _execAsync(self: _Query, urls: List[str]) -> list:
+    async def _execAsync(self: _Query[_QueryParametersT], urls: list[str]) -> list[object]:
         with self._client as c:
-            res = await asyncio.gather(
-                *[self._requestExecutor.exec(c.exec, "GET", i, None) for i in urls]
-            )
-            return list(itertools.chain(*res))
+            res = await asyncio.gather(*[self._requestExecutor.exec(c.exec, "GET", i, None) for i in urls])
+            # Time-series endpoints return iterable payloads; the shared client also handles scalar responses.
+            return list(itertools.chain(*(cast(Iterable[object], response) for response in res)))
 
-    def __toUrlParam(self: _Query, start: str | None, end: str | None) -> str:
+    def __toUrlParam(self: _Query[_QueryParametersT], start: str | None, end: str | None) -> str:
         return f"{start}/{end}"
 
-    def _validateQuery(self: _Query) -> None:
+    def _validateQuery(self: _Query[_QueryParametersT]) -> None:
         if self._queryParameters.extractionRangeType is None:
-            raise Exception(
+            raise ValueError(
                 "Data extraction range must be provided. Provide a date range, period"
                 + " or period range or an interval eg .InAbsoluteDateRange()"
             )
         if self._queryParameters.ids is None and self._queryParameters.filterId is None:
-            raise Exception(
+            raise ValueError(
                 "Marketadata ids OR filterId must be provided for extraction. "
                 + "Use .ForMarketData() OR .ForFilterId() and provide an integer "
                 + "or integer array as an argument"
             )
 
-    def __getRelativeInterval(self: _Query, interval: RelativeInterval) -> str:
+    def __getRelativeInterval(self: _Query[_QueryParametersT], interval: RelativeInterval) -> str:
         switcher = {
             RelativeInterval.RollingWeek: "RollingWeek",
             RelativeInterval.RollingYear: "RollingYear",
@@ -201,7 +201,7 @@ class _Query:
         }
         subPath = switcher.get(interval, "RelativeInterval")
         if subPath == "RelativeInterval":
-            raise Exception("Not supported RelativeInterval")
+            raise ValueError("Not supported RelativeInterval")
         return subPath
 
 

@@ -1,10 +1,11 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Optional
+
 from dateutil import tz
 
-from Artesian.MarketData._Dto import MarketDataIdentifier
 from .._Enum import UpsertMode
+from .MarketDataIdentifier import MarketDataIdentifier
 
 
 @dataclass
@@ -81,8 +82,8 @@ class AuctionBids:
     """
 
     bidTimestamp: datetime
-    bid: List[AuctionBidValue]
-    offer: List[AuctionBidValue]
+    bid: list[AuctionBidValue]
+    offer: list[AuctionBidValue]
 
 
 @dataclass
@@ -111,12 +112,12 @@ class UpsertData:
 
     ID: MarketDataIdentifier
     timezone: str
-    downloadedAt: datetime = datetime.utcnow().replace(tzinfo=tz.UTC)
+    downloadedAt: datetime = field(default_factory=lambda: datetime.now(tz.UTC))
     version: Optional[datetime] = None
-    rows: Optional[Dict[datetime, Optional[float]]] = None
-    marketAssessment: Optional[Dict[datetime, Dict[str, MarketAssessmentValue]]] = None
-    bidAsk: Optional[Dict[datetime, Dict[str, BidAskValue]]] = None
-    auctionRows: Optional[Dict[datetime, AuctionBids]] = None
+    rows: Optional[dict[datetime, Optional[float]]] = None
+    marketAssessment: Optional[dict[datetime, dict[str, MarketAssessmentValue]]] = None
+    bidAsk: Optional[dict[datetime, dict[str, BidAskValue]]] = None
+    auctionRows: Optional[dict[datetime, AuctionBids]] = None
     deferCommandExecution: bool = False
     deferDataGeneration: bool = True
     keepNulls: bool = False

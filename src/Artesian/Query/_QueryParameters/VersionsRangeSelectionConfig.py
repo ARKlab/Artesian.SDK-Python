@@ -1,5 +1,4 @@
 from __future__ import annotations
-from typing import Optional
 
 
 class VersionsRangeSelectionConfig:
@@ -15,11 +14,11 @@ class VersionsRangeSelectionConfig:
 
     def __init__(
         self: VersionsRangeSelectionConfig,
-        dateStart: Optional[str] = None,
-        dateEnd: Optional[str] = None,
-        period: Optional[str] = None,
-        periodFrom: Optional[str] = None,
-        periodTo: Optional[str] = None,
+        dateStart: str | None = None,
+        dateEnd: str | None = None,
+        period: str | None = None,
+        periodFrom: str | None = None,
+        periodTo: str | None = None,
     ) -> None:
         """Inits for the Versions Range Selection Configuration."""
 

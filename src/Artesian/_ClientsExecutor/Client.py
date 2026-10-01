@@ -1,18 +1,21 @@
 from __future__ import annotations
-from email.message import Message
-from typing import Any, Optional, cast
-import requests
-import platform
 
-from .ArtesianJsonSerializer import artesianJsonSerialize, artesianJsonDeserialize
-from .. import __version__
+import platform
+from email.message import Message
+from typing import Self
+
+import requests
+
 from Artesian.Exceptions import (
+    ArtesianSdkForbiddenException,
+    ArtesianSdkOptimisticConcurrencyException,
     ArtesianSdkRequestException,
     ArtesianSdkServerException,
     ArtesianSdkValidationException,
-    ArtesianSdkForbiddenException,
-    ArtesianSdkOptimisticConcurrencyException,
 )
+
+from .. import __version__
+from .ArtesianJsonSerializer import artesianJsonDeserialize, artesianJsonSerialize
 
 
 class _Client:
@@ -42,11 +45,11 @@ class _Client:
             }
         )
 
-    def __enter__(self: _Client) -> _Client:
+    def __enter__(self: Self) -> Self:
         self.__session.__enter__()
         return self
 
-    def __exit__(self: _Client, *args: Any) -> None:
+    def __exit__(self: _Client, *args: object) -> None:
         self.__session.__exit__(args)
 
     async def exec(
@@ -54,33 +57,27 @@ class _Client:
         method: str,
         url: str,
         obj: object = None,
-        retcls: Optional[type] = None,
-        params: Optional[dict] = None,
-    ) -> Any | None:
-        json = cast(Any, artesianJsonSerialize(obj))
+        retcls: type | None = None,
+        params: dict | None = None,
+    ) -> object:
+        json = artesianJsonSerialize(obj)
         url = self.__baseUrl + url
         r = requests.Request(method, url, json=json, params=params)
         prep = self.__session.prepare_request(r)
         try:
             res = self.__session.send(prep)
         except Exception as e:
-            raise ArtesianSdkRequestException(
-                "Unexpected error while calling {}|{}".format(method, url)
-            ) from e
+            raise ArtesianSdkRequestException(f"Unexpected error while calling {method}|{url}") from e
 
         # Replaced the deprecated 'cgi' module (removed in Python 3.13) with 'email.message'.
         msg = Message()
-        msg['content-type'] = res.headers.get("Content-Type", "")
+        msg["content-type"] = res.headers.get("Content-Type", "")
         mimetype = msg.get_content_type()  # es. "text/html"
         _ = msg.get_params()
 
         if res.status_code >= 200 and res.status_code < 300:
             if mimetype == "application/json":
-                return (
-                    artesianJsonDeserialize(res.json(), retcls)
-                    if retcls is not None
-                    else res.json()
-                )
+                return artesianJsonDeserialize(res.json(), retcls) if retcls is not None else res.json()
             if mimetype.split("/")[0] == "text":
                 return res.text
             return res.content
@@ -99,19 +96,11 @@ class _Client:
             errorText = res.text if res.text != "" else None
 
         if res.status_code == 400:  # BadRequest
-            raise ArtesianSdkValidationException(
-                method, url, res.status_code, problemDetails, errorText
-            )
+            raise ArtesianSdkValidationException(method, url, res.status_code, problemDetails, errorText)
         if res.status_code in [409, 412]:  # Conflict, PreconditionFailed
-            raise ArtesianSdkOptimisticConcurrencyException(
-                method, url, res.status_code, problemDetails, errorText
-            )
+            raise ArtesianSdkOptimisticConcurrencyException(method, url, res.status_code, problemDetails, errorText)
         if res.status_code in [401, 403]:  # Unauthenticated, Forbidden
-            raise ArtesianSdkForbiddenException(
-                method, url, res.status_code, problemDetails, errorText
-            )
+            raise ArtesianSdkForbiddenException(method, url, res.status_code, problemDetails, errorText)
 
         # if we reached here it means that is a 500 or another unknown error
-        raise ArtesianSdkServerException(
-            method, url, res.status_code, problemDetails, errorText
-        )
+        raise ArtesianSdkServerException(method, url, res.status_code, problemDetails, errorText)

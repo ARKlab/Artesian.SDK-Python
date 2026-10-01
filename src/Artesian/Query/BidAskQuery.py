@@ -1,21 +1,23 @@
 from __future__ import annotations
+
 from urllib import parse
+
+from Artesian._ClientsExecutor.Client import _Client
+from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
 from Artesian.Query._QueryParameters.QueryParameters import (
     _FillCustomBidAskStrategy,
     _FillLatestStrategy,
     _NoFillStrategy,
     _NullFillStrategy,
 )
+
 from ._Query import _Query
 from ._QueryParameters.BidAskQueryParameters import BidAskQueryParameters
 from .DefaultPartitionStrategy import DefaultPartitionStrategy
-from Artesian._ClientsExecutor.RequestExecutor import _RequestExecutor
-from Artesian._ClientsExecutor.Client import _Client
 from .RelativeInterval import RelativeInterval
-from typing import List
 
 
-class BidAskQuery(_Query):
+class BidAskQuery(_Query[BidAskQueryParameters]):
     __routePrefix = "ba"
 
     def __init__(
@@ -31,7 +33,7 @@ class BidAskQuery(_Query):
         self._queryParameters = queryParameters
         self.__partition = partitionStrategy
 
-    def forMarketData(self: BidAskQuery, ids: List[int]) -> BidAskQuery:
+    def forMarketData(self: BidAskQuery, ids: list[int]) -> BidAskQuery:
         """
         Set the list of marketdata to be queried.
 
@@ -120,9 +122,7 @@ class BidAskQuery(_Query):
         super()._inRelativePeriod(extractionPeriod)
         return self
 
-    def inRelativeInterval(
-        self: BidAskQuery, relativeInterval: RelativeInterval
-    ) -> BidAskQuery:
+    def inRelativeInterval(self: BidAskQuery, relativeInterval: RelativeInterval) -> BidAskQuery:
         """
         Gets the Relative Interval considers a specific interval of time window.
 
@@ -136,7 +136,7 @@ class BidAskQuery(_Query):
         super()._inRelativeInterval(relativeInterval)
         return self
 
-    def forProducts(self: BidAskQuery, products: List[str]) -> BidAskQuery:
+    def forProducts(self: BidAskQuery, products: list[str]) -> BidAskQuery:
         """
         Gets the Products tor the BidAsk Query in a time window.
 
@@ -173,9 +173,7 @@ class BidAskQuery(_Query):
         self._queryParameters.fill = _NoFillStrategy()
         return self
 
-    def withFillLatestValue(
-        self: BidAskQuery, period: str, continueToEnd: bool = False
-    ) -> BidAskQuery:
+    def withFillLatestValue(self: BidAskQuery, period: str, continueToEnd: bool = False) -> BidAskQuery:
         """
         Optional filler strategy for the extraction.
 
@@ -210,7 +208,7 @@ class BidAskQuery(_Query):
         self._queryParameters.fill = _FillCustomBidAskStrategy(**val)
         return self
 
-    def execute(self: BidAskQuery) -> list:
+    def execute(self: BidAskQuery) -> list[object]:
         """
         Execute the Query.
 
@@ -219,7 +217,7 @@ class BidAskQuery(_Query):
         urls = self.__buildRequest()
         return super()._exec(urls)
 
-    async def executeAsync(self: BidAskQuery) -> list:
+    async def executeAsync(self: BidAskQuery) -> list[object]:
         """
         Execute Async Query.
 
@@ -228,24 +226,24 @@ class BidAskQuery(_Query):
         urls = self.__buildRequest()
         return await super()._execAsync(urls)
 
-    def __buildRequest(self: BidAskQuery) -> List[str]:
+    def __buildRequest(self: BidAskQuery) -> list[str]:
         self.__validateQuery()
         qps = self.__partition.PartitionBidAsk([self._queryParameters])
         urls = []
         for qp in qps:
             url = f"/{self.__routePrefix}/{super()._buildExtractionRangeRoute(qp)}?_=1"
-            if not (qp.ids is None):
+            if qp.ids is not None:
                 sep = ","
                 ids = sep.join(map(str, qp.ids))
                 enc = parse.quote_plus(ids)
                 url = url + "&id=" + enc
-            if not (qp.filterId is None):
+            if qp.filterId is not None:
                 url = url + "&filterId=" + str(qp.filterId)
-            if not (qp.products is None):
+            if qp.products is not None:
                 sep = ","
                 prod = enc = parse.quote_plus(sep.join(qp.products))
                 url = url + "&p=" + prod
-            if not (qp.fill is None):
+            if qp.fill is not None:
                 url = url + "&" + qp.fill.getUrlParams()
             urls.append(url)
         return urls
@@ -253,7 +251,7 @@ class BidAskQuery(_Query):
     def __validateQuery(self: BidAskQuery) -> None:
         super()._validateQuery()
         if self._queryParameters.products is None:
-            raise Exception(
+            raise ValueError(
                 "Products must be provided for extraction. Use .ForProducts() argument "
                 + "takes a string or string array of products"
             )

@@ -1,10 +1,10 @@
 from __future__ import annotations
-from typing import List, Optional
-from .QueryParameters import _QueryParameters
-from .ExtractionRangeType import ExtractionRangeType
+
+from Artesian.MarketData import AggregationRule, Granularity
+
 from .ExtractionRangeConfig import ExtractionRangeConfig
-from Artesian.MarketData import Granularity
-from Artesian.MarketData import AggregationRule
+from .ExtractionRangeType import ExtractionRangeType
+from .QueryParameters import _QueryParameters
 
 
 class ActualQueryParameters(_QueryParameters):
@@ -25,15 +25,15 @@ class ActualQueryParameters(_QueryParameters):
 
     def __init__(
         self: ActualQueryParameters,
-        ids: Optional[List[int]] = None,
-        extractionRangeConfig: ExtractionRangeConfig = ExtractionRangeConfig(),
-        extractionRangeType: Optional[ExtractionRangeType] = None,
-        timezone: Optional[str] = None,
-        filterId: Optional[int] = None,
-        granularity: Optional[Granularity] = None,
-        transformId: Optional[str] = None,
-        unitOfMeasure: Optional[str] = None,
-        aggregationRule: Optional[AggregationRule] = None
+        ids: list[int] | None = None,
+        extractionRangeConfig: ExtractionRangeConfig | None = None,
+        extractionRangeType: ExtractionRangeType | None = None,
+        timezone: str | None = None,
+        filterId: int | None = None,
+        granularity: Granularity | None = None,
+        transformId: str | None = None,
+        unitOfMeasure: str | None = None,
+        aggregationRule: AggregationRule | None = None,
     ) -> None:
         """
         Inits ActualQueryParameters
@@ -50,9 +50,7 @@ class ActualQueryParameters(_QueryParameters):
             unitOfMeasure: The UnitOfMeasure to use for extraction.
             aggregationRule: The AggregationRule to use for extraction.
         """
-        _QueryParameters.__init__(
-            self, ids, extractionRangeConfig, extractionRangeType, timezone, filterId
-        )
+        _QueryParameters.__init__(self, ids, extractionRangeConfig, extractionRangeType, timezone, filterId)
         self.granularity = granularity
         self.transformId = transformId
         self.unitOfMeasure = unitOfMeasure

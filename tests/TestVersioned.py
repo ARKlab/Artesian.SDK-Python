@@ -1,12 +1,19 @@
 from __future__ import annotations
-from Artesian import ArtesianConfig
-from Artesian.Query import QueryService
-from Artesian.MarketData import Granularity
-from Artesian.MarketData import AggregationRule
-from . import helpers
+
 import unittest
 
+from Artesian import ArtesianConfig
+from Artesian.MarketData import AggregationRule, Granularity
+from Artesian.Query import QueryService
+from Artesian.Query._QueryParameters.ActualQueryParameters import ActualQueryParameters
+from Artesian.Query._QueryParameters.AuctionQueryParameters import AuctionQueryParameters
+from Artesian.Query._QueryParameters.BidAskQueryParameters import BidAskQueryParameters
+from Artesian.Query._QueryParameters.MasQueryParameters import MasQueryParameters
+from Artesian.Query._QueryParameters.QueryParameters import _QueryParameters
+from Artesian.Query._QueryParameters.VersionedQueryParameters import VersionedQueryParameters
 from tests.helpers import Qs
+
+from . import helpers
 
 cfg = ArtesianConfig("https://arkive.artesian.cloud/tenantName/", "APIKey")
 
@@ -14,6 +21,25 @@ qs = QueryService(cfg)
 
 
 class TestVersioned(unittest.TestCase):
+    def test_default_query_configs_are_not_shared(self) -> None:
+        for params_type in (
+            ActualQueryParameters,
+            AuctionQueryParameters,
+            BidAskQueryParameters,
+            MasQueryParameters,
+            VersionedQueryParameters,
+            _QueryParameters,
+        ):
+            with self.subTest(params_type=params_type):
+                first = params_type(ids=None)
+                second = params_type(ids=None)
+                first.extractionRangeConfig.dateStart = "2020-01-01"
+                self.assertIsNone(second.extractionRangeConfig.dateStart)
+        first_versioned = VersionedQueryParameters()
+        second_versioned = VersionedQueryParameters()
+        first_versioned.versionSelectionConfig.lastN = 3
+        self.assertIsNone(second_versioned.versionSelectionConfig.lastN)
+
     @helpers.TrackRequests
     def test_Null_Fill(self: TestVersioned, requests: Qs) -> None:
         (
@@ -181,8 +207,8 @@ class TestVersioned(unittest.TestCase):
         self.assertEqual(query["fillerK"], "Null")
 
     @helpers.TrackRequests
-    def test_UnitOfMeasure(self, requests):
-        url = (
+    def test_UnitOfMeasure(self, requests: Qs) -> None:
+        (
             qs.createVersioned()
             .forMarketData([100000001])
             .inAbsoluteDateRange("2021-09-22", "2021-09-23")
@@ -198,8 +224,8 @@ class TestVersioned(unittest.TestCase):
         self.assertEqual(query["unitOfMeasure"], "kW")
 
     @helpers.TrackRequests
-    def test_AggregationRule(self, requests):
-        url = (
+    def test_AggregationRule(self, requests: Qs) -> None:
+        (
             qs.createVersioned()
             .forMarketData([100000001])
             .inAbsoluteDateRange("2021-09-22", "2021-09-23")

@@ -1,15 +1,15 @@
-from .AggregationRule import AggregationRule
 from ...Granularity import Granularity
-from .MarketDataType import MarketDataType
+from .AggregationRule import AggregationRule
 from .ArtesianMetadataFacetType import ArtesianMetadataFacetType
 from .DerivedAlgorithm import DerivedAlgorithm
+from .MarketDataType import MarketDataType
 from .UpsertMode import UpsertMode
 
 __all__ = [
-    AggregationRule.__name__,
-    Granularity.__name__,
-    MarketDataType.__name__,
-    ArtesianMetadataFacetType.__name__,
-    DerivedAlgorithm.__name__,
-    UpsertMode.__name__
-]  # type: ignore
+    "AggregationRule",
+    "ArtesianMetadataFacetType",
+    "DerivedAlgorithm",
+    "Granularity",
+    "MarketDataType",
+    "UpsertMode",
+]
