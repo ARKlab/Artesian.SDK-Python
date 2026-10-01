@@ -2,8 +2,8 @@ from dataclasses import dataclass
 
 from Artesian.MarketData._Dto.CurveRangeEntity import CurveRangeEntity
 
-# Has been tried extensively to use TypeVar and Generic for this purpose
-# jsons library fails with Generics thus we opted for the following
+# Concrete subclasses per payload (the former jsons serializer failed with Generics);
+# kept to preserve the public types.
 
 
 @dataclass

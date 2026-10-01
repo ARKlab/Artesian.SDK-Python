@@ -120,6 +120,25 @@ class TestClientErrorHandling(unittest.IsolatedAsyncioTestCase):
                 "Failed REST call to Artesian. GET https://baseurl.com/400 returned 400. TITLE",
             )
 
+    async def test_invalidProblemDetailsFallsBackToText(self) -> None:
+        for body in ("not json", '["not", "an", "object"]'):
+            with self.subTest(body=body):
+                with responses.RequestsMock() as rsps:
+                    rsps.add(
+                        "GET",
+                        "https://baseurl.com/400",
+                        body=body,
+                        status=400,
+                        content_type="application/problem+json; charset=utf-8",
+                    )
+
+                    with self.assertRaises(ArtesianSdkValidationException) as ex:
+                        with self._client as c:
+                            await c.exec("GET", "/400")
+
+                self.assertIsNone(ex.exception.problemDetails)
+                self.assertEqual(ex.exception.errorText, body)
+
     async def test_NOT_problemDetails(self) -> None:
         cases = [
             (400, ArtesianSdkValidationException),
