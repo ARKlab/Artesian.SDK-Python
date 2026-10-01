@@ -140,7 +140,7 @@ jobs:
           ((github.event_name == 'pull_request' &&
             github.event.pull_request.head.repo.full_name == github.repository) ||
            (github.event_name == 'push' && github.ref == 'refs/heads/master'))
-        uses: actions/upload-code-coverage@d8e329117199404bba6fc81efe8093dc7c015e34 # v1
+        uses: actions/upload-code-coverage@2b21a77928be8d5168c2b9581a67f2adbebacc52 # v1
         with:
           file: coverage.xml
           language: Python
