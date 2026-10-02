@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 from typing import Optional
-from .DataQualityRuleConfigDto import DataQualityRuleConfigDto
+
 from .._Enum.RuleType import RuleType
+from .DataQualityRuleConfigDto import DataQualityRuleConfigDto
 
 
 @dataclass

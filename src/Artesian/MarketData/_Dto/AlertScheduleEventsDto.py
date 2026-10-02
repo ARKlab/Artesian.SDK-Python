@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional
 
 from .DqCheckChangeEventDto import DqCheckChangeEventDtoOutput
 
@@ -16,7 +16,7 @@ class AlertScheduleEventsDtoOutput:
     """
 
     scheduleTime: Optional[datetime] = None
-    events: List[DqCheckChangeEventDtoOutput] = field(default_factory=list)
+    events: list[DqCheckChangeEventDtoOutput] = field(default_factory=list)
 
 
 AlertScheduleEventsOutput = AlertScheduleEventsDtoOutput

@@ -1,5 +1,4 @@
 from __future__ import annotations
-from typing import Optional
 
 
 class ExtractionRangeConfig:
@@ -10,6 +9,6 @@ class ExtractionRangeConfig:
         date: Date for the Extraction Range configuration in (ISO) format
     """
 
-    def __init__(self: ExtractionRangeConfig, date: Optional[str] = None) -> None:
+    def __init__(self: ExtractionRangeConfig, date: str | None = None) -> None:
         """Inits the Extraction Range Configuration."""
         self.date = date

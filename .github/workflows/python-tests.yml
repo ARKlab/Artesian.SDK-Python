@@ -6,335 +6,224 @@ on:
     tags:
       - "v[0-9]*.[0-9]*.[0-9]*"
   pull_request:
-    branches: [master]
+    branches: [main, master, develop, develop-beta]
   workflow_dispatch:
 
 permissions:
-  id-token: write
-  contents: write
-  statuses: write
-  checks: write
+  contents: read
 
 jobs:
-  # ---------------------------------------------------------------------------
-  # Pyright
-  # ---------------------------------------------------------------------------
-
-  pyright:
-    name: pyright
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-      checks: write
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v7
-        with:
-          python-version: "3.11"
-
-      - name: Install dependencies
-        shell: bash
-        run: |
-          python -m pip install --upgrade pip
-
-          export SETUPTOOLS_SCM_PRETEND_VERSION="0.0.0"
-
-          echo "SETUPTOOLS_SCM_PRETEND_VERSION=$SETUPTOOLS_SCM_PRETEND_VERSION"
-
-          pip install --no-build-isolation -e ".[dev]"
-
-      - name: Run Pyright
-        uses: jordemort/action-pyright@v1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          reporter: github-check
-          lib:
-          level: warning
-          filter_mode: file
-
-  # ---------------------------------------------------------------------------
-  # Build / Test
-  # ---------------------------------------------------------------------------
-
-  build:
-    name: "build"
+  test-matrix:
+    name: "Python ${{ matrix.python-version }} / ${{ matrix.os }}"
     runs-on: ${{ matrix.os }}
+    # Test artifacts use a fixed version regardless of the release tag.
+    env:
+      SETUPTOOLS_SCM_PRETEND_VERSION: "0.0.0"
 
     permissions:
       contents: read
 
     strategy:
+      fail-fast: false
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
         os: ["ubuntu-latest", "windows-latest", "macos-latest"]
 
     steps:
       - name: "Checkout"
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v7
+      - name: Set up uv / Python ${{ matrix.python-version }}
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
           python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
+        id: install
+        run: uv sync --locked
+
+      - name: Run Ruff and Pyrefly
         shell: bash
         run: |
-          python -m pip install --upgrade pip
-
-          TAG="${GITHUB_REF_NAME}"
-
-          export SETUPTOOLS_SCM_PRETEND_VERSION="0.0.0"
-
-          if [[ "$TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)a([0-9]+)\.([0-9]+)$ ]]; then
-            export SETUPTOOLS_SCM_PRETEND_VERSION="${BASH_REMATCH[1]}a${BASH_REMATCH[2]}.post${BASH_REMATCH[3]}"
-          elif [[ "$TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)b([0-9]+)$ ]]; then
-            export SETUPTOOLS_SCM_PRETEND_VERSION="${BASH_REMATCH[1]}b${BASH_REMATCH[2]}"
-          elif [[ "$TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)$ ]]; then
-            export SETUPTOOLS_SCM_PRETEND_VERSION="${BASH_REMATCH[1]}"
-          fi
-
-          echo "SETUPTOOLS_SCM_PRETEND_VERSION=${SETUPTOOLS_SCM_PRETEND_VERSION}"
-
-          pip install -e ".[dev]"
-
-      - name: Run flake8
-        run: |
-          flake8 .
+          uv run --no-sync ruff check --target-version "py${PYTHON_VERSION//./}" --output-format github .
+          uv run --no-sync ruff format --check --target-version "py${PYTHON_VERSION//./}" .
+          uv run --no-sync pyrefly check --python-version "$PYTHON_VERSION" --output-format github
+        env:
+          PYTHON_VERSION: ${{ matrix.python-version }}
 
       - name: Test Pytest
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         run: |
-          pytest --junitxml=junit/test-results-${{ matrix.python-version }}-${{ matrix.os }}.xml
+          uv run --no-sync pytest --junitxml=junit/test-results-${{ matrix.python-version }}-${{ matrix.os }}.xml
+
+      - name: Build package
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        run: uv build
 
       - name: Upload pytest test results
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         if: always()
         with:
           name: test-results-build-${{ matrix.python-version }}-${{ matrix.os }}
           path: junit/test-results-${{ matrix.python-version }}-${{ matrix.os }}.xml
 
       - name: Upload build coverage
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         if: always()
         with:
           name: coverage-build-${{ matrix.python-version }}-${{ matrix.os }}
-          path: coverage.xml
+          include-hidden-files: true
+          path: |
+            .coverage
+            coverage.xml
 
-  # ---------------------------------------------------------------------------
-  # Test Report
-  #
-  # Consolidates test results from all jobs (build and publish-preview)
-  # into a single report.
-  # ---------------------------------------------------------------------------
-
-  test-report:
-    name: "Test Report"
+  checks:
+    name: "Checks"
     runs-on: ubuntu-latest
-    needs:
-      - build
-      - publish-preview
-
+    needs: [test-matrix]
     if: always()
 
     permissions:
       contents: read
       checks: write
+      code-quality: write
+      pull-requests: read
+    env:
+      SETUPTOOLS_SCM_PRETEND_VERSION: "0.0.0"
 
     steps:
       - name: "Checkout"
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+
+      - name: "Set up uv"
+        if: ${{ needs.test-matrix.result == 'success' }}
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          python-version: "3.14"
+
+      - name: "Install coverage tooling"
+        if: ${{ needs.test-matrix.result == 'success' }}
+        run: uv sync --locked --no-dev --group test
+
+      - name: "Download coverage artifacts"
+        if: ${{ needs.test-matrix.result == 'success' }}
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          pattern: coverage-build-*
+          path: coverage
+
+      - name: "Create code coverage report"
+        if: ${{ needs.test-matrix.result == 'success' }}
+        shell: bash
+        run: |
+          uv run --no-sync coverage combine coverage/coverage-build-*/.coverage
+          uv run --no-sync coverage xml
+          uv run --no-sync coverage html
+          uv run --no-sync coverage report --format=markdown >> "$GITHUB_STEP_SUMMARY"
+
+      - name: "Upload combined coverage"
+        if: ${{ needs.test-matrix.result == 'success' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: coverage-combined
+          path: |
+            coverage.xml
+            htmlcov/
+
+      - name: "Upload coverage to GitHub"
+        if: >
+          needs.test-matrix.result == 'success' &&
+          ((github.event_name == 'pull_request' &&
+            github.event.pull_request.head.repo.full_name == github.repository) ||
+           (github.event_name == 'push' && github.ref == 'refs/heads/master'))
+        uses: actions/upload-code-coverage@d8e329117199404bba6fc81efe8093dc7c015e34 # v1
+        with:
+          file: coverage.xml
+          language: Python
+          label: code-coverage/pytest
 
       - name: "Download test result artifacts"
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         if: always()
         with:
-          pattern: test-results-*
+          pattern: test-results-build-*
           path: test-results
           merge-multiple: true
 
       - name: "Test Report"
-        uses: dorny/test-reporter@v3
-        if: always()
+        uses: dorny/test-reporter@a43b3a5f7366b97d083190328d2c652e1a8b6aa2 # v3
+        if: always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
         with:
           name: Python Tests
           path: "test-results/**/*.xml"
           reporter: java-junit
           fail-on-error: "true"
-          use-actions-summary: "false"
+          use-actions-summary: "true"
 
-  # ---------------------------------------------------------------------------
-  # Code Coverage
-  #
-  # Coverage from all Python/OS combinations and the PR preview merged state
-  # is merged into a single report.
-  # ---------------------------------------------------------------------------
+      - name: "Require successful matrix"
+        if: always()
+        env:
+          MATRIX_RESULT: ${{ needs.test-matrix.result }}
+        run: test "$MATRIX_RESULT" = success
 
-  coverage-report:
-    name: "Code Coverage"
+  # Stable: v4.3.0 -> 4.3.0; tag commit must be contained in master.
+  # Beta: v4.3.0b1 / v5.0.0b1; tag commit must be contained in develop-beta.
+  # The beta version must be the next minor or major after the latest master GA.
+  # PR preview: v4.3.0a69.post1 / v4.3.0a69.post2. The base version
+  # must match the latest master GA version; 69 is the PR number, and
+  # 1 / 2 are preview iterations. The tag must point to the unmerged PR
+  # head containing current master, not to a synthetic merge commit.
+  build-release:
+    name: "Build release"
     runs-on: ubuntu-latest
-    needs:
-      - build
-      - publish-preview
-
-    if: always()
-
     permissions:
       contents: read
-      checks: write
-
-    steps:
-      - name: "Download coverage artifacts"
-        uses: actions/download-artifact@v8
-        if: always()
-        with:
-          pattern: coverage-*
-          path: coverage
-
-      - name: "Install dotnet"
-        uses: actions/setup-dotnet@v6
-        with:
-          dotnet-version: 10.x
-
-      - name: "Install reportgenerator"
-        shell: bash
-        run: dotnet tool install -g dotnet-reportgenerator-globaltool
-
-      - name: "Create code coverage report"
-        shell: bash
-        run: |
-          export PATH="$PATH:$HOME/.dotnet/tools"
-          reportgenerator \
-            -reports:"coverage/**/*.xml" \
-            -targetdir:CodeCoverage \
-            -reporttypes:'MarkdownSummaryGithub;Cobertura'
-
-      - name: "Write to Job Summary"
-        if: always()
-        run: cat CodeCoverage/SummaryGithub.md >> "$GITHUB_STEP_SUMMARY"
-
-  # ---------------------------------------------------------------------------
-  # Publish Stable
-  #
-  # Tag:
-  #   v4.3.0
-  #
-  # Python package version:
-  #   4.3.0
-  #
-  # Must originate from:
-  #   master
-  # ---------------------------------------------------------------------------
-
-  publish-stable:
-    name: "Publish Stable"
-    runs-on: ubuntu-latest
-    needs:
-      - pyright
-      - build
+    needs: [checks]
 
     if: >
-      github.event_name == 'push' &&
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
       startsWith(github.ref, 'refs/tags/v') &&
-      !contains(github.ref_name, 'a') &&
-      !contains(github.ref_name, 'b')
+      needs.checks.result == 'success'
 
     steps:
       - name: "Checkout"
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
+          ref: ${{ github.sha }}
           fetch-depth: 0
 
-      - name: "Validate GA release tag"
+      - name: "Validate release tag"
+        id: tag
         shell: bash
-        run: bash .github/workflows/validate_tag.sh "$GITHUB_REF_NAME" ga
+        run: |
+          TAG="$GITHUB_REF_NAME"
+          if [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+a[0-9]+\.post[0-9]+$ ]]; then
+            KIND=preview
+          elif [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+b[0-9]+$ ]]; then
+            KIND=beta
+          else
+            KIND=ga
+          fi
+          bash .github/workflows/validate_tag.sh "$TAG" "$KIND"
+          echo "kind=$KIND" >> "$GITHUB_OUTPUT"
+          echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
 
       - name: "Validate release commit is contained in master"
+        if: steps.tag.outputs.kind == 'ga'
         shell: bash
         run: bash .github/workflows/validate_branch.sh "master"
 
-      - name: "Set up Python 3.11"
-        uses: actions/setup-python@v7
-        with:
-          python-version: "3.11"
-
-      - name: "Install dependencies"
-        shell: bash
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install build
-
-      - name: "Build package"
-        shell: bash
-        run: |
-          echo "Building GA package: ${GITHUB_REF_NAME#v}"
-          python -m build
-
-      - name: "Publish package"
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
-
-  # ---------------------------------------------------------------------------
-  # Publish Beta
-  #
-  # Tag:
-  #   v4.3.0b1
-  #   v4.3.0b2
-  #
-  # Python package version:
-  #   4.3.0b1
-  #   4.3.0b2
-  #
-  # Must originate from:
-  #   develop-beta
-  #
-  # Beta version MUST be the next minor version after
-  # the latest GA version on master.
-  #
-  # Example:
-  #
-  #   master       = v4.2.0
-  #   develop-beta = v4.3.0b1
-  #
-  # ---------------------------------------------------------------------------
-
-  publish-beta:
-    name: "Publish Beta"
-    runs-on: ubuntu-latest
-    needs:
-      - pyright
-      - build
-
-    if: >
-      github.event_name == 'push' &&
-      startsWith(github.ref, 'refs/tags/v') &&
-      contains(github.ref_name, 'b')
-
-    steps:
-      - name: "Checkout"
-        uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-
-      - name: "Validate Beta release tag"
-        shell: bash
-        run: bash .github/workflows/validate_tag.sh "$GITHUB_REF_NAME" beta
-
       - name: "Validate release commit is contained in develop-beta"
+        if: steps.tag.outputs.kind == 'beta'
         shell: bash
         run: bash .github/workflows/validate_branch.sh "develop-beta"
 
-      - name: "Validate next minor version"
+      - name: "Validate next minor or major version"
+        if: steps.tag.outputs.kind == 'beta'
         shell: bash
         run: |
           TAG="${GITHUB_REF_NAME}"
@@ -360,139 +249,41 @@ jobs:
 
           MASTER_MAJOR=$(echo "$MASTER_VERSION" | cut -d. -f1)
           MASTER_MINOR=$(echo "$MASTER_VERSION" | cut -d. -f2)
+          NEXT_MINOR="$((10#$MASTER_MINOR + 1))"
+          NEXT_MAJOR="$((10#$MASTER_MAJOR + 1))"
 
-          BETA_MAJOR=$(echo "$BETA_VERSION" | cut -d. -f1)
-          BETA_MINOR=$(echo "$BETA_VERSION" | cut -d. -f2)
-
-          EXPECTED_MAJOR="$MASTER_MAJOR"
-          EXPECTED_MINOR="$((MASTER_MINOR + 1))"
-
-          if [[ "$BETA_MAJOR" != "$EXPECTED_MAJOR" ||
-                "$BETA_MINOR" != "$EXPECTED_MINOR" ]]; then
-            echo "::error::Beta version $BETA_VERSION is not the next minor version after master GA $MASTER_VERSION."
-            echo "::error::Expected: ${EXPECTED_MAJOR}.${EXPECTED_MINOR}.0bN"
+          if [[ "$BETA_VERSION" != "${MASTER_MAJOR}.${NEXT_MINOR}.0" &&
+                "$BETA_VERSION" != "${NEXT_MAJOR}.0.0" ]]; then
+            echo "::error::Beta version $BETA_VERSION is not the next minor or major version after master GA $MASTER_VERSION."
+            echo "::error::Expected: ${MASTER_MAJOR}.${NEXT_MINOR}.0bN or ${NEXT_MAJOR}.0.0bN"
             exit 1
           fi
 
-          echo "Beta version $BETA_VERSION is the next minor version after master GA $MASTER_VERSION."
+          echo "Beta version $BETA_VERSION is the next minor or major version after master GA $MASTER_VERSION."
 
-      - name: "Set up Python 3.11"
-        uses: actions/setup-python@v7
-        with:
-          python-version: "3.11"
-
-      - name: "Install dependencies"
-        shell: bash
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install build
-
-      - name: "Build package"
-        shell: bash
-        run: |
-          TAG="${GITHUB_REF_NAME}"
-
-          if [[ "$TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)b([0-9]+)$ ]]; then
-            export SETUPTOOLS_SCM_PRETEND_VERSION="${BASH_REMATCH[1]}b${BASH_REMATCH[2]}"
-          fi
-
-          echo "SETUPTOOLS_SCM_PRETEND_VERSION=${SETUPTOOLS_SCM_PRETEND_VERSION}"
-
-          python -m build
-
-      - name: "Publish package"
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
-
-  # ---------------------------------------------------------------------------
-  # Publish PR Preview
-  #
-  # Tag:
-  #   v4.3.0a69.1
-  #   v4.3.0a69.2
-  #
-  # Python package version:
-  #   4.3.0a69.post1
-  #   4.3.0a69.post2
-  #
-  # Where:
-  #   4.3.0 = latest GA version on master
-  #   69    = PR number
-  #   1 / 2 = preview iteration
-  #
-  # The PR Preview version MUST match the latest GA version on master.
-  # The PR must be based on the current master.
-  # ---------------------------------------------------------------------------
-
-  publish-preview:
-    name: "Publish PR Preview"
-    runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-      checks: write
-
-    needs:
-      - pyright
-      - build
-
-    if: >
-      github.event_name == 'push' &&
-      startsWith(github.ref, 'refs/tags/v') &&
-      contains(github.ref_name, 'a')
-
-    steps:
-      - name: "Extract PR number"
-        id: pr
-        shell: bash
-        run: |
-          TAG="${GITHUB_REF_NAME}"
-
-          if [[ ! "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+a([0-9]+)\.([0-9]+)$ ]]; then
-            echo "::error::Invalid PR preview tag: $TAG"
-            exit 1
-          fi
-
-          PR_NUMBER="${BASH_REMATCH[1]}"
-          ITERATION="${BASH_REMATCH[2]}"
-
-          echo "number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
-          echo "iteration=$ITERATION" >> "$GITHUB_OUTPUT"
-
-          echo "PR number: $PR_NUMBER"
-          echo "Iteration: $ITERATION"
-
-      - name: "Checkout merged PR head"
-        uses: actions/checkout@v7
-        with:
-          ref: refs/pull/${{ steps.pr.outputs.number }}/merge
-          fetch-depth: 0
-
-      - name: "Validate PR Preview tag"
-        shell: bash
-        run: bash .github/workflows/validate_tag.sh "$GITHUB_REF_NAME" preview
-
-      - name: "Validate PR is based on current master"
+      - name: "Validate preview source"
+        if: steps.tag.outputs.kind == 'preview'
         shell: bash
         run: |
           git fetch origin master
 
-          CURRENT_MASTER=$(git rev-parse origin/master)
-          MERGE_PARENT=$(git rev-parse HEAD^1)
-
-          echo "Current master: $CURRENT_MASTER"
-          echo "Merge parent:   $MERGE_PARENT"
-
-          if [[ "$MERGE_PARENT" != "$CURRENT_MASTER" ]]; then
-            echo "::error::PR Preview is not based on the current master."
+          if ! git merge-base --is-ancestor origin/master HEAD; then
+            echo "::error::PR Preview tag does not contain the current master."
             exit 1
           fi
 
-          echo "PR Preview is based on master."
+          PR_NUMBER="${GITHUB_REF_NAME#*a}"
+          PR_NUMBER="${PR_NUMBER%%.*}"
+          git fetch origin "refs/pull/$PR_NUMBER/head"
+
+          if git merge-base --is-ancestor HEAD origin/master ||
+             [[ "$(git rev-parse HEAD)" != "$(git rev-parse FETCH_HEAD^{commit})" ]]; then
+            echo "::error::PR Preview tag must point to the unmerged head of PR $PR_NUMBER."
+            exit 1
+          fi
 
       - name: "Validate preview version"
+        if: steps.tag.outputs.kind == 'preview'
         shell: bash
         run: |
           TAG="${GITHUB_REF_NAME}"
@@ -506,7 +297,7 @@ jobs:
             sed 's/^v//'
           )
 
-          PREVIEW_VERSION=$(echo "$TAG" | sed -E 's/^v([0-9]+\.[0-9]+\.[0-9]+)a[0-9]+\.[0-9]+$/\1/')
+          PREVIEW_VERSION=$(echo "$TAG" | sed -E 's/^v([0-9]+\.[0-9]+\.[0-9]+)a[0-9]+\.post[0-9]+$/\1/')
 
           echo "Master GA version: $MASTER_VERSION"
           echo "Preview version:   $PREVIEW_VERSION"
@@ -523,64 +314,86 @@ jobs:
 
           echo "PR Preview version matches current master GA version: $MASTER_VERSION"
 
-      - name: "Set up Python 3.11"
-        uses: actions/setup-python@v7
+      - name: "Record release source"
+        id: source
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: "Set up uv"
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
-          python-version: "3.11"
-
-      - name: "Install dependencies"
-        shell: bash
-        run: |
-          python -m pip install --upgrade pip
-
-          TAG="${GITHUB_REF_NAME}"
-
-          if [[ "$TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)a([0-9]+)\.([0-9]+)$ ]]; then
-            export SETUPTOOLS_SCM_PRETEND_VERSION="${BASH_REMATCH[1]}a${BASH_REMATCH[2]}.post${BASH_REMATCH[3]}"
-          fi
-
-          echo "SETUPTOOLS_SCM_PRETEND_VERSION=${SETUPTOOLS_SCM_PRETEND_VERSION:-not-set}"
-
-          pip install -e ".[dev]"
-          python -m pip install build
-
-      - name: "Run flake8"
-        run: |
-          flake8 .
-
-      - name: "Test Pytest"
-        run: |
-          pytest --junitxml=junit/test-results-preview.xml
-
-      - name: "Upload pytest test results"
-        uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: test-results-preview
-          path: junit/test-results-preview.xml
-
-      - name: "Upload preview coverage"
-        uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: coverage-preview
-          path: coverage.xml
+          python-version: "3.14"
 
       - name: "Build package"
-        shell: bash
+        env:
+          SETUPTOOLS_SCM_PRETEND_VERSION: ${{ steps.tag.outputs.version }}
+        run: uv build
+
+      - name: "Record distribution hashes"
         run: |
-          TAG="${GITHUB_REF_NAME}"
+          echo "Source commit: ${{ steps.source.outputs.sha }}" >> "$GITHUB_STEP_SUMMARY"
+          sha256sum dist/*.whl dist/*.tar.gz >> "$GITHUB_STEP_SUMMARY"
 
-          if [[ "$TAG" =~ ^v([0-9]+\.[0-9]+\.[0-9]+)a([0-9]+)\.([0-9]+)$ ]]; then
-            export SETUPTOOLS_SCM_PRETEND_VERSION="${BASH_REMATCH[1]}a${BASH_REMATCH[2]}.post${BASH_REMATCH[3]}"
-          fi
-
-          echo "SETUPTOOLS_SCM_PRETEND_VERSION=${SETUPTOOLS_SCM_PRETEND_VERSION}"
-
-          python -m build
-
-      - name: "Publish package"
-        uses: pypa/gh-action-pypi-publish@release/v1
+      - name: "Upload release distributions"
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
-          user: __token__
-          password: ${{ secrets.PYPI_API_TOKEN }}
+          name: release-dist
+          path: |
+            dist/*.whl
+            dist/*.tar.gz
+          if-no-files-found: error
+
+  # See https://docs.astral.sh/uv/guides/integration/github/#publishing-to-pypi
+  # Only this job can obtain a publishing identity; do not check out or build here.
+  publish:
+    name: "Attest and publish to PyPI"
+    runs-on: ubuntu-latest
+    needs: [build-release]
+    if: >
+      (github.event_name == 'push' || github.event_name == 'workflow_dispatch') &&
+      startsWith(github.ref, 'refs/tags/v') &&
+      needs.build-release.result == 'success'
+    environment:
+      name: pypi
+    permissions:
+      contents: read
+      id-token: write
+    concurrency:
+      group: pypi-${{ github.ref }}
+      cancel-in-progress: false
+    steps:
+      - name: "Download release distributions"
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: release-dist
+          path: dist
+
+      - name: "Check release filenames"
+        shell: python
+        run: |
+          import os
+          import re
+          from pathlib import Path
+
+          match = re.fullmatch(r"v\d+\.\d+\.\d+(?:b\d+|a\d+\.post\d+)?", os.environ["GITHUB_REF_NAME"])
+          if not match:
+              raise SystemExit("Invalid release tag")
+          version = match.group()[1:]
+          expected = {f"artesian_sdk-{version}-py3-none-any.whl", f"artesian_sdk-{version}.tar.gz"}
+          if {path.name for path in Path("dist").iterdir()} != expected:
+              raise SystemExit("Release distributions do not match the tag")
+
+      - name: "Set up pinned uv"
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: "0.12.19"
+          enable-cache: false
+
+      - name: "Generate PEP 740 publish attestations"
+        uses: astral-sh/attest-action@f589a42a7efb6fe400b4f400de60b4bc90390027 # v0.0.6
+        with:
+          paths: |
+            dist/*.whl
+            dist/*.tar.gz
+
+      - name: "Publish with required Trusted Publishing"
+        run: uv publish --no-config --trusted-publishing always --publish-url https://upload.pypi.org/legacy/

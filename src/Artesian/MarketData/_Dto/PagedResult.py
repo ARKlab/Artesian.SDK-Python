@@ -1,16 +1,15 @@
 from dataclasses import dataclass
-from typing import List
 
+from Artesian.MarketData._Dto.CheckResultCheckSummaryDto import CheckResultCheckSummaryDto
 from Artesian.MarketData._Dto.CurveRangeEntity import CurveRangeEntity
 from Artesian.MarketData._Dto.DataQualityRuleDtoOutput import DataQualityRuleDtoOutput
 from Artesian.MarketData._Dto.MarketDataQualityRuleAssignmentDto import (
     MarketDataQualityRuleAssignmentDtoOutput,
 )
-from Artesian.MarketData._Dto.CheckResultCheckSummaryDto import CheckResultCheckSummaryDto
-from Artesian.MarketData._Dto.QualityNotificationAlertDto import QualityNotificationAlertDtoOutput
 from Artesian.MarketData._Dto.QualityNotificationAlertAssignmentDto import (
     QualityNotificationAlertAssignmentDtoOutput,
 )
+from Artesian.MarketData._Dto.QualityNotificationAlertDto import QualityNotificationAlertDtoOutput
 
 # Has been tried extensively to use TypeVar and Generic for this purpose
 # jsons library fails with Generics thus we opted for the following
@@ -37,29 +36,29 @@ class PagedResult:
 
 @dataclass
 class PagedResultCurveRangeEntity(PagedResult):
-    data: List[CurveRangeEntity]
+    data: list[CurveRangeEntity]
 
 
 @dataclass
 class PagedResultDataQualityRuleDtoOutput(PagedResult):
-    data: List[DataQualityRuleDtoOutput]
+    data: list[DataQualityRuleDtoOutput]
 
 
 @dataclass
 class PagedResultMarketDataQualityRuleAssignmentDtoOutput(PagedResult):
-    data: List[MarketDataQualityRuleAssignmentDtoOutput]
+    data: list[MarketDataQualityRuleAssignmentDtoOutput]
 
 
 @dataclass
 class PagedResultCheckResultCheckSummaryDto(PagedResult):
-    data: List[CheckResultCheckSummaryDto]
+    data: list[CheckResultCheckSummaryDto]
 
 
 @dataclass
 class PagedResultQualityNotificationAlertDtoOutput(PagedResult):
-    data: List[QualityNotificationAlertDtoOutput]
+    data: list[QualityNotificationAlertDtoOutput]
 
 
 @dataclass
 class PagedResultQualityNotificationAlertAssignmentDtoOutput(PagedResult):
-    data: List[QualityNotificationAlertAssignmentDtoOutput]
+    data: list[QualityNotificationAlertAssignmentDtoOutput]

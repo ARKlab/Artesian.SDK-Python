@@ -12,5 +12,3 @@ class ActualCompletenessAndFreshnessConfigDto(CompletenessAndFreshnessConfigDto)
     Inherits schedule and record validation settings from
     CompletenessAndFreshnessConfigDto.
     """
-
-    pass

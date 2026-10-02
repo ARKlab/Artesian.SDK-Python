@@ -1,6 +1,6 @@
+import datetime
 from dataclasses import dataclass
 from typing import Optional
-import datetime
 
 
 @dataclass
@@ -21,6 +21,7 @@ class CheckResultExtractTs:
         marketDataId: The Market Data ID.
         ruleId: The Rule ID.
     """
+
     time: datetime.datetime
     issueCount: int
     competenceStart: datetime.datetime
@@ -53,6 +54,7 @@ class CheckResultExtractVts:
         marketDataId: The Market Data ID.
         ruleId: The Rule ID.
     """
+
     time: datetime.datetime
     issueCount: int
     competenceStart: datetime.datetime

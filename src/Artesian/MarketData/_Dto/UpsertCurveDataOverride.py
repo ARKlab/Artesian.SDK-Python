@@ -1,9 +1,11 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import Optional
 from uuid import UUID
 
-from .UpsertData import UpsertData
 from .._Enum.OverrideKind import OverrideKind
+from .UpsertData import UpsertData
 
 
 @dataclass
@@ -29,6 +31,6 @@ class UpsertCurveDataOverride(UpsertData):
     replaceExisting: bool = False
     comment: Optional[str] = None
 
-    def validate(self: "UpsertCurveDataOverride") -> None:
+    def validate(self: UpsertCurveDataOverride) -> None:
         if self.overrideId is not None and self.overrideId.int == 0:
             raise ValueError("Override metadata id must be valorized")

@@ -1,7 +1,14 @@
+import unittest
+
 from Artesian import ArtesianConfig
 from Artesian.Query import QueryService
+from Artesian.Query._QueryParameters.QueryParameters import (
+    _FillCustomBidAskStrategy,
+    _FillCustomMasStrategy,
+)
+from tests.helpers import Qs
+
 from . import helpers
-import unittest
 
 cfg = ArtesianConfig("https://arkive.artesian.cloud/tenantName/", "APIKey")
 
@@ -10,8 +17,8 @@ qs = QueryService(cfg)
 
 class TestBidAsk(unittest.TestCase):
     @helpers.TrackRequests
-    def test_Null_Fill(self, requests):
-        url = (
+    def test_Null_Fill(self, requests: Qs) -> None:
+        (
             qs.createBidAsk()
             .forMarketData([100000001])
             .forProducts(["M+1", "M+2"])
@@ -23,8 +30,8 @@ class TestBidAsk(unittest.TestCase):
         self.assertEqual(requests.getQs()["fillerK"], "Null")
 
     @helpers.TrackRequests
-    def test_No_Fill(self, requests):
-        url = (
+    def test_No_Fill(self, requests: Qs) -> None:
+        (
             qs.createBidAsk()
             .forMarketData([100000001])
             .forProducts(["M+1", "M+2"])
@@ -36,8 +43,8 @@ class TestBidAsk(unittest.TestCase):
         self.assertEqual(requests.getQs()["fillerK"], "NoFill")
 
     @helpers.TrackRequests
-    def test_Latest_Fill(self, requests):
-        url = (
+    def test_Latest_Fill(self, requests: Qs) -> None:
+        (
             qs.createBidAsk()
             .forMarketData([100000001])
             .forProducts(["M+1", "M+2"])
@@ -52,13 +59,13 @@ class TestBidAsk(unittest.TestCase):
         self.assertEqual(query["fillerC"], "False")
 
     @helpers.TrackRequests
-    def test_Latest_Fill_Continue(self, requests):
-        url = (
+    def test_Latest_Fill_Continue(self, requests: Qs) -> None:
+        (
             qs.createBidAsk()
             .forMarketData([100000001])
             .forProducts(["M+1", "M+2"])
             .inAbsoluteDateRange("2018-01-01", "2018-01-02")
-            .withFillLatestValue("P5D", "True")
+            .withFillLatestValue("P5D", True)
             .execute()
         )
 
@@ -68,8 +75,8 @@ class TestBidAsk(unittest.TestCase):
         self.assertEqual(query["fillerC"], "True")
 
     @helpers.TrackRequests
-    def test_Custom_Value_Fill(self, requests):
-        url = (
+    def test_Custom_Value_Fill(self, requests: Qs) -> None:
+        (
             qs.createBidAsk()
             .forMarketData([100000001])
             .forProducts(["M+1", "M+2"])
@@ -93,3 +100,18 @@ class TestBidAsk(unittest.TestCase):
         self.assertEqual(query["fillerDVbaq"], "4")
         self.assertEqual(query["fillerDVlp"], "5")
         self.assertEqual(query["fillerDVlq"], "6")
+
+    def test_Custom_Value_Fill_Preserves_Falsy_Filtering(self) -> None:
+        cases = [
+            (
+                _FillCustomBidAskStrategy(bestBidPrice=0, bestAskPrice=2.5, bestBidQuantity=0.0, lastPrice=-3),
+                "fillerK=CustomValue&fillerDVbap=2.5&fillerDVlp=-3",
+            ),
+            (
+                _FillCustomMasStrategy(settlement=0, open=2.5, close=-3, volume=0.0),
+                "fillerK=CustomValue&fillerDVo=2.5&fillerDVc=-3",
+            ),
+        ]
+        for strategy, expected in cases:
+            with self.subTest(strategy=type(strategy).__name__):
+                self.assertEqual(strategy.getUrlParams(), expected)
