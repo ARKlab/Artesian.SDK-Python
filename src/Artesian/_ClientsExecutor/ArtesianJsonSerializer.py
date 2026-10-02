@@ -70,7 +70,7 @@ def __checkResultExtractDeserializer(obj: dict[str, object], cls: type, *args: A
     return cls(**values)
 
 
-def __enumValue(enumType: type[TEnum], value: object) -> TEnum:
+def __enumValue(enumType: type[TEnum], value: object) -> TEnum:  # noqa: UP047, RUF100
     if isinstance(value, enumType):
         return value
     return enumType[str(value)]
