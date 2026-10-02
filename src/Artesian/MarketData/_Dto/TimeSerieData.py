@@ -1,6 +1,7 @@
 from dataclasses import dataclass
-from typing import Dict, Optional
 from datetime import datetime
+from typing import Optional
+
 from Artesian.MarketData._Enum.MarketDataType import MarketDataType
 
 
@@ -17,6 +18,6 @@ class TimeSerieData:
     """
 
     type: MarketDataType
-    rows: Optional[Dict[datetime, Optional[float]]] = None
+    rows: Optional[dict[datetime, Optional[float]]] = None
     version: Optional[datetime] = None
     timezone: Optional[str] = None

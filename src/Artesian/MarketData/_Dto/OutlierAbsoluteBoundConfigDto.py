@@ -21,5 +21,5 @@ class OutlierAbsoluteBoundConfigDto(OutlierModelConfigDto):
     lowerBound: float
 
     @property
-    def model(self: "OutlierAbsoluteBoundConfigDto") -> OutlierModel:
+    def model(self: OutlierAbsoluteBoundConfigDto) -> OutlierModel:
         return OutlierModel.AbsoluteBound

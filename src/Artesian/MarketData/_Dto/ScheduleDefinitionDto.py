@@ -10,7 +10,7 @@ class ScheduleDefinitionDto:
     """
 
     @property
-    def type(self: "ScheduleDefinitionDto") -> ScheduleDefinitionType:
+    def type(self: ScheduleDefinitionDto) -> ScheduleDefinitionType:
         raise NotImplementedError(
             "ScheduleDefinitionDto.type must be implemented by subclasses"
         )

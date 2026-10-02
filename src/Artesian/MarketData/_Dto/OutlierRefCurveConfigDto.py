@@ -21,5 +21,5 @@ class OutlierRefCurveConfigDto(OutlierModelConfigDto):
     tolerancePerc: float
 
     @property
-    def model(self: "OutlierRefCurveConfigDto") -> OutlierModel:
+    def model(self: OutlierRefCurveConfigDto) -> OutlierModel:
         return OutlierModel.RefCurve

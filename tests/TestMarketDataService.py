@@ -1,12 +1,12 @@
-from Artesian import ArtesianConfig
-import responses
 import unittest
-from Artesian.MarketData._Dto.DerivedTransformQueryValidation import DerivedTransformQueryValidation
-from Artesian.MarketData._Dto.DerivedTransformQueryValidationResponse import DerivedTransformQueryValidationResponse
-from Artesian.MarketData._Dto.TimeSerieData import TimeSerieData
-from Artesian._ClientsExecutor.ArtesianJsonSerializer import artesianJsonSerialize
 from datetime import date, datetime
 from uuid import UUID
+
+import responses
+
+from Artesian import ArtesianConfig
+from Artesian._ClientsExecutor.ArtesianJsonSerializer import artesianJsonSerialize
+from Artesian.MarketData import *
 from Artesian.MarketData import (
     ArtesianMetadataFacet,
     ArtesianMetadataFacetCount,
@@ -14,33 +14,44 @@ from Artesian.MarketData import (
     ArtesianSearchResults,
     CheckConversionResult,
     CommonUnitOfMeasure,
-    DataQualityStatusSummaryDto,
     CurveRangeEntity,
+    DataQualityStatusSummaryDto,
     DerivedAlgorithm,
     DerivedCfg,
     Granularity,
+    MarketDataCurveSummaryDto,
     MarketDataEntityInput,
     MarketDataEntityOutput,
     MarketDataEntityOutputEnriched,
-    MarketDataCurveSummaryDto,
+    MarketDataIdentifier,
     MarketDataService,
     MarketDataType,
-    PagedResultCurveRangeEntity,
-    UnitOfMeasure,
-    MarketDataIdentifier,
+    OnEventTriggerConfigDto,
     OverrideKind,
     OverrideMetadataEntry,
-    OnEventTriggerConfigDto,
+    PagedResultCurveRangeEntity,
     PagedResultOverrideMetadataEntry,
+    UnitOfMeasure,
     UpsertCurveDataOverride,
 )
 from Artesian.MarketData._Dto.ActualCompletenessAndFreshnessConfigDto import (
     ActualCompletenessAndFreshnessConfigDto,
 )
+from Artesian.MarketData._Dto.AlertScheduleEventsDto import AlertScheduleEventsDtoOutput
+from Artesian.MarketData._Dto.CheckResultExtract import CheckResultExtractTs, CheckResultExtractVts
 from Artesian.MarketData._Dto.CronScheduleDefinitionDto import CronScheduleDefinitionDto
 from Artesian.MarketData._Dto.DataQualityRuleConfigDto import DataQualityRuleConfigDto
 from Artesian.MarketData._Dto.DataQualityRuleDtoInput import DataQualityRuleDtoInput
 from Artesian.MarketData._Dto.DataQualityRuleDtoOutput import DataQualityRuleDtoOutput
+from Artesian.MarketData._Dto.DerivedTransformQueryValidation import DerivedTransformQueryValidation
+from Artesian.MarketData._Dto.DerivedTransformQueryValidationResponse import DerivedTransformQueryValidationResponse
+from Artesian.MarketData._Dto.DqCheckChangeEventDto import (
+    DqCheckChangeEventDtoOutput,
+    LocalDateTimeRange,
+)
+from Artesian.MarketData._Dto.DqRuleDqStatusSummaryDto import DqRuleDqStatusSummaryDto
+from Artesian.MarketData._Dto.MailNotificationDto import MailNotificationDto
+from Artesian.MarketData._Dto.MarketDataDqStatusSummaryDto import MarketDataDqStatusSummaryDto
 from Artesian.MarketData._Dto.MarketDataQualityRuleAssignmentDto import (
     MarketDataQualityRuleAssignmentDtoInput,
     MarketDataQualityRuleAssignmentDtoOutput,
@@ -48,37 +59,28 @@ from Artesian.MarketData._Dto.MarketDataQualityRuleAssignmentDto import (
 from Artesian.MarketData._Dto.PagedResult import (
     PagedResultDataQualityRuleDtoOutput,
     PagedResultMarketDataQualityRuleAssignmentDtoOutput,
-)
-from Artesian.MarketData._Dto.RecordValidationConfigDto import RecordValidationConfigDto
-from Artesian.MarketData._Dto.ScheduleConfigDto import ScheduleConfigDto
-from Artesian.MarketData._Enum.RuleType import RuleType
-from Artesian.MarketData._Dto.CheckResultExtract import CheckResultExtractVts, CheckResultExtractTs
-from Artesian.MarketData._Dto.DqRuleDqStatusSummaryDto import DqRuleDqStatusSummaryDto
-from Artesian.MarketData._Dto.MarketDataDqStatusSummaryDto import MarketDataDqStatusSummaryDto
-from Artesian.MarketData._Dto.DqCheckChangeEventDto import (
-    DqCheckChangeEventDtoOutput,
-    LocalDateTimeRange,
-)
-from Artesian.MarketData._Enum.CheckAggregatedStatus import CheckAggregatedStatus
-from Artesian.MarketData._Dto.AlertScheduleEventsDto import AlertScheduleEventsDtoOutput
-from Artesian.MarketData._Dto.MailNotificationDto import MailNotificationDto
-from Artesian.MarketData._Dto.PagedResult import PagedResultQualityNotificationAlertDtoOutput
-from Artesian.MarketData._Dto.PagedResult import (
     PagedResultQualityNotificationAlertAssignmentDtoOutput,
-)
-from Artesian.MarketData._Dto.QualityNotificationAlertDto import (
-    QualityNotificationAlertDtoInput,
-    QualityNotificationAlertDtoOutput,
+    PagedResultQualityNotificationAlertDtoOutput,
 )
 from Artesian.MarketData._Dto.QualityNotificationAlertAssignmentDto import (
     QualityNotificationAlertAssignmentDtoInput,
     QualityNotificationAlertAssignmentDtoOutput,
 )
+from Artesian.MarketData._Dto.QualityNotificationAlertDto import (
+    QualityNotificationAlertDtoInput,
+    QualityNotificationAlertDtoOutput,
+)
+from Artesian.MarketData._Dto.RecordValidationConfigDto import RecordValidationConfigDto
+from Artesian.MarketData._Dto.ScheduleConfigDto import ScheduleConfigDto
+from Artesian.MarketData._Dto.TimeSerieData import TimeSerieData
+from Artesian.MarketData._Enum.CheckAggregatedStatus import CheckAggregatedStatus
+from Artesian.MarketData._Enum.RuleType import RuleType
+
 cfg = ArtesianConfig("https://baseurl.com", "APIKey")
 
 
 class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
-    def setUp(self: "TestMarketDataServiceMarketData") -> None:
+    def setUp(self: TestMarketDataServiceMarketData) -> None:
         self.__service = MarketDataService(cfg)
 
         curveIds = [1, 2]
@@ -344,7 +346,84 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
 
         return super().setUp()
 
-    async def test_registerMarketData(self: "TestMarketDataServiceMarketData") -> None:
+
+    def _not_found_cases(self) -> list[tuple[str, str, str, tuple[object, ...]]]:
+        validation = DerivedTransformQueryValidation(
+            data=TimeSerieData(rows={}, type=MarketDataType.ActualTimeSerie),
+            transform="SELECT * FROM $table",
+        )
+        return [
+            ("readCurveRange", "GET", "/marketdata/entity/1/curves", (1, 1, 2)),
+            ("searchFacet", "GET", "/marketdata/searchfacet", (1, 2)),
+            ("readMarketDataRegistryById", "GET", "/marketdata/entity/1", (1,)),
+            ("updateMarketData", "PUT", "/marketdata/entity/1", (1, self.__sampleInput)),
+            (
+                "readMarketDataRegistryByName",
+                "GET",
+                "/marketdata/entity",
+                ("PROVIDER", "MARKETDATA"),
+            ),
+            ("registerMarketData", "POST", "/marketdata/entity", (self.__sampleInput,)),
+            (
+                "checkConversion",
+                "GET",
+                "/uom/checkconversion",
+                ([CommonUnitOfMeasure.MW], CommonUnitOfMeasure.kW),
+            ),
+            (
+                "updateDerivedConfiguration",
+                "POST",
+                "/marketdata/entity/1/updateDerivedConfiguration",
+                (1, self.__sampleInput.derivedCfg),
+            ),
+            (
+                "derivedTransformQueryValidation",
+                "POST",
+                "/utils/derivedTransform/queryValidation",
+                (validation,),
+            ),
+        ]
+
+    def _mock_not_found(self, rsps: responses.RequestsMock, name: str, method: str, route: str) -> None:
+        if name == "updateDerivedConfiguration":
+            rsps.add(
+                "GET",
+                self.__baseurl + "/marketdata/entity/1",
+                json=self.__serializedOutput,
+                status=200,
+            )
+        rsps.add(method, self.__baseurl + route, status=404)
+
+    async def test_not_found_returns_none_async(self) -> None:
+        for name, method, route, args in self._not_found_cases():
+            with self.subTest(method=name), responses.RequestsMock() as rsps:
+                self._mock_not_found(rsps, name, method, route)
+                result = await getattr(self.__service, name + "Async")(*args)
+                self.assertIsNone(result)
+                self.assertEqual(
+                    len(rsps.calls), 2 if name == "updateDerivedConfiguration" else 1
+                )
+
+    def test_not_found_returns_none_sync(self) -> None:
+        for name, method, route, args in self._not_found_cases():
+            with self.subTest(method=name), responses.RequestsMock() as rsps:
+                self._mock_not_found(rsps, name, method, route)
+                result = getattr(self.__service, name)(*args)
+                self.assertIsNone(result)
+                self.assertEqual(
+                    len(rsps.calls), 2 if name == "updateDerivedConfiguration" else 1
+                )
+
+    async def test_updateDerivedConfiguration_missing_source_preserves_error(self) -> None:
+        self.assertIsNotNone(self.__sampleInput.derivedCfg)
+        with responses.RequestsMock() as rsps:
+            rsps.add("GET", self.__baseurl + "/marketdata/entity/1", status=404)
+            with self.assertRaises(AttributeError):
+                await self.__service.updateDerivedConfigurationAsync(
+                    1, self.__sampleInput.derivedCfg
+                )
+            self.assertEqual(len(rsps.calls), 1)
+    async def test_registerMarketData(self: TestMarketDataServiceMarketData) -> None:
         expectedJson = {
             "MarketDataId": 0,
             "ProviderName": "PROVIDER",
@@ -381,7 +460,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
 
             self.assertEqual(output, self.__sampleOutput)
 
-    async def test_registerMarketDataTransform(self: "TestMarketDataServiceMarketData") -> None:
+    async def test_registerMarketDataTransform(self: TestMarketDataServiceMarketData) -> None:
         expectedJson = {
             "MarketDataId": 0,
             "ProviderName": "PROVIDER",
@@ -412,7 +491,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
 
             self.assertEqual(output, self.__sampleOutputTransform)
 
-    async def test_readMarketDataRegistryByNameAsync(self: "TestMarketDataServiceMarketData") -> None:
+    async def test_readMarketDataRegistryByNameAsync(self: TestMarketDataServiceMarketData) -> None:
         with responses.RequestsMock() as rsps:
             params = {
                 "provider": "PROVIDER",
@@ -439,7 +518,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             )
             self.assertEqual(output, self.__sampleOutputEnriched)
 
-    async def test_deleteMarketDataAsync(self: "TestMarketDataServiceMarketData") -> None:
+    async def test_deleteMarketDataAsync(self: TestMarketDataServiceMarketData) -> None:
         with responses.RequestsMock() as rsps:
             rsps.add(
                 "DELETE",
@@ -449,7 +528,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             await self.__service.deleteMarketDataAsync(self.__id)
             self.assertEqual(len(rsps.calls), 1)
 
-    async def test_updateMarketDataAsync(self: "TestMarketDataServiceMarketData") -> None:
+    async def test_updateMarketDataAsync(self: TestMarketDataServiceMarketData) -> None:
         with responses.RequestsMock() as rsps:
             rsps.add(
                 "PUT",
@@ -462,7 +541,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             )
             self.assertEqual(output, self.__sampleOutput)
 
-    async def test_readMarketDataRegistryByIdAsync(self: "TestMarketDataServiceMarketData") -> None:
+    async def test_readMarketDataRegistryByIdAsync(self: TestMarketDataServiceMarketData) -> None:
         with responses.RequestsMock() as rsps:
             params = {
                 "includeCurveSummary": True,
@@ -486,7 +565,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             )
             self.assertEqual(output, self.__sampleOutputEnriched)
 
-    async def test_readCurveRangePaginationAsync(self: "TestMarketDataServiceMarketData") -> None:
+    async def test_readCurveRangePaginationAsync(self: TestMarketDataServiceMarketData) -> None:
         with responses.RequestsMock() as rsps:
             params = {"page": "1", "pageSize": "2"}
             rsps.add(
@@ -501,7 +580,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             )
             self.assertEqual(output, self.__curveRangeOutput)
 
-    async def test_readCurveRangeProductAsync(self: "TestMarketDataServiceMarketData") -> None:
+    async def test_readCurveRangeProductAsync(self: TestMarketDataServiceMarketData) -> None:
         with responses.RequestsMock() as rsps:
             params = {"page": "1", "pageSize": "2", "product": "PRODUCT"}
             rsps.add(
@@ -519,7 +598,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             )
             self.assertEqual(output, self.__curveRangeOutput)
 
-    async def test_readCurveRangeVersionFromToAsync(self: "TestMarketDataServiceMarketData") -> None:
+    async def test_readCurveRangeVersionFromToAsync(self: TestMarketDataServiceMarketData) -> None:
         with responses.RequestsMock() as rsps:
             params = {
                 "page": "1",
@@ -544,7 +623,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             )
             self.assertEqual(output, self.__curveRangeOutput)
 
-    async def test_checkConversionAsync(self: "TestMarketDataServiceMarketData") -> None:
+    async def test_checkConversionAsync(self: TestMarketDataServiceMarketData) -> None:
         with responses.RequestsMock() as rsps:
             params = {
                 "inputUnitsOfMeasure": [CommonUnitOfMeasure.MW, CommonUnitOfMeasure.MWh, CommonUnitOfMeasure.day],
@@ -563,7 +642,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             )
             self.assertEqual(output, self.__checkConversionResult)
 
-    async def test_derivedTransformQueryValidationAsync(self: "TestMarketDataServiceMarketData") -> None:
+    async def test_derivedTransformQueryValidationAsync(self: TestMarketDataServiceMarketData) -> None:
         expectedJson = {
             "Data": {
                 "Rows": [
@@ -600,7 +679,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
 
             self.assertEqual(output, self.__derivedTransformQueryValidationResponse)
 
-    async def test_searchFacetAsync(self: "TestMarketDataServiceMarketData") -> None:
+    async def test_searchFacetAsync(self: TestMarketDataServiceMarketData) -> None:
         with responses.RequestsMock() as rsps:
             params = {
                 "page": "1",
@@ -648,7 +727,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             )
             self.assertEqual(output, self.__artesianSearchResults)
 
-    async def test_registerDataQualityRuleAsync(self: "TestMarketDataServiceMarketData") -> None:
+    async def test_registerDataQualityRuleAsync(self: TestMarketDataServiceMarketData) -> None:
         with responses.RequestsMock() as rsps:
             rsps.add(
                 "POST",
@@ -668,7 +747,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
 
             self.assertEqual(output, self.__dataQualityRuleOutput)
 
-    async def test_readDataQualityRuleByIdAsync(self: "TestMarketDataServiceMarketData") -> None:
+    async def test_readDataQualityRuleByIdAsync(self: TestMarketDataServiceMarketData) -> None:
         with responses.RequestsMock() as rsps:
             rsps.add(
                 "GET",
@@ -681,7 +760,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
 
             self.assertEqual(output, self.__dataQualityRuleOutput)
 
-    async def test_readDataQualityRuleAsync(self: "TestMarketDataServiceMarketData") -> None:
+    async def test_readDataQualityRuleAsync(self: TestMarketDataServiceMarketData) -> None:
         with responses.RequestsMock() as rsps:
             params = {
                 "marketDataId": "1",
@@ -709,7 +788,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
 
             self.assertEqual(output, self.__pagedDataQualityRuleOutput)
 
-    async def test_updateDataQualityRuleAsync(self: "TestMarketDataServiceMarketData") -> None:
+    async def test_updateDataQualityRuleAsync(self: TestMarketDataServiceMarketData) -> None:
         with responses.RequestsMock() as rsps:
             updateInput = DataQualityRuleDtoInput(
                 id=1,
@@ -734,7 +813,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
 
             self.assertEqual(output, self.__dataQualityRuleOutput)
 
-    async def test_deleteDataQualityRuleAsync(self: "TestMarketDataServiceMarketData") -> None:
+    async def test_deleteDataQualityRuleAsync(self: TestMarketDataServiceMarketData) -> None:
         with responses.RequestsMock() as rsps:
             rsps.add(
                 "DELETE",
@@ -746,7 +825,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
 
             self.assertEqual(len(rsps.calls), 1)
 
-    async def test_registerQualityNotificationAlertAsync(self: "TestMarketDataServiceMarketData") -> None:
+    async def test_registerQualityNotificationAlertAsync(self: TestMarketDataServiceMarketData) -> None:
         with responses.RequestsMock() as rsps:
             rsps.add(
                 "POST",
@@ -766,7 +845,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
 
             self.assertEqual(output, self.__qualityNotificationAlertOutput)
 
-    async def test_readQualityNotificationAlertByIdAsync(self: "TestMarketDataServiceMarketData") -> None:
+    async def test_readQualityNotificationAlertByIdAsync(self: TestMarketDataServiceMarketData) -> None:
         with responses.RequestsMock() as rsps:
             rsps.add(
                 "GET",
@@ -781,7 +860,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
 
             self.assertEqual(output, self.__qualityNotificationAlertOutput)
 
-    async def test_readQualityNotificationAlertsAsync(self: "TestMarketDataServiceMarketData") -> None:
+    async def test_readQualityNotificationAlertsAsync(self: TestMarketDataServiceMarketData) -> None:
         with responses.RequestsMock() as rsps:
             params = {
                 "name": "Weather",
@@ -805,7 +884,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
 
             self.assertEqual(output, self.__pagedQualityNotificationAlertOutput)
 
-    async def test_updateQualityNotificationAlertAsync(self: "TestMarketDataServiceMarketData") -> None:
+    async def test_updateQualityNotificationAlertAsync(self: TestMarketDataServiceMarketData) -> None:
         with responses.RequestsMock() as rsps:
             rsps.add(
                 "PUT",
@@ -825,7 +904,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
 
             self.assertEqual(output, self.__qualityNotificationAlertOutput)
 
-    async def test_deleteQualityNotificationAlertAsync(self: "TestMarketDataServiceMarketData") -> None:
+    async def test_deleteQualityNotificationAlertAsync(self: TestMarketDataServiceMarketData) -> None:
         with responses.RequestsMock() as rsps:
             rsps.add(
                 "DELETE",
@@ -837,7 +916,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
 
             self.assertEqual(len(rsps.calls), 1)
 
-    async def test_readAlertScheduleEventsAsync(self: "TestMarketDataServiceMarketData") -> None:
+    async def test_readAlertScheduleEventsAsync(self: TestMarketDataServiceMarketData) -> None:
         scheduleTime = datetime(2024, 1, 15, 10, 0)
         scheduleEvents = AlertScheduleEventsDtoOutput(scheduleTime=scheduleTime)
         with responses.RequestsMock() as rsps:
@@ -855,7 +934,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
 
             self.assertEqual(output, scheduleEvents)
 
-    async def test_readAlertScheduleListAsync(self: "TestMarketDataServiceMarketData") -> None:
+    async def test_readAlertScheduleListAsync(self: TestMarketDataServiceMarketData) -> None:
         with responses.RequestsMock() as rsps:
             rsps.add(
                 "GET",
@@ -872,7 +951,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
                 [datetime(2024, 1, 15, 10, 0), datetime(2024, 1, 14, 10, 0)],
             )
 
-    async def test_readAlertScheduleLastEventsAsync(self: "TestMarketDataServiceMarketData") -> None:
+    async def test_readAlertScheduleLastEventsAsync(self: TestMarketDataServiceMarketData) -> None:
         scheduleEvents = AlertScheduleEventsDtoOutput()
         with responses.RequestsMock() as rsps:
             rsps.add(
@@ -887,7 +966,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(output, scheduleEvents)
 
     async def test_registerQualityNotificationAlertAssignmentAsync(
-        self: "TestMarketDataServiceMarketData",
+        self: TestMarketDataServiceMarketData,
     ) -> None:
         entity = QualityNotificationAlertAssignmentDtoInput(
             alertId=1,
@@ -920,7 +999,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(output, expected)
 
     async def test_readQualityNotificationAlertAssignmentByIdAsync(
-        self: "TestMarketDataServiceMarketData",
+        self: TestMarketDataServiceMarketData,
     ) -> None:
         expected = QualityNotificationAlertAssignmentDtoOutput(
             id=1,
@@ -943,7 +1022,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(output, expected)
 
     async def test_readQualityNotificationAlertAssignmentsAsync(
-        self: "TestMarketDataServiceMarketData",
+        self: TestMarketDataServiceMarketData,
     ) -> None:
         assignment = QualityNotificationAlertAssignmentDtoOutput(
             id=1,
@@ -983,7 +1062,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             await self.__service.readQualityNotificationAlertAssignmentsAsync(1, 0)
 
     async def test_deleteQualityNotificationAlertAssignmentAsync(
-        self: "TestMarketDataServiceMarketData",
+        self: TestMarketDataServiceMarketData,
     ) -> None:
         with responses.RequestsMock() as rsps:
             rsps.add(
@@ -996,7 +1075,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
 
             self.assertEqual(len(rsps.calls), 1)
 
-    async def test_registerDataQualityRuleAssignmentAsync(self: "TestMarketDataServiceMarketData") -> None:
+    async def test_registerDataQualityRuleAssignmentAsync(self: TestMarketDataServiceMarketData) -> None:
         with responses.RequestsMock() as rsps:
             params = {"initializationLookbackPeriod": "P30D"}
             rsps.add(
@@ -1019,7 +1098,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
 
             self.assertEqual(output, self.__dataQualityRuleAssignmentOutput)
 
-    async def test_readDataQualityRuleAssignmentByIdAsync(self: "TestMarketDataServiceMarketData") -> None:
+    async def test_readDataQualityRuleAssignmentByIdAsync(self: TestMarketDataServiceMarketData) -> None:
         with responses.RequestsMock() as rsps:
             rsps.add(
                 "GET",
@@ -1034,7 +1113,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
 
             self.assertEqual(output, self.__dataQualityRuleAssignmentOutput)
 
-    async def test_readDataQualityRuleAssignmentAsync(self: "TestMarketDataServiceMarketData") -> None:
+    async def test_readDataQualityRuleAssignmentAsync(self: TestMarketDataServiceMarketData) -> None:
         with responses.RequestsMock() as rsps:
             sort = ["Id asc"]
             params = {
@@ -1064,7 +1143,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
 
             self.assertEqual(output, self.__pagedDataQualityRuleAssignmentOutput)
 
-    async def test_updateDataQualityRuleAssignmentAsync(self: "TestMarketDataServiceMarketData") -> None:
+    async def test_updateDataQualityRuleAssignmentAsync(self: TestMarketDataServiceMarketData) -> None:
         with responses.RequestsMock() as rsps:
             params = {
                 "initializationLookbackPeriod": "P60D",
@@ -1086,7 +1165,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
 
             self.assertEqual(output, self.__dataQualityRuleAssignmentOutput)
 
-    async def test_deleteDataQualityRuleAssignmentAsync(self: "TestMarketDataServiceMarketData") -> None:
+    async def test_deleteDataQualityRuleAssignmentAsync(self: TestMarketDataServiceMarketData) -> None:
         with responses.RequestsMock() as rsps:
             rsps.add(
                 "DELETE",
@@ -1099,7 +1178,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(len(rsps.calls), 1)
 
     async def test_readDataQualityRuleAssignmentEventsFeedAsync(
-        self: "TestMarketDataServiceMarketData",
+        self: TestMarketDataServiceMarketData,
     ) -> None:
         afterTimestamp = datetime(2024, 1, 15, 10, 0)
         event = DqCheckChangeEventDtoOutput(
@@ -1137,7 +1216,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
 
             self.assertEqual(output, [event])
 
-    async def test_getDataQualityCheckResultExtractVtsAsync(self: "TestMarketDataServiceMarketData") -> None:
+    async def test_getDataQualityCheckResultExtractVtsAsync(self: TestMarketDataServiceMarketData) -> None:
         with responses.RequestsMock() as rsps:
             params = {
                 "timeZone": "UTC",
@@ -1161,7 +1240,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             )
             self.assertEqual(output, [self.__sampleVts])
 
-    async def test_getDataQualityCheckResultExtractTsAsync(self: "TestMarketDataServiceMarketData") -> None:
+    async def test_getDataQualityCheckResultExtractTsAsync(self: TestMarketDataServiceMarketData) -> None:
         with responses.RequestsMock() as rsps:
             params = {
                 "timeZone": "Europe/Rome",
@@ -1183,7 +1262,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             )
             self.assertEqual(output, [self.__sampleTs])
 
-    async def test_getDataQualityCheckResultCheckSummaryAsync(self: "TestMarketDataServiceMarketData") -> None:
+    async def test_getDataQualityCheckResultCheckSummaryAsync(self: TestMarketDataServiceMarketData) -> None:
         from Artesian.MarketData._Dto.CheckResultCheckSummaryDto import (
             CheckResultCheckSummaryDto,
         )
@@ -1247,7 +1326,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(output, expectedOutput)
 
     async def test_dataQualityCheckResultValidation(
-        self: "TestMarketDataServiceMarketData",
+        self: TestMarketDataServiceMarketData,
     ) -> None:
         with self.assertRaisesRegex(ValueError, "timeZone cannot be None or empty"):
             await self.__service.getDataQualityCheckResultExtractTsAsync(
@@ -1262,7 +1341,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
         with self.assertRaisesRegex(ValueError, "PageSize must be greater than 0"):
             await self.__service.getDataQualityCheckResultCheckSummaryAsync(1, 0)
 
-    async def test_getMarketDataDqStatusSummaryAsync(self: "TestMarketDataServiceMarketData") -> None:
+    async def test_getMarketDataDqStatusSummaryAsync(self: TestMarketDataServiceMarketData) -> None:
         with responses.RequestsMock() as rsps:
             params = {
                 "limit": "50",
@@ -1285,7 +1364,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             )
             self.assertEqual(output, [self.__sampleMdDq])
 
-    async def test_getDqRuleDqStatusSummaryAsync(self: "TestMarketDataServiceMarketData") -> None:
+    async def test_getDqRuleDqStatusSummaryAsync(self: TestMarketDataServiceMarketData) -> None:
         with responses.RequestsMock() as rsps:
             params = {
                 "limit": "100",
@@ -1309,7 +1388,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(output, [self.__sampleDqRule])
 
     async def test_dataQualityStatusSummaryLimitValidation(
-        self: "TestMarketDataServiceMarketData",
+        self: TestMarketDataServiceMarketData,
     ) -> None:
         with self.assertRaisesRegex(ValueError, "Limit must be between 1 and 1000"):
             await self.__service.getMarketDataDqStatusSummaryAsync(limit=0)
@@ -1317,7 +1396,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             await self.__service.getDqRuleDqStatusSummaryAsync(limit=1001)
 
     async def test_upsertCurveDataOverrideAsync(
-        self: "TestMarketDataServiceMarketData",
+        self: TestMarketDataServiceMarketData,
     ) -> None:
         betaBaseUrl = "https://baseurl.com/v2.2-beta"
         data = UpsertCurveDataOverride(
@@ -1360,7 +1439,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(output, expected)
 
     async def test_deleteOverrideDataAsync(
-        self: "TestMarketDataServiceMarketData",
+        self: TestMarketDataServiceMarketData,
     ) -> None:
         betaBaseUrl = "https://baseurl.com/v2.2-beta"
         overrideId = UUID("11111111-1111-1111-1111-111111111111")
@@ -1380,7 +1459,7 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(len(rsps.calls), 1)
 
     async def test_readOverrideMetadataAsync(
-        self: "TestMarketDataServiceMarketData",
+        self: TestMarketDataServiceMarketData,
     ) -> None:
         betaBaseUrl = "https://baseurl.com/v2.2-beta"
         expected = PagedResultOverrideMetadataEntry(

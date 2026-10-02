@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Optional
+
 from Artesian.Query.RelativeInterval import RelativeInterval
 
 
@@ -17,15 +17,15 @@ class ExtractionRangeConfig:
 
     def __init__(self: ExtractionRangeConfig) -> None:
         """Init for the Extraction Range Configuration."""
-        self.dateStart: Optional[str] = None
+        self.dateStart: str | None = None
         """ Start date for the Date Range for extraction. (ISO format) """
-        self.dateEnd: Optional[str] = None
+        self.dateEnd: str | None = None
         """ End date for Date Renge for extraction. (ISO format)"""
-        self.period: Optional[str] = None
+        self.period: str | None = None
         """ Period range for extraction. (ISO format)"""
-        self.periodFrom: Optional[str] = None
+        self.periodFrom: str | None = None
         """ Period start range for extraction. (ISO format)"""
-        self.periodTo: Optional[str] = None
+        self.periodTo: str | None = None
         """ Period end range for extraction. (ISO format)"""
-        self.relativeInterval: Optional[RelativeInterval] = None
+        self.relativeInterval: RelativeInterval | None = None
         """ Relative Interval range for extraction."""

@@ -1,20 +1,20 @@
+from collections.abc import Callable
 from datetime import date, datetime
 from enum import Enum
 from platform import system
-from dateutil import parser
-import jsons
-from typing import Any, Callable, Dict, Optional, Type, TypeVar, get_args
+from typing import Any, TypedDict, TypeVar, get_args
 
+import jsons
+from dateutil import parser
 
 TEnum = TypeVar("TEnum", bound=Enum)
-
 
 __commonFmt = "%Y-%m-%dT%H:%M:%S.%f"
 if system() == "Linux":
     __commonFmt = "%04Y-%m-%dT%H:%M:%S.%f"
 
 
-def __artesianDatetimeSerializer(obj: datetime, **kwargs: Any) -> str:
+def __artesianDatetimeSerializer(obj: datetime, **kwargs: object) -> str:
     if obj.tzinfo is None:
         ret = obj.strftime(__commonFmt)
         return ret
@@ -26,14 +26,14 @@ def __artesianDatetimeSerializer(obj: datetime, **kwargs: Any) -> str:
     return ret
 
 
-def __artesianDatetimeDeserializer(obj: str, *args: Any, **kwargs: Any) -> datetime:
+def __artesianDatetimeDeserializer(obj: str, *args: object, **kwargs: object) -> datetime:
     return parser.isoparse(obj)
 
 
 def __checkResultExtractSerializer(
     obj: Any, *args: Any, **kwargs: Any
-) -> Dict[str, object]:
-    result: Dict[str, object] = {
+) -> dict[str, object]:
+    result: dict[str, object] = {
         "AID": obj.assignmentId,
         "MKID": obj.marketDataId,
         "RID": obj.ruleId,
@@ -54,7 +54,7 @@ def __checkResultExtractSerializer(
 
 
 def __checkResultExtractDeserializer(
-    obj: Dict[str, object], cls: type, *args: Any, **kwargs: Any
+    obj: dict[str, object], cls: type, *args: Any, **kwargs: Any
 ) -> object:
     values = {
         "providerName": obj.get("P"),
@@ -76,14 +76,14 @@ def __checkResultExtractDeserializer(
     return cls(**values)
 
 
-def __enumValue(enumType: Type[TEnum], value: object) -> TEnum:
+def __enumValue(enumType: type[TEnum], value: object) -> TEnum:  # noqa: UP047
     if isinstance(value, enumType):
         return value
     return enumType[str(value)]
 
 
 def __scheduleDefinitionDeserializer(
-    obj: Dict[str, Any], *args: Any, **kwargs: Any
+    obj: dict[str, Any], *args: Any, **kwargs: Any
 ) -> Any:
     from Artesian.MarketData._Dto.CronScheduleDefinitionDto import (
         CronScheduleDefinitionDto,
@@ -102,7 +102,7 @@ def __scheduleDefinitionDeserializer(
 
 
 def __triggerConfigDeserializer(
-    obj: Dict[str, Any], *args: Any, **kwargs: Any
+    obj: dict[str, Any], *args: Any, **kwargs: Any
 ) -> Any:
     from Artesian.MarketData._Dto.TriggerConfigDto import (
         OnEventTriggerConfigDto,
@@ -123,7 +123,7 @@ def __triggerConfigDeserializer(
 
 
 def __dataQualityRuleConfigDeserializer(
-    obj: Dict[str, Any], *args: Any, **kwargs: Any
+    obj: dict[str, Any], *args: Any, **kwargs: Any
 ) -> Any:
     from Artesian.MarketData._Dto.ActualCompletenessAndFreshnessConfigDto import (
         ActualCompletenessAndFreshnessConfigDto,
@@ -212,8 +212,8 @@ def __dataQualityRuleConfigDeserializer(
 
 def __dataQualityStatusSummarySerializer(
     obj: Any, *args: Any, **kwargs: Any
-) -> Dict[str, object]:
-    result: Dict[str, object] = {
+) -> dict[str, object]:
+    result: dict[str, object] = {
         "ActiveRulesCount": obj.activeRulesCount,
         "FailedRulesCount": obj.failedRulesCount,
     }
@@ -229,7 +229,7 @@ def __dataQualityStatusSummarySerializer(
 
 
 def __dataQualityStatusSummaryDeserializer(
-    obj: Dict[str, Any], *args: Any, **kwargs: Any
+    obj: dict[str, Any], *args: Any, **kwargs: Any
 ) -> Any:
     from Artesian.MarketData._Dto.DataQualityStatusSummaryDto import (
         DataQualityStatusSummaryDto,
@@ -272,31 +272,19 @@ def __is_valid_json_key(key: object) -> bool:
     return issubclass(type(key), (str, int, float, bool)) or key is None
 
 
-def __artesianDictSerializer(
-    obj: dict, *, key_transformer: Optional[Callable[[str], str]] = None, **kwargs: Any
-) -> list:
+def __artesianDictSerializer(obj: dict, *, key_transformer: Callable[[str], str] | None = None, **kwargs: Any) -> list:
     result = []
-    for key in obj:
-        obj_ = obj[key]
-        key_ = (
-            key
-            if __is_valid_json_key(key)
-            else jsons.dump(key, key_transformer=None, **kwargs)
-        )
+    for key, obj_ in obj.items():
+        key_ = key if __is_valid_json_key(key) else jsons.dump(key, key_transformer=None, **kwargs)
         elem = jsons.dump(obj_, key_transformer=key_transformer, **kwargs)
         result.append({"Key": key_, "Value": elem})
     return result
 
 
-def __artesianDictDeserializer(
-    obj: list, cls: type, *args: Any, **kwargs: Any
-) -> object:
+def __artesianDictDeserializer(obj: list, cls: type, *args: object, **kwargs: Any) -> object:
     key, value = get_args(cls)
-    result: Dict[key, value] = {  # type: ignore
-        jsons.load(item["Key"], key, *args, **kwargs): jsons.load(
-            item["Value"], value, *args, **kwargs
-        )
-        for item in obj
+    result = {
+        jsons.load(item["Key"], key, *args, **kwargs): jsons.load(item["Value"], value, *args, **kwargs) for item in obj
     }
 
     return result
@@ -304,12 +292,8 @@ def __artesianDictDeserializer(
 
 __artesianJsonSerializer = jsons.JsonSerializable.fork()
 
-jsons.set_serializer(
-    __artesianDictSerializer, Dict, high_prio=True, fork_inst=__artesianJsonSerializer
-)
-jsons.set_deserializer(
-    __artesianDictDeserializer, Dict, high_prio=True, fork_inst=__artesianJsonSerializer
-)
+jsons.set_serializer(__artesianDictSerializer, dict, high_prio=True, fork_inst=__artesianJsonSerializer)
+jsons.set_deserializer(__artesianDictDeserializer, dict, high_prio=True, fork_inst=__artesianJsonSerializer)
 
 jsons.set_serializer(
     __artesianDatetimeSerializer,
@@ -390,7 +374,14 @@ def __registerDataQualitySerializers() -> None:
     __dataQualitySerializersRegistered = True
 
 
-__artesianJsonKwArgs = {
+class _ArtesianJsonOptions(TypedDict):
+    strip_privates: bool
+    strip_nulls: bool
+    use_enum_name: bool
+    fork_inst: type[jsons.JsonSerializable]
+
+
+__artesianJsonKwArgs: _ArtesianJsonOptions = {
     "strip_privates": True,
     "strip_nulls": True,
     # 'strict': True, disabled due to failure in untyped Dict (Tags)
@@ -399,9 +390,7 @@ __artesianJsonKwArgs = {
 }
 
 
-def artesianJsonSerialize(
-    obj: object, cls: Optional[type] = None, **kwargs: Any
-) -> object:
+def artesianJsonSerialize(obj: object, cls: type | None = None, **kwargs: Any) -> Any:
     """
     Sets the Artesian Json Serializer.
 
@@ -414,13 +403,11 @@ def artesianJsonSerialize(
       JsonSerializer.
     """
     __registerDataQualitySerializers()
-    kwargs_ = {**__artesianJsonKwArgs, **kwargs}
+    kwargs_: dict[str, Any] = {**__artesianJsonKwArgs, **kwargs}
     return jsons.dump(obj, cls, key_transformer=__camelToPascal, **kwargs_)
 
 
-def artesianJsonDeserialize(
-    obj: object, cls: Optional[type] = None, **kwargs: Any
-) -> object:
+def artesianJsonDeserialize(obj: object, cls: type | None = None, **kwargs: Any) -> Any:
     """
     Sets the Artesian Json Deserializer.
 
@@ -433,5 +420,5 @@ def artesianJsonDeserialize(
       JsonDeserializer.
     """
     __registerDataQualitySerializers()
-    kwargs_ = {**__artesianJsonKwArgs, **kwargs, "strict": False}
+    kwargs_: dict[str, Any] = {**__artesianJsonKwArgs, **kwargs, "strict": False}
     return jsons.load(obj, cls, key_transformer=__pascalToCamel, **kwargs_)

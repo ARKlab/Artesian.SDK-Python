@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Optional
+
 from .VersionsRangeSelectionConfig import VersionsRangeSelectionConfig
 
 
@@ -14,8 +14,8 @@ class VersionSelectionConfig:
 
     def __init__(
         self: VersionSelectionConfig,
-        lastN: Optional[int] = None,
-        version: Optional[str] = None,
+        lastN: int | None = None,
+        version: str | None = None,
     ) -> None:
         """Inits for the Version Selection Configuration."""
         self.lastN = lastN

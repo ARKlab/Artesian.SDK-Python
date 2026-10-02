@@ -1,5 +1,6 @@
-from datetime import date, datetime
 import unittest
+from datetime import date, datetime
+from typing import cast
 
 from Artesian._ClientsExecutor.ArtesianJsonSerializer import (
     artesianJsonDeserialize,
@@ -7,6 +8,7 @@ from Artesian._ClientsExecutor.ArtesianJsonSerializer import (
 )
 from Artesian.MarketData import (
     ActualCompletenessAndFreshnessConfigDto,
+    CronScheduleDefinitionDto,
     DataQualityStatusSummaryDto,
     OnEventTriggerConfigDto,
     OutlierAbsoluteBoundConfigDto,
@@ -25,7 +27,7 @@ from Artesian.MarketData._Dto.QualityNotificationAlertDto import (
 
 class TestDataQualitySerialization(unittest.TestCase):
     def test_compact_extract_ts_round_trip(
-        self: "TestDataQualitySerialization",
+        self: TestDataQualitySerialization,
     ) -> None:
         payload = {
             "P": "provider",
@@ -46,7 +48,7 @@ class TestDataQualitySerialization(unittest.TestCase):
         self.assertEqual(artesianJsonSerialize(result), payload)
 
     def test_compact_extract_vts_uses_version_key(
-        self: "TestDataQualitySerialization",
+        self: TestDataQualitySerialization,
     ) -> None:
         result = CheckResultExtractVts(
             time=datetime(2024, 1, 1),
@@ -62,7 +64,7 @@ class TestDataQualitySerialization(unittest.TestCase):
         self.assertNotIn("Version", payload)
 
     def test_rule_configuration_is_deserialized_to_concrete_types(
-        self: "TestDataQualitySerialization",
+        self: TestDataQualitySerialization,
     ) -> None:
         actualPayload = {
             "Id": 1,
@@ -108,17 +110,18 @@ class TestDataQualitySerialization(unittest.TestCase):
         self.assertIsInstance(
             actual.configuration, ActualCompletenessAndFreshnessConfigDto
         )
-        self.assertEqual(
-            actual.configuration.scheduleConfig.scheduleDefinition.cronExpression,
-            "0 0 * * *",
+        schedule_definition = cast(
+            CronScheduleDefinitionDto,
+            actual.configuration.scheduleConfig.scheduleDefinition,
         )
+        self.assertEqual(schedule_definition.cronExpression, "0 0 * * *")
         self.assertIsInstance(outlier.configuration, OutlierConfigDto)
         self.assertIsInstance(
             outlier.configuration.model, OutlierAbsoluteBoundConfigDto
         )
 
     def test_alert_trigger_is_deserialized_to_concrete_type(
-        self: "TestDataQualitySerialization",
+        self: TestDataQualitySerialization,
     ) -> None:
         scheduledPayload = {
             "Name": "digest",
@@ -149,7 +152,7 @@ class TestDataQualitySerialization(unittest.TestCase):
         self.assertIsInstance(onEvent.triggerConfig, OnEventTriggerConfigDto)
 
     def test_status_summary_maps_from_api_field(
-        self: "TestDataQualitySerialization",
+        self: TestDataQualitySerialization,
     ) -> None:
         payload = {"From": "2024-01-01", "To": "2024-01-02"}
 

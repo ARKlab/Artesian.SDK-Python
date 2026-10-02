@@ -1,7 +1,8 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Optional
-from Artesian.MarketData._Dto import MarketDataIdentifier
+from typing import Optional
+
+from .MarketDataIdentifier import MarketDataIdentifier
 
 
 @dataclass
@@ -29,7 +30,7 @@ class DeleteData:
     rangeStart: datetime
     rangeEnd: datetime
     timezone: Optional[str] = None
-    product: Optional[List[str]] = None
+    product: Optional[list[str]] = None
     version: Optional[datetime] = None
     deferCommandExecution: bool = False
     deferDataGeneration: bool = True

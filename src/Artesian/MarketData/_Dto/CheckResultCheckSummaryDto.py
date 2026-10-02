@@ -1,6 +1,6 @@
+import datetime
 from dataclasses import dataclass
 from typing import Optional
-import datetime
 
 from Artesian.MarketData._Dto.MarketDataQualityRuleAssignmentDto import MarketDataQualityRuleAssignmentDtoOutput
 

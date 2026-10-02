@@ -10,7 +10,7 @@ class TriggerConfigDto(ABC):
 
     @property
     @abstractmethod
-    def type(self: "TriggerConfigDto") -> AlertType:
+    def type(self: TriggerConfigDto) -> AlertType:
         """Discriminator indicating the alert trigger type."""
         raise NotImplementedError
 
@@ -20,7 +20,7 @@ class OnEventTriggerConfigDto(TriggerConfigDto):
     """Trigger configuration for event-driven alerts."""
 
     @property
-    def type(self: "OnEventTriggerConfigDto") -> AlertType:
+    def type(self: OnEventTriggerConfigDto) -> AlertType:
         return AlertType.OnEvent
 
 
@@ -31,5 +31,5 @@ class ScheduleTriggerConfigDto(TriggerConfigDto):
     scheduleDefinition: ScheduleDefinitionDto
 
     @property
-    def type(self: "ScheduleTriggerConfigDto") -> AlertType:
+    def type(self: ScheduleTriggerConfigDto) -> AlertType:
         return AlertType.Scheduled

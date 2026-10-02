@@ -13,4 +13,3 @@ class ActualCompletenessAndFreshnessConfigDto(CompletenessAndFreshnessConfigDto)
     CompletenessAndFreshnessConfigDto.
     """
 
-    pass
