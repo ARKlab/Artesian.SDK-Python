@@ -16,5 +16,6 @@ class DqRuleDqStatusSummaryDto:
         statusSummary: The aggregated DQ status summary for this rule
                        (across all assigned Market Data, or filtered by a specific Market Data).
     """
+
     ruleId: int
     statusSummary: Optional[DataQualityStatusSummaryDto] = None

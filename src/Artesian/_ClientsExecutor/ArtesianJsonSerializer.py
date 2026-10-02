@@ -30,9 +30,7 @@ def __artesianDatetimeDeserializer(obj: str, *args: object, **kwargs: object) ->
     return parser.isoparse(obj)
 
 
-def __checkResultExtractSerializer(
-    obj: Any, *args: Any, **kwargs: Any
-) -> dict[str, object]:
+def __checkResultExtractSerializer(obj: Any, *args: Any, **kwargs: Any) -> dict[str, object]:
     result: dict[str, object] = {
         "AID": obj.assignmentId,
         "MKID": obj.marketDataId,
@@ -53,9 +51,7 @@ def __checkResultExtractSerializer(
     return result
 
 
-def __checkResultExtractDeserializer(
-    obj: dict[str, object], cls: type, *args: Any, **kwargs: Any
-) -> object:
+def __checkResultExtractDeserializer(obj: dict[str, object], cls: type, *args: Any, **kwargs: Any) -> object:
     values = {
         "providerName": obj.get("P"),
         "curveName": obj.get("C"),
@@ -70,21 +66,17 @@ def __checkResultExtractDeserializer(
     }
     if cls.__name__ == "CheckResultExtractVts":
         version = obj.get("V")
-        values["version"] = (
-            __artesianDatetimeDeserializer(str(version)) if version is not None else None
-        )
+        values["version"] = __artesianDatetimeDeserializer(str(version)) if version is not None else None
     return cls(**values)
 
 
-def __enumValue(enumType: type[TEnum], value: object) -> TEnum:  # noqa: UP047
+def __enumValue(enumType: type[TEnum], value: object) -> TEnum:
     if isinstance(value, enumType):
         return value
     return enumType[str(value)]
 
 
-def __scheduleDefinitionDeserializer(
-    obj: dict[str, Any], *args: Any, **kwargs: Any
-) -> Any:
+def __scheduleDefinitionDeserializer(obj: dict[str, Any], *args: Any, **kwargs: Any) -> Any:
     from Artesian.MarketData._Dto.CronScheduleDefinitionDto import (
         CronScheduleDefinitionDto,
     )
@@ -101,9 +93,7 @@ def __scheduleDefinitionDeserializer(
     raise ValueError(f"Unsupported schedule definition type: {scheduleType}")
 
 
-def __triggerConfigDeserializer(
-    obj: dict[str, Any], *args: Any, **kwargs: Any
-) -> Any:
+def __triggerConfigDeserializer(obj: dict[str, Any], *args: Any, **kwargs: Any) -> Any:
     from Artesian.MarketData._Dto.TriggerConfigDto import (
         OnEventTriggerConfigDto,
         ScheduleTriggerConfigDto,
@@ -114,17 +104,11 @@ def __triggerConfigDeserializer(
     if alertType is AlertType.OnEvent:
         return OnEventTriggerConfigDto()
     if alertType is AlertType.Scheduled:
-        return ScheduleTriggerConfigDto(
-            scheduleDefinition=__scheduleDefinitionDeserializer(
-                obj["ScheduleDefinition"]
-            )
-        )
+        return ScheduleTriggerConfigDto(scheduleDefinition=__scheduleDefinitionDeserializer(obj["ScheduleDefinition"]))
     raise ValueError(f"Unsupported alert type: {alertType}")
 
 
-def __dataQualityRuleConfigDeserializer(
-    obj: dict[str, Any], *args: Any, **kwargs: Any
-) -> Any:
+def __dataQualityRuleConfigDeserializer(obj: dict[str, Any], *args: Any, **kwargs: Any) -> Any:
     from Artesian.MarketData._Dto.ActualCompletenessAndFreshnessConfigDto import (
         ActualCompletenessAndFreshnessConfigDto,
     )
@@ -157,9 +141,7 @@ def __dataQualityRuleConfigDeserializer(
         modelObj = obj["Model"]
         modelType = __enumValue(OutlierModel, modelObj["Model"])
         if modelType is OutlierModel.AbsoluteBound:
-            model = OutlierAbsoluteBoundConfigDto(
-                upperBound=modelObj["UpperBound"], lowerBound=modelObj["LowerBound"]
-            )
+            model = OutlierAbsoluteBoundConfigDto(upperBound=modelObj["UpperBound"], lowerBound=modelObj["LowerBound"])
         elif modelType is OutlierModel.RefCurve:
             model = OutlierRefCurveConfigDto(
                 referenceMarketDataId=modelObj["ReferenceMarketDataId"],
@@ -174,9 +156,7 @@ def __dataQualityRuleConfigDeserializer(
     marketDataType = __enumValue(MarketDataType, obj["MarketDataType"])
     scheduleObj = obj["ScheduleConfig"]
     scheduleConfig = ScheduleConfigDto(
-        scheduleDefinition=__scheduleDefinitionDeserializer(
-            scheduleObj["ScheduleDefinition"]
-        ),
+        scheduleDefinition=__scheduleDefinitionDeserializer(scheduleObj["ScheduleDefinition"]),
         maxDelay=scheduleObj["MaxDelay"],
     )
     validationObj = obj["RecordValidationConfig"]
@@ -184,9 +164,7 @@ def __dataQualityRuleConfigDeserializer(
     recordValidationConfig = RecordValidationConfigDto(
         recordRangeFrom=validationObj["RecordRangeFrom"],
         recordRangeTo=validationObj["RecordRangeTo"],
-        precision=(
-            __enumValue(PeriodPrecision, precision) if precision is not None else None
-        ),
+        precision=(__enumValue(PeriodPrecision, precision) if precision is not None else None),
     )
     commonValues = {
         "marketDataType": marketDataType,
@@ -201,18 +179,12 @@ def __dataQualityRuleConfigDeserializer(
             **commonValues,
             versionToleranceFrom=obj["VersionToleranceFrom"],
             versionToleranceTo=obj["VersionToleranceTo"],
-            versionPrecision=(
-                __enumValue(PeriodPrecision, versionPrecision)
-                if versionPrecision is not None
-                else None
-            ),
+            versionPrecision=(__enumValue(PeriodPrecision, versionPrecision) if versionPrecision is not None else None),
         )
     raise ValueError(f"Unsupported Market Data type: {marketDataType}")
 
 
-def __dataQualityStatusSummarySerializer(
-    obj: Any, *args: Any, **kwargs: Any
-) -> dict[str, object]:
+def __dataQualityStatusSummarySerializer(obj: Any, *args: Any, **kwargs: Any) -> dict[str, object]:
     result: dict[str, object] = {
         "ActiveRulesCount": obj.activeRulesCount,
         "FailedRulesCount": obj.failedRulesCount,
@@ -228,9 +200,7 @@ def __dataQualityStatusSummarySerializer(
     return result
 
 
-def __dataQualityStatusSummaryDeserializer(
-    obj: dict[str, Any], *args: Any, **kwargs: Any
-) -> Any:
+def __dataQualityStatusSummaryDeserializer(obj: dict[str, Any], *args: Any, **kwargs: Any) -> Any:
     from Artesian.MarketData._Dto.DataQualityStatusSummaryDto import (
         DataQualityStatusSummaryDto,
     )
@@ -243,16 +213,8 @@ def __dataQualityStatusSummaryDeserializer(
     fromValue = obj.get("From")
     toValue = obj.get("To")
     return DataQualityStatusSummaryDto(
-        lastCheckTime=(
-            __artesianDatetimeDeserializer(str(lastCheckTime))
-            if lastCheckTime is not None
-            else None
-        ),
-        overallStatus=(
-            __enumValue(CheckAggregatedStatus, overallStatus)
-            if overallStatus is not None
-            else None
-        ),
+        lastCheckTime=(__artesianDatetimeDeserializer(str(lastCheckTime)) if lastCheckTime is not None else None),
+        overallStatus=(__enumValue(CheckAggregatedStatus, overallStatus) if overallStatus is not None else None),
         activeRulesCount=obj.get("ActiveRulesCount", 0),
         failedRulesCount=obj.get("FailedRulesCount", 0),
         from_=date.fromisoformat(str(fromValue)) if fromValue is not None else None,

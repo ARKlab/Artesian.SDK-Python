@@ -6,9 +6,7 @@ from .CompletenessAndFreshnessConfigDto import CompletenessAndFreshnessConfigDto
 
 
 @dataclass
-class VersionedCompletenessAndFreshnessConfigDto(
-    CompletenessAndFreshnessConfigDto
-):
+class VersionedCompletenessAndFreshnessConfigDto(CompletenessAndFreshnessConfigDto):
     """
     Configuration for Completeness and Freshness rules applied to
     versioned time series.

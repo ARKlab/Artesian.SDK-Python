@@ -26,6 +26,7 @@ class CheckResultCheckSummaryDto:
         aggregatedStatus: Aggregated quality status (OK = no issues, KO = failures detected).
         versionFrom: Version-from boundary for versioned time series (None for actuals).
     """
+
     lastCheckTime: datetime.datetime
     rangeStart: datetime.date
     rangeEnd: datetime.date

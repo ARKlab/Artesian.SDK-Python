@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import unittest
 from datetime import date, datetime
 from typing import cast
@@ -107,18 +109,14 @@ class TestDataQualitySerialization(unittest.TestCase):
         actual = artesianJsonDeserialize(actualPayload, DataQualityRuleDtoOutput)
         outlier = artesianJsonDeserialize(outlierPayload, DataQualityRuleDtoOutput)
 
-        self.assertIsInstance(
-            actual.configuration, ActualCompletenessAndFreshnessConfigDto
-        )
+        self.assertIsInstance(actual.configuration, ActualCompletenessAndFreshnessConfigDto)
         schedule_definition = cast(
             CronScheduleDefinitionDto,
             actual.configuration.scheduleConfig.scheduleDefinition,
         )
         self.assertEqual(schedule_definition.cronExpression, "0 0 * * *")
         self.assertIsInstance(outlier.configuration, OutlierConfigDto)
-        self.assertIsInstance(
-            outlier.configuration.model, OutlierAbsoluteBoundConfigDto
-        )
+        self.assertIsInstance(outlier.configuration.model, OutlierAbsoluteBoundConfigDto)
 
     def test_alert_trigger_is_deserialized_to_concrete_type(
         self: TestDataQualitySerialization,
@@ -141,12 +139,8 @@ class TestDataQualitySerialization(unittest.TestCase):
             "Version": 1,
         }
 
-        scheduled = artesianJsonDeserialize(
-            scheduledPayload, QualityNotificationAlertDtoOutput
-        )
-        onEvent = artesianJsonDeserialize(
-            onEventPayload, QualityNotificationAlertDtoOutput
-        )
+        scheduled = artesianJsonDeserialize(scheduledPayload, QualityNotificationAlertDtoOutput)
+        onEvent = artesianJsonDeserialize(onEventPayload, QualityNotificationAlertDtoOutput)
 
         self.assertIsInstance(scheduled.triggerConfig, ScheduleTriggerConfigDto)
         self.assertIsInstance(onEvent.triggerConfig, OnEventTriggerConfigDto)

@@ -147,9 +147,7 @@ class _Query(Generic[_QueryParametersT]):
         self._queryParameters.skipOverrides = skipOverrides
         return self
 
-    def withIncludeOverrideDetails(
-        self, includeOverrideDetails: bool = True
-    ) -> Self:
+    def withIncludeOverrideDetails(self, includeOverrideDetails: bool = True) -> Self:
         """Set whether override details should be included in results.
 
         Args:
@@ -161,15 +159,10 @@ class _Query(Generic[_QueryParametersT]):
         self._queryParameters.includeOverrideDetails = includeOverrideDetails
         return self
 
-    def _buildOverrideQueryParams(
-        self: _Query[_QueryParametersT], queryParameters: _QueryParameters
-    ) -> str:
+    def _buildOverrideQueryParams(self: _Query[_QueryParametersT], queryParameters: _QueryParameters) -> str:
         includeDetails = str(queryParameters.includeOverrideDetails).lower()
         skipOverrides = str(queryParameters.skipOverrides).lower()
-        return (
-            f"&includeOverrideDetails={includeDetails}"
-            f"&skipOverrides={skipOverrides}"
-        )
+        return f"&includeOverrideDetails={includeDetails}&skipOverrides={skipOverrides}"
 
     def _buildExtractionRangeRoute(self: _Query[_QueryParametersT], queryParamaters: _QueryParameters) -> str:
         rela = None

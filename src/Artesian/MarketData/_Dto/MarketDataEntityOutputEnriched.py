@@ -26,5 +26,6 @@ class MarketDataEntityOutputEnriched(MarketDataEntityOutput):
         curveSummary: CurveSummary info about the market data.
             Populated when includeCurveSummary=true.
     """
+
     dataQualityStatusSummary: Optional[dict[str, DataQualityStatusSummaryDto]] = None
     curveSummary: Optional[MarketDataCurveSummaryDto] = None
