@@ -8,7 +8,6 @@ import responses
 
 from Artesian import ArtesianConfig
 from Artesian._ClientsExecutor.ArtesianJsonSerializer import artesianJsonSerialize
-from Artesian.MarketData import *
 from Artesian.MarketData import (
     ArtesianMetadataFacet,
     ArtesianMetadataFacetCount,

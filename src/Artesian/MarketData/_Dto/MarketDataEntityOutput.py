@@ -39,7 +39,7 @@ class MarketDataEntityOutput(MarketDataEntityInput):
 
     def _validateUpdateDerivedCfg(self, derivedCfgUpdate: DerivedCfg) -> None:
         if self.derivedCfg is None:
-            raise ValueError("DerivedCfg cannot be added to a MarketData that has not")
+            raise ValueError("Cannot update DerivedCfg: the MarketData has no existing derived configuration")
 
         if self.derivedCfg.derivedAlgorithm != derivedCfgUpdate.derivedAlgorithm:
-            raise ValueError("Derived Algorithm cannot be update")
+            raise ValueError("Cannot update DerivedCfg: the derived algorithm cannot be changed")
