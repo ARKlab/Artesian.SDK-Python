@@ -104,6 +104,10 @@ version on PyPI is the tag without `v`; no version remapping is performed.
 
 - **Stable:** `vX.Y.Z` (for example, `v4.3.0`). The tagged commit must be
   contained in `master`.
+- **Development and release candidate:** `vX.Y.Z.devN` and `vX.Y.ZrcN`
+  (for example, `v5.0.0.dev1` and `v5.0.0rc2`). The tagged commit must be
+  contained in `master`. Standalone alpha tags such as `v5.0.0a1` are not
+  accepted.
 - **Beta:** `vX.Y.ZbN` (for example, `v4.3.0b1` or `v5.0.0b1`). The tagged
   commit must be contained in `develop-beta`. Compared with the latest stable
   tag on `master`, the base version must be either the next minor

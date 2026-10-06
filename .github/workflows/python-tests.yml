@@ -171,6 +171,7 @@ jobs:
         run: test "$MATRIX_RESULT" = success
 
   # Stable: v4.3.0 -> 4.3.0; tag commit must be contained in master.
+  # Development / RC: v5.0.0.dev1 / v5.0.0rc2; tag commit must be contained in master.
   # Beta: v4.3.0b1 / v5.0.0b1; tag commit must be contained in develop-beta.
   # The beta version must be the next minor or major after the latest master GA.
   # PR preview: v4.3.0a69.post1 / v4.3.0a69.post2. The base version
@@ -205,6 +206,10 @@ jobs:
             KIND=preview
           elif [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+b[0-9]+$ ]]; then
             KIND=beta
+          elif [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+\.dev[0-9]+$ ]]; then
+            KIND=dev
+          elif [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+rc[0-9]+$ ]]; then
+            KIND=rc
           else
             KIND=ga
           fi
@@ -213,7 +218,7 @@ jobs:
           echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
 
       - name: "Validate release commit is contained in master"
-        if: steps.tag.outputs.kind == 'ga'
+        if: steps.tag.outputs.kind == 'ga' || steps.tag.outputs.kind == 'dev' || steps.tag.outputs.kind == 'rc'
         shell: bash
         run: bash .github/workflows/validate_branch.sh "master"
 
@@ -374,7 +379,7 @@ jobs:
           import re
           from pathlib import Path
 
-          match = re.fullmatch(r"v\d+\.\d+\.\d+(?:b\d+|a\d+\.post\d+)?", os.environ["GITHUB_REF_NAME"])
+          match = re.fullmatch(r"v\d+\.\d+\.\d+(?:b\d+|rc\d+|\.dev\d+|a\d+\.post\d+)?", os.environ["GITHUB_REF_NAME"])
           if not match:
               raise SystemExit("Invalid release tag")
           version = match.group()[1:]
