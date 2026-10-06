@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import Optional
 
 from Artesian.MarketData._Dto.DataQualityStatusSummaryDto import DataQualityStatusSummaryDto
 from Artesian.MarketData._Dto.MarketDataEntityOutputEnriched import MarketDataEntityOutputEnriched
@@ -19,7 +19,8 @@ class MarketDataDqStatusSummaryDto:
         marketData: The full enriched Market Data entity. None if no rule assignment exists for this Market Data.
         assignments: The Data Quality rule assignments bound to this Market Data (respecting the queried rule filter).
     """
+
     marketDataId: int
     statusSummary: Optional[DataQualityStatusSummaryDto] = None
     marketData: Optional[MarketDataEntityOutputEnriched] = None
-    assignments: Optional[List] = None
+    assignments: Optional[list] = None

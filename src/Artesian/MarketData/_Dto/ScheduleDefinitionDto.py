@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 
 from .._Enum.ScheduleDefinitionType import ScheduleDefinitionType
@@ -10,7 +12,5 @@ class ScheduleDefinitionDto:
     """
 
     @property
-    def type(self: "ScheduleDefinitionDto") -> ScheduleDefinitionType:
-        raise NotImplementedError(
-            "ScheduleDefinitionDto.type must be implemented by subclasses"
-        )
+    def type(self: ScheduleDefinitionDto) -> ScheduleDefinitionType:
+        raise NotImplementedError("ScheduleDefinitionDto.type must be implemented by subclasses")

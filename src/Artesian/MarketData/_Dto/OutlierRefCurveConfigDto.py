@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 
 from .._Enum.OutlierModel import OutlierModel
@@ -21,5 +23,5 @@ class OutlierRefCurveConfigDto(OutlierModelConfigDto):
     tolerancePerc: float
 
     @property
-    def model(self: "OutlierRefCurveConfigDto") -> OutlierModel:
+    def model(self: OutlierRefCurveConfigDto) -> OutlierModel:
         return OutlierModel.RefCurve

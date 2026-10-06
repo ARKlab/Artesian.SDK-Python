@@ -1,24 +1,49 @@
+import unittest
+from datetime import datetime, timedelta
+from unittest.mock import patch, sentinel
+
+import jsons
+import responses
+from dateutil import tz
+
 from Artesian import ArtesianConfig
-from Artesian._ClientsExecutor.ArtesianJsonSerializer import artesianJsonSerialize
+from Artesian._ClientsExecutor.ArtesianJsonSerializer import (
+    artesianJsonDeserialize,
+    artesianJsonSerialize,
+)
 from Artesian.MarketData import (
-    MarketDataService,
-    MarketDataIdentifier,
-    UpsertData,
-    MarketAssessmentValue,
-    BidAskValue,
     AuctionBids,
     AuctionBidValue,
+    BidAskValue,
+    CurveRangeEntity,
+    MarketAssessmentValue,
+    MarketDataIdentifier,
+    MarketDataService,
+    MarketDataType,
+    PagedResultCurveRangeEntity,
+    UpsertData,
 )
-from datetime import datetime
-import responses
-import unittest
-
-from dateutil import tz
+from Artesian.MarketData._Dto.TimeSerieData import TimeSerieData
 
 cfg = ArtesianConfig("https://baseurl.com", "APIKey")
 
 
 class TestMarketDataServiceUpsertData(unittest.IsolatedAsyncioTestCase):
+    def test_deserialize_nullable_dtos(self) -> None:
+        series = TimeSerieData(type=MarketDataType.ActualTimeSerie, rows={datetime(2020, 1, 1): 42.0})
+        page = PagedResultCurveRangeEntity(1, 2, 1, False, [CurveRangeEntity(5)])
+        for value in (series, page):
+            with self.subTest(cls=type(value)):
+                self.assertEqual(artesianJsonDeserialize(artesianJsonSerialize(value), type(value)), value)
+
+    def test_default_downloaded_at_is_created_per_instance_in_utc(self) -> None:
+        before = datetime.now(tz.UTC)
+        upsert = UpsertData(MarketDataIdentifier("PROVIDER", "CURVENAME"), "UTC")
+        after = datetime.now(tz.UTC)
+        self.assertLessEqual(before, upsert.downloadedAt)
+        self.assertLessEqual(upsert.downloadedAt, after)
+        self.assertEqual(upsert.downloadedAt.utcoffset(), timedelta(0))
+
     def setUp(self) -> None:
         self.__service = MarketDataService(cfg)
         self.maxDiff = None
@@ -26,7 +51,33 @@ class TestMarketDataServiceUpsertData(unittest.IsolatedAsyncioTestCase):
 
         return super().setUp()
 
-    async def test_upsertDateSerie(self):
+    def test_json_options_preserve_overrides_and_custom_kwargs(self) -> None:
+        options = {
+            "strip_privates": False,
+            "strip_nulls": False,
+            "use_enum_name": False,
+            "fork_inst": jsons.JsonSerializable.fork(),
+            "strict": True,
+            "plugin_option": sentinel.plugin_option,
+        }
+        cases = [
+            (artesianJsonSerialize, "dump", True, "camelCase", "CamelCase"),
+            (artesianJsonDeserialize, "load", False, "PascalCase", "pascalCase"),
+        ]
+        for adapter, operation, strict, key, transformed_key in cases:
+            with self.subTest(operation=operation):
+                with patch("Artesian._ClientsExecutor.ArtesianJsonSerializer.jsons." + operation) as json_operation:
+                    result = adapter(sentinel.payload, dict, **options)
+
+                self.assertIs(result, json_operation.return_value)
+                json_operation.assert_called_once()
+                self.assertEqual(json_operation.call_args.args, (sentinel.payload, dict))
+                forwarded = dict(json_operation.call_args.kwargs)
+                key_transformer = forwarded.pop("key_transformer")
+                self.assertEqual(key_transformer(key), transformed_key)
+                self.assertEqual(forwarded, {**options, "strict": strict})
+
+    async def test_upsertDateSerie(self) -> None:
         expectedJson = {
             "ID": {"Provider": "PROVIDER", "Name": "CURVENAME"},
             "Timezone": "CET",
@@ -63,7 +114,7 @@ class TestMarketDataServiceUpsertData(unittest.IsolatedAsyncioTestCase):
 
             self.assertEqual(len(rsps.calls), 1)
 
-    async def test_upsertDateSerieMA(self):
+    async def test_upsertDateSerieMA(self) -> None:
         expectedJson = {
             "ID": {"Provider": "PROVIDER", "Name": "CURVENAME"},
             "MarketAssessment": [
@@ -121,7 +172,7 @@ class TestMarketDataServiceUpsertData(unittest.IsolatedAsyncioTestCase):
 
             self.assertEqual(len(rsps.calls), 1)
 
-    async def test_upsertDateSerieBA(self):
+    async def test_upsertDateSerieBA(self) -> None:
         expectedJson = {
             "ID": {"Provider": "PROVIDER", "Name": "CURVENAME"},
             "BidAsk": [
@@ -188,7 +239,7 @@ class TestMarketDataServiceUpsertData(unittest.IsolatedAsyncioTestCase):
 
             self.assertEqual(len(rsps.calls), 1)
 
-    async def test_upsertDateSerieAU(self):
+    async def test_upsertDateSerieAU(self) -> None:
         expectedJson = {
             "ID": {"Provider": "PROVIDER", "Name": "CURVENAME"},
             "AuctionRows": [

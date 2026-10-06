@@ -29,9 +29,7 @@ class QualityNotificationAlertAssignmentDtoInput:
 
 
 @dataclass
-class QualityNotificationAlertAssignmentDtoOutput(
-    QualityNotificationAlertAssignmentDtoInput
-):
+class QualityNotificationAlertAssignmentDtoOutput(QualityNotificationAlertAssignmentDtoInput):
     """
     Read model returned by GET operations.
 

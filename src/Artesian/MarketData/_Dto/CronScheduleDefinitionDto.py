@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 from typing import Optional
 
@@ -20,5 +22,5 @@ class CronScheduleDefinitionDto(ScheduleDefinitionDto):
     timeZone: Optional[str] = None
 
     @property
-    def type(self: "CronScheduleDefinitionDto") -> ScheduleDefinitionType:
+    def type(self: CronScheduleDefinitionDto) -> ScheduleDefinitionType:
         return ScheduleDefinitionType.Cron

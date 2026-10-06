@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import Optional
 
 
 @dataclass
@@ -11,4 +11,4 @@ class MailNotificationDto:
         recipients: The array of recipient email addresses to which the quality alert notification will be sent
     """
 
-    recipients: Optional[List[str]] = None
+    recipients: Optional[list[str]] = None

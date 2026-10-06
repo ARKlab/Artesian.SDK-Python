@@ -1,26 +1,26 @@
+from __future__ import annotations
+
 import unittest
 
 from Artesian import ArtesianConfig
 from Artesian.MarketData import Granularity
 from Artesian.Query import QueryService
+
 from . import helpers
 from .helpers import Qs
-
 
 cfg = ArtesianConfig("https://arkive.artesian.cloud/tenantName/", "APIKey")
 qs = QueryService(cfg)
 
 
 class TestQueryOverrides(unittest.TestCase):
-    def assertOverrideParams(self: "TestQueryOverrides", requests: Qs) -> None:
+    def assertOverrideParams(self: TestQueryOverrides, requests: Qs) -> None:
         query = requests.getQs()
         self.assertEqual(query["includeOverrideDetails"], "true")
         self.assertEqual(query["skipOverrides"], "true")
 
     @helpers.TrackRequests
-    def test_actual_override_options(
-        self: "TestQueryOverrides", requests: Qs
-    ) -> None:
+    def test_actual_override_options(self: TestQueryOverrides, requests: Qs) -> None:
         (
             qs.createActual()
             .forMarketData([100000001])
@@ -34,9 +34,7 @@ class TestQueryOverrides(unittest.TestCase):
         self.assertOverrideParams(requests)
 
     @helpers.TrackRequests
-    def test_versioned_override_options(
-        self: "TestQueryOverrides", requests: Qs
-    ) -> None:
+    def test_versioned_override_options(self: TestQueryOverrides, requests: Qs) -> None:
         (
             qs.createVersioned()
             .forMarketData([100000001])
@@ -51,9 +49,7 @@ class TestQueryOverrides(unittest.TestCase):
         self.assertOverrideParams(requests)
 
     @helpers.TrackRequests
-    def test_market_assessment_override_options(
-        self: "TestQueryOverrides", requests: Qs
-    ) -> None:
+    def test_market_assessment_override_options(self: TestQueryOverrides, requests: Qs) -> None:
         (
             qs.createMarketAssessment()
             .forMarketData([100000001])
@@ -67,9 +63,7 @@ class TestQueryOverrides(unittest.TestCase):
         self.assertOverrideParams(requests)
 
     @helpers.TrackRequests
-    def test_auction_override_options(
-        self: "TestQueryOverrides", requests: Qs
-    ) -> None:
+    def test_auction_override_options(self: TestQueryOverrides, requests: Qs) -> None:
         (
             qs.createAuction()
             .forMarketData([100000001])
@@ -82,9 +76,7 @@ class TestQueryOverrides(unittest.TestCase):
         self.assertOverrideParams(requests)
 
     @helpers.TrackRequests
-    def test_bid_ask_override_options(
-        self: "TestQueryOverrides", requests: Qs
-    ) -> None:
+    def test_bid_ask_override_options(self: TestQueryOverrides, requests: Qs) -> None:
         (
             qs.createBidAsk()
             .forMarketData([100000001])
@@ -98,9 +90,7 @@ class TestQueryOverrides(unittest.TestCase):
         self.assertOverrideParams(requests)
 
     @helpers.TrackRequests
-    def test_override_options_default_to_false(
-        self: "TestQueryOverrides", requests: Qs
-    ) -> None:
+    def test_override_options_default_to_false(self: TestQueryOverrides, requests: Qs) -> None:
         (
             qs.createActual()
             .forMarketData([100000001])

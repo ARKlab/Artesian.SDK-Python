@@ -1,9 +1,9 @@
-from dataclasses import dataclass
 import datetime
-from typing import Dict, Optional
+from dataclasses import dataclass
+from typing import Optional
 
-from .MarketDataEntityOutput import MarketDataEntityOutput
 from .DataQualityStatusSummaryDto import DataQualityStatusSummaryDto
+from .MarketDataEntityOutput import MarketDataEntityOutput
 
 
 @dataclass
@@ -26,5 +26,6 @@ class MarketDataEntityOutputEnriched(MarketDataEntityOutput):
         curveSummary: CurveSummary info about the market data.
             Populated when includeCurveSummary=true.
     """
-    dataQualityStatusSummary: Optional[Dict[str, DataQualityStatusSummaryDto]] = None
+
+    dataQualityStatusSummary: Optional[dict[str, DataQualityStatusSummaryDto]] = None
     curveSummary: Optional[MarketDataCurveSummaryDto] = None

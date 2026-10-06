@@ -1,21 +1,23 @@
+import unittest
 from ast import Dict
+
+import responses
+
 from Artesian import (
-    ArtesianSdkValidationException,
-    ArtesianSdkOptimisticConcurrencyException,
     ArtesianSdkForbiddenException,
+    ArtesianSdkOptimisticConcurrencyException,
     ArtesianSdkServerException,
+    ArtesianSdkValidationException,
 )
 from Artesian._ClientsExecutor.Client import _Client
-import unittest
-import responses
 
 
 class TestClientErrorHandling(unittest.IsolatedAsyncioTestCase):
-    def setUp(self):
+    def setUp(self) -> None:
         self._client = _Client("https://baseurl.com", "APIKey")
 
     # @responses.activate cannot be used with responses<0.19 with 'async' methods
-    async def test_on404returnNone(self):
+    async def test_on404returnNone(self) -> None:
         with responses.RequestsMock() as rsps:
             rsps.add("GET", "https://baseurl.com/404", body="", status=404)
 
@@ -24,13 +26,13 @@ class TestClientErrorHandling(unittest.IsolatedAsyncioTestCase):
 
             self.assertIsNone(res, "Response should be None on 404")
 
-    async def test_on404throwsWhenNoRetCls(self):
+    async def test_on404throwsWhenNoRetCls(self) -> None:
         with responses.RequestsMock() as rsps:
             rsps.add("GET", "https://baseurl.com/404", body="", status=404)
 
             with self.assertRaises(ArtesianSdkServerException) as ex:
                 with self._client as c:
-                    res = await c.exec("GET", "/404", retcls=None)
+                    await c.exec("GET", "/404", retcls=None)
 
             self.assertEqual(ex.exception.statusCode, 404)
             self.assertEqual(
@@ -38,7 +40,7 @@ class TestClientErrorHandling(unittest.IsolatedAsyncioTestCase):
                 "Failed REST call to Artesian. GET https://baseurl.com/404 returned 404.",
             )
 
-    async def test_success(self):
+    async def test_success(self) -> None:
         with responses.RequestsMock() as rsps:
             rsps.add(
                 "GET",
@@ -53,7 +55,7 @@ class TestClientErrorHandling(unittest.IsolatedAsyncioTestCase):
 
             self.assertEqual(res, {"result": True})
 
-    async def test_problemDetails(self):
+    async def test_problemDetails(self) -> None:
         cases = [
             (400, ArtesianSdkValidationException),
             (409, ArtesianSdkOptimisticConcurrencyException),
@@ -81,19 +83,17 @@ class TestClientErrorHandling(unittest.IsolatedAsyncioTestCase):
 
                     with self.assertRaises(excls) as ex:
                         with self._client as c:
-                            res = await c.exec("GET", "/" + str(code))
+                            await c.exec("GET", "/" + str(code))
 
                     self.assertEqual(ex.exception.statusCode, code)
                     self.assertIsNone(ex.exception.errorText)
                     self.assertEqual(ex.exception.problemDetails, problemDetails)
                     self.assertEqual(
                         ex.exception.message,
-                        "Failed REST call to Artesian. GET https://baseurl.com/{} returned {}. DETAIL".format(
-                            code, code
-                        ),
+                        f"Failed REST call to Artesian. GET https://baseurl.com/{code} returned {code}. DETAIL",
                     )
 
-    async def test_problemDetailsWithoutDetails(self):
+    async def test_problemDetailsWithoutDetails(self) -> None:
         with responses.RequestsMock() as rsps:
             problemDetails = {
                 "type": "TYPE",
@@ -110,7 +110,7 @@ class TestClientErrorHandling(unittest.IsolatedAsyncioTestCase):
 
             with self.assertRaises(ArtesianSdkValidationException) as ex:
                 with self._client as c:
-                    res = await c.exec("GET", "/" + str(400))
+                    await c.exec("GET", "/" + str(400))
 
             self.assertEqual(ex.exception.statusCode, 400)
             self.assertIsNone(ex.exception.errorText)
@@ -120,7 +120,7 @@ class TestClientErrorHandling(unittest.IsolatedAsyncioTestCase):
                 "Failed REST call to Artesian. GET https://baseurl.com/400 returned 400. TITLE",
             )
 
-    async def test_NOT_problemDetails(self):
+    async def test_NOT_problemDetails(self) -> None:
         cases = [
             (400, ArtesianSdkValidationException),
             (409, ArtesianSdkOptimisticConcurrencyException),
@@ -143,14 +143,12 @@ class TestClientErrorHandling(unittest.IsolatedAsyncioTestCase):
 
                     with self.assertRaises(excls) as ex:
                         with self._client as c:
-                            res = await c.exec("GET", "/" + str(code))
+                            await c.exec("GET", "/" + str(code))
 
                     self.assertEqual(ex.exception.statusCode, code)
                     self.assertIsNone(ex.exception.problemDetails)
                     self.assertEqual(ex.exception.errorText, body)
                     self.assertEqual(
                         ex.exception.message,
-                        "Failed REST call to Artesian. GET https://baseurl.com/{} returned {}. BODY STRING".format(
-                            code, code
-                        ),
+                        f"Failed REST call to Artesian. GET https://baseurl.com/{code} returned {code}. BODY STRING",
                     )

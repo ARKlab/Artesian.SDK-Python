@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 
 from .._Enum.OutlierModel import OutlierModel
@@ -14,7 +16,5 @@ class OutlierModelConfigDto(DataQualityRuleConfigDto):
     type: RuleType = field(init=False, default=RuleType.Outlier)
 
     @property
-    def model(self: "OutlierModelConfigDto") -> OutlierModel:
-        raise NotImplementedError(
-            "OutlierModelConfigDto.model must be implemented by subclasses"
-        )
+    def model(self: OutlierModelConfigDto) -> OutlierModel:
+        raise NotImplementedError("OutlierModelConfigDto.model must be implemented by subclasses")

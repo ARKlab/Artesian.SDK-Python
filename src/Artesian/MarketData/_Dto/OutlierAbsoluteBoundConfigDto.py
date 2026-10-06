@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from dataclasses import dataclass
 
 from .._Enum.OutlierModel import OutlierModel
@@ -21,5 +23,5 @@ class OutlierAbsoluteBoundConfigDto(OutlierModelConfigDto):
     lowerBound: float
 
     @property
-    def model(self: "OutlierAbsoluteBoundConfigDto") -> OutlierModel:
+    def model(self: OutlierAbsoluteBoundConfigDto) -> OutlierModel:
         return OutlierModel.AbsoluteBound
