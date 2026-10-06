@@ -1,386 +1,325 @@
+"""Artesian JSON wire format on top of msgspec.
+
+DTOs stay plain dataclasses. On the wire:
+- keys are PascalCase, private (``_x``) fields are dropped and ``None`` fields are omitted;
+- enums travel by name; datetimes are RFC 3339 (naive stays naive, UTC gets ``Z``);
+- non-finite floats (NaN, Infinity) are rejected with ``ValueError``;
+- a dict is sent as ``[{"Key": k, "Value": v}]`` only when its field is marked with
+  :func:`keyValueArrayField` (the marker applies to every dict nested inside that field),
+  otherwise as a JSON object. When decoding, any dict accepts both shapes;
+- a field may override its wire name via ``metadata={WIRE_NAME_KEY: "X"}``; a trailing ``_`` is dropped;
+- read-only properties of a dataclass (e.g. a ``type`` discriminator) are sent as well;
+- polymorphic Data Quality bases (see ``_POLYMORPHIC``) decode to the concrete subclass.
+
+Decoding compiles each target type once into a mirror ``msgspec.Struct`` so parsing and
+validation run in C; a cached converter then rebuilds the dataclasses.
+"""
+
+import types
 from collections.abc import Callable
+from dataclasses import MISSING, Field, field, fields, is_dataclass
 from datetime import date, datetime
 from enum import Enum
-from platform import system
-from typing import Any, TypedDict, TypeVar, get_args
+from functools import cache
+from math import isfinite
+from typing import Any, Literal, Union, cast, get_args, get_origin, get_type_hints
 
-import jsons
-from dateutil import parser
+import msgspec
 
-TEnum = TypeVar("TEnum", bound=Enum)
-
-__commonFmt = "%Y-%m-%dT%H:%M:%S.%f"
-if system() == "Linux":
-    __commonFmt = "%04Y-%m-%dT%H:%M:%S.%f"
+WIRE_METADATA_KEY = "artesian_wire"
+KEY_VALUE_ARRAY = "key_value_array"
+WIRE_NAME_KEY = "artesian_wire_name"
 
 
-def __artesianDatetimeSerializer(obj: datetime, **kwargs: object) -> str:
-    if obj.tzinfo is None:
-        ret = obj.strftime(__commonFmt)
-        return ret
-    offset = obj.utcoffset()
-    if offset is not None and offset.total_seconds() == 0:
-        ret = obj.strftime(__commonFmt + "Z")
-        return ret
-    ret = obj.isoformat(timespec="seconds")
-    return ret
+def keyValueArrayField() -> None:
+    """A ``None``-defaulted dataclass field whose dicts are sent as Key/Value arrays."""
+    return field(default=None, metadata={WIRE_METADATA_KEY: KEY_VALUE_ARRAY})
 
 
-def __artesianDatetimeDeserializer(obj: str, *args: object, **kwargs: object) -> datetime:
-    return parser.isoparse(obj)
+def _pascal(name: str) -> str:
+    return name[0].upper() + name[1:].rstrip("_")
 
 
-def __checkResultExtractSerializer(obj: Any, *args: Any, **kwargs: Any) -> dict[str, object]:
-    result: dict[str, object] = {
-        "AID": obj.assignmentId,
-        "MKID": obj.marketDataId,
-        "RID": obj.ruleId,
-        "T": __artesianDatetimeSerializer(obj.time),
-        "D": obj.issueCount,
-        "S": __artesianDatetimeSerializer(obj.competenceStart),
-        "E": __artesianDatetimeSerializer(obj.competenceEnd),
-    }
-    if obj.providerName is not None:
-        result["P"] = obj.providerName
-    if obj.curveName is not None:
-        result["C"] = obj.curveName
-    if obj.ruleName is not None:
-        result["R"] = obj.ruleName
-    if type(obj).__name__ == "CheckResultExtractVts" and obj.version is not None:
-        result["V"] = __artesianDatetimeSerializer(obj.version)
-    return result
+def _wireName(f: Field[Any]) -> str:
+    return f.metadata.get(WIRE_NAME_KEY) or _pascal(f.name)
 
 
-def __checkResultExtractDeserializer(obj: dict[str, object], cls: type, *args: Any, **kwargs: Any) -> object:
-    values = {
-        "providerName": obj.get("P"),
-        "curveName": obj.get("C"),
-        "ruleName": obj.get("R"),
-        "assignmentId": obj.get("AID", 0),
-        "marketDataId": obj.get("MKID", 0),
-        "ruleId": obj.get("RID", 0),
-        "time": __artesianDatetimeDeserializer(str(obj["T"])),
-        "issueCount": obj["D"],
-        "competenceStart": __artesianDatetimeDeserializer(str(obj["S"])),
-        "competenceEnd": __artesianDatetimeDeserializer(str(obj["E"])),
-    }
-    if cls.__name__ == "CheckResultExtractVts":
-        version = obj.get("V")
-        values["version"] = __artesianDatetimeDeserializer(str(version)) if version is not None else None
-    return cls(**values)
+# ---------------------------------------------------------------- encode
+
+# float is excluded so every value goes through the non-finite check in _toWire.
+_PASSTHROUGH = frozenset({str, int, bool, type(None), datetime, date})
 
 
-def __enumValue(enumType: type[TEnum], value: object) -> TEnum:  # noqa: UP047, RUF100
-    if isinstance(value, enumType):
-        return value
-    return enumType[str(value)]
+class _KeyValue(msgspec.Struct):
+    Key: Any
+    Value: Any
 
 
-def __scheduleDefinitionDeserializer(obj: dict[str, Any], *args: Any, **kwargs: Any) -> Any:
-    from Artesian.MarketData._Dto.CronScheduleDefinitionDto import (
-        CronScheduleDefinitionDto,
-    )
-    from Artesian.MarketData._Enum.ScheduleDefinitionType import (
-        ScheduleDefinitionType,
-    )
+@cache
+def _encodePlan(cls: type) -> tuple[tuple[str, str, bool], ...]:
+    plan = [
+        (f.name, _wireName(f), f.metadata.get(WIRE_METADATA_KEY) == KEY_VALUE_ARRAY)
+        for f in fields(cls)
+        if not f.name.startswith("_")
+    ]
+    seen = {name for name, _, _ in plan}
+    for base in cls.__mro__:
+        for name, attr in vars(base).items():
+            if isinstance(attr, property) and not name.startswith("_") and name not in seen:
+                seen.add(name)
+                plan.append((name, _pascal(name), False))
+    return tuple(plan)
 
-    scheduleType = __enumValue(ScheduleDefinitionType, obj["Type"])
-    if scheduleType is ScheduleDefinitionType.Cron:
-        return CronScheduleDefinitionDto(
-            cronExpression=obj.get("CronExpression"),
-            timeZone=obj.get("TimeZone"),
+
+def _finite(value: float) -> float:
+    # msgspec writes NaN/Infinity as null; refuse them like requests' json= (allow_nan=False) did.
+    if not isfinite(value):
+        raise ValueError(f"Out of range float values are not JSON compliant: {value!r}")
+    return value
+
+
+def _toWire(obj: object, kv: bool) -> object:
+    t = type(obj)
+    if t in _PASSTHROUGH:
+        return obj
+    if t is float:
+        return _finite(cast(float, obj))
+    if isinstance(obj, Enum):
+        return obj.name
+    # msgspec only encodes exact builtins: coerce subclasses such as pandas.Timestamp or numpy.float64.
+    if isinstance(obj, datetime):
+        return datetime(
+            obj.year, obj.month, obj.day, obj.hour, obj.minute, obj.second, obj.microsecond, obj.tzinfo, fold=obj.fold
         )
-    raise ValueError(f"Unsupported schedule definition type: {scheduleType}")
+    if isinstance(obj, date):
+        return date(obj.year, obj.month, obj.day)
+    if isinstance(obj, float):
+        return _finite(float(obj))
+    for base in (int, str):
+        if isinstance(obj, base):
+            return base(obj)
+    if isinstance(obj, dict):
+        if kv:
+            return [
+                _KeyValue(
+                    k if type(k) in _PASSTHROUGH else _toWire(k, True),
+                    v if type(v) in _PASSTHROUGH else _toWire(v, True),
+                )
+                for k, v in obj.items()
+            ]
+        return {_toWire(k, False): _toWire(v, False) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [x if type(x) in _PASSTHROUGH else _toWire(x, kv) for x in obj]
+    if is_dataclass(obj) and not isinstance(obj, type):
+        out: dict[str, object] = {}
+        for name, wire, fieldKv in _encodePlan(t):
+            v = getattr(obj, name)
+            if v is not None:
+                out[wire] = _toWire(v, kv or fieldKv)
+        return out
+    return obj
 
 
-def __triggerConfigDeserializer(obj: dict[str, Any], *args: Any, **kwargs: Any) -> Any:
-    from Artesian.MarketData._Dto.TriggerConfigDto import (
-        OnEventTriggerConfigDto,
-        ScheduleTriggerConfigDto,
-    )
-    from Artesian.MarketData._Enum.AlertType import AlertType
-
-    alertType = __enumValue(AlertType, obj["Type"])
-    if alertType is AlertType.OnEvent:
-        return OnEventTriggerConfigDto()
-    if alertType is AlertType.Scheduled:
-        return ScheduleTriggerConfigDto(scheduleDefinition=__scheduleDefinitionDeserializer(obj["ScheduleDefinition"]))
-    raise ValueError(f"Unsupported alert type: {alertType}")
+_encoder = msgspec.json.Encoder()
 
 
-def __dataQualityRuleConfigDeserializer(obj: dict[str, Any], *args: Any, **kwargs: Any) -> Any:
+def artesianJsonEncode(obj: object) -> bytes:
+    """Encodes ``obj`` to Artesian JSON bytes."""
+    return _encoder.encode(_toWire(obj, False))
+
+
+def artesianJsonSerialize(obj: object) -> Any:
+    """Converts ``obj`` to the JSON-compatible builtins Artesian expects on the wire."""
+    return msgspec.to_builtins(_toWire(obj, False))
+
+
+# ---------------------------------------------------------------- decode
+
+# Wire types are assembled at runtime; typed as Any so checkers accept dynamic subscripts.
+_Literal: Any = Literal
+_Union: Any = Union
+
+_Converter = Callable[[Any], Any] | None  # None means the decoded value is already final
+
+
+@cache
+def _compile(tp: Any) -> tuple[Any, _Converter]:
+    """Returns the msgspec wire type for ``tp`` and the converter back to ``tp``."""
+    if isinstance(tp, type) and tp.__name__ in _POLYMORPHIC and tp.__module__.startswith(_DTO_MODULE):
+        return Any, lambda v: _convertTo(_POLYMORPHIC[tp.__name__](v), v)
+    if isinstance(tp, type) and is_dataclass(tp):
+        return _compileConcrete(tp)
+    if isinstance(tp, type) and issubclass(tp, Enum):
+        return _Literal[tuple(tp.__members__)], lambda v: tp[v]
+    origin, args = get_origin(tp), get_args(tp)
+    if origin in (Union, types.UnionType):
+        return _compileUnion(args)
+    if tp is dict or origin is dict:
+        return _compileDict(*(args or (Any, Any)))
+    if tp is list or origin is list:
+        itemWire, itemConv = _compile(args[0] if args else Any)
+        if itemConv is None:
+            return list[itemWire], None
+        return list[itemWire], lambda v: [itemConv(x) for x in v]
+    return tp, None
+
+
+def _compileUnion(args: tuple[Any, ...]) -> tuple[Any, _Converter]:
+    compiled = [_compile(a) for a in args]
+    wire = _Union[tuple(w for w, _ in compiled)]
+    convs = [c for (_, c), a in zip(compiled, args, strict=True) if a is not type(None)]
+    if all(c is None for c in convs):
+        return wire, None
+    # ponytail: only Optional[X] needs a branch-aware converter; Union[A, B] of convertible types is unsupported.
+    if len(convs) != 1:
+        raise TypeError(f"Unsupported union for Artesian deserialization: {args}")
+    conv = convs[0]
+    assert conv is not None
+    return wire, lambda v: None if v is None else conv(v)
+
+
+def _compileDict(keyTp: Any, valueTp: Any) -> tuple[Any, _Converter]:
+    keyWire, keyConv = _compile(keyTp)
+    valueWire, valueConv = _compile(valueTp)
+    entry = msgspec.defstruct("KeyValue", [("Key", keyWire), ("Value", valueWire)])
+    wire = Union[dict[keyWire, valueWire], list[entry]]  # noqa: UP007 - built dynamically
+    if keyConv is None and valueConv is None:
+        return wire, lambda v: v if type(v) is dict else {e.Key: e.Value for e in v}
+    kc = keyConv or (lambda x: x)
+    vc = valueConv or (lambda x: x)
+
+    def conv(v: Any) -> dict:
+        items = v.items() if type(v) is dict else ((e.Key, e.Value) for e in v)
+        return {kc(k): vc(x) for k, x in items}
+
+    return wire, conv
+
+
+_DTO_MODULE = "Artesian.MarketData._Dto"
+
+
+def _convertTo(cls: type, raw: Any) -> object:
+    wire, conv = _compileConcrete(cls)
+    value = msgspec.convert(raw, wire)
+    return value if conv is None else conv(value)
+
+
+def _scheduleDefinition(raw: dict[str, Any]) -> type:
+    from Artesian.MarketData._Dto.CronScheduleDefinitionDto import CronScheduleDefinitionDto
+
+    if raw.get("Type") == "Cron":
+        return CronScheduleDefinitionDto
+    raise ValueError(f"Unsupported schedule definition type: {raw.get('Type')}")
+
+
+def _triggerConfig(raw: dict[str, Any]) -> type:
+    from Artesian.MarketData._Dto.TriggerConfigDto import OnEventTriggerConfigDto, ScheduleTriggerConfigDto
+
+    types_ = {"OnEvent": OnEventTriggerConfigDto, "Scheduled": ScheduleTriggerConfigDto}
+    if raw.get("Type") in types_:
+        return types_[raw["Type"]]
+    raise ValueError(f"Unsupported alert type: {raw.get('Type')}")
+
+
+def _outlierModel(raw: dict[str, Any]) -> type:
+    from Artesian.MarketData._Dto.OutlierAbsoluteBoundConfigDto import OutlierAbsoluteBoundConfigDto
+    from Artesian.MarketData._Dto.OutlierRefCurveConfigDto import OutlierRefCurveConfigDto
+
+    types_ = {"AbsoluteBound": OutlierAbsoluteBoundConfigDto, "RefCurve": OutlierRefCurveConfigDto}
+    if raw.get("Model") in types_:
+        return types_[raw["Model"]]
+    raise ValueError(f"Unsupported outlier model: {raw.get('Model')}")
+
+
+def _ruleConfig(raw: dict[str, Any]) -> type:
     from Artesian.MarketData._Dto.ActualCompletenessAndFreshnessConfigDto import (
         ActualCompletenessAndFreshnessConfigDto,
     )
-    from Artesian.MarketData._Dto.DataQualityRuleConfigDto import (
-        DataQualityRuleConfigDto,
-    )
-    from Artesian.MarketData._Dto.OutlierAbsoluteBoundConfigDto import (
-        OutlierAbsoluteBoundConfigDto,
-    )
+    from Artesian.MarketData._Dto.DataQualityRuleConfigDto import DataQualityRuleConfigDto
     from Artesian.MarketData._Dto.OutlierConfigDto import OutlierConfigDto
-    from Artesian.MarketData._Dto.OutlierRefCurveConfigDto import (
-        OutlierRefCurveConfigDto,
-    )
-    from Artesian.MarketData._Dto.RecordValidationConfigDto import (
-        RecordValidationConfigDto,
-    )
-    from Artesian.MarketData._Dto.ScheduleConfigDto import ScheduleConfigDto
     from Artesian.MarketData._Dto.VersionedCompletenessAndFreshnessConfigDto import (
         VersionedCompletenessAndFreshnessConfigDto,
     )
-    from Artesian.MarketData._Enum.MarketDataType import MarketDataType
-    from Artesian.MarketData._Enum.OutlierModel import OutlierModel
-    from Artesian.MarketData._Enum.PeriodPrecision import PeriodPrecision
-    from Artesian.MarketData._Enum.RuleType import RuleType
 
-    ruleType = __enumValue(RuleType, obj["Type"])
-    if ruleType is RuleType.Outlier:
-        if "Model" not in obj:
-            return DataQualityRuleConfigDto(type=ruleType)
-        modelObj = obj["Model"]
-        modelType = __enumValue(OutlierModel, modelObj["Model"])
-        if modelType is OutlierModel.AbsoluteBound:
-            model = OutlierAbsoluteBoundConfigDto(upperBound=modelObj["UpperBound"], lowerBound=modelObj["LowerBound"])
-        elif modelType is OutlierModel.RefCurve:
-            model = OutlierRefCurveConfigDto(
-                referenceMarketDataId=modelObj["ReferenceMarketDataId"],
-                tolerancePerc=modelObj["TolerancePerc"],
-            )
-        else:
-            raise ValueError(f"Unsupported outlier model: {modelType}")
-        return OutlierConfigDto(model=model)
-
-    if "MarketDataType" not in obj:
-        return DataQualityRuleConfigDto(type=ruleType)
-    marketDataType = __enumValue(MarketDataType, obj["MarketDataType"])
-    scheduleObj = obj["ScheduleConfig"]
-    scheduleConfig = ScheduleConfigDto(
-        scheduleDefinition=__scheduleDefinitionDeserializer(scheduleObj["ScheduleDefinition"]),
-        maxDelay=scheduleObj["MaxDelay"],
-    )
-    validationObj = obj["RecordValidationConfig"]
-    precision = validationObj.get("Precision")
-    recordValidationConfig = RecordValidationConfigDto(
-        recordRangeFrom=validationObj["RecordRangeFrom"],
-        recordRangeTo=validationObj["RecordRangeTo"],
-        precision=(__enumValue(PeriodPrecision, precision) if precision is not None else None),
-    )
-    commonValues = {
-        "marketDataType": marketDataType,
-        "scheduleConfig": scheduleConfig,
-        "recordValidationConfig": recordValidationConfig,
+    if raw.get("Type") == "Outlier":
+        return OutlierConfigDto if "Model" in raw else DataQualityRuleConfigDto
+    marketDataType = raw.get("MarketDataType")
+    if marketDataType is None:
+        return DataQualityRuleConfigDto
+    types_ = {
+        "ActualTimeSerie": ActualCompletenessAndFreshnessConfigDto,
+        "VersionedTimeSerie": VersionedCompletenessAndFreshnessConfigDto,
     }
-    if marketDataType is MarketDataType.ActualTimeSerie:
-        return ActualCompletenessAndFreshnessConfigDto(**commonValues)
-    if marketDataType is MarketDataType.VersionedTimeSerie:
-        versionPrecision = obj.get("VersionPrecision")
-        return VersionedCompletenessAndFreshnessConfigDto(
-            **commonValues,
-            versionToleranceFrom=obj["VersionToleranceFrom"],
-            versionToleranceTo=obj["VersionToleranceTo"],
-            versionPrecision=(__enumValue(PeriodPrecision, versionPrecision) if versionPrecision is not None else None),
-        )
+    if marketDataType in types_:
+        return types_[marketDataType]
     raise ValueError(f"Unsupported Market Data type: {marketDataType}")
 
 
-def __dataQualityStatusSummarySerializer(obj: Any, *args: Any, **kwargs: Any) -> dict[str, object]:
-    result: dict[str, object] = {
-        "ActiveRulesCount": obj.activeRulesCount,
-        "FailedRulesCount": obj.failedRulesCount,
-    }
-    if obj.lastCheckTime is not None:
-        result["LastCheckTime"] = __artesianDatetimeSerializer(obj.lastCheckTime)
-    if obj.overallStatus is not None:
-        result["OverallStatus"] = obj.overallStatus.name
-    if obj.from_ is not None:
-        result["From"] = obj.from_.isoformat()
-    if obj.to is not None:
-        result["To"] = obj.to.isoformat()
-    return result
-
-
-def __dataQualityStatusSummaryDeserializer(obj: dict[str, Any], *args: Any, **kwargs: Any) -> Any:
-    from Artesian.MarketData._Dto.DataQualityStatusSummaryDto import (
-        DataQualityStatusSummaryDto,
-    )
-    from Artesian.MarketData._Enum.CheckAggregatedStatus import (
-        CheckAggregatedStatus,
-    )
-
-    lastCheckTime = obj.get("LastCheckTime")
-    overallStatus = obj.get("OverallStatus")
-    fromValue = obj.get("From")
-    toValue = obj.get("To")
-    return DataQualityStatusSummaryDto(
-        lastCheckTime=(__artesianDatetimeDeserializer(str(lastCheckTime)) if lastCheckTime is not None else None),
-        overallStatus=(__enumValue(CheckAggregatedStatus, overallStatus) if overallStatus is not None else None),
-        activeRulesCount=obj.get("ActiveRulesCount", 0),
-        failedRulesCount=obj.get("FailedRulesCount", 0),
-        from_=date.fromisoformat(str(fromValue)) if fromValue is not None else None,
-        to=date.fromisoformat(str(toValue)) if toValue is not None else None,
-    )
-
-
-def __camelToPascal(k: str) -> str:
-    return k[0].upper() + k[1:]
-
-
-def __pascalToCamel(k: str) -> str:
-    return k[0].lower() + k[1:]
-
-
-def __is_valid_json_key(key: object) -> bool:
-    return issubclass(type(key), (str, int, float, bool)) or key is None
-
-
-def __artesianDictSerializer(obj: dict, *, key_transformer: Callable[[str], str] | None = None, **kwargs: Any) -> list:
-    result = []
-    for key, obj_ in obj.items():
-        key_ = key if __is_valid_json_key(key) else jsons.dump(key, key_transformer=None, **kwargs)
-        elem = jsons.dump(obj_, key_transformer=key_transformer, **kwargs)
-        result.append({"Key": key_, "Value": elem})
-    return result
-
-
-def __artesianDictDeserializer(obj: list, cls: type, *args: object, **kwargs: Any) -> object:
-    key, value = get_args(cls)
-    result = {
-        jsons.load(item["Key"], key, *args, **kwargs): jsons.load(item["Value"], value, *args, **kwargs) for item in obj
-    }
-
-    return result
-
-
-__artesianJsonSerializer = jsons.JsonSerializable.fork()
-
-jsons.set_serializer(__artesianDictSerializer, dict, high_prio=True, fork_inst=__artesianJsonSerializer)
-jsons.set_deserializer(__artesianDictDeserializer, dict, high_prio=True, fork_inst=__artesianJsonSerializer)
-
-jsons.set_serializer(
-    __artesianDatetimeSerializer,
-    datetime,
-    high_prio=True,
-    fork_inst=__artesianJsonSerializer,
-)
-jsons.set_deserializer(
-    __artesianDatetimeDeserializer,
-    datetime,
-    high_prio=True,
-    fork_inst=__artesianJsonSerializer,
-)
-__dataQualitySerializersRegistered = False
-
-
-def __registerDataQualitySerializers() -> None:
-    global __dataQualitySerializersRegistered
-    if __dataQualitySerializersRegistered:
-        return
-
-    from Artesian.MarketData._Dto.CheckResultExtract import (
-        CheckResultExtractTs,
-        CheckResultExtractVts,
-    )
-    from Artesian.MarketData._Dto.DataQualityRuleConfigDto import (
-        DataQualityRuleConfigDto,
-    )
-    from Artesian.MarketData._Dto.DataQualityStatusSummaryDto import (
-        DataQualityStatusSummaryDto,
-    )
-    from Artesian.MarketData._Dto.ScheduleDefinitionDto import ScheduleDefinitionDto
-    from Artesian.MarketData._Dto.TriggerConfigDto import TriggerConfigDto
-
-    for cls in (CheckResultExtractTs, CheckResultExtractVts):
-        jsons.set_serializer(
-            __checkResultExtractSerializer,
-            cls,
-            high_prio=True,
-            fork_inst=__artesianJsonSerializer,
-        )
-        jsons.set_deserializer(
-            __checkResultExtractDeserializer,
-            cls,
-            high_prio=True,
-            fork_inst=__artesianJsonSerializer,
-        )
-    jsons.set_deserializer(
-        __dataQualityRuleConfigDeserializer,
-        DataQualityRuleConfigDto,
-        high_prio=True,
-        fork_inst=__artesianJsonSerializer,
-    )
-    jsons.set_deserializer(
-        __scheduleDefinitionDeserializer,
-        ScheduleDefinitionDto,
-        high_prio=True,
-        fork_inst=__artesianJsonSerializer,
-    )
-    jsons.set_deserializer(
-        __triggerConfigDeserializer,
-        TriggerConfigDto,
-        high_prio=True,
-        fork_inst=__artesianJsonSerializer,
-    )
-    jsons.set_serializer(
-        __dataQualityStatusSummarySerializer,
-        DataQualityStatusSummaryDto,
-        high_prio=True,
-        fork_inst=__artesianJsonSerializer,
-    )
-    jsons.set_deserializer(
-        __dataQualityStatusSummaryDeserializer,
-        DataQualityStatusSummaryDto,
-        high_prio=True,
-        fork_inst=__artesianJsonSerializer,
-    )
-    __dataQualitySerializersRegistered = True
-
-
-class _ArtesianJsonOptions(TypedDict):
-    strip_privates: bool
-    strip_nulls: bool
-    use_enum_name: bool
-    fork_inst: type[jsons.JsonSerializable]
-
-
-__artesianJsonKwArgs: _ArtesianJsonOptions = {
-    "strip_privates": True,
-    "strip_nulls": True,
-    # 'strict': True, disabled due to failure in untyped Dict (Tags)
-    "use_enum_name": True,
-    "fork_inst": __artesianJsonSerializer,
+# Abstract Data Quality bases, matched by name (the DTO modules import this one) -> concrete-class resolver.
+_POLYMORPHIC: dict[str, Callable[[dict[str, Any]], type]] = {
+    "ScheduleDefinitionDto": _scheduleDefinition,
+    "TriggerConfigDto": _triggerConfig,
+    "OutlierModelConfigDto": _outlierModel,
+    "DataQualityRuleConfigDto": _ruleConfig,
 }
 
 
-def artesianJsonSerialize(obj: object, cls: type | None = None, **kwargs: Any) -> Any:
-    """
-    Sets the Artesian Json Serializer.
-
-    Args:
-      obj: string for the object for the serialization
-      cls: type for the serialization
-      kwargs: override the dump
-
-    Returns:
-      JsonSerializer.
-    """
-    __registerDataQualitySerializers()
-    kwargs_: dict[str, Any] = {**__artesianJsonKwArgs, **kwargs}
-    return jsons.dump(obj, cls, key_transformer=__camelToPascal, **kwargs_)
+@cache
+def _compileConcrete(cls: type) -> tuple[Any, _Converter]:
+    return _compileDataclass(cls)
 
 
-def artesianJsonDeserialize(obj: object, cls: type | None = None, **kwargs: Any) -> Any:
-    """
-    Sets the Artesian Json Deserializer.
+def _compileDataclass(cls: type) -> tuple[Any, _Converter]:
+    hints = get_type_hints(cls)
+    specs: list[tuple[str, Any, Any]] = []
+    # Nulls are omitted on the wire, so a required Optional field absent from the payload means None.
+    omittedNone = {
+        f.name
+        for f in fields(cls)
+        if f.default is MISSING and f.default_factory is MISSING and type(None) in get_args(hints[f.name])
+    }
+    convs: list[tuple[str, _Converter]] = []
+    for f in fields(cls):
+        if f.name.startswith("_") or not f.init:
+            continue
+        wire, conv = _compile(hints[f.name])
+        # Null is accepted for any field, as before; missing fields keep the dataclass default.
+        specs.append((f.name, Union[wire, None, msgspec.UnsetType], msgspec.UNSET))  # noqa: UP007
+        convs.append((f.name, conv))
+    mirror = msgspec.defstruct(cls.__name__, specs, rename={f.name: _wireName(f) for f in fields(cls)})
 
-    Args:
-      obj: string for the object for the deserialization
-      cls: type for the deserialization
-      kwargs: override the load
+    def toDataclass(m: Any) -> object:
+        kwargs = {}
+        for name, conv in convs:
+            v = getattr(m, name)
+            if v is not msgspec.UNSET:
+                kwargs[name] = v if conv is None or v is None else conv(v)
+            elif name in omittedNone:
+                kwargs[name] = None
+        return cls(**kwargs)
 
-    Returns:
-      JsonDeserializer.
-    """
-    __registerDataQualitySerializers()
-    kwargs_: dict[str, Any] = {**__artesianJsonKwArgs, **kwargs, "strict": False}
-    return jsons.load(obj, cls, key_transformer=__pascalToCamel, **kwargs_)
+    return mirror, toDataclass
+
+
+@cache
+def _decoder(cls: Any) -> msgspec.json.Decoder:
+    return msgspec.json.Decoder(_compile(cls)[0])
+
+
+_untypedDecoder = msgspec.json.Decoder()
+
+
+def artesianJsonDecode(data: bytes, cls: type | None = None) -> object:
+    """Decodes Artesian JSON bytes into ``cls``, or into builtins when ``cls`` is None."""
+    if cls is None:
+        return _untypedDecoder.decode(data)
+    conv = _compile(cls)[1]
+    value = _decoder(cls).decode(data)
+    return value if conv is None else conv(value)
+
+
+def artesianJsonDeserialize(obj: object, cls: type) -> Any:
+    """Converts JSON-compatible builtins (as produced by ``artesianJsonSerialize``) into ``cls``."""
+    wire, conv = _compile(cls)
+    value = msgspec.convert(obj, wire)
+    return value if conv is None else conv(value)

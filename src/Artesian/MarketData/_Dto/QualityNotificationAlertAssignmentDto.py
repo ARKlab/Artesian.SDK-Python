@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 
 from .MarketDataEntityOutputEnriched import MarketDataEntityOutputEnriched
 from .QualityNotificationAlertDto import QualityNotificationAlertDtoOutput
@@ -25,7 +24,7 @@ class QualityNotificationAlertAssignmentDtoInput:
     id: int = 0
     alertId: int = 0
     marketDataId: int = 0
-    eTag: Optional[str] = None
+    eTag: str | None = None
 
 
 @dataclass
@@ -43,8 +42,8 @@ class QualityNotificationAlertAssignmentDtoOutput(QualityNotificationAlertAssign
             assignment.
     """
 
-    marketData: Optional[MarketDataEntityOutputEnriched] = None
-    alert: Optional[QualityNotificationAlertDtoOutput] = None
+    marketData: MarketDataEntityOutputEnriched | None = None
+    alert: QualityNotificationAlertDtoOutput | None = None
 
 
 QualityNotificationAlertAssignmentInput = QualityNotificationAlertAssignmentDtoInput

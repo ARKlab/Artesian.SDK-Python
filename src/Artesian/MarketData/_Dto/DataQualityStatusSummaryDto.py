@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from datetime import date, datetime
-from typing import Optional
 
 from .._Enum.CheckAggregatedStatus import CheckAggregatedStatus
 
@@ -27,9 +26,9 @@ class DataQualityStatusSummaryDto:
             check results are available yet
     """
 
-    lastCheckTime: Optional[datetime] = None
-    overallStatus: Optional[CheckAggregatedStatus] = None
+    lastCheckTime: datetime | None = None
+    overallStatus: CheckAggregatedStatus | None = None
     activeRulesCount: int = 0
     failedRulesCount: int = 0
-    from_: Optional[date] = None
-    to: Optional[date] = None
+    from_: date | None = None
+    to: date | None = None

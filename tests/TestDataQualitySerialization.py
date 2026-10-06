@@ -38,10 +38,10 @@ class TestDataQualitySerialization(unittest.TestCase):
             "AID": 3,
             "MKID": 4,
             "RID": 5,
-            "T": "2024-01-01T00:00:00.000000",
+            "T": "2024-01-01T00:00:00",
             "D": 2,
-            "S": "2024-01-01T00:00:00.000000",
-            "E": "2024-01-02T00:00:00.000000",
+            "S": "2024-01-01T00:00:00",
+            "E": "2024-01-02T00:00:00",
         }
 
         result = artesianJsonDeserialize(payload, CheckResultExtractTs)
@@ -62,7 +62,7 @@ class TestDataQualitySerialization(unittest.TestCase):
 
         payload = artesianJsonSerialize(result)
 
-        self.assertEqual(payload["V"], "2023-12-31T00:00:00.000000")
+        self.assertEqual(payload["V"], "2023-12-31T00:00:00")
         self.assertNotIn("Version", payload)
 
     def test_rule_configuration_is_deserialized_to_concrete_types(

@@ -22,8 +22,8 @@ class TestMarketDataServiceDeleteData(unittest.IsolatedAsyncioTestCase):
         expectedJson = {
             "ID": {"Provider": "PROVIDER", "Name": "CURVENAME"},
             "Timezone": "CET",
-            "RangeStart": "2020-01-01T01:00:00.000000",
-            "RangeEnd": "2020-01-03T01:00:00.000000",
+            "RangeStart": "2020-01-01T01:00:00",
+            "RangeEnd": "2020-01-03T01:00:00",
             "DeferCommandExecution": False,
             "DeferDataGeneration": True,
         }
@@ -51,8 +51,8 @@ class TestMarketDataServiceDeleteData(unittest.IsolatedAsyncioTestCase):
     async def test_deleteDateSerieWithoutTimezone(self) -> None:
         expectedJson = {
             "ID": {"Provider": "PROVIDER", "Name": "CURVENAME"},
-            "RangeStart": "2020-01-01T01:00:00.000000",
-            "RangeEnd": "2020-01-03T01:00:00.000000",
+            "RangeStart": "2020-01-01T01:00:00",
+            "RangeEnd": "2020-01-03T01:00:00",
             "DeferCommandExecution": False,
             "DeferDataGeneration": True,
         }
@@ -81,8 +81,8 @@ class TestMarketDataServiceDeleteData(unittest.IsolatedAsyncioTestCase):
             "ID": {"Provider": "PROVIDER", "Name": "CURVENAME"},
             "Timezone": "CET",
             "Product": ["Jan-15"],
-            "RangeStart": "2020-01-01T01:00:00.000000",
-            "RangeEnd": "2020-01-03T01:00:00.000000",
+            "RangeStart": "2020-01-01T01:00:00",
+            "RangeEnd": "2020-01-03T01:00:00",
             "DeferCommandExecution": False,
             "DeferDataGeneration": True,
         }
@@ -112,8 +112,8 @@ class TestMarketDataServiceDeleteData(unittest.IsolatedAsyncioTestCase):
         expectedJson = {
             "ID": {"Provider": "PROVIDER", "Name": "CURVENAME"},
             "Product": ["Jan-15"],
-            "RangeStart": "2020-01-01T01:00:00.000000",
-            "RangeEnd": "2020-01-03T01:00:00.000000",
+            "RangeStart": "2020-01-01T01:00:00",
+            "RangeEnd": "2020-01-03T01:00:00",
             "DeferCommandExecution": False,
             "DeferDataGeneration": True,
         }
@@ -142,9 +142,9 @@ class TestMarketDataServiceDeleteData(unittest.IsolatedAsyncioTestCase):
         expectedJson = {
             "ID": {"Provider": "PROVIDER", "Name": "CURVENAME"},
             "Timezone": "CET",
-            "Version": "2020-01-01T01:00:00.000000",
-            "RangeStart": "2020-01-01T01:00:00.000000",
-            "RangeEnd": "2020-01-03T01:00:00.000000",
+            "Version": "2020-01-01T01:00:00",
+            "RangeStart": "2020-01-01T01:00:00",
+            "RangeEnd": "2020-01-03T01:00:00",
             "DeferCommandExecution": False,
             "DeferDataGeneration": True,
         }
@@ -173,9 +173,9 @@ class TestMarketDataServiceDeleteData(unittest.IsolatedAsyncioTestCase):
     async def test_deleteVersionedSerieWithoutTimezone(self) -> None:
         expectedJson = {
             "ID": {"Provider": "PROVIDER", "Name": "CURVENAME"},
-            "Version": "2020-01-01T01:00:00.000000",
-            "RangeStart": "2020-01-01T01:00:00.000000",
-            "RangeEnd": "2020-01-03T01:00:00.000000",
+            "Version": "2020-01-01T01:00:00",
+            "RangeStart": "2020-01-01T01:00:00",
+            "RangeEnd": "2020-01-03T01:00:00",
             "DeferCommandExecution": False,
             "DeferDataGeneration": True,
         }

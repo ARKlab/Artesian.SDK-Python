@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional
 
 from .._Enum.ScheduleDefinitionType import ScheduleDefinitionType
 from .ScheduleDefinitionDto import ScheduleDefinitionDto
@@ -18,8 +17,8 @@ class CronScheduleDefinitionDto(ScheduleDefinitionDto):
         timeZone: IANA time zone identifier used to evaluate cronExpression
     """
 
-    cronExpression: Optional[str] = None
-    timeZone: Optional[str] = None
+    cronExpression: str | None = None
+    timeZone: str | None = None
 
     @property
     def type(self: CronScheduleDefinitionDto) -> ScheduleDefinitionType:

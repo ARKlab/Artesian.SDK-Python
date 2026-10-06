@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 
 from Artesian.MarketData._Dto.DataQualityStatusSummaryDto import DataQualityStatusSummaryDto
 
@@ -18,4 +17,4 @@ class DqRuleDqStatusSummaryDto:
     """
 
     ruleId: int
-    statusSummary: Optional[DataQualityStatusSummaryDto] = None
+    statusSummary: DataQualityStatusSummaryDto | None = None

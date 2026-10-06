@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 
 from .._Enum.PeriodPrecision import PeriodPrecision
 
@@ -23,4 +22,4 @@ class RecordValidationConfigDto:
 
     recordRangeFrom: str
     recordRangeTo: str
-    precision: Optional[PeriodPrecision] = None
+    precision: PeriodPrecision | None = None

@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Optional
 from uuid import UUID
 
 from .._Enum.OverrideKind import OverrideKind
@@ -29,14 +28,14 @@ class OverrideMetadataEntry:
         comment: optional free-text comment describing the correction.
     """
 
-    id: Optional[UUID]
+    id: UUID | None
     marketDataId: int
     kind: OverrideKind
-    version: Optional[datetime]
-    product: Optional[str]
+    version: datetime | None
+    product: str | None
     referencedMarketDataId: int
     rangeExactStart: datetime
     rangeExactEnd: datetime
-    createdBy: Optional[str]
+    createdBy: str | None
     createdAt: datetime
-    comment: Optional[str] = None
+    comment: str | None = None

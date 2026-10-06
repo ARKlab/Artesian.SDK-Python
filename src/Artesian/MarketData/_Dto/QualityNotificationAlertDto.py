@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 
 from .MailNotificationDto import MailNotificationDto
 from .TriggerConfigDto import TriggerConfigDto
@@ -23,8 +22,8 @@ class QualityNotificationAlertDtoInput:
     name: str
     triggerConfig: TriggerConfigDto
     id: int = 0
-    mailNotifications: Optional[list[MailNotificationDto]] = None
-    eTag: Optional[str] = None
+    mailNotifications: list[MailNotificationDto] | None = None
+    eTag: str | None = None
     version: int = 0
 
 

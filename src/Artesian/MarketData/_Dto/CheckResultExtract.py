@@ -1,6 +1,7 @@
 import datetime
-from dataclasses import dataclass
-from typing import Optional
+from dataclasses import dataclass, field
+
+from Artesian._ClientsExecutor.ArtesianJsonSerializer import WIRE_NAME_KEY
 
 
 @dataclass
@@ -22,16 +23,16 @@ class CheckResultExtractTs:
         ruleId: The Rule ID.
     """
 
-    time: datetime.datetime
-    issueCount: int
-    competenceStart: datetime.datetime
-    competenceEnd: datetime.datetime
-    providerName: Optional[str] = None
-    curveName: Optional[str] = None
-    ruleName: Optional[str] = None
-    assignmentId: int = 0
-    marketDataId: int = 0
-    ruleId: int = 0
+    time: datetime.datetime = field(metadata={WIRE_NAME_KEY: "T"})
+    issueCount: int = field(metadata={WIRE_NAME_KEY: "D"})
+    competenceStart: datetime.datetime = field(metadata={WIRE_NAME_KEY: "S"})
+    competenceEnd: datetime.datetime = field(metadata={WIRE_NAME_KEY: "E"})
+    providerName: str | None = field(default=None, metadata={WIRE_NAME_KEY: "P"})
+    curveName: str | None = field(default=None, metadata={WIRE_NAME_KEY: "C"})
+    ruleName: str | None = field(default=None, metadata={WIRE_NAME_KEY: "R"})
+    assignmentId: int = field(default=0, metadata={WIRE_NAME_KEY: "AID"})
+    marketDataId: int = field(default=0, metadata={WIRE_NAME_KEY: "MKID"})
+    ruleId: int = field(default=0, metadata={WIRE_NAME_KEY: "RID"})
 
 
 @dataclass
@@ -55,14 +56,14 @@ class CheckResultExtractVts:
         ruleId: The Rule ID.
     """
 
-    time: datetime.datetime
-    issueCount: int
-    competenceStart: datetime.datetime
-    competenceEnd: datetime.datetime
-    providerName: Optional[str] = None
-    curveName: Optional[str] = None
-    ruleName: Optional[str] = None
-    assignmentId: int = 0
-    marketDataId: int = 0
-    ruleId: int = 0
-    version: Optional[datetime.datetime] = None
+    time: datetime.datetime = field(metadata={WIRE_NAME_KEY: "T"})
+    issueCount: int = field(metadata={WIRE_NAME_KEY: "D"})
+    competenceStart: datetime.datetime = field(metadata={WIRE_NAME_KEY: "S"})
+    competenceEnd: datetime.datetime = field(metadata={WIRE_NAME_KEY: "E"})
+    providerName: str | None = field(default=None, metadata={WIRE_NAME_KEY: "P"})
+    curveName: str | None = field(default=None, metadata={WIRE_NAME_KEY: "C"})
+    ruleName: str | None = field(default=None, metadata={WIRE_NAME_KEY: "R"})
+    assignmentId: int = field(default=0, metadata={WIRE_NAME_KEY: "AID"})
+    marketDataId: int = field(default=0, metadata={WIRE_NAME_KEY: "MKID"})
+    ruleId: int = field(default=0, metadata={WIRE_NAME_KEY: "RID"})
+    version: datetime.datetime | None = field(default=None, metadata={WIRE_NAME_KEY: "V"})

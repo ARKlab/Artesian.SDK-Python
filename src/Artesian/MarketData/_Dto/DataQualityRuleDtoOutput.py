@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 
 from .._Enum.CheckAggregatedStatus import CheckAggregatedStatus
 from .DataQualityRuleDtoInput import DataQualityRuleDtoInput
@@ -18,4 +17,4 @@ class DataQualityRuleDtoOutput(DataQualityRuleDtoInput):
             has been executed yet
     """
 
-    aggregatedStatus: Optional[CheckAggregatedStatus] = None
+    aggregatedStatus: CheckAggregatedStatus | None = None
