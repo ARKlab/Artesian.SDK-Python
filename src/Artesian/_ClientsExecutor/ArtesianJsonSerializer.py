@@ -7,7 +7,7 @@ DTOs stay plain dataclasses. On the wire:
 - a dict is sent as ``[{"Key": k, "Value": v}]`` only when its field is marked with
   :func:`keyValueArrayField` (the marker applies to every dict nested inside that field),
   otherwise as a JSON object. When decoding, any dict accepts both shapes;
-- a field may override its wire name via ``metadata={WIRE_NAME_KEY: "X"}``; a trailing ``_`` is dropped;
+- a field may override its wire name via ``metadata={WIRE_NAME_KEY: "X"}``;
 - read-only properties of a dataclass (e.g. a ``type`` discriminator) are sent as well;
 - polymorphic Data Quality bases (see ``_POLYMORPHIC``) decode to the concrete subclass.
 
@@ -37,7 +37,7 @@ def keyValueArrayField() -> None:
 
 
 def _pascal(name: str) -> str:
-    return name[0].upper() + name[1:].rstrip("_")
+    return name[0].upper() + name[1:]
 
 
 def _wireName(f: Field[Any]) -> str:
