@@ -379,7 +379,7 @@ jobs:
           import re
           from pathlib import Path
 
-          match = re.fullmatch(r"v\d+\.\d+\.\d+(?:b\d+|a\d+\.post\d+)?", os.environ["GITHUB_REF_NAME"])
+          match = re.fullmatch(r"v\d+\.\d+\.\d+(?:b\d+|rc\d+|\.dev\d+|a\d+\.post\d+)?", os.environ["GITHUB_REF_NAME"])
           if not match:
               raise SystemExit("Invalid release tag")
           version = match.group()[1:]

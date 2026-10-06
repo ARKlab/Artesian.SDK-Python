@@ -3,7 +3,7 @@
 set -euo pipefail
 
 if [[ $# -ne 2 ]]; then
-  echo "::error::Usage: $0 <tag> <ga|beta|preview>"
+  echo "::error::Usage: $0 <tag> <ga|beta|dev|rc|preview>"
   exit 2
 fi
 

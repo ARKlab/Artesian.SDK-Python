@@ -1,4 +1,5 @@
 import os
+import re
 import subprocess
 import unittest
 from pathlib import Path
@@ -36,3 +37,12 @@ class TestReleaseTags(unittest.TestCase):
                     check=False,
                 )
                 self.assertEqual(result.returncode == 0, valid, result.stdout + result.stderr)
+
+    def test_publish_filename_check_accepts_all_kinds(self) -> None:
+        workflow = (REPO_ROOT / ".github/workflows/python-tests.yml").read_text(encoding="utf-8")
+        found = re.search(r're\.fullmatch\(r"(v[^"]+)", os\.environ\["GITHUB_REF_NAME"\]\)', workflow)
+        self.assertIsNotNone(found)
+        assert found is not None
+        for tag in ("v4.3.0", "v4.3.0b1", "v5.0.0.dev1", "v5.0.0rc2", "v4.3.0a69.post2"):
+            with self.subTest(tag=tag):
+                self.assertTrue(re.fullmatch(found.group(1), tag))
