@@ -21,6 +21,16 @@ case "$TYPE" in
     EXPECTED='vX.Y.ZbN'
     ;;
 
+  dev)
+    PATTERN='^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.dev(0|[1-9][0-9]*)$'
+    EXPECTED='vX.Y.Z.devN'
+    ;;
+
+  rc)
+    PATTERN='^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)rc(0|[1-9][0-9]*)$'
+    EXPECTED='vX.Y.ZrcN'
+    ;;
+
   preview)
     PATTERN='^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)a(0|[1-9][0-9]*)\.post(0|[1-9][0-9]*)$'
     EXPECTED='vX.Y.Za{PR_NUMBER}.post{ITERATION}'

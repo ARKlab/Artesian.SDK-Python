@@ -12,8 +12,14 @@ class TestReleaseTags(unittest.TestCase):
         env = {key: value for key, value in os.environ.items() if key != "GITHUB_REF"}
         for tag, kind, valid in (
             ("v4.3.0", "ga", True),
+            ("v5.0.0a1", "ga", False),
+            ("v5.0.0b1", "ga", False),
             ("v4.3.0b1", "beta", True),
             ("v5.0.0b1", "beta", True),
+            ("v5.0.0.dev1", "dev", True),
+            ("v5.0.0.dev01", "dev", False),
+            ("v5.0.0rc2", "rc", True),
+            ("v5.0.0rc02", "rc", False),
             ("v4.3.0a69.post2", "preview", True),
             ("v4.3.0a69.2", "preview", False),
             ("v4.3.0a069.post02", "preview", False),
