@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 
 from .._Enum import DerivedAlgorithm
 
@@ -19,5 +18,5 @@ class DerivedCfg:
 
     derivedAlgorithm: DerivedAlgorithm
     version: int
-    orderedReferencedMarketDataIds: Optional[list[int]]
-    transform: Optional[str] = None
+    orderedReferencedMarketDataIds: list[int] | None
+    transform: str | None = None

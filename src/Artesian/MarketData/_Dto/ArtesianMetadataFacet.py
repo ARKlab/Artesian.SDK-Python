@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 
 from .._Enum import ArtesianMetadataFacetType
 
@@ -14,7 +13,7 @@ class ArtesianMetadataFacetCount:
         count: the count of ArtesianMetadataFacet
     """
 
-    value: Optional[str] = None
+    value: str | None = None
     count: int = 0
 
 
@@ -29,6 +28,6 @@ class ArtesianMetadataFacet:
         values: list of ArtesianMetadataFacetCount
     """
 
-    facetName: Optional[str] = None
-    facetType: Optional[ArtesianMetadataFacetType] = None
-    values: Optional[list[ArtesianMetadataFacetCount]] = None
+    facetName: str | None = None
+    facetType: ArtesianMetadataFacetType | None = None
+    values: list[ArtesianMetadataFacetCount] | None = None

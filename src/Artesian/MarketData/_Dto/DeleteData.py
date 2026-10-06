@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Optional
 
 from .MarketDataIdentifier import MarketDataIdentifier
 
@@ -29,8 +28,8 @@ class DeleteData:
     ID: MarketDataIdentifier
     rangeStart: datetime
     rangeEnd: datetime
-    timezone: Optional[str] = None
-    product: Optional[list[str]] = None
-    version: Optional[datetime] = None
+    timezone: str | None = None
+    product: list[str] | None = None
+    version: datetime | None = None
     deferCommandExecution: bool = False
     deferDataGeneration: bool = True

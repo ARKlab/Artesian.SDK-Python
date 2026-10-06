@@ -1,6 +1,5 @@
 import datetime
 from dataclasses import dataclass
-from typing import Optional
 
 from .DerivedCfg import DerivedCfg
 from .MarketDataEntityInput import MarketDataEntityInput
@@ -30,11 +29,11 @@ class MarketDataEntityOutput(MarketDataEntityInput):
         created: the time the market data has been created
     """
 
-    lastUpdated: Optional[datetime.datetime] = None
-    dataLastWritedAt: Optional[datetime.datetime] = None
-    dataRangeStart: Optional[datetime.date] = None
-    dataRangeEnd: Optional[datetime.date] = None
-    created: Optional[datetime.datetime] = None
+    lastUpdated: datetime.datetime | None = None
+    dataLastWritedAt: datetime.datetime | None = None
+    dataRangeStart: datetime.date | None = None
+    dataRangeEnd: datetime.date | None = None
+    created: datetime.datetime | None = None
     # tranform: missing due to handling class hierarchies deserializations
 
     def _validateUpdateDerivedCfg(self, derivedCfgUpdate: DerivedCfg) -> None:
