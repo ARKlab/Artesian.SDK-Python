@@ -238,6 +238,8 @@ class TestPolymorphicSerialization(unittest.TestCase):
         payloads = (
             {"Type": "CompletenessAndFreshness", "MarketDataType": "MarketAssessment"},
             {"Type": "Outlier", "Model": {"Type": "Outlier", "Model": "Nope"}},
+            {"Type": "Nope", "MarketDataType": "ActualTimeSerie"},
+            {"MarketDataType": "ActualTimeSerie"},
         )
         for payload in payloads:
             with self.subTest(payload=payload), self.assertRaises(ValueError):

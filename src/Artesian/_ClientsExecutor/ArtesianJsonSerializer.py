@@ -241,8 +241,11 @@ def _ruleConfig(raw: dict[str, Any]) -> type:
         VersionedCompletenessAndFreshnessConfigDto,
     )
 
-    if raw.get("Type") == "Outlier":
+    ruleType = raw.get("Type")
+    if ruleType == "Outlier":
         return OutlierConfigDto if "Model" in raw else DataQualityRuleConfigDto
+    if ruleType != "CompletenessAndFreshness":
+        raise ValueError(f"Unsupported rule type: {ruleType}")
     marketDataType = raw.get("MarketDataType")
     if marketDataType is None:
         return DataQualityRuleConfigDto
