@@ -225,6 +225,8 @@ def _outlierModel(raw: dict[str, Any]) -> type:
     from Artesian.MarketData._Dto.OutlierAbsoluteBoundConfigDto import OutlierAbsoluteBoundConfigDto
     from Artesian.MarketData._Dto.OutlierRefCurveConfigDto import OutlierRefCurveConfigDto
 
+    if raw.get("Type", "Outlier") != "Outlier":
+        raise ValueError(f"Unsupported outlier model rule type: {raw.get('Type')}")
     types_ = {"AbsoluteBound": OutlierAbsoluteBoundConfigDto, "RefCurve": OutlierRefCurveConfigDto}
     if raw.get("Model") in types_:
         return types_[raw["Model"]]

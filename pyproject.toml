@@ -48,7 +48,7 @@ testpaths = [
 addopts = "--doctest-modules --junitxml=junit/test-results.xml --cov --cov-report=term-missing --cov-report=xml --cov-report=html"
 
 [tool.uv]
-required-version = "==0.12.19"
+required-version = "==0.12.23"
 
 [dependency-groups]
 dev = [

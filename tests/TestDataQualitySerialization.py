@@ -238,6 +238,7 @@ class TestPolymorphicSerialization(unittest.TestCase):
         payloads = (
             {"Type": "CompletenessAndFreshness", "MarketDataType": "MarketAssessment"},
             {"Type": "Outlier", "Model": {"Type": "Outlier", "Model": "Nope"}},
+            {"Type": "Outlier", "Model": {"Type": "CompletenessAndFreshness", "Model": "RefCurve"}},
             {"Type": "Nope", "MarketDataType": "ActualTimeSerie"},
             {"MarketDataType": "ActualTimeSerie"},
         )
@@ -254,6 +255,15 @@ class TestPolymorphicSerialization(unittest.TestCase):
                 result = artesianJsonDeserialize(artesianJsonSerialize(model), OutlierModelConfigDto)
 
                 self.assertEqual(result, model)
+
+    def test_outlier_model_type_is_optional_but_must_not_conflict(self: TestPolymorphicSerialization) -> None:
+        result = artesianJsonDeserialize(
+            {"Model": "RefCurve", "ReferenceMarketDataId": 3, "TolerancePerc": 0.5}, OutlierModelConfigDto
+        )
+
+        self.assertEqual(result, OutlierRefCurveConfigDto(referenceMarketDataId=3, tolerancePerc=0.5))
+        with self.assertRaises(ValueError):
+            artesianJsonDeserialize({"Type": "CompletenessAndFreshness", "Model": "RefCurve"}, OutlierModelConfigDto)
 
     def test_trigger_config_round_trips_to_concrete_types(self: TestPolymorphicSerialization) -> None:
         samples: list[TriggerConfigDto] = [
