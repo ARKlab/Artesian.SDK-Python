@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 
 from .._Enum.RuleType import RuleType
 from .DataQualityRuleConfigDto import DataQualityRuleConfigDto
@@ -24,4 +23,4 @@ class DataQualityRuleDtoInput:
     configuration: DataQualityRuleConfigDto
     version: int
     id: int = 0
-    eTag: Optional[str] = None
+    eTag: str | None = None

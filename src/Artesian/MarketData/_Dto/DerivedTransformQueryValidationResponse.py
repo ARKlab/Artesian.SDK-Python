@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 
 from .TimeSerieData import TimeSerieData
 
@@ -13,7 +12,7 @@ class Error:
 
     """
 
-    message: Optional[str] = None
+    message: str | None = None
 
 
 @dataclass
@@ -28,4 +27,4 @@ class DerivedTransformQueryValidationResponse:
 
     data: TimeSerieData
     valid: bool
-    error: Optional[Error] = None
+    error: Error | None = None

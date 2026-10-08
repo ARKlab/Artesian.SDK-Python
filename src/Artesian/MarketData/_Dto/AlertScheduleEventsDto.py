@@ -1,6 +1,5 @@
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Optional
 
 from .DqCheckChangeEventDto import DqCheckChangeEventDtoOutput
 
@@ -15,7 +14,7 @@ class AlertScheduleEventsDtoOutput:
         events: The DQ check change events for this schedule occurrence
     """
 
-    scheduleTime: Optional[datetime] = None
+    scheduleTime: datetime | None = None
     events: list[DqCheckChangeEventDtoOutput] = field(default_factory=list)
 
 

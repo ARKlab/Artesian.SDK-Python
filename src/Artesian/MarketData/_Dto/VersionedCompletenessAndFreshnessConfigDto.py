@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 
 from .._Enum.PeriodPrecision import PeriodPrecision
 from .CompletenessAndFreshnessConfigDto import CompletenessAndFreshnessConfigDto
@@ -25,4 +24,4 @@ class VersionedCompletenessAndFreshnessConfigDto(CompletenessAndFreshnessConfigD
 
     versionToleranceFrom: str
     versionToleranceTo: str
-    versionPrecision: Optional[PeriodPrecision] = None
+    versionPrecision: PeriodPrecision | None = None

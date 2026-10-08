@@ -1,6 +1,7 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import date, datetime
-from typing import Optional
+
+from Artesian._ClientsExecutor.ArtesianJsonSerializer import WIRE_NAME_KEY
 
 from .._Enum.CheckAggregatedStatus import CheckAggregatedStatus
 
@@ -27,9 +28,9 @@ class DataQualityStatusSummaryDto:
             check results are available yet
     """
 
-    lastCheckTime: Optional[datetime] = None
-    overallStatus: Optional[CheckAggregatedStatus] = None
+    lastCheckTime: datetime | None = None
+    overallStatus: CheckAggregatedStatus | None = None
     activeRulesCount: int = 0
     failedRulesCount: int = 0
-    from_: Optional[date] = None
-    to: Optional[date] = None
+    from_: date | None = field(default=None, metadata={WIRE_NAME_KEY: "From"})
+    to: date | None = None

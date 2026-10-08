@@ -3,7 +3,7 @@
 set -euo pipefail
 
 if [[ $# -ne 2 ]]; then
-  echo "::error::Usage: $0 <tag> <ga|beta|preview>"
+  echo "::error::Usage: $0 <tag> <ga|beta|dev|rc|preview>"
   exit 2
 fi
 
@@ -19,6 +19,16 @@ case "$TYPE" in
   beta)
     PATTERN='^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)b(0|[1-9][0-9]*)$'
     EXPECTED='vX.Y.ZbN'
+    ;;
+
+  dev)
+    PATTERN='^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.dev(0|[1-9][0-9]*)$'
+    EXPECTED='vX.Y.Z.devN'
+    ;;
+
+  rc)
+    PATTERN='^v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)rc(0|[1-9][0-9]*)$'
+    EXPECTED='vX.Y.ZrcN'
     ;;
 
   preview)

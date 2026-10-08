@@ -59,8 +59,8 @@ To update dependencies intentionally, use `uv lock --upgrade` (or
 
 Use Ruff's format-on-save integration or `uv run ruff format PATH` for edited
 Python files. CI enforces formatting and linting for SDK source and tests;
-samples remain excluded. Explicit `Any` is limited to the jsons adapter's
-dynamic plugin keyword arguments and the test decorators' dynamic unittest instances.
+samples remain excluded. Explicit `Any` is limited to the JSON wire-schema
+compiler's runtime annotations and the test decorators' dynamic unittest instances.
 
 `uv run --locked pyrefly check` checks the SDK and tests on the development Python
 version without a diagnostic baseline. CI also checks each supported version.
@@ -68,11 +68,22 @@ Keep annotations accurate without
 changing public method names, parameters, or runtime behavior.
 Use `TypeVar` and `Generic[T]` for generic classes until the minimum supported
 Python is 3.12; PEP 695's `class Name[T]` syntax cannot be parsed by Python 3.11.
-MarketData DTOs retain `Optional[T]` because jsons 1.6 cannot deserialize their
-`T | None` annotations on Python 3.11.
+DTOs use PEP 604 `T | None` annotations; the msgspec wire-schema compiler
+resolves them on every supported Python version.
 Unknown responses use `object` rather than `Any`, and nullable service results
-include `None`. Preserve public import paths and jsons wire formats when
+include `None`. Preserve public import paths and wire formats when
 changing internal typing.
+
+## 3.1 JSON wire format
+
+`Artesian._ClientsExecutor.ArtesianJsonSerializer` maps DTO dataclasses to the
+Artesian JSON wire format with msgspec: PascalCase keys, omitted `None` fields,
+enums by name, and RFC 3339 datetimes (naive stays naive, UTC ends in `Z`,
+zero microseconds are omitted). A `dict` field is sent as a JSON object unless
+it is declared with `keyValueArrayField()`, which sends it (and every dict
+nested in it) as `[{"Key": k, "Value": v}]`. Decoding into any `dict` accepts
+both shapes. `benchmark/bench_serde.py` measures large payloads; see
+`benchmark/README.md`.
 
 ## 4. CI and coverage
 
@@ -93,6 +104,10 @@ version on PyPI is the tag without `v`; no version remapping is performed.
 
 - **Stable:** `vX.Y.Z` (for example, `v4.3.0`). The tagged commit must be
   contained in `master`.
+- **Development and release candidate:** `vX.Y.Z.devN` and `vX.Y.ZrcN`
+  (for example, `v5.0.0.dev1` and `v5.0.0rc2`). The tagged commit must be
+  contained in `master`. Standalone alpha tags such as `v5.0.0a1` are not
+  accepted.
 - **Beta:** `vX.Y.ZbN` (for example, `v4.3.0b1` or `v5.0.0b1`). The tagged
   commit must be contained in `develop-beta`. Compared with the latest stable
   tag on `master`, the base version must be either the next minor

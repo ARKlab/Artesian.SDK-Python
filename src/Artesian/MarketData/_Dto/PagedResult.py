@@ -11,8 +11,8 @@ from Artesian.MarketData._Dto.QualityNotificationAlertAssignmentDto import (
 )
 from Artesian.MarketData._Dto.QualityNotificationAlertDto import QualityNotificationAlertDtoOutput
 
-# Has been tried extensively to use TypeVar and Generic for this purpose
-# jsons library fails with Generics thus we opted for the following
+# Concrete subclasses per payload (the former jsons serializer failed with Generics);
+# kept to preserve the public types.
 
 
 @dataclass

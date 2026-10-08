@@ -1,6 +1,5 @@
 import datetime
 from dataclasses import dataclass
-from typing import Optional
 
 from Artesian.MarketData._Dto.MarketDataQualityRuleAssignmentDto import MarketDataQualityRuleAssignmentDtoOutput
 
@@ -31,11 +30,11 @@ class CheckResultCheckSummaryDto:
     rangeStart: datetime.date
     rangeEnd: datetime.date
     aggregatedStatus: str
-    assignment: Optional[MarketDataQualityRuleAssignmentDtoOutput] = None
-    product: Optional[str] = None
-    version: Optional[datetime.datetime] = None
-    lastUpdated: Optional[datetime.datetime] = None
-    created: Optional[datetime.datetime] = None
-    rangeExactStart: Optional[datetime.datetime] = None
-    rangeExactEnd: Optional[datetime.datetime] = None
-    versionFrom: Optional[datetime.datetime] = None
+    assignment: MarketDataQualityRuleAssignmentDtoOutput | None = None
+    product: str | None = None
+    version: datetime.datetime | None = None
+    lastUpdated: datetime.datetime | None = None
+    created: datetime.datetime | None = None
+    rangeExactStart: datetime.datetime | None = None
+    rangeExactEnd: datetime.datetime | None = None
+    versionFrom: datetime.datetime | None = None

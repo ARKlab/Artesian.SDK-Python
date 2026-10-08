@@ -1,5 +1,4 @@
 from dataclasses import dataclass
-from typing import Optional
 
 from Artesian.MarketData._Dto.DataQualityStatusSummaryDto import DataQualityStatusSummaryDto
 from Artesian.MarketData._Dto.MarketDataEntityOutputEnriched import MarketDataEntityOutputEnriched
@@ -21,6 +20,6 @@ class MarketDataDqStatusSummaryDto:
     """
 
     marketDataId: int
-    statusSummary: Optional[DataQualityStatusSummaryDto] = None
-    marketData: Optional[MarketDataEntityOutputEnriched] = None
-    assignments: Optional[list] = None
+    statusSummary: DataQualityStatusSummaryDto | None = None
+    marketData: MarketDataEntityOutputEnriched | None = None
+    assignments: list | None = None

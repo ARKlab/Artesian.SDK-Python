@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Optional
 
 from .DataQualityRuleDtoOutput import DataQualityRuleDtoOutput
 from .MarketDataEntityOutputEnriched import MarketDataEntityOutputEnriched
@@ -22,7 +21,7 @@ class MarketDataQualityRuleAssignmentDtoInput:
     id: int = 0
     marketDataId: int = 0
     dataQualityRuleId: int = 0
-    eTag: Optional[str] = None
+    eTag: str | None = None
 
 
 @dataclass
@@ -42,7 +41,7 @@ class MarketDataQualityRuleAssignmentDtoOutput(MarketDataQualityRuleAssignmentDt
         version: version number for concurrency tracking
     """
 
-    marketData: Optional[MarketDataEntityOutputEnriched] = None
-    dataQualityRule: Optional[DataQualityRuleDtoOutput] = None
-    lookbackDate: Optional[datetime] = None
+    marketData: MarketDataEntityOutputEnriched | None = None
+    dataQualityRule: DataQualityRuleDtoOutput | None = None
+    lookbackDate: datetime | None = None
     version: int = 0

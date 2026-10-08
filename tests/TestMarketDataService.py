@@ -592,8 +592,8 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
         expectedJson = {
             "Data": {
                 "Rows": [
-                    {"Key": "2020-01-01T01:00:00.000000", "Value": 42.0},
-                    {"Key": "2020-01-02T02:00:00.000000", "Value": 43.0},
+                    {"Key": "2020-01-01T01:00:00", "Value": 42.0},
+                    {"Key": "2020-01-02T02:00:00", "Value": 43.0},
                 ],
                 "Type": "ActualTimeSerie",
             },

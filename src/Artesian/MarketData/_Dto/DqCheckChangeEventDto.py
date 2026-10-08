@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Optional
 
 from .._Enum.CheckAggregatedStatus import CheckAggregatedStatus
 
@@ -15,8 +14,8 @@ class LocalDateTimeRange:
         end: end timestamp (exclusive)
     """
 
-    start: Optional[datetime] = None
-    end: Optional[datetime] = None
+    start: datetime | None = None
+    end: datetime | None = None
 
 
 @dataclass
@@ -43,13 +42,13 @@ class DqCheckChangeEventDtoOutput:
     marketDataId: int = 0
     ruleId: int = 0
     assignmentId: int = 0
-    version: Optional[datetime] = None
-    product: Optional[str] = None
-    rangeImpacted: Optional[LocalDateTimeRange] = None
-    newStatus: Optional[CheckAggregatedStatus] = None
-    oldStatus: Optional[CheckAggregatedStatus] = None
-    timestamp: Optional[datetime] = None
-    ruleName: Optional[str] = None
+    version: datetime | None = None
+    product: str | None = None
+    rangeImpacted: LocalDateTimeRange | None = None
+    newStatus: CheckAggregatedStatus | None = None
+    oldStatus: CheckAggregatedStatus | None = None
+    timestamp: datetime | None = None
+    ruleName: str | None = None
     ruleVersion: int = 0
-    marketDataName: Optional[str] = None
-    provider: Optional[str] = None
+    marketDataName: str | None = None
+    provider: str | None = None

@@ -1,6 +1,5 @@
 import datetime
 from dataclasses import dataclass
-from typing import Optional
 
 from .DataQualityStatusSummaryDto import DataQualityStatusSummaryDto
 from .MarketDataEntityOutput import MarketDataEntityOutput
@@ -10,9 +9,9 @@ from .MarketDataEntityOutput import MarketDataEntityOutput
 class MarketDataCurveSummaryDto:
     """Summary information about the market data curve."""
 
-    dataLastWritedAt: Optional[datetime.datetime] = None
-    dataRangeStart: Optional[datetime.date] = None
-    dataRangeEnd: Optional[datetime.date] = None
+    dataLastWritedAt: datetime.datetime | None = None
+    dataRangeStart: datetime.date | None = None
+    dataRangeEnd: datetime.date | None = None
 
 
 @dataclass
@@ -27,5 +26,5 @@ class MarketDataEntityOutputEnriched(MarketDataEntityOutput):
             Populated when includeCurveSummary=true.
     """
 
-    dataQualityStatusSummary: Optional[dict[str, DataQualityStatusSummaryDto]] = None
-    curveSummary: Optional[MarketDataCurveSummaryDto] = None
+    dataQualityStatusSummary: dict[str, DataQualityStatusSummaryDto] | None = None
+    curveSummary: MarketDataCurveSummaryDto | None = None
