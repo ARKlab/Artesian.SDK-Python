@@ -323,8 +323,8 @@ class GMEPublicOfferQuery:
             Market.MIA3: "MIA3",
             Market.MRR: "MRR",
             Market.AFRR: "AFRR",
-            Market.GMP_ASTA: "GMP_ASTA",
-            Market.GMP_Cont: "GMP_Cont",
+            Market.MGP_ASTA: "MGP_ASTA",
+            Market.MGP_Cont: "MGP_Cont",
             Market.MI_Cont: "MI_Cont",
             Market.MGS: "MGS",
         }
