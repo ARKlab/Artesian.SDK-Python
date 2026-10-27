@@ -38,6 +38,7 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools_scm]
 write_to = "src/Artesian/_version.py"
+version_scheme = "only-version"
 local_scheme = "dirty-tag"
 
 [tool.pytest.ini_options]
@@ -48,13 +49,13 @@ testpaths = [
 addopts = "--doctest-modules --junitxml=junit/test-results.xml --cov --cov-report=term-missing --cov-report=xml --cov-report=html"
 
 [tool.uv]
-required-version = "==0.12.19"
+required-version = "==0.13.6"
 
 [dependency-groups]
 dev = [
     {include-group = "test"},
-    "pyrefly==1.3.2",
-    "ruff==0.16.10",
+    "pyrefly==1.4.0",
+    "ruff==0.17.3",
 ]
 test = [
     "pytest>=8.3.5",
@@ -69,7 +70,7 @@ include = ["*.py", "*.pyi"]
 extend-exclude = ["src/Artesian/_version.py", "samples"]
 
 [tool.ruff.lint]
-extend-select = ["ANN"]
+extend-select = ["ANN", "DTZ"]
 
 [tool.ruff.lint.flake8-bugbear]
 # Returns an immutable dataclasses.field() specifier marking Key/Value-array dicts.
