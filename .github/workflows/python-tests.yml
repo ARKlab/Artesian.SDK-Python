@@ -63,14 +63,14 @@ jobs:
         run: uv build
 
       - name: Upload pytest test results
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         if: always()
         with:
           name: test-results-build-${{ matrix.python-version }}-${{ matrix.os }}
           path: junit/test-results-${{ matrix.python-version }}-${{ matrix.os }}.xml
 
       - name: Upload build coverage
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         if: always()
         with:
           name: coverage-build-${{ matrix.python-version }}-${{ matrix.os }}
@@ -127,7 +127,7 @@ jobs:
 
       - name: "Upload combined coverage"
         if: ${{ needs.test-matrix.result == 'success' }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: coverage-combined
           path: |
@@ -339,7 +339,7 @@ jobs:
           sha256sum dist/*.whl dist/*.tar.gz >> "$GITHUB_STEP_SUMMARY"
 
       - name: "Upload release distributions"
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: release-dist
           path: |
