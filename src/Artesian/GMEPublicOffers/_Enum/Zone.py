@@ -27,5 +27,4 @@ class Zone(Enum):
     BSP = 22
     XAUS = 23
     XFRA = 24
-    XFRA = 24
     UNKNOWN = 99
