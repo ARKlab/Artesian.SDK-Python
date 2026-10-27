@@ -30,7 +30,7 @@ from Artesian.MarketData import (
 from Artesian.MarketData._Dto.TimeSerieData import TimeSerieData
 
 BASE = "https://bench.local"
-START = datetime(2020, 1, 1)  # noqa: DTZ001 - Artesian rows are naive local times
+START = datetime(2020, 1, 1)
 
 
 def _times(n: int) -> list[datetime]:

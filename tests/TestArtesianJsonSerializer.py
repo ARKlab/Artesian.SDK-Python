@@ -17,7 +17,7 @@ from Artesian._ClientsExecutor.ArtesianJsonSerializer import (
 from Artesian.MarketData import MarketDataType, UpsertData
 from Artesian.MarketData._Dto.TimeSerieData import TimeSerieData
 
-NAIVE = datetime(2020, 1, 1, 1)  # noqa: DTZ001 - Artesian rows are naive local times
+NAIVE = datetime(2020, 1, 1, 1)
 
 
 @dataclass
@@ -112,7 +112,7 @@ class TestArtesianJsonSerializer(unittest.TestCase):
         self.assertEqual(marked, {"rows", "marketAssessment", "bidAsk", "auctionRows"})
 
     def test_decode_accepts_both_dict_shapes(self) -> None:
-        expected = TimeSerieData(MarketDataType.ActualTimeSerie, rows={NAIVE: 1.0, datetime(2020, 1, 2): None})  # noqa: DTZ001
+        expected = TimeSerieData(MarketDataType.ActualTimeSerie, rows={NAIVE: 1.0, datetime(2020, 1, 2): None})
         bodies = [
             (
                 b'{"Type":"ActualTimeSerie","Rows":[{"Key":"2020-01-01T01:00:00","Value":1.0},'
