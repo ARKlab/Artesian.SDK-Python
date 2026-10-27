@@ -69,7 +69,7 @@ include = ["*.py", "*.pyi"]
 extend-exclude = ["src/Artesian/_version.py", "samples"]
 
 [tool.ruff.lint]
-extend-select = ["ANN"]
+extend-select = ["ANN", "DTZ"]
 
 [tool.ruff.lint.flake8-bugbear]
 # Returns an immutable dataclasses.field() specifier marking Key/Value-array dicts.
