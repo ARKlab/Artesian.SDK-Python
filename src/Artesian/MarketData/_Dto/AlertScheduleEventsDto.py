@@ -16,9 +16,7 @@ class AlertScheduleEventsDtoOutput:
     """
 
     scheduleTime: datetime | None = None
-    events: PagedResultDqCheckChangeEventDtoOutput = field(
-        default_factory=PagedResultDqCheckChangeEventDtoOutput
-    )
+    events: PagedResultDqCheckChangeEventDtoOutput = field(default_factory=PagedResultDqCheckChangeEventDtoOutput)
 
 
 AlertScheduleEventsOutput = AlertScheduleEventsDtoOutput

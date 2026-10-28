@@ -244,7 +244,12 @@ class TestPolymorphicSerialization(unittest.TestCase):
                 self.assertEqual(result, sample)
 
     def test_mas_and_bidask_rule_configurations_round_trip(self: TestPolymorphicSerialization) -> None:
-        samples: list[DataQualityRuleConfigDto] = [
+        samples: list[
+            MasCompletenessAndFreshnessConfigDto
+            | BidAskCompletenessAndFreshnessConfigDto
+            | MasOutlierConfigDto
+            | BidAskOutlierConfigDto
+        ] = [
             MasCompletenessAndFreshnessConfigDto(
                 scheduleConfig=self._schedule(),
                 recordValidationConfig=RecordValidationConfigDto(recordRangeFrom="PT0S", recordRangeTo="PT1H"),

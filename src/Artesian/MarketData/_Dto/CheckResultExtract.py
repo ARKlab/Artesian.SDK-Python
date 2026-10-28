@@ -25,9 +25,7 @@ class CheckResultExtractTs:
     issueCount: int = field(metadata={WIRE_NAME_KEY: "D"})
     competenceStart: datetime.datetime = field(metadata={WIRE_NAME_KEY: "S"})
     competenceEnd: datetime.datetime = field(metadata={WIRE_NAME_KEY: "E"})
-    providerName: str | None = field(
-        default=None, metadata={WIRE_NAME_KEY: "P"}
-    )
+    providerName: str | None = field(default=None, metadata={WIRE_NAME_KEY: "P"})
     curveName: str | None = field(default=None, metadata={WIRE_NAME_KEY: "C"})
     ruleName: str | None = field(default=None, metadata={WIRE_NAME_KEY: "R"})
     assignmentId: int = field(default=0, metadata={WIRE_NAME_KEY: "AID"})
@@ -58,17 +56,13 @@ class CheckResultExtractVts:
     issueCount: int = field(metadata={WIRE_NAME_KEY: "D"})
     competenceStart: datetime.datetime = field(metadata={WIRE_NAME_KEY: "S"})
     competenceEnd: datetime.datetime = field(metadata={WIRE_NAME_KEY: "E"})
-    providerName: str | None = field(
-        default=None, metadata={WIRE_NAME_KEY: "P"}
-    )
+    providerName: str | None = field(default=None, metadata={WIRE_NAME_KEY: "P"})
     curveName: str | None = field(default=None, metadata={WIRE_NAME_KEY: "C"})
     ruleName: str | None = field(default=None, metadata={WIRE_NAME_KEY: "R"})
     assignmentId: int = field(default=0, metadata={WIRE_NAME_KEY: "AID"})
     marketDataId: int = field(default=0, metadata={WIRE_NAME_KEY: "MKID"})
     ruleId: int = field(default=0, metadata={WIRE_NAME_KEY: "RID"})
-    version: datetime.datetime | None = field(
-        default=None, metadata={WIRE_NAME_KEY: "V"}
-    )
+    version: datetime.datetime | None = field(default=None, metadata={WIRE_NAME_KEY: "V"})
 
 
 @dataclass
