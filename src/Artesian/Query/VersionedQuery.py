@@ -377,7 +377,11 @@ class VersionedQuery(_Query[VersionedQueryParameters]):
         qps = self.__partition.PartitionVersioned([self._queryParameters])
         urls = []
         for qp in qps:
-            url = f"/{self.__routePrefix}/{self.__buildVersionRoute()}/{self.__getGranularityPath(qp.granularity)}/{super()._buildExtractionRangeRoute(qp)}?_=1"
+            url = (
+                f"/{self.__routePrefix}/{self.__buildVersionRoute()}/"
+                f"{self.__getGranularityPath(qp.granularity)}/"
+                f"{super()._buildExtractionRangeRoute(qp)}?_=1"
+            )
             if qp.ids is not None:
                 sep = ","
                 ids = sep.join(map(str, qp.ids))
@@ -435,13 +439,19 @@ class VersionedQuery(_Query[VersionedQueryParameters]):
         if (self._queryParameters.versionSelectionConfig.versionsRange.dateStart is not None) and (
             self._queryParameters.versionSelectionConfig.versionsRange.dateEnd is not None
         ):
-            vr = f"{self._queryParameters.versionSelectionConfig.versionsRange.dateStart}/{self._queryParameters.versionSelectionConfig.versionsRange.dateEnd}"
+            vr = (
+                f"{self._queryParameters.versionSelectionConfig.versionsRange.dateStart}/"
+                f"{self._queryParameters.versionSelectionConfig.versionsRange.dateEnd}"
+            )
         elif self._queryParameters.versionSelectionConfig.versionsRange.period is not None:
             vr = f"{self._queryParameters.versionSelectionConfig.versionsRange.period}"
         elif (self._queryParameters.versionSelectionConfig.versionsRange.periodFrom is not None) and (
             self._queryParameters.versionSelectionConfig.versionsRange.periodTo is not None
         ):
-            vr = f"{self._queryParameters.versionSelectionConfig.versionsRange.periodFrom}/{self._queryParameters.versionSelectionConfig.versionsRange.periodTo}"
+            vr = (
+                f"{self._queryParameters.versionSelectionConfig.versionsRange.periodFrom}/"
+                f"{self._queryParameters.versionSelectionConfig.versionsRange.periodTo}"
+            )
         return vr
 
     def __getGranularityPath(self: VersionedQuery, granularity: Granularity | None) -> str:

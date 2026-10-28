@@ -125,7 +125,10 @@ class TestArtesianJsonSerializer(unittest.TestCase):
                 self.assertEqual(artesianJsonDecode(body, TimeSerieData), expected)
 
     def test_decode_nested_and_plain_dicts(self) -> None:
-        body = b'{"FirstName":"x","Kind":"MarketAssessment","Optional":3,"Nested":{"a":[{"Key":"b","Value":1}]},"Plain":[{"Key":"k","Value":2}]}'
+        body = (
+            b'{"FirstName":"x","Kind":"MarketAssessment","Optional":3,'
+            b'"Nested":{"a":[{"Key":"b","Value":1}]},"Plain":[{"Key":"k","Value":2}]}'
+        )
         expected = _Sample("x", MarketDataType.MarketAssessment, 3, nested={"a": {"b": 1}}, plain={"k": 2})
         self.assertEqual(artesianJsonDecode(body, _Sample), expected)
         self.assertEqual(artesianJsonDeserialize(artesianJsonSerialize(expected), _Sample), expected)

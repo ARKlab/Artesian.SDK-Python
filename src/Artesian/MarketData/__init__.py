@@ -7,9 +7,13 @@ from ._Dto import (
     ArtesianSearchResults,
     AuctionBids,
     AuctionBidValue,
+    BidAskCompletenessAndFreshnessConfigDto,
+    BidAskOutlierConfigDto,
     BidAskValue,
     CheckConversionResult,
     CheckResultCheckSummaryDto,
+    CheckResultExtractBidAsk,
+    CheckResultExtractMas,
     CheckResultExtractTs,
     CheckResultExtractVts,
     CompletenessAndFreshnessConfigDto,
@@ -34,6 +38,8 @@ from ._Dto import (
     MarketDataIdentifier,
     MarketDataQualityRuleAssignmentDtoInput,
     MarketDataQualityRuleAssignmentDtoOutput,
+    MasCompletenessAndFreshnessConfigDto,
+    MasOutlierConfigDto,
     OnEventTriggerConfigDto,
     OutlierAbsoluteBoundConfigDto,
     OutlierConfigDto,
@@ -43,6 +49,7 @@ from ._Dto import (
     PagedResultCheckResultCheckSummaryDto,
     PagedResultCurveRangeEntity,
     PagedResultDataQualityRuleDtoOutput,
+    PagedResultDqCheckChangeEventDtoOutput,
     PagedResultMarketDataQualityRuleAssignmentDtoOutput,
     PagedResultOverrideMetadataEntry,
     PagedResultQualityNotificationAlertAssignmentDtoOutput,
@@ -64,9 +71,11 @@ from ._Dto import (
 from ._Enum.AggregationRule import AggregationRule
 from ._Enum.AlertType import AlertType
 from ._Enum.ArtesianMetadataFacetType import ArtesianMetadataFacetType
+from ._Enum.BidAskDataQualityField import BidAskDataQualityField
 from ._Enum.CheckAggregatedStatus import CheckAggregatedStatus
 from ._Enum.DerivedAlgorithm import DerivedAlgorithm
 from ._Enum.MarketDataType import MarketDataType
+from ._Enum.MasDataQualityField import MasDataQualityField
 from ._Enum.OutlierModel import OutlierModel
 from ._Enum.OverrideKind import OverrideKind
 from ._Enum.PeriodPrecision import PeriodPrecision
@@ -86,10 +95,15 @@ __all__ = [
     "ArtesianSearchResults",
     "AuctionBidValue",
     "AuctionBids",
+    "BidAskCompletenessAndFreshnessConfigDto",
+    "BidAskDataQualityField",
+    "BidAskOutlierConfigDto",
     "BidAskValue",
     "CheckAggregatedStatus",
     "CheckConversionResult",
     "CheckResultCheckSummaryDto",
+    "CheckResultExtractBidAsk",
+    "CheckResultExtractMas",
     "CheckResultExtractTs",
     "CheckResultExtractVts",
     "CommonUnitOfMeasure",
@@ -119,6 +133,9 @@ __all__ = [
     "MarketDataQualityRuleAssignmentDtoOutput",
     "MarketDataService",
     "MarketDataType",
+    "MasCompletenessAndFreshnessConfigDto",
+    "MasDataQualityField",
+    "MasOutlierConfigDto",
     "OnEventTriggerConfigDto",
     "OutlierAbsoluteBoundConfigDto",
     "OutlierConfigDto",
@@ -130,6 +147,7 @@ __all__ = [
     "PagedResultCheckResultCheckSummaryDto",
     "PagedResultCurveRangeEntity",
     "PagedResultDataQualityRuleDtoOutput",
+    "PagedResultDqCheckChangeEventDtoOutput",
     "PagedResultMarketDataQualityRuleAssignmentDtoOutput",
     "PagedResultOverrideMetadataEntry",
     "PagedResultQualityNotificationAlertAssignmentDtoOutput",

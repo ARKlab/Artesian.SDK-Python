@@ -6,9 +6,7 @@ from Artesian._ClientsExecutor.ArtesianJsonSerializer import WIRE_NAME_KEY
 
 @dataclass
 class CheckResultExtractTs:
-    """
-    Compact extraction result for actual (non-versioned) time series.
-
+    """Compact extraction result for actual (non-versioned) time series.
 
     Attributes:
         time: The timestamp.
@@ -27,7 +25,9 @@ class CheckResultExtractTs:
     issueCount: int = field(metadata={WIRE_NAME_KEY: "D"})
     competenceStart: datetime.datetime = field(metadata={WIRE_NAME_KEY: "S"})
     competenceEnd: datetime.datetime = field(metadata={WIRE_NAME_KEY: "E"})
-    providerName: str | None = field(default=None, metadata={WIRE_NAME_KEY: "P"})
+    providerName: str | None = field(
+        default=None, metadata={WIRE_NAME_KEY: "P"}
+    )
     curveName: str | None = field(default=None, metadata={WIRE_NAME_KEY: "C"})
     ruleName: str | None = field(default=None, metadata={WIRE_NAME_KEY: "R"})
     assignmentId: int = field(default=0, metadata={WIRE_NAME_KEY: "AID"})
@@ -37,10 +37,8 @@ class CheckResultExtractTs:
 
 @dataclass
 class CheckResultExtractVts:
-    """
-    Compact extraction result for versioned time series (VTS).
-    Adds the Version field compared to Ts.
-
+    """Compact extraction result for versioned time series (VTS). Adds the
+    Version field compared to Ts.
 
     Attributes:
         time: The timestamp.
@@ -60,10 +58,24 @@ class CheckResultExtractVts:
     issueCount: int = field(metadata={WIRE_NAME_KEY: "D"})
     competenceStart: datetime.datetime = field(metadata={WIRE_NAME_KEY: "S"})
     competenceEnd: datetime.datetime = field(metadata={WIRE_NAME_KEY: "E"})
-    providerName: str | None = field(default=None, metadata={WIRE_NAME_KEY: "P"})
+    providerName: str | None = field(
+        default=None, metadata={WIRE_NAME_KEY: "P"}
+    )
     curveName: str | None = field(default=None, metadata={WIRE_NAME_KEY: "C"})
     ruleName: str | None = field(default=None, metadata={WIRE_NAME_KEY: "R"})
     assignmentId: int = field(default=0, metadata={WIRE_NAME_KEY: "AID"})
     marketDataId: int = field(default=0, metadata={WIRE_NAME_KEY: "MKID"})
     ruleId: int = field(default=0, metadata={WIRE_NAME_KEY: "RID"})
-    version: datetime.datetime | None = field(default=None, metadata={WIRE_NAME_KEY: "V"})
+    version: datetime.datetime | None = field(
+        default=None, metadata={WIRE_NAME_KEY: "V"}
+    )
+
+
+@dataclass
+class CheckResultExtractMas(CheckResultExtractTs):
+    product: str | None = field(default=None, metadata={WIRE_NAME_KEY: "PR"})
+
+
+@dataclass
+class CheckResultExtractBidAsk(CheckResultExtractTs):
+    product: str | None = field(default=None, metadata={WIRE_NAME_KEY: "PR"})

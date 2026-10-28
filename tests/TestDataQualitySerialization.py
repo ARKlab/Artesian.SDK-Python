@@ -12,8 +12,16 @@ from Artesian._ClientsExecutor.ArtesianJsonSerializer import (
 )
 from Artesian.MarketData import (
     ActualCompletenessAndFreshnessConfigDto,
+    BidAskCompletenessAndFreshnessConfigDto,
+    BidAskDataQualityField,
+    BidAskOutlierConfigDto,
+    CheckResultExtractBidAsk,
+    CheckResultExtractMas,
     CronScheduleDefinitionDto,
     DataQualityStatusSummaryDto,
+    MasCompletenessAndFreshnessConfigDto,
+    MasDataQualityField,
+    MasOutlierConfigDto,
     OnEventTriggerConfigDto,
     OutlierAbsoluteBoundConfigDto,
     OutlierConfigDto,
@@ -76,6 +84,23 @@ class TestDataQualitySerialization(unittest.TestCase):
 
         self.assertEqual(payload["V"], "2023-12-31T00:00:00")
         self.assertNotIn("Version", payload)
+
+    def test_compact_extract_mas_and_bidask_include_product(
+        self: TestDataQualitySerialization,
+    ) -> None:
+        for resultType in (CheckResultExtractMas, CheckResultExtractBidAsk):
+            result = resultType(
+                time=datetime(2024, 1, 1),
+                issueCount=1,
+                competenceStart=datetime(2024, 1, 1),
+                competenceEnd=datetime(2024, 1, 2),
+                product="GME_D",
+            )
+            with self.subTest(resultType=resultType):
+                payload = artesianJsonSerialize(result)
+
+                self.assertEqual(payload["PR"], "GME_D")
+                self.assertEqual(artesianJsonDeserialize(payload, resultType), result)
 
     def test_rule_configuration_is_deserialized_to_concrete_types(
         self: TestDataQualitySerialization,
@@ -218,6 +243,37 @@ class TestPolymorphicSerialization(unittest.TestCase):
                 self.assertIs(type(result), type(sample))
                 self.assertEqual(result, sample)
 
+    def test_mas_and_bidask_rule_configurations_round_trip(self: TestPolymorphicSerialization) -> None:
+        samples: list[DataQualityRuleConfigDto] = [
+            MasCompletenessAndFreshnessConfigDto(
+                scheduleConfig=self._schedule(),
+                recordValidationConfig=RecordValidationConfigDto(recordRangeFrom="PT0S", recordRangeTo="PT1H"),
+                products=["GME_D"],
+                fieldsToBeValidated=[MasDataQualityField.Settlement],
+            ),
+            BidAskCompletenessAndFreshnessConfigDto(
+                scheduleConfig=self._schedule(),
+                recordValidationConfig=RecordValidationConfigDto(recordRangeFrom="PT0S", recordRangeTo="PT1H"),
+                products=["GME_D"],
+                fieldsToBeValidated=[BidAskDataQualityField.BestBidPrice],
+            ),
+            MasOutlierConfigDto(
+                model=OutlierAbsoluteBoundConfigDto(upperBound=10.0, lowerBound=-10.0),
+                products=["GME_D"],
+                fieldsToBeValidated=[MasDataQualityField.Settlement],
+            ),
+            BidAskOutlierConfigDto(
+                model=OutlierAbsoluteBoundConfigDto(upperBound=10.0, lowerBound=-10.0),
+                fieldsToBeValidated=[BidAskDataQualityField.LastPrice],
+            ),
+        ]
+        for sample in samples:
+            with self.subTest(type=type(sample).__name__):
+                payload = artesianJsonSerialize(sample)
+
+                self.assertEqual(payload["MarketDataType"], sample.marketDataType.name)
+                self.assertEqual(artesianJsonDeserialize(payload, DataQualityRuleConfigDto), sample)
+
     def test_rule_config_serializes_discriminators(self: TestPolymorphicSerialization) -> None:
         payload = artesianJsonSerialize(
             OutlierConfigDto(model=OutlierRefCurveConfigDto(referenceMarketDataId=7, tolerancePerc=5.0))
@@ -236,9 +292,9 @@ class TestPolymorphicSerialization(unittest.TestCase):
 
     def test_rule_config_rejects_unknown_discriminators(self: TestPolymorphicSerialization) -> None:
         payloads = (
-            {"Type": "CompletenessAndFreshness", "MarketDataType": "MarketAssessment"},
             {"Type": "Outlier", "Model": {"Type": "Outlier", "Model": "Nope"}},
             {"Type": "Outlier", "Model": {"Type": "CompletenessAndFreshness", "Model": "RefCurve"}},
+            {"Type": "Outlier", "MarketDataType": "Auction", "Model": {"Model": "AbsoluteBound"}},
             {"Type": "Nope", "MarketDataType": "ActualTimeSerie"},
             {"MarketDataType": "ActualTimeSerie"},
         )

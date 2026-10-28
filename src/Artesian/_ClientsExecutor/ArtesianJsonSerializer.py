@@ -237,7 +237,15 @@ def _ruleConfig(raw: dict[str, Any]) -> type:
     from Artesian.MarketData._Dto.ActualCompletenessAndFreshnessConfigDto import (
         ActualCompletenessAndFreshnessConfigDto,
     )
+    from Artesian.MarketData._Dto.BidAskCompletenessAndFreshnessConfigDto import (
+        BidAskCompletenessAndFreshnessConfigDto,
+    )
+    from Artesian.MarketData._Dto.BidAskOutlierConfigDto import BidAskOutlierConfigDto
     from Artesian.MarketData._Dto.DataQualityRuleConfigDto import DataQualityRuleConfigDto
+    from Artesian.MarketData._Dto.MasCompletenessAndFreshnessConfigDto import (
+        MasCompletenessAndFreshnessConfigDto,
+    )
+    from Artesian.MarketData._Dto.MasOutlierConfigDto import MasOutlierConfigDto
     from Artesian.MarketData._Dto.OutlierConfigDto import OutlierConfigDto
     from Artesian.MarketData._Dto.VersionedCompletenessAndFreshnessConfigDto import (
         VersionedCompletenessAndFreshnessConfigDto,
@@ -245,7 +253,18 @@ def _ruleConfig(raw: dict[str, Any]) -> type:
 
     ruleType = raw.get("Type")
     if ruleType == "Outlier":
-        return OutlierConfigDto if "Model" in raw else DataQualityRuleConfigDto
+        if "Model" not in raw:
+            return DataQualityRuleConfigDto
+        outlierTypes = {
+            "MarketAssessment": MasOutlierConfigDto,
+            "BidAsk": BidAskOutlierConfigDto,
+        }
+        marketDataType = raw.get("MarketDataType")
+        if marketDataType in outlierTypes:
+            return outlierTypes[marketDataType]
+        if marketDataType in (None, "ActualTimeSerie", "VersionedTimeSerie"):
+            return OutlierConfigDto
+        raise ValueError(f"Unsupported Market Data type for Outlier: {marketDataType}")
     if ruleType != "CompletenessAndFreshness":
         raise ValueError(f"Unsupported rule type: {ruleType}")
     marketDataType = raw.get("MarketDataType")
@@ -254,6 +273,8 @@ def _ruleConfig(raw: dict[str, Any]) -> type:
     types_ = {
         "ActualTimeSerie": ActualCompletenessAndFreshnessConfigDto,
         "VersionedTimeSerie": VersionedCompletenessAndFreshnessConfigDto,
+        "MarketAssessment": MasCompletenessAndFreshnessConfigDto,
+        "BidAsk": BidAskCompletenessAndFreshnessConfigDto,
     }
     if marketDataType in types_:
         return types_[marketDataType]

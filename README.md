@@ -426,6 +426,12 @@ Artesian supports Data Quality Rules to validate market data for completeness,
 freshness, and outlier detection. Rules are reusable configurations that can be
 assigned to one or more Market Data entities through rule assignments.
 
+Data Quality endpoints require the `/dataquality/dqrule/all` ACL resource;
+alert endpoints require `/dataquality/alertrule/all`. Grants to
+`/featureflag/dqbeta` no longer apply. Read APIs that can return Market Data
+details accept `includeMarketData` (default `False`); details are returned only
+when the caller can read the corresponding Market Data.
+
 The examples below use the synchronous `MarketDataService` methods for brevity.
 Async counterparts with the same name plus the `Async` suffix are also
 available.
@@ -527,6 +533,63 @@ createdVersionedRule = marketDataService.registerDataQualityRule(
 )
 ```
 
+Completeness and Freshness rules are also supported for Market Assessment and
+BidAsk. Each configuration specifies the products to check (relative or
+special, for example `D+1`) and the fields to validate:
+
+```Python
+from Artesian.MarketData import (
+  BidAskCompletenessAndFreshnessConfigDto,
+  BidAskDataQualityField,
+  MasCompletenessAndFreshnessConfigDto,
+  MasDataQualityField,
+)
+
+scheduleConfig = ScheduleConfigDto(
+  scheduleDefinition=CronScheduleDefinitionDto(
+    cronExpression="0 9 * * *",
+    timeZone="UTC",
+  ),
+  maxDelay="PT2H",
+)
+recordValidationConfig = RecordValidationConfigDto(
+  recordRangeFrom="-P1D",
+  recordRangeTo="P0D",
+)
+
+masRule = DataQualityRuleDtoInput(
+  name="Daily MAS completeness",
+  type=RuleType.CompletenessAndFreshness,
+  configuration=MasCompletenessAndFreshnessConfigDto(
+    marketDataType=MarketDataType.MarketAssessment,
+    products=["D+1"],
+    fieldsToBeValidated=[MasDataQualityField.Settlement],
+    scheduleConfig=scheduleConfig,
+    recordValidationConfig=recordValidationConfig,
+  ),
+  version=0,
+)
+
+bidAskRule = DataQualityRuleDtoInput(
+  name="Daily BidAsk completeness",
+  type=RuleType.CompletenessAndFreshness,
+  configuration=BidAskCompletenessAndFreshnessConfigDto(
+    marketDataType=MarketDataType.BidAsk,
+    products=["D+1"],
+    fieldsToBeValidated=[
+      BidAskDataQualityField.BestBidPrice,
+      BidAskDataQualityField.BestAskPrice,
+    ],
+    scheduleConfig=scheduleConfig,
+    recordValidationConfig=recordValidationConfig,
+  ),
+  version=0,
+)
+
+createdMasRule = marketDataService.registerDataQualityRule(masRule)
+createdBidAskRule = marketDataService.registerDataQualityRule(bidAskRule)
+```
+
 #### Outlier Detection Rule
 
 ```Python
@@ -548,6 +611,60 @@ outlierRule = DataQualityRuleDtoInput(
 )
 
 createdOutlierRule = marketDataService.registerDataQualityRule(outlierRule)
+```
+
+Absolute-bound Outlier rules are also supported for Market Assessment and
+BidAsk. Their products are optional rule-level selectors and can be relative or
+special (for example `D+1`). This differs from product filters on check-result
+extracts, which must be absolute or special products.
+
+```Python
+from Artesian.MarketData import (
+  BidAskDataQualityField,
+  BidAskOutlierConfigDto,
+  MasDataQualityField,
+  MasOutlierConfigDto,
+)
+
+masOutlierRule = DataQualityRuleDtoInput(
+  name="MAS settlement bounds",
+  type=RuleType.Outlier,
+  configuration=MasOutlierConfigDto(
+    marketDataType=MarketDataType.MarketAssessment,
+    products=["D+1"],
+    fieldsToBeValidated=[MasDataQualityField.Settlement],
+    model=OutlierAbsoluteBoundConfigDto(
+      lowerBound=0.0,
+      upperBound=100.0,
+    ),
+  ),
+  version=0,
+)
+
+bidAskOutlierRule = DataQualityRuleDtoInput(
+  name="BidAsk price bounds",
+  type=RuleType.Outlier,
+  configuration=BidAskOutlierConfigDto(
+    marketDataType=MarketDataType.BidAsk,
+    products=["D+1"],
+    fieldsToBeValidated=[
+      BidAskDataQualityField.BestBidPrice,
+      BidAskDataQualityField.BestAskPrice,
+    ],
+    model=OutlierAbsoluteBoundConfigDto(
+      lowerBound=0.0,
+      upperBound=100.0,
+    ),
+  ),
+  version=0,
+)
+
+createdMasOutlierRule = marketDataService.registerDataQualityRule(
+  masOutlierRule
+)
+createdBidAskOutlierRule = marketDataService.registerDataQualityRule(
+  bidAskOutlierRule
+)
 ```
 
 ### Read Data Quality Rules
@@ -629,7 +746,10 @@ print(f"Assignment ID: {createdAssignment.id}")
 Get a single assignment:
 
 ```Python
-assignment = marketDataService.readDataQualityRuleAssignmentById(456)
+assignment = marketDataService.readDataQualityRuleAssignmentById(
+  456,
+  includeMarketData=True,
+)
 print(f"MarketData: {assignment.marketData.marketDataName if assignment.marketData else None}")
 print(f"Rule: {assignment.dataQualityRule.name if assignment.dataQualityRule else None}")
 ```
@@ -644,6 +764,7 @@ assignments = marketDataService.readDataQualityRuleAssignment(
   ruleId=123,
   ruleName="weather",
   sort=["Id desc"],
+  includeMarketData=True,
 )
 
 for assignment in assignments.data:
@@ -683,6 +804,7 @@ from datetime import datetime, timezone
 events = marketDataService.readDataQualityRuleAssignmentEventsFeed(
   id=456,
   afterTimestamp=datetime(2024, 1, 15, 0, 0, tzinfo=timezone.utc),
+  includeMarketData=True,
 )
 
 print(f"Retrieved {len(events)} events")
@@ -713,6 +835,13 @@ if rule.aggregatedStatus == CheckAggregatedStatus.KO:
 
 ### Data Quality Check Results
 
+Check-result APIs provide compact extracts, paginated summaries, and
+aggregated status overviews. Use assignment IDs to restrict extracts to
+specific rule assignments. Extracts, check summaries, and Market Data status
+summaries accept `includeMarketData` (default `False`); names are returned only
+when the caller can read that Market Data. ACL-protected `pageSize`, `limit`,
+and `assignmentIds` values are limited to 100.
+
 Read compact check results for actual or versioned time series. Date ranges are
 end-exclusive and periods use ISO strings:
 
@@ -723,6 +852,7 @@ actualResults = marketDataService.getDataQualityCheckResultExtractTs(
   end="2024-02-01",
   timeZone="Europe/Rome",
   assignmentIds=[456],
+  includeMarketData=True,
 )
 
 versionedResults = marketDataService.getDataQualityCheckResultExtractVts(
@@ -732,7 +862,40 @@ versionedResults = marketDataService.getDataQualityCheckResultExtractVts(
   end="2024-02-01",
   timeZone="UTC",
   assignmentIds=[456],
+  includeMarketData=True,
 )
+```
+
+Market Assessment and BidAsk extracts include the materialized product name.
+Their product filters must be absolute or special products (for example
+`Jan-27`), without duplicates; relative products such as `M+1` are only valid
+in rule configurations.
+
+```Python
+masResults = marketDataService.getDataQualityCheckResultExtractMas(
+  granularity="Day",
+  start="2024-01-01",
+  end="2024-02-01",
+  timeZone="Europe/Rome",
+  assignmentIds=[456],
+  products=["Jan-27", "Feb-27"],
+  includeMarketData=True,
+)
+
+bidAskResults = marketDataService.getDataQualityCheckResultExtractBidAsk(
+  granularity="Hour",
+  start="2024-01-01",
+  end="2024-01-02",
+  timeZone="Europe/Rome",
+  assignmentIds=[789],
+  products=["Jan-27"],
+)
+
+for result in masResults:
+  print(f"{result.product} - {result.time}: {result.issueCount} issues")
+
+for result in bidAskResults:
+  print(f"{result.product} - {result.time}: {result.issueCount} issues")
 ```
 
 Retrieve paginated check summaries or the latest aggregated status by Market
@@ -747,12 +910,14 @@ summaries = marketDataService.getDataQualityCheckResultCheckSummary(
   marketDataIds=[100000001],
   dqStatus=CheckAggregatedStatus.KO,
   skipEmptyRanges=True,
+  includeMarketData=True,
 )
 
 marketDataStatuses = marketDataService.getMarketDataDqStatusSummary(
   ruleId=123,
   dqStatus=CheckAggregatedStatus.KO,
   limit=20,
+  includeMarketData=True,
 )
 ruleStatuses = marketDataService.getDqRuleDqStatusSummary(
   marketDataId=100000001,
@@ -824,7 +989,10 @@ Read an assignment by ID or retrieve a paginated list filtered by alert or
 Market Data:
 
 ```Python
-assignment = marketDataService.readQualityNotificationAlertAssignmentById(456)
+assignment = marketDataService.readQualityNotificationAlertAssignmentById(
+  456,
+  includeMarketData=True,
+)
 print(f"Alert {assignment.alertId} monitors Market Data {assignment.marketDataId}")
 
 assignments = marketDataService.readQualityNotificationAlertAssignments(
@@ -833,6 +1001,7 @@ assignments = marketDataService.readQualityNotificationAlertAssignments(
   alertId=123,
   marketDataId=100000001,
   sort=["Id asc"],
+  includeMarketData=True,
 )
 
 for item in assignments.data:
@@ -910,20 +1079,30 @@ For scheduled alerts, retrieve the most recent materialized schedule timestamps
 and the events materialized for a specific occurrence or for the latest one:
 
 ```Python
-from datetime import datetime
-
 occurrences = marketDataService.readAlertScheduleList(
   alertId=123,
   lastN=10,
 )
 
-events = marketDataService.readAlertScheduleEvents(
-  alertId=123,
-  scheduleTime=datetime(2024, 1, 15, 10, 0),
-)
+if occurrences:
+  scheduleEvents = marketDataService.readAlertScheduleEvents(
+    alertId=123,
+    scheduleTime=occurrences[0],
+    page=1,
+    pageSize=100,
+    includeMarketData=True,
+  )
 
-latestEvents = marketDataService.readAlertScheduleLastEvents(alertId=123)
-print(f"Latest materialized events: {len(latestEvents.events)}")
+  for event in scheduleEvents.events.data:
+    print(f"Event at {event.timestamp}: {event.newStatus}")
+
+latestEvents = marketDataService.readAlertScheduleLastEvents(
+  alertId=123,
+  page=1,
+  pageSize=100,
+  includeMarketData=True,
+)
+print(f"Latest materialized events: {len(latestEvents.events.data)}")
 ```
 
 ### Market Data Overrides and Fallbacks
