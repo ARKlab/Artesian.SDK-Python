@@ -799,11 +799,11 @@ marketDataService.deleteDataQualityRuleAssignment(456)
 Retrieve raw events for a specific assignment (max 8-day lookback):
 
 ```Python
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 events = marketDataService.readDataQualityRuleAssignmentEventsFeed(
   id=456,
-  afterTimestamp=datetime(2024, 1, 15, 0, 0, tzinfo=timezone.utc),
+  afterTimestamp=datetime.now(timezone.utc) - timedelta(days=1),
   includeMarketData=True,
 )
 

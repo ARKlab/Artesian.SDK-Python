@@ -2061,7 +2061,7 @@ class MarketDataService:
 
         Args:
             page: Page number (1-based, default: 1).
-            pageSize: Items per page (default: 10).
+            pageSize: Items per page (1..100, default: 10).
             marketDataIds: Optional filter by MarketData IDs.
             ruleIds: Optional filter by Rule IDs.
             assignmentIds: Optional filter by Assignment IDs.
@@ -2153,7 +2153,7 @@ class MarketDataService:
 
         Args:
             page: Page number (1-based, default: 1).
-            pageSize: Items per page (default: 10).
+            pageSize: Items per page (1..100, default: 10).
             marketDataIds: Optional filter by MarketData IDs.
             ruleIds: Optional filter by Rule IDs.
             assignmentIds: Optional filter by Assignment IDs.
@@ -2285,7 +2285,7 @@ class MarketDataService:
             dqStatus: Optional aggregated DQ status filter (OK/KO). When KO,
                       returns only rules whose
             overall status is KO.
-            limit: Maximum number of results to return (1..1000, default: 10).
+            limit: Maximum number of results to return (1..100, default: 10).
 
         Returns:
             An enumerable of DqRuleDqStatusSummaryDto items (Async).
@@ -2336,7 +2336,7 @@ class MarketDataService:
             dqStatus: Optional aggregated DQ status filter (OK/KO). When KO,
                       returns only rules whose
             overall status is KO.
-            limit: Maximum number of results to return (1..1000, default: 10).
+            limit: Maximum number of results to return (1..100, default: 10).
 
         Returns:
             An enumerable of DqRuleDqStatusSummaryDto items.
