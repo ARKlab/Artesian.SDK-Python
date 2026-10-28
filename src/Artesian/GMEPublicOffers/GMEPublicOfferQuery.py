@@ -415,6 +415,7 @@ class GMEPublicOfferQuery:
             Zone.BSP: "BSP",
             Zone.XAUS: "XAUS",
             Zone.XFRA: "XFRA",
+            Zone.UNKNOWN: "UNKNOWN",
         }
         vr = switcher.get(zone, "DefZone")
         if vr == "DefZone":
