@@ -1183,14 +1183,6 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
 
             self.assertEqual(output, [])
 
-    async def test_readDataQualityRuleAssignmentEventsFeedRejectsTimestampOlderThanEightDays(
-        self: TestMarketDataServiceMarketData,
-    ) -> None:
-        afterTimestamp = datetime.now(UTC) - timedelta(days=9)
-
-        with self.assertRaisesRegex(ValueError, "8 days ago"):
-            await self.__service.readDataQualityRuleAssignmentEventsFeedAsync(self.__id, afterTimestamp)
-
     async def test_getDataQualityCheckResultExtractVtsAsync(self: TestMarketDataServiceMarketData) -> None:
         with responses.RequestsMock() as rsps:
             params = {
@@ -1395,8 +1387,6 @@ class TestMarketDataServiceMarketData(unittest.IsolatedAsyncioTestCase):
             await self.__service.getDataQualityCheckResultExtractBidAskAsync(
                 "Day", "2024-01-01", "2024-01-31", "UTC", list(range(101))
             )
-        with self.assertRaisesRegex(ValueError, "at most 100"):
-            await self.__service.getDataQualityCheckResultCheckSummaryAsync(1, 10, assignmentIds=list(range(101)))
 
     async def test_getMarketDataDqStatusSummaryAsync(self: TestMarketDataServiceMarketData) -> None:
         with responses.RequestsMock() as rsps:

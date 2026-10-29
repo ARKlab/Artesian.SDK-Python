@@ -431,6 +431,9 @@ alert endpoints require `/dataquality/alertrule/all`. Grants to
 `/featureflag/dqbeta` no longer apply. Read APIs that can return Market Data
 details accept `includeMarketData` (default `False`); details are returned only
 when the caller can read the corresponding Market Data.
+`includeDataQuality` on `readMarketDataRegistryById`,
+`readMarketDataRegistryByName` and `searchFacet` requires read access on
+`/dataquality/dqrule/all` (since 6.9.0).
 
 The examples below use the synchronous `MarketDataService` methods for brevity.
 Async counterparts with the same name plus the `Async` suffix are also

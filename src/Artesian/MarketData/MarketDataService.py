@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from typing import cast
 from uuid import UUID
 
@@ -73,13 +73,6 @@ _PagedQualityNotificationAlertAssignmentOutput = PagedResultQualityNotificationA
 def _validateAssignmentIds(assignmentIds: list[int] | None) -> None:
     if assignmentIds is not None and len(assignmentIds) > _MAX_DATA_QUALITY_ACL_CANDIDATES:
         raise ValueError(f"assignmentIds must contain at most {_MAX_DATA_QUALITY_ACL_CANDIDATES} values")
-
-
-def _validateAfterTimestamp(afterTimestamp: datetime | None) -> None:
-    if afterTimestamp is None:
-        return
-    if _toUtc(afterTimestamp) < datetime.now(UTC) - timedelta(days=8):
-        raise ValueError("afterTimestamp cannot be earlier than 8 days ago")
 
 
 def _toUtc(value: datetime) -> datetime:
@@ -1447,7 +1440,6 @@ class MarketDataService:
         Returns:
             List of DqCheckChangeEventDtoOutput (Async).
         """
-        _validateAfterTimestamp(afterTimestamp)
         url = "/dataquality/dqruleassignment/" + str(id) + "/events"
         params: dict[str, object] = {}
         if afterTimestamp is not None:
@@ -2084,7 +2076,6 @@ class MarketDataService:
             raise ValueError(f"Page must be greater than 0. Page: {page}")
         if pageSize < 1 or pageSize > _MAX_DATA_QUALITY_ACL_CANDIDATES:
             raise ValueError(f"PageSize must be between 1 and {_MAX_DATA_QUALITY_ACL_CANDIDATES}. PageSize: {pageSize}")
-        _validateAssignmentIds(assignmentIds)
 
         url = "/dataquality/checkresult/checksummary"
         params: dict[str, object] = {
