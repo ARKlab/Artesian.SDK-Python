@@ -30,19 +30,26 @@ from Artesian.MarketData import (
     ScheduleTriggerConfigDto,
     VersionedCompletenessAndFreshnessConfigDto,
 )
+from Artesian.MarketData._Dto.AlertScheduleEventsDto import AlertScheduleEventsDtoOutput
 from Artesian.MarketData._Dto.CheckResultExtract import (
     CheckResultExtractTs,
     CheckResultExtractVts,
 )
 from Artesian.MarketData._Dto.DataQualityRuleConfigDto import DataQualityRuleConfigDto
 from Artesian.MarketData._Dto.DataQualityRuleDtoOutput import DataQualityRuleDtoOutput
+from Artesian.MarketData._Dto.DqCheckChangeEventDto import (
+    DqCheckChangeEventDtoOutput,
+    LocalDateTimeRange,
+)
 from Artesian.MarketData._Dto.OutlierModelConfigDto import OutlierModelConfigDto
+from Artesian.MarketData._Dto.PagedResult import PagedResultDqCheckChangeEventDtoOutput
 from Artesian.MarketData._Dto.QualityNotificationAlertDto import (
     QualityNotificationAlertDtoOutput,
 )
 from Artesian.MarketData._Dto.RecordValidationConfigDto import RecordValidationConfigDto
 from Artesian.MarketData._Dto.ScheduleDefinitionDto import ScheduleDefinitionDto
 from Artesian.MarketData._Dto.TriggerConfigDto import TriggerConfigDto
+from Artesian.MarketData._Enum.CheckAggregatedStatus import CheckAggregatedStatus
 from Artesian.MarketData._Enum.MarketDataType import MarketDataType
 from Artesian.MarketData._Enum.PeriodPrecision import PeriodPrecision
 
@@ -364,6 +371,98 @@ class TestPolymorphicSerialization(unittest.TestCase):
         result = artesianJsonDecode(artesianJsonEncode(sample), QualityNotificationAlertDtoOutput)
 
         self.assertEqual(result, sample)
+
+
+class TestServiceWirePayloads(unittest.TestCase):
+    """Hand-written payloads in the shape returned by the service."""
+
+    def test_mas_outlier_payload(self: TestServiceWirePayloads) -> None:
+        payload = {
+            "Type": "Outlier",
+            "MarketDataType": "MarketAssessment",
+            "Model": {"Type": "Outlier", "Model": "AbsoluteBound", "UpperBound": 10.0, "LowerBound": -10.0},
+            "Products": ["D+1"],
+            "FieldsToBeValidated": ["Settlement"],
+        }
+
+        result = artesianJsonDeserialize(payload, DataQualityRuleConfigDto)
+
+        self.assertIs(type(result), MasOutlierConfigDto)
+        result = cast(MasOutlierConfigDto, result)
+        self.assertEqual(result.products, ["D+1"])
+        self.assertEqual(result.fieldsToBeValidated, [MasDataQualityField.Settlement])
+        self.assertEqual(result.model, OutlierAbsoluteBoundConfigDto(upperBound=10.0, lowerBound=-10.0))
+
+    def test_bidask_outlier_payload(self: TestServiceWirePayloads) -> None:
+        payload = {
+            "Type": "Outlier",
+            "MarketDataType": "BidAsk",
+            "Model": {"Type": "Outlier", "Model": "AbsoluteBound", "UpperBound": 10.0, "LowerBound": -10.0},
+            "Products": ["D+1"],
+            "FieldsToBeValidated": ["LastPrice"],
+        }
+
+        result = artesianJsonDeserialize(payload, DataQualityRuleConfigDto)
+
+        self.assertIs(type(result), BidAskOutlierConfigDto)
+        result = cast(BidAskOutlierConfigDto, result)
+        self.assertEqual(result.products, ["D+1"])
+        self.assertEqual(result.fieldsToBeValidated, [BidAskDataQualityField.LastPrice])
+
+    def test_versioned_outlier_payload_decodes_to_outlier_config(self: TestServiceWirePayloads) -> None:
+        payload = {
+            "Type": "Outlier",
+            "MarketDataType": "VersionedTimeSerie",
+            "Model": {"Type": "Outlier", "Model": "RefCurve", "ReferenceMarketDataId": 7, "TolerancePerc": 5.0},
+        }
+
+        result = artesianJsonDeserialize(payload, DataQualityRuleConfigDto)
+
+        self.assertIs(type(result), OutlierConfigDto)
+        self.assertEqual(result.marketDataType, MarketDataType.VersionedTimeSerie)
+        self.assertEqual(cast(OutlierConfigDto, result).model, OutlierRefCurveConfigDto(7, 5.0))
+
+    def test_alert_schedule_events_payload(self: TestServiceWirePayloads) -> None:
+        payload = {
+            "ScheduleTime": "2024-05-01T08:00:00Z",
+            "Events": {
+                "Page": 1,
+                "PageSize": 100,
+                "Count": 1,
+                "IsCountPartial": False,
+                "Data": [
+                    {
+                        "MarketDataId": 10,
+                        "RuleId": 2,
+                        "AssignmentId": 3,
+                        "Version": None,
+                        "Product": "D+1",
+                        "RangeImpacted": {"Start": "2024-05-01T00:00:00", "End": "2024-05-02T00:00:00"},
+                        "NewStatus": "KO",
+                        "OldStatus": "OK",
+                        "Timestamp": "2024-05-01T07:59:00Z",
+                        "RuleName": "rule",
+                        "RuleVersion": 4,
+                        "MarketDataName": "curve",
+                        "Provider": "provider",
+                    }
+                ],
+            },
+        }
+
+        result = artesianJsonDeserialize(payload, AlertScheduleEventsDtoOutput)
+
+        self.assertIsInstance(result.events, PagedResultDqCheckChangeEventDtoOutput)
+        self.assertEqual((result.events.page, result.events.pageSize, result.events.count), (1, 100, 1))
+        self.assertFalse(result.events.isCountPartial)
+        self.assertEqual(len(result.events.data), 1)
+        event = result.events.data[0]
+        self.assertIsInstance(event, DqCheckChangeEventDtoOutput)
+        self.assertEqual((event.marketDataId, event.ruleId, event.assignmentId), (10, 2, 3))
+        self.assertEqual(event.product, "D+1")
+        self.assertEqual((event.newStatus, event.oldStatus), (CheckAggregatedStatus.KO, CheckAggregatedStatus.OK))
+        self.assertEqual(event.rangeImpacted, LocalDateTimeRange(datetime(2024, 5, 1), datetime(2024, 5, 2)))
+        self.assertEqual(event.ruleVersion, 4)
 
 
 if __name__ == "__main__":
