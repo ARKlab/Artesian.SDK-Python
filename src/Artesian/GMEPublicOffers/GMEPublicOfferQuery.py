@@ -213,7 +213,10 @@ class GMEPublicOfferQuery:
         self._validateQuery()
         qp = self._queryParameters
 
-        url = f"/{self.__routePrefix}/{self._buildExtractionRangeRoute(qp)}/{self.__getPurpose(qp.purpose)}/{self.__getStatus(qp.status)}?_=1"
+        url = (
+            f"/{self.__routePrefix}/{self._buildExtractionRangeRoute(qp)}/"
+            f"{self.__getPurpose(qp.purpose)}/{self.__getStatus(qp.status)}?_=1"
+        )
 
         if qp.page is not None:
             url = url + "&page=" + str(qp.page)

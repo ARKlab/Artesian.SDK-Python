@@ -6,9 +6,7 @@ from Artesian._ClientsExecutor.ArtesianJsonSerializer import WIRE_NAME_KEY
 
 @dataclass
 class CheckResultExtractTs:
-    """
-    Compact extraction result for actual (non-versioned) time series.
-
+    """Compact extraction result for actual (non-versioned) time series.
 
     Attributes:
         time: The timestamp.
@@ -37,10 +35,8 @@ class CheckResultExtractTs:
 
 @dataclass
 class CheckResultExtractVts:
-    """
-    Compact extraction result for versioned time series (VTS).
-    Adds the Version field compared to Ts.
-
+    """Compact extraction result for versioned time series (VTS). Adds the
+    Version field compared to Ts.
 
     Attributes:
         time: The timestamp.
@@ -67,3 +63,13 @@ class CheckResultExtractVts:
     marketDataId: int = field(default=0, metadata={WIRE_NAME_KEY: "MKID"})
     ruleId: int = field(default=0, metadata={WIRE_NAME_KEY: "RID"})
     version: datetime.datetime | None = field(default=None, metadata={WIRE_NAME_KEY: "V"})
+
+
+@dataclass
+class CheckResultExtractMas(CheckResultExtractTs):
+    product: str | None = field(default=None, metadata={WIRE_NAME_KEY: "PR"})
+
+
+@dataclass
+class CheckResultExtractBidAsk(CheckResultExtractTs):
+    product: str | None = field(default=None, metadata={WIRE_NAME_KEY: "PR"})

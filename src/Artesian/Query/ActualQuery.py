@@ -269,7 +269,10 @@ class ActualQuery(_Query[ActualQueryParameters]):
         qps = self.__partition.PartitionActual([self._queryParameters])
         urls = []
         for qp in qps:
-            url = f"/{self.__routePrefix}/{self.__getGranularityPath(qp.granularity)}/{super()._buildExtractionRangeRoute(qp)}?_=1"
+            url = (
+                f"/{self.__routePrefix}/{self.__getGranularityPath(qp.granularity)}/"
+                f"{super()._buildExtractionRangeRoute(qp)}?_=1"
+            )
             if qp.ids is not None:
                 sep = ","
                 ids = sep.join(map(str, qp.ids))

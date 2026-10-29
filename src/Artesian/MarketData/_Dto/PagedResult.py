@@ -1,24 +1,33 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
-from Artesian.MarketData._Dto.CheckResultCheckSummaryDto import CheckResultCheckSummaryDto
+from Artesian.MarketData._Dto.CheckResultCheckSummaryDto import (
+    CheckResultCheckSummaryDto,
+)
 from Artesian.MarketData._Dto.CurveRangeEntity import CurveRangeEntity
-from Artesian.MarketData._Dto.DataQualityRuleDtoOutput import DataQualityRuleDtoOutput
+from Artesian.MarketData._Dto.DataQualityRuleDtoOutput import (
+    DataQualityRuleDtoOutput,
+)
+from Artesian.MarketData._Dto.DqCheckChangeEventDto import (
+    DqCheckChangeEventDtoOutput,
+)
 from Artesian.MarketData._Dto.MarketDataQualityRuleAssignmentDto import (
     MarketDataQualityRuleAssignmentDtoOutput,
 )
 from Artesian.MarketData._Dto.QualityNotificationAlertAssignmentDto import (
     QualityNotificationAlertAssignmentDtoOutput,
 )
-from Artesian.MarketData._Dto.QualityNotificationAlertDto import QualityNotificationAlertDtoOutput
+from Artesian.MarketData._Dto.QualityNotificationAlertDto import (
+    QualityNotificationAlertDtoOutput,
+)
 
-# Concrete subclasses per payload (the former jsons serializer failed with Generics);
+# Concrete subclasses per payload (the former jsons serializer failed with
+# Generics);
 # kept to preserve the public types.
 
 
 @dataclass
 class PagedResult:
-    """
-    Class for the paged result.
+    """Class for the paged result.
 
     Attributes:
         page: page number (1-based)
@@ -52,6 +61,15 @@ class PagedResultMarketDataQualityRuleAssignmentDtoOutput(PagedResult):
 @dataclass
 class PagedResultCheckResultCheckSummaryDto(PagedResult):
     data: list[CheckResultCheckSummaryDto]
+
+
+@dataclass
+class PagedResultDqCheckChangeEventDtoOutput(PagedResult):
+    page: int = 1
+    pageSize: int = 100
+    count: int = 0
+    isCountPartial: bool = False
+    data: list[DqCheckChangeEventDtoOutput] = field(default_factory=list)
 
 
 @dataclass

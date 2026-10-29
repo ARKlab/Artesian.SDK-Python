@@ -1,14 +1,20 @@
 from __future__ import annotations
 
 import asyncio
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import cast
 from uuid import UUID
 
 from Artesian.MarketData._Dto import DeleteData, MarketDataEntityOutputEnriched
-from Artesian.MarketData._Dto.DerivedTransformQueryValidation import DerivedTransformQueryValidation
-from Artesian.MarketData._Dto.DerivedTransformQueryValidationResponse import DerivedTransformQueryValidationResponse
-from Artesian.MarketData._Enum.CheckAggregatedStatus import CheckAggregatedStatus
+from Artesian.MarketData._Dto.DerivedTransformQueryValidation import (
+    DerivedTransformQueryValidation,
+)
+from Artesian.MarketData._Dto.DerivedTransformQueryValidationResponse import (
+    DerivedTransformQueryValidationResponse,
+)
+from Artesian.MarketData._Enum.CheckAggregatedStatus import (
+    CheckAggregatedStatus,
+)
 
 from .._ClientsExecutor.Client import _Client
 from .._ClientsExecutor.RequestExecutor import _RequestExecutor
@@ -17,7 +23,12 @@ from ..ArtesianPolicyConfig import ArtesianPolicyConfig
 from ._Dto.AlertScheduleEventsDto import AlertScheduleEventsDtoOutput
 from ._Dto.ArtesianSearchResults import ArtesianSearchResults
 from ._Dto.CheckConversionResult import CheckConversionResult
-from ._Dto.CheckResultExtract import CheckResultExtractTs, CheckResultExtractVts
+from ._Dto.CheckResultExtract import (
+    CheckResultExtractBidAsk,
+    CheckResultExtractMas,
+    CheckResultExtractTs,
+    CheckResultExtractVts,
+)
 from ._Dto.DataQualityRuleDtoInput import DataQualityRuleDtoInput
 from ._Dto.DataQualityRuleDtoOutput import DataQualityRuleDtoOutput
 from ._Dto.DerivedCfg import DerivedCfg
@@ -39,7 +50,9 @@ from ._Dto.PagedResult import (
     PagedResultQualityNotificationAlertAssignmentDtoOutput,
     PagedResultQualityNotificationAlertDtoOutput,
 )
-from ._Dto.PagedResultOverrideMetadataEntry import PagedResultOverrideMetadataEntry
+from ._Dto.PagedResultOverrideMetadataEntry import (
+    PagedResultOverrideMetadataEntry,
+)
 from ._Dto.QualityNotificationAlertAssignmentDto import (
     QualityNotificationAlertAssignmentDtoInput,
     QualityNotificationAlertAssignmentDtoOutput,
@@ -53,26 +66,41 @@ from ._Dto.UpsertData import UpsertData
 from ._Enum.OverrideKind import OverrideKind
 from ._Enum.RuleType import RuleType
 
+_MAX_DATA_QUALITY_ACL_CANDIDATES = 100
+_PagedQualityNotificationAlertAssignmentOutput = PagedResultQualityNotificationAlertAssignmentDtoOutput
+
+
+def _validateAssignmentIds(assignmentIds: list[int] | None) -> None:
+    if assignmentIds is not None and len(assignmentIds) > _MAX_DATA_QUALITY_ACL_CANDIDATES:
+        raise ValueError(f"assignmentIds must contain at most {_MAX_DATA_QUALITY_ACL_CANDIDATES} values")
+
+
+def _toUtc(value: datetime) -> datetime:
+    # Naive values are treated as UTC, like the Instant used by the .NET SDK.
+    if value.tzinfo is None:
+        return value.replace(tzinfo=UTC)
+    return value.astimezone(UTC)
+
+
+def _toInstantString(value: datetime) -> str:
+    return _toUtc(value).isoformat().replace("+00:00", "Z")
+
 
 class MarketDataService:
-    """
-    Class for the MarketData Service.
-
-    """
+    """Class for the MarketData Service."""
 
     __version = "v2.1"
     __versionOverride = "v2.2-beta"
 
     def __init__(self: MarketDataService, artesianConfig: ArtesianConfig) -> None:
-        """
-        Inits the MarketData Service
+        """Inits the MarketData Service.
 
         Using the ArtesianServiceConfig, is possible to create an istance of
-        the MarketDataService which is used to retrieve and edit MarketData references.
+        the MarketDataService which is used to retrieve and edit MarketData
+        references.
 
         Args:
             artesianConfiguration: The Artesian Configuration.
-
         """
         self.__config = artesianConfig
         self.__policy = ArtesianPolicyConfig()
@@ -92,21 +120,20 @@ class MarketDataService:
         versionFrom: str | None = None,
         versionTo: str | None = None,
     ) -> PagedResultCurveRangeEntity | None:
-        """
-        Reads paged set of available versions of the marketdata by id.
+        """Reads paged set of available versions of the marketdata by id.
 
         Args:
             id: ID of the marketdata to be retrieved.
             page: int of the page number (1-based).
             pageSize: int of the pagesize.
             product: Market product in the case of Market Assessment.
-            versionFrom: String of the start date of version range (ISO format).
+            versionFrom: String of the start date of version range (ISO
+                         format).
             versionTo: String of the end date of version range (ISO format).
 
         Returns:
             Paged result of CurveRange entity (Async).
         """
-
         url = "/marketdata/entity/" + str(id) + "/curves"
         params: dict[str, str | int] = {}
         params["page"] = page
@@ -140,15 +167,15 @@ class MarketDataService:
         versionFrom: str | None = None,
         versionTo: str | None = None,
     ) -> PagedResultCurveRangeEntity | None:
-        """
-        Reads paged set of available versions of the marketdata by id.
+        """Reads paged set of available versions of the marketdata by id.
 
         Args:
             id: ID of the marketdata to be retrieved.
             page: int of the page number (1-based).
             pageSize: int of the pagesize.
             product: Market product in the case of Market Assessment.
-            versionFrom: String of the start date of version range (ISO format).
+            versionFrom: String of the start date of version range (ISO
+                         format).
             versionTo: String of the end date of version range (ISO format).
 
         Returns:
@@ -171,8 +198,7 @@ class MarketDataService:
         includeDataQuality: bool = False,
         skipOverrides: bool = True,
     ) -> ArtesianSearchResults | None:
-        """
-        Search the MarketData collection with faceted results.
+        """Search the MarketData collection with faceted results.
 
         Args:
             searchText: SearchText parameter.
@@ -180,11 +206,16 @@ class MarketDataService:
             pageSize: int of the pagesize.
             filters: ArtesianSearchFilter containing the search params.
             sorts: Sorts list.
-            doNotLoadAdditionalInfo: Skip loading up-to-date curve range and transform.
-            includeCurveSummary: When true, includes curve summary (ranges) in the response.
-            includeTimeTransform: When true, includes time transform in the response.
-            includeDataQuality: When true, includes data quality status summary in the response.
-            skipOverrides: When false, includes override metadata in the response. Requires the /featureflag/
+            doNotLoadAdditionalInfo: Skip loading up-to-date curve range and
+                                     transform.
+            includeCurveSummary: When true, includes curve summary (ranges) in
+                                 the response.
+            includeTimeTransform: When true, includes time transform in the
+                                  response.
+            includeDataQuality: When true, includes data quality status summary
+                                in the response.
+            skipOverrides: When false, includes override metadata in the
+                           response. Requires the /featureflag/
             overridebeta permission during beta. Default true.
 
         Returns:
@@ -240,8 +271,7 @@ class MarketDataService:
         includeDataQuality: bool = False,
         skipOverrides: bool = True,
     ) -> ArtesianSearchResults | None:
-        """
-        Search the MarketData collection with faceted results.
+        """Search the MarketData collection with faceted results.
 
         Args:
             searchText: SearchText parameter.
@@ -249,7 +279,8 @@ class MarketDataService:
             pageSize: int of the pagesize.
             filters: ArtesianSearchFilter containing the search params.
             sorts: Sorts list.
-            doNotLoadAdditionalInfo: Skip loading up-to-date curve range and transform.
+            doNotLoadAdditionalInfo: Skip loading up-to-date curve range and
+                                     transform.
 
         Returns:
             ArtesianSearchResults entity.
@@ -277,15 +308,18 @@ class MarketDataService:
         includeDataQuality: bool = False,
         skipOverrides: bool = True,
     ) -> MarketDataEntityOutputEnriched | None:
-        """
-        Reads MarketData by id with MarketDataID.
+        """Reads MarketData by id with MarketDataID.
 
         Args:
             id: ID of the marketdata to be retrieved.
-            includeCurveSummary: When true, includes curve summary (ranges) in the response.
-            includeTimeTransform: When true, includes time transform in the response.
-            includeDataQuality: When true, includes data quality status summary in the response.
-            skipOverrides: When false, includes override metadata in the response. Requires the /featureflag/
+            includeCurveSummary: When true, includes curve summary (ranges) in
+                                 the response.
+            includeTimeTransform: When true, includes time transform in the
+                                  response.
+            includeDataQuality: When true, includes data quality status summary
+                                in the response.
+            skipOverrides: When false, includes override metadata in the
+                           response. Requires the /featureflag/
             overridebeta permission during beta. Default true.
 
         Returns:
@@ -321,8 +355,7 @@ class MarketDataService:
         includeDataQuality: bool = False,
         skipOverrides: bool = True,
     ) -> MarketDataEntityOutputEnriched | None:
-        """
-        Reads MarketData by curve name with MarketDataID.
+        """Reads MarketData by curve name with MarketDataID.
 
         Args:
             id: ID of the marketdata to be retrieved.
@@ -343,8 +376,7 @@ class MarketDataService:
     async def updateMarketDataAsync(
         self: MarketDataService, id: int, entity: MarketDataEntityInput
     ) -> MarketDataEntityOutput | None:
-        """
-        Saves the given MarketData Entity
+        """Saves the given MarketData Entity.
 
         Args:
             id: int of the marketdata to be updated
@@ -360,8 +392,7 @@ class MarketDataService:
     def updateMarketData(
         self: MarketDataService, id: int, entity: MarketDataEntityInput
     ) -> MarketDataEntityOutput | None:
-        """
-        Saves the given MarketData Entity
+        """Saves the given MarketData Entity.
 
         Args:
             id: int of the marketdata to be updated
@@ -372,8 +403,7 @@ class MarketDataService:
         return _get_event_loop().run_until_complete(self.updateMarketDataAsync(id, entity))
 
     async def deleteMarketDataAsync(self: MarketDataService, id: int) -> None:
-        """
-        Delete the specific MarketData entity by id
+        """Delete the specific MarketData entity by id.
 
         Args:
             id: int of the marketdata to be deleted
@@ -387,8 +417,7 @@ class MarketDataService:
             return
 
     def deleteMarketData(self: MarketDataService, id: int) -> None:
-        """
-        Delete the specific MarketData entity by id
+        """Delete the specific MarketData entity by id.
 
         Args:
             id: int of the marketdata to be deleted
@@ -407,16 +436,19 @@ class MarketDataService:
         includeDataQuality: bool = False,
         skipOverrides: bool = True,
     ) -> MarketDataEntityOutputEnriched | None:
-        """
-        Reads MarketData by provider and curve name.
+        """Reads MarketData by provider and curve name.
 
         Args:
             provider: string of the provider to be retrieved.
             curveName: string of the curve name to be retrieved.
-            includeCurveSummary: When true, includes curve summary (ranges) in the response.
-            includeTimeTransform: When true, includes time transform in the response.
-            includeDataQuality: When true, includes data quality status summary in the response.
-            skipOverrides: When false, includes override metadata in the response. Requires the /featureflag/
+            includeCurveSummary: When true, includes curve summary (ranges) in
+                                 the response.
+            includeTimeTransform: When true, includes time transform in the
+                                  response.
+            includeDataQuality: When true, includes data quality status summary
+                                in the response.
+            skipOverrides: When false, includes override metadata in the
+                           response. Requires the /featureflag/
             overridebeta permission during beta. Default true.
 
         Returns:
@@ -455,8 +487,7 @@ class MarketDataService:
         includeDataQuality: bool = False,
         skipOverrides: bool = True,
     ) -> MarketDataEntityOutputEnriched | None:
-        """
-        Reads MarketData by provider and curve name.
+        """Reads MarketData by provider and curve name.
 
         Args:
             provider: string of the provider to be retrieved.
@@ -479,8 +510,7 @@ class MarketDataService:
     async def registerMarketDataAsync(
         self: MarketDataService, entity: MarketDataEntityInput
     ) -> MarketDataEntityOutput | None:
-        """
-        Register a new MarketData entity.
+        """Register a new MarketData entity.
 
         Args:
             entity: The Market Data Entity Input
@@ -494,8 +524,7 @@ class MarketDataService:
             return cast(MarketDataEntityOutput | None, res[0])
 
     def registerMarketData(self: MarketDataService, entity: MarketDataEntityInput) -> MarketDataEntityOutput | None:
-        """
-        Register a new MarketData entity.
+        """Register a new MarketData entity.
 
         Args:
             entity: The Market Data Entity Input
@@ -503,7 +532,6 @@ class MarketDataService:
         Returns:
             MarketData Entity Output.
         """
-
         entity._validateDerivedCfg()
 
         return _get_event_loop().run_until_complete(self.registerMarketDataAsync(entity))
@@ -511,8 +539,7 @@ class MarketDataService:
     async def registerDataQualityRuleAsync(
         self: MarketDataService, entity: DataQualityRuleDtoInput
     ) -> DataQualityRuleDtoOutput:
-        """
-        Creates a new Data Quality Rule.
+        """Creates a new Data Quality Rule.
 
         Args:
             entity: rule definition including name, type and configuration.
@@ -526,8 +553,7 @@ class MarketDataService:
             return cast(DataQualityRuleDtoOutput, res[0])
 
     def registerDataQualityRule(self: MarketDataService, entity: DataQualityRuleDtoInput) -> DataQualityRuleDtoOutput:
-        """
-        Creates a new Data Quality Rule.
+        """Creates a new Data Quality Rule.
 
         Args:
             entity: rule definition including name, type and configuration.
@@ -538,8 +564,7 @@ class MarketDataService:
         return _get_event_loop().run_until_complete(self.registerDataQualityRuleAsync(entity))
 
     async def readDataQualityRuleByIdAsync(self: MarketDataService, id: int) -> DataQualityRuleDtoOutput:
-        """
-        Retrieves a Data Quality Rule by its id.
+        """Retrieves a Data Quality Rule by its id.
 
         Args:
             id: unique identifier of the rule.
@@ -550,13 +575,20 @@ class MarketDataService:
         url = "/dataquality/dqrule/" + str(id)
         with self.__client as c:
             res = await asyncio.gather(
-                *[self.__executor.exec(c.exec, "GET", url, None, retcls=DataQualityRuleDtoOutput)]
+                *[
+                    self.__executor.exec(
+                        c.exec,
+                        "GET",
+                        url,
+                        None,
+                        retcls=DataQualityRuleDtoOutput,
+                    )
+                ]
             )
             return cast(DataQualityRuleDtoOutput, res[0])
 
     def readDataQualityRuleById(self: MarketDataService, id: int) -> DataQualityRuleDtoOutput:
-        """
-        Retrieves a Data Quality Rule by its id.
+        """Retrieves a Data Quality Rule by its id.
 
         Args:
             id: unique identifier of the rule.
@@ -576,8 +608,7 @@ class MarketDataService:
         ruleIds: list[int] | None = None,
         sort: list[str] | None = None,
     ) -> PagedResultDataQualityRuleDtoOutput:
-        """
-        Retrieves a paginated list of Data Quality Rules.
+        """Retrieves a paginated list of Data Quality Rules.
 
         Args:
             page: page number (1-based).
@@ -636,8 +667,7 @@ class MarketDataService:
         ruleIds: list[int] | None = None,
         sort: list[str] | None = None,
     ) -> PagedResultDataQualityRuleDtoOutput:
-        """
-        Retrieves a paginated list of Data Quality Rules.
+        """Retrieves a paginated list of Data Quality Rules.
 
         Args:
             page: page number (1-based).
@@ -666,8 +696,7 @@ class MarketDataService:
     async def updateDataQualityRuleAsync(
         self: MarketDataService, id: int, entity: DataQualityRuleDtoInput
     ) -> DataQualityRuleDtoOutput:
-        """
-        Updates an existing Data Quality Rule.
+        """Updates an existing Data Quality Rule.
 
         Args:
             id: unique identifier of the rule to update.
@@ -684,8 +713,7 @@ class MarketDataService:
     def updateDataQualityRule(
         self: MarketDataService, id: int, entity: DataQualityRuleDtoInput
     ) -> DataQualityRuleDtoOutput:
-        """
-        Updates an existing Data Quality Rule.
+        """Updates an existing Data Quality Rule.
 
         Args:
             id: unique identifier of the rule to update.
@@ -697,8 +725,7 @@ class MarketDataService:
         return _get_event_loop().run_until_complete(self.updateDataQualityRuleAsync(id, entity))
 
     async def deleteDataQualityRuleAsync(self: MarketDataService, id: int) -> None:
-        """
-        Deletes a Data Quality Rule by id.
+        """Deletes a Data Quality Rule by id.
 
         Args:
             id: unique identifier of the rule to delete.
@@ -712,8 +739,7 @@ class MarketDataService:
             return
 
     def deleteDataQualityRule(self: MarketDataService, id: int) -> None:
-        """
-        Deletes a Data Quality Rule by id.
+        """Deletes a Data Quality Rule by id.
 
         Args:
             id: unique identifier of the rule to delete.
@@ -730,7 +756,15 @@ class MarketDataService:
         url = "/dataquality/alertrule"
         with self.__client as c:
             res = await asyncio.gather(
-                *[self.__executor.exec(c.exec, "POST", url, entity, QualityNotificationAlertDtoOutput)]
+                *[
+                    self.__executor.exec(
+                        c.exec,
+                        "POST",
+                        url,
+                        entity,
+                        QualityNotificationAlertDtoOutput,
+                    )
+                ]
             )
             return cast(QualityNotificationAlertDtoOutput, res[0])
 
@@ -826,12 +860,22 @@ class MarketDataService:
         url = "/dataquality/alertrule/" + str(id)
         with self.__client as c:
             res = await asyncio.gather(
-                *[self.__executor.exec(c.exec, "PUT", url, entity, QualityNotificationAlertDtoOutput)]
+                *[
+                    self.__executor.exec(
+                        c.exec,
+                        "PUT",
+                        url,
+                        entity,
+                        QualityNotificationAlertDtoOutput,
+                    )
+                ]
             )
             return cast(QualityNotificationAlertDtoOutput, res[0])
 
     def updateQualityNotificationAlert(
-        self: MarketDataService, id: int, entity: QualityNotificationAlertDtoInput
+        self: MarketDataService,
+        id: int,
+        entity: QualityNotificationAlertDtoInput,
     ) -> QualityNotificationAlertDtoOutput:
         return _get_event_loop().run_until_complete(self.updateQualityNotificationAlertAsync(id, entity))
 
@@ -845,20 +889,53 @@ class MarketDataService:
         return _get_event_loop().run_until_complete(self.deleteQualityNotificationAlertAsync(id))
 
     async def readAlertScheduleEventsAsync(
-        self: MarketDataService, alertId: int, scheduleTime: datetime
+        self: MarketDataService,
+        alertId: int,
+        scheduleTime: datetime,
+        page: int = 1,
+        pageSize: int = 100,
+        includeMarketData: bool = False,
     ) -> AlertScheduleEventsDtoOutput:
-        """Retrieves materialized events for an alert schedule occurrence."""
-        url = "/dataquality/alertrule/" + str(alertId) + "/schedule/" + scheduleTime.isoformat() + "/events"
+        """Retrieves materialized events for an alert schedule occurrence.
+
+        Naive scheduleTime values are treated as UTC.
+        """
+        if page < 1:
+            raise ValueError(f"page must be >= 1 (got {page})")
+        if pageSize < 1 or pageSize > _MAX_DATA_QUALITY_ACL_CANDIDATES:
+            raise ValueError(f"pageSize must be between 1 and {_MAX_DATA_QUALITY_ACL_CANDIDATES} (got {pageSize})")
+        url = "/dataquality/alertrule/" + str(alertId) + "/schedule/" + _toInstantString(scheduleTime) + "/events"
+        params = {
+            "page": page,
+            "pageSize": pageSize,
+            "includeMarketData": includeMarketData,
+        }
         with self.__client as c:
             res = await asyncio.gather(
-                *[self.__executor.exec(c.exec, "GET", url, None, retcls=AlertScheduleEventsDtoOutput)]
+                *[
+                    self.__executor.exec(
+                        c.exec,
+                        "GET",
+                        url,
+                        None,
+                        retcls=AlertScheduleEventsDtoOutput,
+                        params=params,
+                    )
+                ]
             )
             return cast(AlertScheduleEventsDtoOutput, res[0])
 
     def readAlertScheduleEvents(
-        self: MarketDataService, alertId: int, scheduleTime: datetime
+        self: MarketDataService,
+        alertId: int,
+        scheduleTime: datetime,
+        page: int = 1,
+        pageSize: int = 100,
+        includeMarketData: bool = False,
     ) -> AlertScheduleEventsDtoOutput:
-        return _get_event_loop().run_until_complete(self.readAlertScheduleEventsAsync(alertId, scheduleTime))
+        return _get_event_loop().run_until_complete(
+            self.readAlertScheduleEventsAsync(alertId, scheduleTime, page, pageSize, includeMarketData)
+        )
 
     async def readAlertScheduleListAsync(self: MarketDataService, alertId: int, lastN: int = 10) -> list[datetime]:
         """Lists the most recent schedule occurrence timestamps."""
@@ -883,17 +960,49 @@ class MarketDataService:
     def readAlertScheduleList(self: MarketDataService, alertId: int, lastN: int = 10) -> list[datetime]:
         return _get_event_loop().run_until_complete(self.readAlertScheduleListAsync(alertId, lastN))
 
-    async def readAlertScheduleLastEventsAsync(self: MarketDataService, alertId: int) -> AlertScheduleEventsDtoOutput:
+    async def readAlertScheduleLastEventsAsync(
+        self: MarketDataService,
+        alertId: int,
+        page: int = 1,
+        pageSize: int = 100,
+        includeMarketData: bool = False,
+    ) -> AlertScheduleEventsDtoOutput:
         """Retrieves events from the latest alert schedule occurrence."""
+        if page < 1:
+            raise ValueError(f"page must be >= 1 (got {page})")
+        if pageSize < 1 or pageSize > _MAX_DATA_QUALITY_ACL_CANDIDATES:
+            raise ValueError(f"pageSize must be between 1 and {_MAX_DATA_QUALITY_ACL_CANDIDATES} (got {pageSize})")
         url = "/dataquality/alertrule/" + str(alertId) + "/schedule/latest/events"
+        params = {
+            "page": page,
+            "pageSize": pageSize,
+            "includeMarketData": includeMarketData,
+        }
         with self.__client as c:
             res = await asyncio.gather(
-                *[self.__executor.exec(c.exec, "GET", url, None, retcls=AlertScheduleEventsDtoOutput)]
+                *[
+                    self.__executor.exec(
+                        c.exec,
+                        "GET",
+                        url,
+                        None,
+                        retcls=AlertScheduleEventsDtoOutput,
+                        params=params,
+                    )
+                ]
             )
             return cast(AlertScheduleEventsDtoOutput, res[0])
 
-    def readAlertScheduleLastEvents(self: MarketDataService, alertId: int) -> AlertScheduleEventsDtoOutput:
-        return _get_event_loop().run_until_complete(self.readAlertScheduleLastEventsAsync(alertId))
+    def readAlertScheduleLastEvents(
+        self: MarketDataService,
+        alertId: int,
+        page: int = 1,
+        pageSize: int = 100,
+        includeMarketData: bool = False,
+    ) -> AlertScheduleEventsDtoOutput:
+        return _get_event_loop().run_until_complete(
+            self.readAlertScheduleLastEventsAsync(alertId, page, pageSize, includeMarketData)
+        )
 
     async def registerQualityNotificationAlertAssignmentAsync(
         self: MarketDataService,
@@ -925,10 +1034,11 @@ class MarketDataService:
         return _get_event_loop().run_until_complete(self.registerQualityNotificationAlertAssignmentAsync(entity))
 
     async def readQualityNotificationAlertAssignmentByIdAsync(
-        self: MarketDataService, id: int
+        self: MarketDataService, id: int, includeMarketData: bool = False
     ) -> QualityNotificationAlertAssignmentDtoOutput:
         """Retrieves a notification alert assignment by id."""
         url = "/dataquality/alertruleassignment/" + str(id)
+        params = {"includeMarketData": includeMarketData}
         with self.__client as c:
             res = await asyncio.gather(
                 *[
@@ -938,15 +1048,18 @@ class MarketDataService:
                         url,
                         None,
                         retcls=QualityNotificationAlertAssignmentDtoOutput,
+                        params=params,
                     )
                 ]
             )
             return cast(QualityNotificationAlertAssignmentDtoOutput, res[0])
 
     def readQualityNotificationAlertAssignmentById(
-        self: MarketDataService, id: int
+        self: MarketDataService, id: int, includeMarketData: bool = False
     ) -> QualityNotificationAlertAssignmentDtoOutput:
-        return _get_event_loop().run_until_complete(self.readQualityNotificationAlertAssignmentByIdAsync(id))
+        return _get_event_loop().run_until_complete(
+            self.readQualityNotificationAlertAssignmentByIdAsync(id, includeMarketData)
+        )
 
     async def readQualityNotificationAlertAssignmentsAsync(
         self: MarketDataService,
@@ -955,16 +1068,19 @@ class MarketDataService:
         alertId: int | None = None,
         marketDataId: int | None = None,
         sort: list[str] | None = None,
-    ) -> PagedResultQualityNotificationAlertAssignmentDtoOutput:
+        includeMarketData: bool = False,
+    ) -> _PagedQualityNotificationAlertAssignmentOutput:
         """Retrieves a paginated list of notification alert assignments."""
         if page < 1:
             raise ValueError(f"page must be >= 1 (got {page})")
-        if pageSize < 1:
-            raise ValueError(f"pageSize must be >= 1 (got {pageSize})")
+        if pageSize < 1 or pageSize > _MAX_DATA_QUALITY_ACL_CANDIDATES:
+            raise ValueError(f"pageSize must be between 1 and {_MAX_DATA_QUALITY_ACL_CANDIDATES} (got {pageSize})")
 
-        params: dict[str, object] = {}
-        params["page"] = page
-        params["pageSize"] = pageSize
+        params: dict[str, object] = {
+            "page": page,
+            "pageSize": pageSize,
+            "includeMarketData": includeMarketData,
+        }
 
         if alertId is not None:
             params["alertId"] = alertId
@@ -982,12 +1098,12 @@ class MarketDataService:
                         "GET",
                         url,
                         None,
-                        retcls=PagedResultQualityNotificationAlertAssignmentDtoOutput,
+                        retcls=(_PagedQualityNotificationAlertAssignmentOutput),
                         params=params,
                     )
                 ]
             )
-            return cast(PagedResultQualityNotificationAlertAssignmentDtoOutput, res[0])
+            return cast(_PagedQualityNotificationAlertAssignmentOutput, res[0])
 
     def readQualityNotificationAlertAssignments(
         self: MarketDataService,
@@ -996,9 +1112,12 @@ class MarketDataService:
         alertId: int | None = None,
         marketDataId: int | None = None,
         sort: list[str] | None = None,
-    ) -> PagedResultQualityNotificationAlertAssignmentDtoOutput:
+        includeMarketData: bool = False,
+    ) -> _PagedQualityNotificationAlertAssignmentOutput:
         return _get_event_loop().run_until_complete(
-            self.readQualityNotificationAlertAssignmentsAsync(page, pageSize, alertId, marketDataId, sort)
+            self.readQualityNotificationAlertAssignmentsAsync(
+                page, pageSize, alertId, marketDataId, sort, includeMarketData
+            )
         )
 
     async def deleteQualityNotificationAlertAssignmentAsync(self: MarketDataService, id: int) -> None:
@@ -1015,12 +1134,14 @@ class MarketDataService:
         entity: MarketDataQualityRuleAssignmentDtoInput,
         initializationLookbackPeriod: str | None = None,
     ) -> MarketDataQualityRuleAssignmentDtoOutput:
-        """
-        Creates a new assignment binding a Market Data entity to a Data Quality Rule.
+        """Creates a new assignment binding a Market Data entity to a Data
+        Quality Rule.
 
         Args:
-            entity: assignment definition including MarketDataId and DataQualityRuleId.
-            initializationLookbackPeriod: optional ISO 8601 period (e.g. "P30D")
+            entity: assignment definition including MarketDataId and
+                    DataQualityRuleId.
+            initializationLookbackPeriod: optional ISO 8601 period (e.g.
+                                          "P30D")
                 defining how far back in time the rule should validate data on
                 initial assignment.
 
@@ -1055,12 +1176,14 @@ class MarketDataService:
         entity: MarketDataQualityRuleAssignmentDtoInput,
         initializationLookbackPeriod: str | None = None,
     ) -> MarketDataQualityRuleAssignmentDtoOutput:
-        """
-        Creates a new assignment binding a Market Data entity to a Data Quality Rule.
+        """Creates a new assignment binding a Market Data entity to a Data
+        Quality Rule.
 
         Args:
-            entity: assignment definition including MarketDataId and DataQualityRuleId.
-            initializationLookbackPeriod: optional ISO 8601 period (e.g. "P30D")
+            entity: assignment definition including MarketDataId and
+                    DataQualityRuleId.
+            initializationLookbackPeriod: optional ISO 8601 period (e.g.
+                                          "P30D")
                 defining how far back in time the rule should validate data on
                 initial assignment.
 
@@ -1075,18 +1198,20 @@ class MarketDataService:
         )
 
     async def readDataQualityRuleAssignmentByIdAsync(
-        self: MarketDataService, id: int
+        self: MarketDataService, id: int, includeMarketData: bool = False
     ) -> MarketDataQualityRuleAssignmentDtoOutput:
-        """
-        Retrieves a DQ rule assignment by its unique identifier.
+        """Retrieves a DQ rule assignment by its unique identifier.
 
         Args:
             id: unique identifier of the assignment.
+            includeMarketData: when True, includes Market Data details the
+                               caller can read.
 
         Returns:
             MarketDataQualityRuleAssignmentDtoOutput (Async).
         """
         url = "/dataquality/dqruleassignment/" + str(id)
+        params = {"includeMarketData": includeMarketData}
 
         with self.__client as c:
             res = await asyncio.gather(
@@ -1097,14 +1222,16 @@ class MarketDataService:
                         url,
                         None,
                         retcls=MarketDataQualityRuleAssignmentDtoOutput,
+                        params=params,
                     )
                 ]
             )
             return cast(MarketDataQualityRuleAssignmentDtoOutput, res[0])
 
-    def readDataQualityRuleAssignmentById(self: MarketDataService, id: int) -> MarketDataQualityRuleAssignmentDtoOutput:
-        """
-        Retrieves a DQ rule assignment by its unique identifier.
+    def readDataQualityRuleAssignmentById(
+        self: MarketDataService, id: int, includeMarketData: bool = False
+    ) -> MarketDataQualityRuleAssignmentDtoOutput:
+        """Retrieves a DQ rule assignment by its unique identifier.
 
         Args:
             id: unique identifier of the assignment.
@@ -1112,7 +1239,7 @@ class MarketDataService:
         Returns:
             MarketDataQualityRuleAssignmentDtoOutput.
         """
-        return _get_event_loop().run_until_complete(self.readDataQualityRuleAssignmentByIdAsync(id))
+        return _get_event_loop().run_until_complete(self.readDataQualityRuleAssignmentByIdAsync(id, includeMarketData))
 
     async def readDataQualityRuleAssignmentAsync(
         self: MarketDataService,
@@ -1122,9 +1249,9 @@ class MarketDataService:
         ruleId: int | None = None,
         ruleName: str | None = None,
         sort: list[str] | None = None,
+        includeMarketData: bool = False,
     ) -> PagedResultMarketDataQualityRuleAssignmentDtoOutput:
-        """
-        Retrieves a paginated list of DQ rule assignments.
+        """Retrieves a paginated list of DQ rule assignments.
 
         Args:
             page: page number (1-based).
@@ -1139,12 +1266,14 @@ class MarketDataService:
         """
         if page < 1:
             raise ValueError("Page must to be greater than 0. Page:" + str(page))
-        if pageSize < 1:
-            raise ValueError("PageSize must to be greater than 0. Page Size:" + str(pageSize))
+        if pageSize < 1 or pageSize > _MAX_DATA_QUALITY_ACL_CANDIDATES:
+            raise ValueError(f"PageSize must be between 1 and {_MAX_DATA_QUALITY_ACL_CANDIDATES}. PageSize: {pageSize}")
 
-        params: dict[str, object] = {}
-        params["page"] = page
-        params["pageSize"] = pageSize
+        params: dict[str, object] = {
+            "page": page,
+            "pageSize": pageSize,
+            "includeMarketData": includeMarketData,
+        }
         if marketDataId is not None:
             params["marketDataId"] = marketDataId
         if ruleId is not None:
@@ -1163,7 +1292,7 @@ class MarketDataService:
                         "GET",
                         url,
                         None,
-                        retcls=PagedResultMarketDataQualityRuleAssignmentDtoOutput,
+                        retcls=(PagedResultMarketDataQualityRuleAssignmentDtoOutput),
                         params=params,
                     )
                 ]
@@ -1178,9 +1307,9 @@ class MarketDataService:
         ruleId: int | None = None,
         ruleName: str | None = None,
         sort: list[str] | None = None,
+        includeMarketData: bool = False,
     ) -> PagedResultMarketDataQualityRuleAssignmentDtoOutput:
-        """
-        Retrieves a paginated list of DQ rule assignments.
+        """Retrieves a paginated list of DQ rule assignments.
 
         Args:
             page: page number (1-based).
@@ -1201,6 +1330,7 @@ class MarketDataService:
                 ruleId,
                 ruleName,
                 sort,
+                includeMarketData,
             )
         )
 
@@ -1210,8 +1340,8 @@ class MarketDataService:
         initializationLookbackPeriod: str,
         etag: str,
     ) -> MarketDataQualityRuleAssignmentDtoOutput:
-        """
-        Updates an assignment lookback, triggering re-evaluation from new date.
+        """Updates an assignment lookback, triggering re-evaluation from new
+        date.
 
         Args:
             id: unique identifier of the assignment to update.
@@ -1248,8 +1378,8 @@ class MarketDataService:
         initializationLookbackPeriod: str,
         etag: str,
     ) -> MarketDataQualityRuleAssignmentDtoOutput:
-        """
-        Updates an assignment lookback, triggering re-evaluation from new date.
+        """Updates an assignment lookback, triggering re-evaluation from new
+        date.
 
         Args:
             id: unique identifier of the assignment to update.
@@ -1268,8 +1398,7 @@ class MarketDataService:
         )
 
     async def deleteDataQualityRuleAssignmentAsync(self: MarketDataService, id: int) -> None:
-        """
-        Deletes an assignment by id.
+        """Deletes an assignment by id.
 
         Args:
             id: unique identifier of the assignment to delete.
@@ -1283,8 +1412,7 @@ class MarketDataService:
             return
 
     def deleteDataQualityRuleAssignment(self: MarketDataService, id: int) -> None:
-        """
-        Deletes an assignment by id.
+        """Deletes an assignment by id.
 
         Args:
             id: unique identifier of the assignment to delete.
@@ -1298,13 +1426,16 @@ class MarketDataService:
         self: MarketDataService,
         id: int,
         afterTimestamp: datetime | None = None,
+        includeMarketData: bool = False,
     ) -> list[DqCheckChangeEventDtoOutput]:
-        """
-        Retrieves the raw event feed for a specific rule assignment.
+        """Retrieves the raw event feed for a specific rule assignment.
 
         Args:
             id: rule assignment identifier.
             afterTimestamp: optional lower bound, returns events after instant.
+                            Naive values are treated as UTC.
+            includeMarketData: when True, includes provider and curve names
+                               for Market Data the caller can read.
 
         Returns:
             List of DqCheckChangeEventDtoOutput (Async).
@@ -1312,7 +1443,8 @@ class MarketDataService:
         url = "/dataquality/dqruleassignment/" + str(id) + "/events"
         params: dict[str, object] = {}
         if afterTimestamp is not None:
-            params["afterTimestamp"] = afterTimestamp.isoformat()
+            params["afterTimestamp"] = _toInstantString(afterTimestamp)
+        params["includeMarketData"] = includeMarketData
         with self.__client as c:
             res = await asyncio.gather(
                 *[
@@ -1332,9 +1464,9 @@ class MarketDataService:
         self: MarketDataService,
         id: int,
         afterTimestamp: datetime | None = None,
+        includeMarketData: bool = False,
     ) -> list[DqCheckChangeEventDtoOutput]:
-        """
-        Retrieves the raw event feed for a specific rule assignment.
+        """Retrieves the raw event feed for a specific rule assignment.
 
         Args:
             id: rule assignment identifier.
@@ -1344,17 +1476,19 @@ class MarketDataService:
             List of DqCheckChangeEventDtoOutput.
         """
         return _get_event_loop().run_until_complete(
-            self.readDataQualityRuleAssignmentEventsFeedAsync(id, afterTimestamp)
+            self.readDataQualityRuleAssignmentEventsFeedAsync(id, afterTimestamp, includeMarketData)
         )
 
     async def checkConversionAsync(
-        self: MarketDataService, inputUnitsOfMeasure: list[str], targetUnitOfMeasure: str
+        self: MarketDataService,
+        inputUnitsOfMeasure: list[str],
+        targetUnitOfMeasure: str,
     ) -> CheckConversionResult | None:
-        """
-        Check UnitOfMeasure conversion.
+        """Check UnitOfMeasure conversion.
 
         Args:
-            inputUnitsOfMeasure: the list of the input UnitOfMeasure to be check for
+            inputUnitsOfMeasure: the list of the input UnitOfMeasure to be
+                                 check for
                                 conversion
             targetUnitOfMeasure: The target UnitOfMeasure
 
@@ -1382,28 +1516,31 @@ class MarketDataService:
             return cast(CheckConversionResult | None, res[0])
 
     def checkConversion(
-        self: MarketDataService, inputUnitsOfMeasure: list[str], targetUnitOfMeasure: str
+        self: MarketDataService,
+        inputUnitsOfMeasure: list[str],
+        targetUnitOfMeasure: str,
     ) -> CheckConversionResult | None:
-        """
-        Check UnitOfMeasure conversion.
+        """Check UnitOfMeasure conversion.
 
         Args:
-            inputUnitsOfMeasure: the list of the input UnitOfMeasure to be check for
+            inputUnitsOfMeasure: the list of the input UnitOfMeasure to be
+                                 check for
                                 conversion
             targetUnitOfMeasure: The target UnitOfMeasure
 
         Returns:
             CheckConversionResult Entity.
         """
-
         return _get_event_loop().run_until_complete(self.checkConversionAsync(inputUnitsOfMeasure, targetUnitOfMeasure))
 
     async def updateDerivedConfigurationAsync(
-        self: MarketDataService, marketDataId: int, derivedCfg: DerivedCfg, force: bool = False
+        self: MarketDataService,
+        marketDataId: int,
+        derivedCfg: DerivedCfg,
+        force: bool = False,
     ) -> MarketDataEntityOutput | None:
-        """
-        Update Derived Configuration for marketData with id supplied in MarketDataId.
-        The update will trigger a Rebuild
+        """Update Derived Configuration for marketData with id supplied in
+        MarketDataId. The update will trigger a Rebuild.
 
         Args:
             marketDataId: The Market Data Id to be updated
@@ -1414,10 +1551,10 @@ class MarketDataService:
         Returns:
             MarketData Entity Output (Async).
         """
-
         marketDataOutput = await self.readMarketDataRegistryByIdAsync(marketDataId)
 
-        # Preserve the existing AttributeError when the source market-data entity is missing.
+        # Preserve the existing AttributeError when the source market-data
+        # entity is missing.
         cast(MarketDataEntityOutput, marketDataOutput)._validateUpdateDerivedCfg(derivedCfgUpdate=derivedCfg)
 
         url = "/marketdata/entity/" + str(marketDataId) + "/updateDerivedConfiguration"
@@ -1438,11 +1575,13 @@ class MarketDataService:
             return cast(MarketDataEntityOutput | None, res[0])
 
     def updateDerivedConfiguration(
-        self: MarketDataService, marketDataId: int, derivedCfg: DerivedCfg, force: bool = False
+        self: MarketDataService,
+        marketDataId: int,
+        derivedCfg: DerivedCfg,
+        force: bool = False,
     ) -> MarketDataEntityOutput | None:
-        """
-        Update Derived Configuration for marketData with id supplied in MarketDataId.
-        The update will trigger a Rebuild
+        """Update Derived Configuration for marketData with id supplied in
+        MarketDataId. The update will trigger a Rebuild.
 
         Args:
             marketDataId: The Market Data Id to be updated
@@ -1552,11 +1691,11 @@ class MarketDataService:
     async def derivedTransformQueryValidationAsync(
         self: MarketDataService, request: DerivedTransformQueryValidation
     ) -> DerivedTransformQueryValidationResponse | None:
-        """
-        Derived Transform Query Validation.
+        """Derived Transform Query Validation.
 
         Args:
-            request: Request containing TimeSerieData and the Query to be applied to verify the derived transformation
+            request: Request containing TimeSerieData and the Query to be
+                     applied to verify the derived transformation
         Returns:
             DerivedTransformQueryValidationResponse Entity (Async).
         """
@@ -1564,7 +1703,15 @@ class MarketDataService:
 
         with self.__client as c:
             res = await asyncio.gather(
-                *[self.__executor.exec(c.exec, "POST", url, request, retcls=DerivedTransformQueryValidationResponse)]
+                *[
+                    self.__executor.exec(
+                        c.exec,
+                        "POST",
+                        url,
+                        request,
+                        retcls=DerivedTransformQueryValidationResponse,
+                    )
+                ]
             )
 
             return cast(DerivedTransformQueryValidationResponse | None, res[0])
@@ -1572,16 +1719,15 @@ class MarketDataService:
     def derivedTransformQueryValidation(
         self: MarketDataService, request: DerivedTransformQueryValidation
     ) -> DerivedTransformQueryValidationResponse | None:
-        """
-        Derived Transform Query Validation.
+        """Derived Transform Query Validation.
 
         Args:
-            request: Request containing TimeSerieData and the Query to be applied to verify the derived transformation
+            request: Request containing TimeSerieData and the Query to be
+                     applied to verify the derived transformation
 
         Returns:
             DerivedTransformQueryValidationResponse Entity.
         """
-
         return _get_event_loop().run_until_complete(self.derivedTransformQueryValidationAsync(request))
 
     async def getDataQualityCheckResultExtractVtsAsync(
@@ -1592,9 +1738,9 @@ class MarketDataService:
         end: str,
         timeZone: str,
         assignmentIds: list[int] | None = None,
+        includeMarketData: bool = False,
     ) -> list[CheckResultExtractVts]:
-        """
-        Extracts data quality check results for versioned time series (VTS).
+        """Extracts data quality check results for versioned time series (VTS).
         Returns compact, abbreviated DTOs designed for high-volume extraction.
 
         Args:
@@ -1603,17 +1749,23 @@ class MarketDataService:
             start: Range start date (yyyy-MM-dd).
             end: Range end date (yyyy-MM-dd), not inclusive.
             timeZone: IANA timezone identifier (e.g., "UTC", "Europe/Rome").
-            assignmentIds: Optional filter by assignment IDs. If None or empty, returns results for all assignments.
+            assignmentIds: Optional filter by assignment IDs. If None or empty,
+                           returns results for all assignments.
+            includeMarketData: When True, includes provider and curve names
+                               when accessible.
 
         Returns:
-            An enumerable of CheckResultExtractVts with Version populated (Async).
+            An enumerable of CheckResultExtractVts with Version populated
+            (Async).
         """
         if not timeZone:
             raise ValueError("timeZone cannot be None or empty")
+        _validateAssignmentIds(assignmentIds)
 
         url = f"/dataquality/checkresult/extract/vts/Version/{version}/{granularity}/{start}/{end}"
         params: dict[str, object] = {}
         params["timeZone"] = timeZone
+        params["includeMarketData"] = includeMarketData
         if assignmentIds is not None and len(assignmentIds) > 0:
             params["assignmentIds"] = assignmentIds
 
@@ -1640,9 +1792,9 @@ class MarketDataService:
         end: str,
         timeZone: str,
         assignmentIds: list[int] | None = None,
+        includeMarketData: bool = False,
     ) -> list[CheckResultExtractVts]:
-        """
-        Extracts data quality check results for versioned time series (VTS).
+        """Extracts data quality check results for versioned time series (VTS).
         Returns compact, abbreviated DTOs designed for high-volume extraction.
 
         Args:
@@ -1651,13 +1803,22 @@ class MarketDataService:
             start: Range start date (yyyy-MM-dd).
             end: Range end date (yyyy-MM-dd), not inclusive.
             timeZone: IANA timezone identifier (e.g., "UTC", "Europe/Rome").
-            assignmentIds: Optional filter by assignment IDs. If None or empty, returns results for all assignments.
+            assignmentIds: Optional filter by assignment IDs. If None or empty,
+                           returns results for all assignments.
 
         Returns:
             An enumerable of CheckResultExtractVts with Version populated.
         """
         return _get_event_loop().run_until_complete(
-            self.getDataQualityCheckResultExtractVtsAsync(version, granularity, start, end, timeZone, assignmentIds)
+            self.getDataQualityCheckResultExtractVtsAsync(
+                version,
+                granularity,
+                start,
+                end,
+                timeZone,
+                assignmentIds,
+                includeMarketData,
+            )
         )
 
     async def getDataQualityCheckResultExtractTsAsync(
@@ -1667,27 +1828,32 @@ class MarketDataService:
         end: str,
         timeZone: str,
         assignmentIds: list[int] | None = None,
+        includeMarketData: bool = False,
     ) -> list[CheckResultExtractTs]:
-        """
-        Extracts data quality check results for (non-versioned) time series (TS).
-        Returns compact DTOs without version information.
+        """Extracts data quality check results for (non-versioned) time series
+        (TS). Returns compact DTOs without version information.
 
         Args:
             granularity: Time granularity (Day, Hour, etc.).
             start: Range start date (yyyy-MM-dd).
             end: Range end date (yyyy-MM-dd), not inclusive.
             timeZone: IANA timezone identifier (e.g., "UTC", "Europe/Rome").
-            assignmentIds: Optional filter by assignment IDs. If None or empty, returns results for all assignments.
+            assignmentIds: Optional filter by assignment IDs. If None or empty,
+                           returns results for all assignments.
+            includeMarketData: When True, includes provider and curve names
+                               when accessible.
 
         Returns:
             An enumerable of CheckResultExtractTs (Async).
         """
         if not timeZone:
             raise ValueError("timeZone cannot be None or empty")
+        _validateAssignmentIds(assignmentIds)
 
         url = "/dataquality/checkresult/extract/ts/" + str(granularity) + "/" + str(start) + "/" + str(end)
         params: dict[str, object] = {}
         params["timeZone"] = timeZone
+        params["includeMarketData"] = includeMarketData
         if assignmentIds is not None and len(assignmentIds) > 0:
             params["assignmentIds"] = assignmentIds
 
@@ -1713,23 +1879,155 @@ class MarketDataService:
         end: str,
         timeZone: str,
         assignmentIds: list[int] | None = None,
+        includeMarketData: bool = False,
     ) -> list[CheckResultExtractTs]:
-        """
-        Extracts data quality check results for (non-versioned) time series (TS).
-        Returns compact DTOs without version information.
+        """Extracts data quality check results for (non-versioned) time series
+        (TS). Returns compact DTOs without version information.
 
         Args:
             granularity: Time granularity (Day, Hour, etc.).
             start: Range start date (yyyy-MM-dd).
             end: Range end date (yyyy-MM-dd), not inclusive.
             timeZone: IANA timezone identifier (e.g., "UTC", "Europe/Rome").
-            assignmentIds: Optional filter by assignment IDs. If None or empty, returns results for all assignments.
+            assignmentIds: Optional filter by assignment IDs. If None or empty,
+                           returns results for all assignments.
 
         Returns:
             An enumerable of CheckResultExtractTs.
         """
         return _get_event_loop().run_until_complete(
-            self.getDataQualityCheckResultExtractTsAsync(granularity, start, end, timeZone, assignmentIds)
+            self.getDataQualityCheckResultExtractTsAsync(
+                granularity,
+                start,
+                end,
+                timeZone,
+                assignmentIds,
+                includeMarketData,
+            )
+        )
+
+    async def getDataQualityCheckResultExtractMasAsync(
+        self: MarketDataService,
+        granularity: str,
+        start: str,
+        end: str,
+        timeZone: str,
+        assignmentIds: list[int] | None = None,
+        products: list[str] | None = None,
+        includeMarketData: bool = False,
+    ) -> list[CheckResultExtractMas]:
+        """Extracts data quality check results for Market Assessment series."""
+        if not timeZone:
+            raise ValueError("timeZone cannot be None or empty")
+        _validateAssignmentIds(assignmentIds)
+
+        url = f"/dataquality/checkresult/extract/mas/{granularity}/{start}/{end}"
+        params: dict[str, object] = {
+            "tz": timeZone,
+            "includeMarketData": includeMarketData,
+        }
+        if assignmentIds:
+            params["id"] = assignmentIds
+        if products:
+            params["p"] = products
+
+        with self.__client as c:
+            res = await asyncio.gather(
+                *[
+                    self.__executor.exec(
+                        c.exec,
+                        "GET",
+                        url,
+                        None,
+                        retcls=list[CheckResultExtractMas],
+                        params=params,
+                    )
+                ]
+            )
+            return cast(list[CheckResultExtractMas], res[0])
+
+    def getDataQualityCheckResultExtractMas(
+        self: MarketDataService,
+        granularity: str,
+        start: str,
+        end: str,
+        timeZone: str,
+        assignmentIds: list[int] | None = None,
+        products: list[str] | None = None,
+        includeMarketData: bool = False,
+    ) -> list[CheckResultExtractMas]:
+        return _get_event_loop().run_until_complete(
+            self.getDataQualityCheckResultExtractMasAsync(
+                granularity,
+                start,
+                end,
+                timeZone,
+                assignmentIds,
+                products,
+                includeMarketData,
+            )
+        )
+
+    async def getDataQualityCheckResultExtractBidAskAsync(
+        self: MarketDataService,
+        granularity: str,
+        start: str,
+        end: str,
+        timeZone: str,
+        assignmentIds: list[int] | None = None,
+        products: list[str] | None = None,
+        includeMarketData: bool = False,
+    ) -> list[CheckResultExtractBidAsk]:
+        """Extracts data quality check results for BidAsk series."""
+        if not timeZone:
+            raise ValueError("timeZone cannot be None or empty")
+        _validateAssignmentIds(assignmentIds)
+
+        url = f"/dataquality/checkresult/extract/ba/{granularity}/{start}/{end}"
+        params: dict[str, object] = {
+            "tz": timeZone,
+            "includeMarketData": includeMarketData,
+        }
+        if assignmentIds:
+            params["id"] = assignmentIds
+        if products:
+            params["p"] = products
+
+        with self.__client as c:
+            res = await asyncio.gather(
+                *[
+                    self.__executor.exec(
+                        c.exec,
+                        "GET",
+                        url,
+                        None,
+                        retcls=list[CheckResultExtractBidAsk],
+                        params=params,
+                    )
+                ]
+            )
+            return cast(list[CheckResultExtractBidAsk], res[0])
+
+    def getDataQualityCheckResultExtractBidAsk(
+        self: MarketDataService,
+        granularity: str,
+        start: str,
+        end: str,
+        timeZone: str,
+        assignmentIds: list[int] | None = None,
+        products: list[str] | None = None,
+        includeMarketData: bool = False,
+    ) -> list[CheckResultExtractBidAsk]:
+        return _get_event_loop().run_until_complete(
+            self.getDataQualityCheckResultExtractBidAskAsync(
+                granularity,
+                start,
+                end,
+                timeZone,
+                assignmentIds,
+                products,
+                includeMarketData,
+            )
         )
 
     async def getDataQualityCheckResultCheckSummaryAsync(
@@ -1747,14 +2045,15 @@ class MarketDataService:
         products: list[str] | None = None,
         skipEmptyRanges: bool = False,
         sort: list[str] | None = None,
+        includeMarketData: bool = False,
     ) -> PagedResultCheckResultCheckSummaryDto:
-        """
-        Retrieves a paged summary of data quality check results (CurveRange-like view per assignment).
-        Includes range metadata, product info, and assignment details.
+        """Retrieves a paged summary of data quality check results (CurveRange-
+        like view per assignment). Includes range metadata, product info, and
+        assignment details.
 
         Args:
             page: Page number (1-based, default: 1).
-            pageSize: Items per page (default: 10).
+            pageSize: Items per page (1..100, default: 10).
             marketDataIds: Optional filter by MarketData IDs.
             ruleIds: Optional filter by Rule IDs.
             assignmentIds: Optional filter by Assignment IDs.
@@ -1764,22 +2063,26 @@ class MarketDataService:
             versionFrom: Optional version range start (ISO format).
             versionTo: Optional version range end (ISO format).
             products: Optional filter by products.
-            skipEmptyRanges: When True, return only summaries with non-empty range data (default: False).
-            sort: Optional sort expressions (e.g., ["RuleName asc", "LastCheckTime desc"]).
+            skipEmptyRanges: When True, return only summaries with non-empty
+                             range data (default: False).
+            sort: Optional sort expressions (e.g., ["RuleName asc",
+                  "LastCheckTime desc"]).
 
         Returns:
-            A paginated result containing CheckResultCheckSummaryDto items (Async).
+            A paginated result containing CheckResultCheckSummaryDto items
+            (Async).
         """
         if page < 1:
             raise ValueError(f"Page must be greater than 0. Page: {page}")
-        if pageSize < 1:
-            raise ValueError(f"PageSize must be greater than 0. PageSize: {pageSize}")
+        if pageSize < 1 or pageSize > _MAX_DATA_QUALITY_ACL_CANDIDATES:
+            raise ValueError(f"PageSize must be between 1 and {_MAX_DATA_QUALITY_ACL_CANDIDATES}. PageSize: {pageSize}")
 
         url = "/dataquality/checkresult/checksummary"
         params: dict[str, object] = {
             "page": page,
             "pageSize": pageSize,
             "skipEmptyRanges": skipEmptyRanges,
+            "includeMarketData": includeMarketData,
         }
 
         if marketDataIds is not None and len(marketDataIds) > 0:
@@ -1833,14 +2136,15 @@ class MarketDataService:
         products: list[str] | None = None,
         skipEmptyRanges: bool = False,
         sort: list[str] | None = None,
+        includeMarketData: bool = False,
     ) -> PagedResultCheckResultCheckSummaryDto:
-        """
-        Retrieves a paged summary of data quality check results (CurveRange-like view per assignment).
-        Includes range metadata, product info, and assignment details.
+        """Retrieves a paged summary of data quality check results (CurveRange-
+        like view per assignment). Includes range metadata, product info, and
+        assignment details.
 
         Args:
             page: Page number (1-based, default: 1).
-            pageSize: Items per page (default: 10).
+            pageSize: Items per page (1..100, default: 10).
             marketDataIds: Optional filter by MarketData IDs.
             ruleIds: Optional filter by Rule IDs.
             assignmentIds: Optional filter by Assignment IDs.
@@ -1850,8 +2154,10 @@ class MarketDataService:
             versionFrom: Optional version range start (ISO format).
             versionTo: Optional version range end (ISO format).
             products: Optional filter by products.
-            skipEmptyRanges: When True, return only summaries with non-empty range data (default: False).
-            sort: Optional sort expressions (e.g., ["RuleName asc", "LastCheckTime desc"]).
+            skipEmptyRanges: When True, return only summaries with non-empty
+                             range data (default: False).
+            sort: Optional sort expressions (e.g., ["RuleName asc",
+                  "LastCheckTime desc"]).
 
         Returns:
             A paginated result containing CheckResultCheckSummaryDto items.
@@ -1871,6 +2177,7 @@ class MarketDataService:
                 products,
                 skipEmptyRanges,
                 sort,
+                includeMarketData,
             )
         )
 
@@ -1880,27 +2187,29 @@ class MarketDataService:
         marketDataIds: list[int] | None = None,
         dqStatus: CheckAggregatedStatus | None = None,
         limit: int = 10,
+        includeMarketData: bool = False,
     ) -> list[MarketDataDqStatusSummaryDto]:
-        """
-        Retrieves market data entities with their DQ status summary for a given rule.
-        Results are sorted by LastCheckTime descending.
+        """Retrieves market data entities with their DQ status summary for a
+        given rule. Results are sorted by LastCheckTime descending.
 
         Args:
             ruleId: Optional Rule ID filter.
             marketDataIds: Optional filter by MarketData IDs.
-            dqStatus: Optional aggregated DQ status filter (OK/KO). When KO, returns only Market Data
+            dqStatus: Optional aggregated DQ status filter (OK/KO). When KO,
+                      returns only Market Data
             whose overall status is KO.
-            limit: Maximum number of results to return (1..1000, default: 10).
+            limit: Maximum number of results to return (1..100, default: 10).
 
         Returns:
             An enumerable of MarketDataDqStatusSummaryDto items (Async).
         """
-        if limit < 1 or limit > 1000:
-            raise ValueError(f"Limit must be between 1 and 1000. Limit: {limit}")
+        if limit < 1 or limit > _MAX_DATA_QUALITY_ACL_CANDIDATES:
+            raise ValueError(f"Limit must be between 1 and {_MAX_DATA_QUALITY_ACL_CANDIDATES}. Limit: {limit}")
 
         url = "/dataquality/checkresult/marketdata/dataqualitystatussummary"
         params: dict[str, object] = {}
         params["limit"] = limit
+        params["includeMarketData"] = includeMarketData
 
         if ruleId is not None:
             params["ruleId"] = ruleId
@@ -1930,23 +2239,24 @@ class MarketDataService:
         marketDataIds: list[int] | None = None,
         dqStatus: CheckAggregatedStatus | None = None,
         limit: int = 10,
+        includeMarketData: bool = False,
     ) -> list[MarketDataDqStatusSummaryDto]:
-        """
-        Retrieves market data entities with their DQ status summary for a given rule.
-        Results are sorted by LastCheckTime descending.
+        """Retrieves market data entities with their DQ status summary for a
+        given rule. Results are sorted by LastCheckTime descending.
 
         Args:
             ruleId: Optional Rule ID filter.
             marketDataIds: Optional filter by MarketData IDs.
-            dqStatus: Optional aggregated DQ status filter (OK/KO). When KO, returns only Market Data
+            dqStatus: Optional aggregated DQ status filter (OK/KO). When KO,
+                      returns only Market Data
             whose overall status is KO.
-            limit: Maximum number of results to return (1..1000, default: 10).
+            limit: Maximum number of results to return (1..100, default: 10).
 
         Returns:
             An enumerable of MarketDataDqStatusSummaryDto items.
         """
         return _get_event_loop().run_until_complete(
-            self.getMarketDataDqStatusSummaryAsync(ruleId, marketDataIds, dqStatus, limit)
+            self.getMarketDataDqStatusSummaryAsync(ruleId, marketDataIds, dqStatus, limit, includeMarketData)
         )
 
     async def getDqRuleDqStatusSummaryAsync(
@@ -1956,22 +2266,23 @@ class MarketDataService:
         dqStatus: CheckAggregatedStatus | None = None,
         limit: int = 10,
     ) -> list[DqRuleDqStatusSummaryDto]:
-        """
-        Retrieves DQ rules with their status summary, optionally filtered by a specific market data entity.
-        Results are sorted by LastCheckTime descending.
+        """Retrieves DQ rules with their status summary, optionally filtered by
+        a specific market data entity. Results are sorted by LastCheckTime
+        descending.
 
         Args:
             marketDataId: Optional filter by a specific MarketData ID.
             ruleIds: Optional filter by specific Rule IDs.
-            dqStatus: Optional aggregated DQ status filter (OK/KO). When KO, returns only rules whose
+            dqStatus: Optional aggregated DQ status filter (OK/KO). When KO,
+                      returns only rules whose
             overall status is KO.
-            limit: Maximum number of results to return (1..1000, default: 10).
+            limit: Maximum number of results to return (1..100, default: 10).
 
         Returns:
             An enumerable of DqRuleDqStatusSummaryDto items (Async).
         """
-        if limit < 1 or limit > 1000:
-            raise ValueError(f"Limit must be between 1 and 1000. Limit: {limit}")
+        if limit < 1 or limit > _MAX_DATA_QUALITY_ACL_CANDIDATES:
+            raise ValueError(f"Limit must be between 1 and {_MAX_DATA_QUALITY_ACL_CANDIDATES}. Limit: {limit}")
 
         url = "/dataquality/checkresult/dqrule/dataqualitystatussummary"
         params: dict[str, object] = {}
@@ -2006,16 +2317,17 @@ class MarketDataService:
         dqStatus: CheckAggregatedStatus | None = None,
         limit: int = 10,
     ) -> list[DqRuleDqStatusSummaryDto]:
-        """
-        Retrieves DQ rules with their status summary, optionally filtered by a specific market data entity.
-        Results are sorted by LastCheckTime descending.
+        """Retrieves DQ rules with their status summary, optionally filtered by
+        a specific market data entity. Results are sorted by LastCheckTime
+        descending.
 
         Args:
             marketDataId: Optional filter by a specific MarketData ID.
             ruleIds: Optional filter by specific Rule IDs.
-            dqStatus: Optional aggregated DQ status filter (OK/KO). When KO, returns only rules whose
+            dqStatus: Optional aggregated DQ status filter (OK/KO). When KO,
+                      returns only rules whose
             overall status is KO.
-            limit: Maximum number of results to return (1..1000, default: 10).
+            limit: Maximum number of results to return (1..100, default: 10).
 
         Returns:
             An enumerable of DqRuleDqStatusSummaryDto items.
@@ -2026,10 +2338,10 @@ class MarketDataService:
 
 
 def _get_event_loop() -> asyncio.AbstractEventLoop:
-    """
-    Wrapper around asyncio get_event_loop.
-    Ensures that there is an event loop available.
-    An event loop may not be available if the sdk is not run in the main event loop
+    """Wrapper around asyncio get_event_loop.
+
+    Ensures that there is an event loop available. An event loop may not be
+    available if the sdk is not run in the main event loop
     """
     try:
         asyncio.get_event_loop()

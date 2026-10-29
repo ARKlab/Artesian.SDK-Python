@@ -273,7 +273,10 @@ class Attempt(Generic[_T]):
 
     def __repr__(self) -> str:
         if self.has_exception:
-            return f"Attempts: {self.attempt_number}, Error:\n{''.join(traceback.format_tb(cast(_ExceptionInfo, self.value)[2]))}"
+            return (
+                f"Attempts: {self.attempt_number}, Error:\n"
+                f"{''.join(traceback.format_tb(cast(_ExceptionInfo, self.value)[2]))}"
+            )
         else:
             return f"Attempts: {self.attempt_number}, Value: {self.value}"
 
