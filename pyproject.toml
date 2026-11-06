@@ -24,7 +24,7 @@ classifiers = [
 dependencies = [
     "requests~=2.27",
     "six~=1.16",
-    "python-dateutil~=3.0,>=3",
+    "python-dateutil~=4.0,>=4",
     "msgspec~=0.21,>=0.21.1",
 ]
 
