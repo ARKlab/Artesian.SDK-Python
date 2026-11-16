@@ -1,8 +1,9 @@
 # Changelog
 
-All notable changes to this project are documented in this file.
+All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
@@ -28,3 +29,4 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 ### Fixed
 
 - `readAlertScheduleEvents` sends `scheduleTime` as a UTC instant ending with `Z`, as the service route requires.
+- Corrected GME Public Offer market identifiers for MGP auction and continuous markets, and added support for the `UNKNOWN` zone.
