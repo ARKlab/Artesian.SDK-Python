@@ -36,7 +36,7 @@ jobs:
           fetch-depth: 0
 
       - name: Set up uv / Python ${{ matrix.python-version }}
-        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -63,14 +63,14 @@ jobs:
         run: uv build
 
       - name: Upload pytest test results
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         if: always()
         with:
           name: test-results-build-${{ matrix.python-version }}-${{ matrix.os }}
           path: junit/test-results-${{ matrix.python-version }}-${{ matrix.os }}.xml
 
       - name: Upload build coverage
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         if: always()
         with:
           name: coverage-build-${{ matrix.python-version }}-${{ matrix.os }}
@@ -101,7 +101,7 @@ jobs:
 
       - name: "Set up uv"
         if: ${{ needs.test-matrix.result == 'success' }}
-        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
           python-version: "3.14"
 
@@ -111,7 +111,7 @@ jobs:
 
       - name: "Download coverage artifacts"
         if: ${{ needs.test-matrix.result == 'success' }}
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           pattern: coverage-build-*
           path: coverage
@@ -127,7 +127,7 @@ jobs:
 
       - name: "Upload combined coverage"
         if: ${{ needs.test-matrix.result == 'success' }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: coverage-combined
           path: |
@@ -147,7 +147,7 @@ jobs:
           label: code-coverage/pytest
 
       - name: "Download test result artifacts"
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         if: always()
         with:
           pattern: test-results-build-*
@@ -324,7 +324,7 @@ jobs:
         run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - name: "Set up uv"
-        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
           python-version: "3.14"
 
@@ -339,7 +339,7 @@ jobs:
           sha256sum dist/*.whl dist/*.tar.gz >> "$GITHUB_STEP_SUMMARY"
 
       - name: "Upload release distributions"
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: release-dist
           path: |
@@ -367,7 +367,7 @@ jobs:
       cancel-in-progress: false
     steps:
       - name: "Download release distributions"
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           name: release-dist
           path: dist
@@ -388,13 +388,13 @@ jobs:
               raise SystemExit("Release distributions do not match the tag")
 
       - name: "Set up pinned uv"
-        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
-          version: "0.12.23"
+          version: "0.13.7"
           enable-cache: false
 
       - name: "Generate PEP 740 publish attestations"
-        uses: astral-sh/attest-action@f589a42a7efb6fe400b4f400de60b4bc90390027 # v0.0.6
+        uses: astral-sh/attest-action@39b6ce43875c196a579e31635b11aa2a2036384a # v0.0.7
         with:
           paths: |
             dist/*.whl
