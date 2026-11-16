@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Support MAS and BidAsk completeness, freshness, and outlier rule configurations, plus compact check-result extraction.
 - Add paged alert schedule events and optional ACL-aware Market Data details on Data Quality reads.
 - Support optional Market Data details (`includeMarketData`) in TS and VTS Data Quality check-result extraction.
+- `Zone.UNKNOWN` for GME public offers whose zone is not recognized.
 
 ### Changed
 
@@ -25,8 +26,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Datetimes are sent as RFC 3339: naive values stay naive, UTC values end with `Z`, and the fractional part is omitted when it is zero (previously it was always sent with six digits).
 - Mappings are sent as JSON objects unless the DTO field is explicitly marked to use the `Key`/`Value` array format; both shapes are still accepted when decoding.
 - `NaN` and `Infinity` float values are rejected with `ValueError` when serializing.
+- **Breaking:** renamed `Market.GMP_ASTA` and `Market.GMP_Cont` to `Market.MGP_ASTA` and `Market.MGP_Cont` to match the GME market names; queries now send `MGP_ASTA` and `MGP_Cont`. The old names were typos for markets that don't exist and have been removed: code using them raises `AttributeError` and must switch to the new names.
 
 ### Fixed
 
 - `readAlertScheduleEvents` sends `scheduleTime` as a UTC instant ending with `Z`, as the service route requires.
-- Corrected GME Public Offer market identifiers for MGP auction and continuous markets, and added support for the `UNKNOWN` zone.
