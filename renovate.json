@@ -10,7 +10,8 @@
       "description": "Keep [tool.uv] required-version in step with the uv pinned in workflows",
       "managerFilePatterns": ["/^pyproject\\.toml$/"],
       "matchStrings": ["required-version = \"==(?<currentValue>[^\"]+)\""],
-      "depNameTemplate": "astral-sh/uv",
+      "depNameTemplate": "uv",
+      "packageNameTemplate": "astral-sh/uv",
       "datasourceTemplate": "github-releases"
     }
   ]
