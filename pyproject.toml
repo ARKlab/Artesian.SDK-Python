@@ -54,7 +54,7 @@ required-version = "==0.13.7"
 [dependency-groups]
 dev = [
     {include-group = "test"},
-    "pyrefly==1.4.1",
+    "pyrefly==1.5.0",
     "ruff==0.17.4",
 ]
 test = [
