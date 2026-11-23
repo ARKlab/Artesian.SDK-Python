@@ -11,8 +11,7 @@
       "managerFilePatterns": ["/^pyproject\\.toml$/"],
       "matchStrings": ["required-version = \"==(?<currentValue>[^\"]+)\""],
       "depNameTemplate": "uv",
-      "packageNameTemplate": "astral-sh/uv",
-      "datasourceTemplate": "github-releases"
+      "datasourceTemplate": "pypi"
     }
   ]
 }
